@@ -18,8 +18,8 @@ message("CMAKE_BINARY_PATH ${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(include)
-add_subdirectory(core)
-add_subdirectory(embedding)
+#add_subdirectory(core)
+#add_subdirectory(embedding)
 
 SET(BUILD_TESTS "" ON)
 
