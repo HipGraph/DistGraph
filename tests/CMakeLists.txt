@@ -17,7 +17,7 @@ if (NOT googletest_POPULATED)
 endif()
 
 enable_testing()
-add_executable(distblas_test Process3DGridTests.cpp ../include/DistBlas/Process3DGrid.hpp)
+add_executable(distblas_test Process3DGridTests.cpp ../core/Process3DGrid.cpp)
 target_include_directories(distblas_test PRIVATE ../include)
 target_link_libraries(distblas_test GTest::gtest_main)
 
