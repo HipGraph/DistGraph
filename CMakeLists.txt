@@ -28,7 +28,7 @@ if (BUILD_TESTS)
     message(STATUS "Building tests ....")
 endif ()
 
-SET(SOURCES core/Process3DGrid.cpp)
+SET(SOURCES  DistBlas.cpp core/Process3DGrid.cpp)
 
 add_executable(dist_blas ${SOURCES})
 
