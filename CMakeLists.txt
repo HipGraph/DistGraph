@@ -30,7 +30,7 @@ endif ()
 
 SET(SOURCES core/Process3DGrid.cpp)
 
-add_library(dist_blas ${SOURCES})
+add_executable(dist_blas ${SOURCES})
 
 
 target_link_libraries(dist_blas MPI::MPI_CXX)
