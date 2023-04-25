@@ -14,6 +14,13 @@ message(STATUS "MPI executable: ${MPIEXEC_EXECUTABLE}")
 message("Finding OpenMP")
 find_package(OpenMP REQUIRED)
 
+message("Finding BLAS")
+find_package(BLAS REQUIRED)
+
+include_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/include)
+
+link_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/lib)
+
 message("CMAKE_BINARY_PATH ${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
