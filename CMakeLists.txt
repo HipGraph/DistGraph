@@ -19,9 +19,9 @@ find_package(OpenMP REQUIRED)
 message("Finding BLAS")
 find_package(BLAS REQUIRED)
 
-include_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/include)
+include_directories($ENV{COMBLAS_ROOT}/install/include)
 
-link_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/lib)
+link_directories($ENV{COMBLAS_ROOT}/install/lib)
 
 
 

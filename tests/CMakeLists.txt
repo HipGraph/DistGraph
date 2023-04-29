@@ -24,9 +24,9 @@ target_include_directories(distblas_test PRIVATE ../include)
 message("comblas path: $ENV{COMBLAS_ROOT}")
 
 
-include_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/include)
+include_directories($ENV{COMBLAS_ROOT}/install/include)
 
-link_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/lib)
+link_directories($ENV{COMBLAS_ROOT}/install/lib)
 
 
 target_link_libraries(distblas_test GTest::gtest_main)
