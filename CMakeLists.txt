@@ -39,7 +39,7 @@ if (BUILD_TESTS)
     message(STATUS "Building tests ....")
 endif ()
 
-SET(SOURCES  DistBlas.cpp core/Process3DGrid.cpp)
+SET(SOURCES  DistBlas.cpp core/Process3DGrid.cpp io/CombBLASIOReader.cpp)
 
 add_executable(distblas ${SOURCES})
 

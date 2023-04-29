@@ -1,1 +1,1 @@
-//// Created by Isuru Ranawaka on 4/29/23.//#include "IOTests.h"
+#include <memory>#include "../include/DistBLAS/ParallelIO.hpp"using namespace std;using namespace distblas::io;int main(int argc, char** argv){	string file_path  = argv[1];	MPI_Init(&argc, &argv);	auto reader = unique_ptr<ParallelIO>(new ParallelIO);	reader.get()->parallel_read_MM(file_path);	return 0;}
