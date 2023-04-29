@@ -20,9 +20,16 @@ enable_testing()
 #add_executable(distblas_test Process3DGridTests.cpp ../core/Process3DGrid.cpp)
 add_executable(distblas_test IOTests.cpp ../io/CombBLASIOReader.cpp)
 target_include_directories(distblas_test PRIVATE ../include)
+
+include_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/include)
+
+link_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/lib)
+
+
 target_link_libraries(distblas_test GTest::gtest_main)
 target_link_libraries(distblas_test MPI::MPI_CXX)
 target_link_libraries(distblas_test OpenMP::OpenMP_CXX)
+target_link_libraries(distblas_test CombBLAS)
 
 include(GoogleTest)
 #gtest_discover_tests(distblas_test)
