@@ -24,7 +24,6 @@ include_directories($ENV{COMBLAS_ROOT}/install/include)
 link_directories($ENV{COMBLAS_ROOT}/install/lib)
 
 
-
 message("CMAKE_BINARY_PATH ${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
@@ -39,11 +38,11 @@ if (BUILD_TESTS)
     message(STATUS "Building tests ....")
 endif ()
 
-SET(SOURCES  DistBlas.cpp core/Process3DGrid.cpp io/CombBLASIOReader.cpp)
+SET(SOURCES DistBlas.cpp core/Process3DGrid.cpp io/CombBLASIOReader.cpp)
 
 add_executable(distblas ${SOURCES})
 
 
 target_link_libraries(distblas MPI::MPI_CXX)
 target_link_libraries(distblas OpenMP::OpenMP_CXX)
-target_link_libraries(distblas  CombBLAS)
+target_link_libraries(distblas CombBLAS)

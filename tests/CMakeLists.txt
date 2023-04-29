@@ -14,7 +14,7 @@ FetchContent_GetProperties(googletest)
 if (NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+endif ()
 
 enable_testing()
 #add_executable(distblas_test Process3DGridTests.cpp ../core/Process3DGrid.cpp)
