@@ -21,6 +21,9 @@ enable_testing()
 add_executable(distblas_test IOTests.cpp ../io/CombBLASIOReader.cpp)
 target_include_directories(distblas_test PRIVATE ../include)
 
+message("comblas path: $ENV{COMBLAS_ROOT}")
+
+
 include_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/include)
 
 link_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/lib)
