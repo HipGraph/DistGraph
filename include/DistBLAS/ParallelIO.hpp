@@ -1,0 +1,1 @@
+#pragma once#include <string.h>#include <mpi.h>namespace distblas::io{	/**	 * This class implements IO operations of DistBlas library.	 */	class ParallelIO	{	 private:	 public:		ParallelIO();		~ParallelIO();		/**		 * Interface for parallel reading of Matrix Market formatted files		 * @param file_path		 */		void parallel_read_MM(string file_path);	};}

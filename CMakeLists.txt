@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(DistBlas)
+project(DistBLAS)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,8 +11,10 @@ message(STATUS "MPI include dir: ${MPI_CXX_INCLUDE_PATH}")
 message(STATUS "MPI libs: ${MPI_CXX_LIBRARIES}")
 message(STATUS "MPI executable: ${MPIEXEC_EXECUTABLE}")
 
+
 message("Finding OpenMP")
 find_package(OpenMP REQUIRED)
+
 
 message("Finding BLAS")
 find_package(BLAS REQUIRED)
@@ -20,6 +22,8 @@ find_package(BLAS REQUIRED)
 include_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/include)
 
 link_directories($ENV{COMBLAS_ROOT}/CombBLAS/install/lib)
+
+
 
 message("CMAKE_BINARY_PATH ${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)

@@ -1,4 +1,4 @@
-project(DistBlas)
+project(DistBLAS)
 add_library(distblas_api  INTERFACE)
 target_include_directories(distblas_api INTERFACE .)
 
