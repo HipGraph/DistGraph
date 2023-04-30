@@ -26,7 +26,7 @@ vector<Tuple> ParallelIO::parallel_read_MM(string file_path) {
 
   uint64_t nnz;
 
-  G.get()->ParallelReadMM(file_path, true, maximum<double>());
+  G.get()->ParallelReadMM(file_path, false, maximum<double>());
 
   nnz = G.get()->getnnz();
   if (proc_rank == 0) {
