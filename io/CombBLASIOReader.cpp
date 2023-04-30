@@ -22,18 +22,17 @@ vector<Tuple> ParallelIO::parallel_read_MM(string file_path) {
   shared_ptr<CommGrid> simpleGrid;
   simpleGrid.reset(new CommGrid(WORLD, num_procs, 1));
 
-  PSpMat_s32p64_Int *G;
+  unique_ptr<PSpMat_s32p64_Int> G = unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
+
   uint64_t nnz;
 
-  G = new PSpMat_s32p64_Int(simpleGrid);
+  G.get()->ParallelReadMM(file_path, true, maximum<double>());
 
-  G->ParallelReadMM(file_path, true, maximum<double>());
-
-  nnz = G->getnnz();
+  nnz = G.get()->getnnz();
   if (proc_rank == 0) {
     cout << "File reader read " << nnz << " nonzeros." << endl;
   }
-  SpTuples<int64_t, int> tups(G->seq());
+  SpTuples<int64_t, int> tups(G.get()->seq());
   tuple<int64_t, int64_t, int>* values = tups.tuples;
 
   vector<Tuple> unpacked;
