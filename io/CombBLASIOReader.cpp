@@ -40,8 +40,8 @@ vector<Tuple> ParallelIO::parallel_read_MM(string file_path) {
   unpacked.resize(tups.getnnz());
 
   for(int i = 0; i < tups.getnnz(); i++) {
-    unpacked[i].r = get<0>(values[i]);
-    unpacked[i].c = get<1>(values[i]);
+    unpacked[i].row = get<0>(values[i]);
+    unpacked[i].col = get<1>(values[i]);
     unpacked[i].value = get<2>(values[i]);
   }
 
