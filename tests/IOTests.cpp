@@ -2,6 +2,8 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <fstream>
+#include <cstring>
 
 using namespace std;
 using namespace distblas::io;
@@ -18,9 +20,9 @@ int main(int argc, char **argv) {
 
 
 
-  string file_path =  "output.txt"+ to_string(rank);
+  string output_path =  "output.txt"+ to_string(rank);
   char stats[500];
-  strcpy(stats, file_path.c_str());
+  strcpy(stats, output_path.c_str());
   ofstream fout(stats, std::ios_base::app);
 
 
