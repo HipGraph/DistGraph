@@ -2,6 +2,7 @@
 #include <mpi.h>
 #include <string>
 #include <vector>
+#include "Tuple.hpp"
 
 using namespace std;
 using namespace distblas::core;

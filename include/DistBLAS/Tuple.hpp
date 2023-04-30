@@ -1,4 +1,3 @@
-
 namespace distblas::core {
 struct Tuple {
   int64_t row;
