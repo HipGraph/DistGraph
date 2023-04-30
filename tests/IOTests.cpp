@@ -1,7 +1,7 @@
 #include "../include/DistBLAS/ParallelIO.hpp"
 #include <iostream>
 #include <memory>
-#inclue <string>
+#include <string>
 
 using namespace std;
 using namespace distblas::io;
