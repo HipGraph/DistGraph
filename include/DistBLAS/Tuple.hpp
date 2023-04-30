@@ -5,4 +5,4 @@ struct Tuple {
   int64_t col;
   int value;
 };
-} // namespace distblas::core
+}

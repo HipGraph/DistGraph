@@ -11,6 +11,7 @@ namespace distblas::io {
  */
 class ParallelIO {
 private:
+
 public:
   ParallelIO();
   ~ParallelIO();

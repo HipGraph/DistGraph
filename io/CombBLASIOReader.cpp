@@ -11,7 +11,7 @@ typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
 
 ParallelIO::ParallelIO() {}
 
-void ParallelIO::parallel_read_MM(string file_path) {
+vector<Tuple> ParallelIO::parallel_read_MM(string file_path) {
   MPI_Comm WORLD;
   MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
@@ -34,6 +34,20 @@ void ParallelIO::parallel_read_MM(string file_path) {
     cout << "File reader read " << nnz << " nonzeros." << endl;
   }
   SpTuples<int64_t, int> tups(G->seq());
+  tuple<int64_t, int64_t, int>* values = tups.tuples;
+
+  vector<Tuple> unpacked;
+  unpacked.resize(tups.getnnz());
+
+  for(int i = 0; i < tups.getnnz(); i++) {
+    unpacked[i].r = get<0>(values[i]);
+    unpacked[i].c = get<1>(values[i]);
+    unpacked[i].value = get<2>(values[i]);
+  }
+
+  return unpacked;
 }
+
+
 
 ParallelIO::~ParallelIO() {}
