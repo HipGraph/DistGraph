@@ -11,10 +11,14 @@ int main(int argc, char **argv) {
   cout << " file_path " << file_path << endl;
 
   MPI_Init(&argc, &argv);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
-  reader.get()->parallel_read_MM(file_path);
+  vector<Tuple> tuples = reader.get()->parallel_read_MM(file_path);
+
+  cout<<" rank "<<rank<< " size "<<tuples.size()<<endl;
 
   MPI_Finalize();
   return 0;
