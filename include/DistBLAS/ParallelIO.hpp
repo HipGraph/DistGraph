@@ -2,7 +2,7 @@
 #include <mpi.h>
 #include <string>
 #include <vector>
-#include "Tuple.hpp"
+#include "Common.hpp"
 
 using namespace std;
 using namespace distblas::core;
@@ -21,6 +21,7 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  vector<Tuple> parallel_read_MM(string file_path);
+  template <typename T>
+  vector<Tuple<T>> parallel_read_MM(string file_path);
 };
 } // namespace distblas::io
