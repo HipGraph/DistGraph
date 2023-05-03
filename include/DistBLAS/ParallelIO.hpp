@@ -25,3 +25,5 @@ public:
   void parallel_read_MM(string file_path, vector<Tuple<T>> &coords);
 };
 } // namespace distblas::io
+
+#include "../../io/CombBLASIOReader.cpp"
