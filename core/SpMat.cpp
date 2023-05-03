@@ -4,7 +4,7 @@
 using namespace distblas::core;
 
 template <typename T>
-SpMat::SpMat(vector<Tuple<T>> &coords, int gRows, int gCols, int gNNz) {
+SpMat<T>::SpMat(vector<Tuple<T>> &coords, int gRows, int gCols, int gNNz) {
   this->gRows = gRows;
   this->gCols = gCols;
   this->gNNz = gNNz;
@@ -12,11 +12,11 @@ SpMat::SpMat(vector<Tuple<T>> &coords, int gRows, int gCols, int gNNz) {
 }
 
 template <typename T>
-SpMat::~SpMat() {
+SpMat<T>::~SpMat() {
 
 }
 
 template <typename T>
-void SpMat::initialize_csr() {
+void SpMat<T>::initialize_csr() {
 
 }
