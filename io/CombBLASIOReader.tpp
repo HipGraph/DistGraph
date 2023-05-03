@@ -2,7 +2,7 @@
  * This implementation contains the CombBLAS based parallel IO Implementation.
  */
 #include "CombBLAS/CombBLAS.h"
-#include "../include/DistBLAS/ParallelIO.h"
+#include "../include/DistBLAS/ParallelIO.hpp"
 using namespace combblas;
 
 namespace distblas::io {

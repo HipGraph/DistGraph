@@ -27,4 +27,4 @@ public:
 };
 } // namespace distblas::io
 
-#include "../../io/CombBLASIOReader.cpp"
+#include "../../io/CombBLASIOReader.tpp"
