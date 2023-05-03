@@ -22,6 +22,6 @@ public:
    * @param file_path
    */
   template <typename T>
-  vector<Tuple<T>> parallel_read_MM(string file_path);
+  void parallel_read_MM(string file_path, vector<Tuple<T>> &coords);
 };
 } // namespace distblas::io
