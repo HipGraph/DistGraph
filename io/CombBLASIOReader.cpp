@@ -2,14 +2,15 @@
  * This implementation contains the CombBLAS based parallel IO Implementation.
  */
 #include "CombBLAS/CombBLAS.h"
-
+#include "../include/DistBLAS/ParallelIO.h"
 using namespace combblas;
 
 namespace distblas::io {
 
 typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
 
-template <typename T> ParallelIO<T>::ParallelIO() {}
+template <typename T>
+ParallelIO<T>::ParallelIO() {}
 
 template <typename T>
 void ParallelIO<T>::parallel_read_MM(string file_path,
