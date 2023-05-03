@@ -27,11 +27,11 @@ int main(int argc, char **argv) {
 
 
 
-  auto reader = unique_ptr<ParallelIO>(new ParallelIO());
+  auto reader = unique_ptr<ParallelIO<int>>(new ParallelIO<int>());
 
   vector<Tuple<int>> tuples;
 
-  reader.get()->parallel_read_MM<int>(file_path, tuples);
+  reader.get()->parallel_read_MM(file_path, tuples);
 
   for(int i=0; i<tuples.size();i++){
     fout<<tuples[i].row << " "<< tuples[i].col<<" "<< tuples[i].value <<endl;

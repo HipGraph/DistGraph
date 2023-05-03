@@ -10,6 +10,7 @@ namespace distblas::io {
 /**
  * This class implements IO operations of DistBlas library.
  */
+template <typename T>
 class ParallelIO {
 private:
 
@@ -21,7 +22,6 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  template <typename T>
   void parallel_read_MM(string file_path, vector<Tuple<T>> &coords);
 };
 } // namespace distblas::io

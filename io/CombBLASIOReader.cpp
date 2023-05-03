@@ -9,10 +9,11 @@ using namespace combblas;
 
 typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
 
+template <typename T>
 ParallelIO::ParallelIO() {}
 
 template <typename T>
-void parallel_read_MM(string file_path, vector<Tuple<T>> &coords) {
+void ParallelIO::parallel_read_MM(string file_path, vector<Tuple<T>> &coords) {
   MPI_Comm WORLD;
   MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
