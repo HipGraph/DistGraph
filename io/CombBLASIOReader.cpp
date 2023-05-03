@@ -48,5 +48,5 @@ void ParallelIO<T>::parallel_read_MM(string file_path, vector<Tuple<T>> &coords)
 }
 
 
-
-ParallelIO::~ParallelIO() {}
+template <typename T>
+ParallelIO<T>::~ParallelIO() {}
