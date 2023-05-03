@@ -18,7 +18,7 @@ endif ()
 
 enable_testing()
 #add_executable(distblas_test Process3DGridTests.cpp ../core/Process3DGrid.cpp)
-add_executable(distblas_test IOTests.cpp ../io/CombBLASIOReader.cpp, ../core/Process3DGrid.cpp, ../core/SpMat.cpp, ../core/Partitioner.cpp)
+add_executable(distblas_test IOTests.cpp ../io/CombBLASIOReader.cpp  ../core/Process3DGrid.cpp  ../core/SpMat.cpp  ../core/Partitioner.cpp)
 target_include_directories(distblas_test PRIVATE ../include)
 
 message("comblas path: $ENV{COMBLAS_ROOT}")
