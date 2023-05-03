@@ -1,3 +1,5 @@
+#include <cstdint> // int64_t
+
 namespace distblas::core {
 
 template<typename T>

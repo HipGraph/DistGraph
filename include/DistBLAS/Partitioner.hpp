@@ -1,8 +1,4 @@
 #pragma once
-#include "Common.hpp"
-#include <mpi.h>
-#include <string>
-#include <vector>
 #include "SpMat.hpp"
 
 using namespace std;
