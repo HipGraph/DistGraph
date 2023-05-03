@@ -4,8 +4,7 @@
 #include "CombBLAS/CombBLAS.h"
 #include "../include/DistBLAS/ParallelIO.hpp"
 using namespace combblas;
-
-namespace distblas::io {
+using namespace distblas::io;
 
 typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
 
@@ -48,5 +47,5 @@ void ParallelIO<T>::parallel_read_MM(string file_path,
   }
 }
 
-template <typename T> ParallelIO<T>::~ParallelIO() {}
-}
+template <typename T>
+ParallelIO<T>::~ParallelIO() {}
