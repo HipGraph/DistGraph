@@ -1,8 +1,6 @@
 /**
  * This implementation contains the CombBLAS based parallel IO Implementation.
  */
-#pragma once
-#include "../include/DistBLAS/ParallelIO.hpp"
 #include "CombBLAS/CombBLAS.h"
 
 using namespace distblas::io;
