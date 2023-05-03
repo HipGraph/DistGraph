@@ -20,7 +20,7 @@ enable_testing()
 #add_executable(distblas_test Process3DGridTests.cpp ../core/Process3DGrid.cpp)
 
 
-SET(SOURCES IOTests.cpp ../io/CombBLASIOReader.cpp  ../core/Process3DGrid.cpp  ../core/SpMat.cpp  ../core/Partitioner.cpp)
+SET(SOURCES IOTests.cpp   ../core/Process3DGrid.cpp  ../core/SpMat.cpp  ../core/Partitioner.cpp)
 
 add_executable(distblas_test ${SOURCES})
 
