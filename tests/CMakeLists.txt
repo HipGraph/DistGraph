@@ -22,11 +22,9 @@ enable_testing()
 
 SET(SOURCES IOTests.cpp ../io/CombBLASIOReader.cpp  ../core/Process3DGrid.cpp  ../core/SpMat.cpp  ../core/Partitioner.cpp)
 
-target_include_directories(distblas_test PRIVATE ../include)
-
 add_executable(distblas_test ${SOURCES})
 
-
+target_include_directories(distblas_test PRIVATE ../include)
 
 message("comblas path: $ENV{COMBLAS_ROOT}")
 
