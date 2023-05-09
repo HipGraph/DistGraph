@@ -1,8 +1,8 @@
 #pragma once
-#include "SpMat.hpp"
+#include "../data_structures/sparse_mat.hpp"
 
 using namespace std;
-namespace distblas::core  {
+namespace distblas::partition  {
 
   class Partitioner {
 

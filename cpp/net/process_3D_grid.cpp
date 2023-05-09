@@ -1,7 +1,7 @@
-#include "../include/DistBLAS/Process3DGrid.hpp"
+#include "process_3D_grid.hpp"
 #include <cassert>
 
-using namespace distblas::core;
+using namespace distblas::net;
 
 // This clas is taken from: https://github.com/PASSIONLab/distributed_sddmm
 Process3DGrid::Process3DGrid(int nr, int nc, int nl, int adjacency) {

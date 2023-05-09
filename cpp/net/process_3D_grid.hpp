@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace distblas::core {
+namespace distblas::net {
 /**
  * This class provides 3D processor grid for different processor layouts.
  */

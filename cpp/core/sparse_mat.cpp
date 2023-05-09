@@ -1,5 +1,4 @@
-#include "../include/DistBLAS/SpMat.hpp"
-
+#include "sparse_mat.hpp"
 
 using namespace distblas::core;
 

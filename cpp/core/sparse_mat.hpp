@@ -2,8 +2,8 @@
 #include <iostream>
 #include <mpi.h>
 #include <vector>
-#include "Common.hpp"
-#include "DistributedMat.hpp"
+#include "../../utils/Common.hpp"
+#include "distributed_mat.hpp"
 
 using namespace std;
 

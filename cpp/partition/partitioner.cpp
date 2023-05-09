@@ -1,5 +1,5 @@
-#include "../include/DistBLAS/Partitioner.hpp"
-using namespace distblas::core;
+#include "../partitioners/Partitioner.hpp"
+using namespace distblas::partition;
 using namespace std;
 
 Partitioner::Partitioner(MPI_Comm comm) {

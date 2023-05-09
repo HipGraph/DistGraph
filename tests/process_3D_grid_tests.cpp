@@ -1,4 +1,4 @@
-#include "../include/DistBLAS/Process3DGrid.hpp"
+#include "../core/Process3DGrid.hpp"
 #include <iostream>
 #include <memory>
 #include <mpi.h>
