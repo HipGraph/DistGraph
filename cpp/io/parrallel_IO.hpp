@@ -2,7 +2,7 @@
 #include <mpi.h>
 #include <string>
 #include <vector>
-#include "../../utils/Common.hpp"
+#include "../core/common.hpp"
 
 using namespace std;
 using namespace distblas::core;

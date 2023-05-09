@@ -1,5 +1,5 @@
 #pragma once
-#include "../data_structures/sparse_mat.hpp"
+#include "../core/sparse_mat.hpp"
 
 using namespace std;
 namespace distblas::partition  {
