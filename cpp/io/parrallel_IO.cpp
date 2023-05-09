@@ -9,8 +9,8 @@ using namespace distblas::io;
 typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
 
 
-ParallelIO<T>::ParallelIO() {}
+ParallelIO::ParallelIO() {}
 
 
 
-ParallelIO<T>::~ParallelIO() {}
+ParallelIO::~ParallelIO() {}
