@@ -32,25 +32,25 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 #add_subdirectory(embedding)
 
 add_library(disblas_lib SHARED
-            core/common.hpp
-            core/distributed_mat.hpp
-            core/sparse_mat.cpp
-            core/sparse_mat.hpp
-            io/parrallel_IO.cpp
-            io/parrallel_IO.hpp
-            net/process_3D_grid.cpp
-            net/process_3D_grid.hpp
-            partition/partitioner.cpp
-            partition/partitioner.hpp)
+        cpp/core/common.hpp
+        cpp/core/distributed_mat.hpp
+        cpp/core/sparse_mat.cpp
+        cpp/core/sparse_mat.hpp
+        cpp/io/parrallel_IO.cpp
+        cpp/io/parrallel_IO.hpp
+        cpp/net/process_3D_grid.cpp
+        cpp/net/process_3D_grid.hpp
+        cpp/partition/partitioner.cpp
+        cpp/partition/partitioner.hpp)
 
 SET(BUILD_TESTS "" ON)
 
 if (BUILD_TESTS)
-    add_subdirectory(../tests)
+    add_subdirectory(tests)
     message(STATUS "Building tests ....")
 endif ()
 
-SET(SOURCES distblas.cpp)
+SET(SOURCES cpp/distblas.cpp)
 
 add_executable(distblas ${SOURCES})
 
