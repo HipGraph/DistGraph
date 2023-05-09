@@ -23,7 +23,7 @@ public:
    * @param file_path
    */
   template <typename T>
-  void ParallelIO<T>::parallel_read_MM(string file_path,
+  void ParallelIO::parallel_read_MM(string file_path,
                                        vector<Tuple<T>> &coords) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
