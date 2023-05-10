@@ -1,4 +1,5 @@
 #include "../cpp/io/parrallel_IO.hpp"
+#include "../cpp/core/sparse_mat.hpp"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -29,12 +30,12 @@ int main(int argc, char **argv) {
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
-  vector<Tuple<int>> tuples;
+  auto shared_sparseMat = shared_ptr<SpMat<int>>(new SpMat<int>());
 
-  reader.get()->parallel_read_MM<int>(file_path, tuples);
+  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat);
 
   for(int i=0; i<tuples.size();i++){
-    fout<<tuples[i].row << " "<< tuples[i].col<<" "<< tuples[i].value <<endl;
+    fout<<shared_sparseMat.get().coords[i].row << " "<< shared_sparseMat.get().coords[i].col<<" "<< shared_sparseMat.get().coords[i].value <<endl;
   }
 
 

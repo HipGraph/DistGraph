@@ -12,7 +12,6 @@ namespace distblas::core {
 /**
  * This class represents the Sparse Matrix
  */
-
 template <typename T>
 class SpMat: public DistributedMat {
 
@@ -28,6 +27,8 @@ public:
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
   SpMat(vector<Tuple<T>> &coords, int gRows, int gCols, int gNNz);
+
+  SpMat();
 
   void initialize_csr();
 
