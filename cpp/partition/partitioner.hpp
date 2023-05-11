@@ -12,7 +12,7 @@ namespace distblas::partition  {
     ~Partitioner();
 
     template <typename T>
-    SpMat<T>* redistribute_data(SpMat<T> &distributed_mat, bool  inplace) {
+    SpMat * redistribute_data(SpMat &distributed_mat, bool  inplace) {
       int num_procs, proc_rank;
       MPI_Comm_size(this->comm, &num_procs);
       MPI_Comm_rank(this->comm, &proc_rank);
