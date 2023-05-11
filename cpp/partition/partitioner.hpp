@@ -2,6 +2,8 @@
 #include "../core/sparse_mat.hpp"
 
 using namespace std;
+using namespace distblas::core;
+
 namespace distblas::partition  {
 
   class Partitioner {
