@@ -88,5 +88,5 @@ namespace distblas::partition  {
       return spmat;
 
     }
-  };
+  }
 }
