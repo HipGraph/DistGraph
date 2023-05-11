@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include <string>
 #include <vector>
-#include "../core/common.hpp"
 #include "../core/sparse_mat.hpp"
 
 using namespace std;
