@@ -1,4 +1,4 @@
-#include "../partition/partitioner.hpp"
+#include "partitioner.hpp"
 using namespace distblas::partition;
 using namespace std;
 

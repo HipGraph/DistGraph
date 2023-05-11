@@ -23,7 +23,7 @@ public:
    * @param file_path
    */
   template <typename T>
-  void ParallelIO::parallel_read_MM(string file_path, const shared_ptr<SpMat<T>> &spmat_ptr) {
+  void ParallelIO::parallel_read_MM(string file_path, const SpMat<T> &spmat_ptr) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
