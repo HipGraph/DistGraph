@@ -34,12 +34,12 @@ int main(int argc, char **argv) {
 
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
 
-  for(int i=0; i<tuples.size();i++){
-    fout<<shared_sparseMat.get().coords[i].row << " "<< shared_sparseMat.get().coords[i].col<<" "<< shared_sparseMat.get().coords[i].value <<endl;
+  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
+    fout<<shared_sparseMat.get()->coords[i].row << " "<< shared_sparseMat.get()->coords[i].col<<" "<< shared_sparseMat.get()->coords[i].value <<endl;
   }
 
 
-  cout<<" rank "<<rank<< " size "<<tuples.size()<<endl;
+  cout<<" rank "<<rank<< " size "<<shared_sparseMat.get()->coords.size()<<endl;
 
   MPI_Finalize();
   return 0;
