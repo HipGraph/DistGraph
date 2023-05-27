@@ -3,10 +3,16 @@
 #include <string>
 #include <vector>
 #include "../core/sparse_mat.hpp"
+#include "../net/process_3D_grid.hpp"
+#include "CombBLAS/CombBLAS.h"
 
 using namespace std;
 using namespace distblas::core;
+using namespace combblas;
 namespace distblas::io {
+
+typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
+
 /**
  * This class implements IO operations of DistBlas library.
  */
@@ -14,6 +20,8 @@ class ParallelIO {
 private:
 
 public:
+
+  typedef SpMat<typename T> spmat_type;
 
   ParallelIO();
   ~ParallelIO();
@@ -23,7 +31,7 @@ public:
    * @param file_path
    */
   template <typename T>
-  void parallel_read_MM(string file_path, SpMat<T> *spmat_ptr) {
+  void parallel_read_MM(string file_path, SpMat<T> *sp_mat) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
