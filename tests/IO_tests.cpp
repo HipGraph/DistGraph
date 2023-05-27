@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
-  auto shared_sparseMat = shared_ptr<SpMat<int>>(new SpMat<int>());
+  auto shared_sparseMat = shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
 
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
 
