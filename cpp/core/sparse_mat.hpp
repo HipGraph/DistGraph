@@ -26,15 +26,25 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(vector<Tuple<T>> &coords, int gRows, int gCols, int gNNz);
+  SpMat(vector<Tuple<T>> &coords, int gRows, int gCols, int gNNz) {
+    this->gRows = gRows;
+    this->gCols = gCols;
+    this->gNNz = gNNz;
+    this->coords = coords;
+  }
 
-  SpMat();
+  SpMat() {
 
-  void initialize_csr();
+  }
+
+  void initialize_csr(){
+
+  }
 
 
-  ~SpMat();
+  ~SpMat() {
 
+  }
 
 };
 

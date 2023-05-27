@@ -34,7 +34,6 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 add_library(disblas_lib SHARED
         cpp/core/common.hpp
         cpp/core/distributed_mat.hpp
-        cpp/core/sparse_mat.cpp
         cpp/core/sparse_mat.hpp
         cpp/io/parrallel_IO.cpp
         cpp/io/parrallel_IO.hpp
