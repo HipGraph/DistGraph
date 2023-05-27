@@ -22,17 +22,17 @@ project(DistBLAS)
 #add_executable(distblas_test Process3DGridTests.cpp ../core/Process3DGrid.cpp)
 
 
-add_library(disblas_lib SHARED
-        ../cpp/core/common.hpp
-        ../cpp/core/distributed_mat.hpp
-        ../cpp/core/sparse_mat.cpp
-        ../cpp/core/sparse_mat.hpp
-        ../cpp/io/parrallel_IO.cpp
-        ../cpp/io/parrallel_IO.hpp
-        ../cpp/net/process_3D_grid.cpp
-        ../cpp/net/process_3D_grid.hpp
-        ../cpp/partition/partitioner.cpp
-        ../cpp/partition/partitioner.hpp)
+#add_library(disblas_lib SHARED
+#        ../cpp/core/common.hpp
+#        ../cpp/core/distributed_mat.hpp
+#        ../cpp/core/sparse_mat.cpp
+#        ../cpp/core/sparse_mat.hpp
+#        ../cpp/io/parrallel_IO.cpp
+#        ../cpp/io/parrallel_IO.hpp
+#        ../cpp/net/process_3D_grid.cpp
+#        ../cpp/net/process_3D_grid.hpp
+#        ../cpp/partition/partitioner.cpp
+#        ../cpp/partition/partitioner.hpp)
 
 SET(SOURCES IO_tests.cpp)
 
