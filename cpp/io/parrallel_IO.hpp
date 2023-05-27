@@ -72,9 +72,9 @@ public:
     }
 
     sp_mat->coords = coords;
-    sp_mat->gRows = G.get()->gRows;
-    sp_mat->gCols = G.get()->gCols;
-    sp_mat->gNNz = G.get()->gNNz;
+    sp_mat->gRows = G.get()->getnrow();
+    sp_mat->gCols = G.get()->getncol();
+    sp_mat->gNNz = G.get()->getnnz();
 
   }
 };
