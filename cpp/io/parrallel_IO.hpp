@@ -21,8 +21,6 @@ private:
 
 public:
 
-  typedef SpMat<typename T> spmat_type;
-
   ParallelIO();
   ~ParallelIO();
 
@@ -56,7 +54,7 @@ public:
     SpTuples<int64_t, T> tups(G.get()->seq());
     tuple<int64_t, int64_t, T> *values = tups.tuples;
 
-    vector<Tuple<int>> coords;
+    vector<Tuple<T>> coords;
     coords.resize(tups.getnnz());
 
 #pragma omp parallel for
@@ -70,13 +68,13 @@ public:
 
  //TODO: parallalize this
     for(int i = 0; i < coords.size(); i++) {
-      coords[i].r += rowIncrement * proc_rank;
+      coords[i].row += rowIncrement * proc_rank;
     }
 
-    spmat_ptr->coords = coords;
-    spmat_ptr->gRows = G->gRows;
-    spmat_ptr->gCols = G->gCols;
-    spmat_ptr->gNNz = G->gNNz;
+    sp_mat->coords = coords;
+    sp_mat->gRows = G->gRows;
+    sp_mat->gCols = G->gCols;
+    sp_mat->gNNz = G->gNNz;
 
   }
 };
