@@ -39,6 +39,9 @@ int main(int argc, char **argv) {
   }
 
 
+  cout<< " gRows "<<shared_sparseMat.get()->gRows
+       <<" gCols"<<shared_sparseMat.get()->gCols<<" NNz "<< shared_sparseMat.get()->gNNz<<endl;
+
   cout<<" rank "<<rank<< " size "<<shared_sparseMat.get()->coords.size()<<endl;
 
   MPI_Finalize();
