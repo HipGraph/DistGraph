@@ -45,6 +45,20 @@ int main(int argc, char **argv) {
                                         shared_sparseMat.get()->gCols,
                                         grid.get()));
 
+  partitioner.get()->partition_data(shared_sparseMat.get(), false);
+
+  string output_path =  "output_partitioned.txt"+ to_string(rank);
+  char stats[500];
+  strcpy(stats, output_path.c_str());
+  ofstream fout1(stats, std::ios_base::app);
+
+
+  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
+    fout1<<shared_sparseMat.get()->coords[i].row << " "
+         << shared_sparseMat.get()->coords[i].col<<" "
+         << shared_sparseMat.get()->coords[i].value
+         <<endl;
+  }
 
 
   cout<< " gRows "<<shared_sparseMat.get()->gRows
