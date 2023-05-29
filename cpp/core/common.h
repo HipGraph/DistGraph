@@ -9,17 +9,21 @@ using namespace std;
 
 namespace distblas::core {
 
-template <typename T> struct Tuple {
+template <typename T>
+struct Tuple {
   int64_t row;
   int64_t col;
   T value;
 };
 
-template <typename T> struct CSR {
+template <typename T>
+struct CSR {
   int64_t row;
   int64_t col;
   T value;
 };
+
+
 
 template <typename T>
 bool column_major(Tuple<T> &a, Tuple<T> &b) {
@@ -56,9 +60,9 @@ void initialize_mpi_datatypes() {
   }
 
   MPI_Aint offsets[3];
-  offsets[0] = offsetof(Tuple<T>, row);
-  offsets[1] = offsetof(Tuple<T>, col);
-  offsets[2] = offsetof(Tuple<T>, value);
+  offsets[0] = offsetof(Tuple, row);
+  offsets[1] = offsetof(Tuple, col);
+  offsets[2] = offsetof(Tuple, value);
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
 }
