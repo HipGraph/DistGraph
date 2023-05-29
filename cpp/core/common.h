@@ -4,6 +4,8 @@
 #include <cstdint> // int64_t
 #include <vector>
 
+using namespace std;
+
 namespace distblas::core {
 
 template <typename T> struct Tuple {
