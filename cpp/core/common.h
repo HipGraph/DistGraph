@@ -50,12 +50,15 @@ template <typename T>
 void initialize_mpi_datatypes() {
   const int nitems = 3;
   int blocklengths[3] = {1, 1, 1};
-  MPI_Datatype types[3];
+  MPI_Datatype*  types = new MPI_Datatype[3];
+  types[0] = MPI_UINT64_T;
+  types[1] = MPI_UINT64_T;
+
   if (std::is_same<T, int>::value) {
-    types[3] = {MPI_UINT64_T, MPI_UINT64_T, MPI_INT};
+    types[2] = MPI_INT;
   } else {
     // TODO:Need to support all datatypes
-    types[3] = {MPI_UINT64_T, MPI_UINT64_T, MPI_DOUBLE};
+    types[2] = MPI_DOUBLE;
   }
 
   MPI_Aint offsets[3];
@@ -64,6 +67,7 @@ void initialize_mpi_datatypes() {
   offsets[2] = offsetof(Tuple<int>, value);
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
+  delete[] types;
 }
 
 }; // namespace distblas::core
