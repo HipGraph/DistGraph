@@ -16,19 +16,14 @@ int main(int argc, char **argv) {
 
   cout << " file_path " << file_path << endl;
 
-
   MPI_Init(&argc, &argv);
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-
 
   string output_path =  "output.txt"+ to_string(rank);
   char stats[500];
   strcpy(stats, output_path.c_str());
   ofstream fout(stats, std::ios_base::app);
-
-
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
@@ -37,10 +32,18 @@ int main(int argc, char **argv) {
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
 
   for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
-    fout<<shared_sparseMat.get()->coords[i].row << " "<< shared_sparseMat.get()->coords[i].col<<" "<< shared_sparseMat.get()->coords[i].value <<endl;
+    fout<<shared_sparseMat.get()->coords[i].row << " "
+         << shared_sparseMat.get()->coords[i].col<<" "
+         << shared_sparseMat.get()->coords[i].value
+         <<endl;
   }
 
-  auto  partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner());
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 0, 1));
+
+  auto  partitioner = unique_ptr<GlobalAdjacency1DPartitioner>
+      (new GlobalAdjacency1DPartitioner(shared_sparseMat.get()->gRows,
+                                        shared_sparseMat.get()->gCols,
+                                        grid.get()));
 
 
 
