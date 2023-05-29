@@ -60,9 +60,9 @@ void initialize_mpi_datatypes() {
   }
 
   MPI_Aint offsets[3];
-  offsets[0] = offsetof(Tuple, row);
-  offsets[1] = offsetof(Tuple, col);
-  offsets[2] = offsetof(Tuple, value);
+  offsets[0] = offsetof(Tuple<int>, row);
+  offsets[1] = offsetof(Tuple<int>, col);
+  offsets[2] = offsetof(Tuple<int>, value);
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
 }
