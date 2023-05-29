@@ -24,9 +24,9 @@ int GlobalAdjacency1DPartitioner::block_owner(int row_block, int col_block) {
 
 int GlobalAdjacency1DPartitioner::get_owner_Process(int row, int column, bool transpose) {
   if(! transpose) {
-    return blockOwner(row / rows_per_block,  column/cols_per_block);
+    return block_owner(row / rows_per_block,  column/cols_per_block);
   }
   else {
-    return blockOwner(column / rows_per_block,  row/cols_per_block);
+    return block_owner(column / rows_per_block,  row/cols_per_block);
   }
 }

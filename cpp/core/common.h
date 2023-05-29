@@ -61,6 +61,8 @@ void initialize_mpi_datatypes() {
 
 int divide_and_round_up(int num, int denom);
 
+void prefix_sum(vector<int> &values, vector<int> &offsets);
+
 } // namespace distblas::core
 
 #endif

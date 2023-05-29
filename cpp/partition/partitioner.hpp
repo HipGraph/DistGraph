@@ -1,4 +1,7 @@
 #pragma once
+#include <algorithm>
+#include <parallel/algorithm>
+#include <numeric>
 #include "../core/sparse_mat.hpp"
 #include "../net/process_3D_grid.hpp"
 #include "../core/common.h"
@@ -46,7 +49,7 @@ namespace distblas::partition  {
 
       vector<Tuple<T>> coords = sp_mat->coords;
 
-      Tuple* sendbuf = new Tuple<T>[coords.size];
+      Tuple<T>* sendbuf = new Tuple<T>[coords.size];
 
 #pragma omp parallel for
       for(int i = 0; i < coords.size(); i++) {
