@@ -27,7 +27,7 @@ template <typename T> struct CSR {
 };
 
 template <typename T>
-bool column_major(Tuple<T> &a, Tuple<T> &b) {
+bool column_major(Tuple<T> a, Tuple<T> b) {
   if (a.col == b.col) {
     return a.row < b.row;
   } else {
