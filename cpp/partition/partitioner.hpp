@@ -2,9 +2,11 @@
 #include <algorithm>
 #include <parallel/algorithm>
 #include <numeric>
+#include <mpi.h>
 #include "../core/sparse_mat.hpp"
 #include "../net/process_3D_grid.hpp"
 #include "../core/common.h"
+
 
 
 using namespace std;
