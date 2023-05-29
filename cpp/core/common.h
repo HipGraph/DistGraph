@@ -26,6 +26,7 @@ template <typename T> struct CSR {
   T value;
 };
 
+//TODO: removed reference type due to binding issue
 template <typename T>
 bool column_major(Tuple<T> a, Tuple<T> b) {
   if (a.col == b.col) {
