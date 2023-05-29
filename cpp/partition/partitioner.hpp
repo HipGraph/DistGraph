@@ -6,6 +6,7 @@
 #include "../core/sparse_mat.hpp"
 #include "../net/process_3D_grid.hpp"
 #include "../core/common.h"
+#include <iostream>
 
 
 
@@ -86,6 +87,8 @@ namespace distblas::partition  {
       // Use the sizing information to execute an AlltoAll
       int total_received_coords =
           std::accumulate(recvcounts.begin(), recvcounts.end(), 0);
+
+      cout<<" rank "<<my_rank<<" total_coords "<<total_received_coords<<endl;
 
 
       (sp_mat->coords).resize(total_received_coords);
