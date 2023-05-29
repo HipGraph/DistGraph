@@ -1,4 +1,3 @@
-#pragma once
 #include "../core/sparse_mat.hpp"
 #include "../net/process_3D_grid.hpp"
 #include "partitioner.hpp"
