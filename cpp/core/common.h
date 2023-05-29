@@ -18,7 +18,7 @@ template <typename T> struct CSR {
 };
 
 template <typename T>
-bool column_major(TUPLE<T> &a, TUPLE<T> &b) {
+bool column_major(Tuple<T> &a, Tuple<T> &b) {
   if(a.col == b.col) {
     return a.row < b.row;
   }
@@ -28,7 +28,7 @@ bool column_major(TUPLE<T> &a, TUPLE<T> &b) {
 }
 
 template <typename T>
-bool row_major(TUPLE<T> &a, TUPLE<T> &b) {
+bool row_major(Tuple<T> &a, Tuple<T> &b) {
   if(a.row == b.row) {
     return a.col < b.col;
   }
@@ -52,9 +52,9 @@ void initialize_mpi_datatypes() {
   }
 
   MPI_Aint offsets[3];
-  offsets[0] = offsetof(Tuple, row);
-  offsets[1] = offsetof(Tuple, col);
-  offsets[2] = offsetof(Tuple, value);
+  offsets[0] = offsetof(Tuple<T>, row);
+  offsets[1] = offsetof(Tuple<T>, col);
+  offsets[2] = offsetof(Tuple<T>, value);
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
 }
