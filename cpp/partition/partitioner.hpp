@@ -63,6 +63,11 @@ namespace distblas::partition  {
       prefix_sum(sendcounts, offsets);
       bufindices = offsets;
 
+
+      for(int i=0;i<sendcounts.size();i++){
+        cout<<" rank "<<my_rank<<"  size "<<sendcounts[i]<<endl;
+      }
+
 #pragma omp parallel for
       for(int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
