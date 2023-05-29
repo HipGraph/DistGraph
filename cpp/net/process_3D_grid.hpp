@@ -12,7 +12,6 @@ namespace distblas::net {
 class Process3DGrid {
 private:
   int adjacency;
-  int world_size;
   int dim_list[3];
   int permutation[3];
 
@@ -37,9 +36,10 @@ public:
   int global_rank;
   int i, j, k;
   int nr, nc, nl;
-  MPI_Comm row_world, col_world, fiber_world;
+  MPI_Comm row_world, col_world, fiber_world, global;
   MPI_Comm rowcol_slice, rowfiber_slice, colfiber_slice;
   int rank_in_row, rank_in_col, rank_in_fiber;
+  int world_size;
 
   /**
    *

@@ -1,5 +1,6 @@
 #include "../cpp/io/parrallel_IO.hpp"
 #include "../cpp/core/sparse_mat.hpp"
+#include "../cpp/partition/partitioner.hpp"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -8,6 +9,7 @@
 
 using namespace std;
 using namespace distblas::io;
+using namespace distblas::partition;
 
 int main(int argc, char **argv) {
   string file_path = argv[1];
@@ -37,6 +39,9 @@ int main(int argc, char **argv) {
   for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
     fout<<shared_sparseMat.get()->coords[i].row << " "<< shared_sparseMat.get()->coords[i].col<<" "<< shared_sparseMat.get()->coords[i].value <<endl;
   }
+
+  auto  partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner());
+
 
 
   cout<< " gRows "<<shared_sparseMat.get()->gRows

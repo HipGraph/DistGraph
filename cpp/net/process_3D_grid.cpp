@@ -8,6 +8,8 @@ Process3DGrid::Process3DGrid(int nr, int nc, int nl, int adjacency) {
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
 
+  global = MPI_COMM_WORLD;
+
   assert(nr * nc * nl == world_size);
 
   dim_list[0] = nr;
