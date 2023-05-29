@@ -52,6 +52,8 @@ namespace distblas::partition  {
 
       vector<Tuple<T>> coords = sp_mat->coords;
 
+      cout<<" rank "<<my_rank<<"  coords size  "<<coords.size()<<endl;
+
       Tuple<T>* sendbuf = new Tuple<T>[coords.size()];
 
 #pragma omp parallel for

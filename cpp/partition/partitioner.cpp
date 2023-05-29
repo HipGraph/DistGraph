@@ -17,7 +17,7 @@ GlobalAdjacency1DPartitioner::~GlobalAdjacency1DPartitioner(){
 
 int GlobalAdjacency1DPartitioner::block_owner(int row_block, int col_block) {
   int rowRank = row_block;
-  return process_3D_grid->get_global_rank(rowRank, 1, 0);
+  return process_3D_grid->get_global_rank(rowRank, 0, 0);
 
 }
 
