@@ -51,7 +51,7 @@ namespace distblas::partition  {
 
       vector<Tuple<T>> coords = sp_mat->coords;
 
-      Tuple<T>* sendbuf = new Tuple<T>[coords.size];
+      Tuple<T>* sendbuf = new Tuple<T>[coords.size()];
 
 #pragma omp parallel for
       for(int i = 0; i < coords.size(); i++) {
@@ -96,7 +96,7 @@ namespace distblas::partition  {
 
       // TODO: Parallelize the sort routine?
       //std::sort((result->coords).begin(), (result->coords).end(), column_major);
-      __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major);
+      __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major<T>);
       delete[] sendbuf;
     }
 
