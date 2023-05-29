@@ -39,7 +39,7 @@ namespace distblas::partition  {
     int get_owner_Process(int row, int column, bool transpose);
 
     template <typename T>
-    void partition_data(SpMat<T> *sp_mat, bool transpose) {
+    void partition_data(distblas::core::SpMat<T> *sp_mat, bool transpose) {
 
       int world_size = process_3D_grid->world_size;
       int my_rank = process_3D_grid->global_rank;
