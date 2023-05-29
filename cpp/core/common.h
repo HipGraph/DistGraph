@@ -2,6 +2,7 @@
 #define COMMON_HEADER
 
 #include <cstdint> // int64_t
+#include <vector>
 
 namespace distblas::core {
 
