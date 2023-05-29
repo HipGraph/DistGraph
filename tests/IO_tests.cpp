@@ -1,6 +1,7 @@
 #include "../cpp/io/parrallel_IO.hpp"
 #include "../cpp/core/sparse_mat.hpp"
 #include "../cpp/partition/partitioner.hpp"
+#include "../cpp/core/common.h"
 #include <iostream>
 #include <memory>
 #include <string>

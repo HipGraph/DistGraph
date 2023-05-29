@@ -53,18 +53,20 @@ void initialize_mpi_datatypes() {
   MPI_Datatype*  types = new MPI_Datatype[3];
   types[0] = MPI_UINT64_T;
   types[1] = MPI_UINT64_T;
-
+  MPI_Aint offsets[3];
   if (std::is_same<T, int>::value) {
     types[2] = MPI_INT;
+    offsets[0] = offsetof(Tuple<int>, row);
+    offsets[1] = offsetof(Tuple<int>, col);
+    offsets[2] = offsetof(Tuple<int>, value);
   } else {
     // TODO:Need to support all datatypes
     types[2] = MPI_DOUBLE;
+    offsets[0] = offsetof(Tuple<double>, row);
+    offsets[1] = offsetof(Tuple<double>, col);
+    offsets[2] = offsetof(Tuple<double>, value);
   }
 
-  MPI_Aint offsets[3];
-  offsets[0] = offsetof(Tuple<int>, row);
-  offsets[1] = offsetof(Tuple<int>, col);
-  offsets[2] = offsetof(Tuple<int>, value);
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
   delete[] types;
