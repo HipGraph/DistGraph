@@ -3,7 +3,7 @@
 
 using namespace std;
 
-MPI_Datatype SPTUPLE;
+MPI_Datatype distblas::core::SPTUPLE;
 
 int distblas::core::divide_and_round_up(int num, int denom){
   if (num % denom > 0) {
