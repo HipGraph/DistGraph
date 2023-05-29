@@ -4,6 +4,7 @@
 #include <cstdint> // int64_t
 #include <vector>
 #include <mpi.h>
+#include <cstddef>
 
 using namespace std;
 
