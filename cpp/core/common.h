@@ -3,6 +3,7 @@
 
 #include <cstdint> // int64_t
 #include <vector>
+#include <mpi.h>
 
 using namespace std;
 
