@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  initialize_mpi_datatypes();
+  initialize_mpi_datatypes<int>();
 
   string output_path =  "output.txt"+ to_string(rank);
   char stats[500];

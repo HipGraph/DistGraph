@@ -46,7 +46,8 @@ template <typename T> bool row_major(Tuple<T> &a, Tuple<T> &b) {
 
 extern MPI_Datatype SPTUPLE;
 
-template <typename T> void initialize_mpi_datatypes() {
+template <typename T>
+void initialize_mpi_datatypes() {
   const int nitems = 3;
   int blocklengths[3] = {1, 1, 1};
   MPI_Datatype types[3];
