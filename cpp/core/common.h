@@ -40,7 +40,7 @@ bool row_major(Tuple<T> &a, Tuple<T> &b) {
   }
 }
 
-MPI_Datatype SPTUPLE;
+extern MPI_Datatype SPTUPLE;
 
 template <typename T>
 void initialize_mpi_datatypes() {
