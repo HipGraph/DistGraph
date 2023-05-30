@@ -52,7 +52,7 @@ namespace distblas::partition  {
 
       vector<Tuple<T>> coords = sp_mat->coords;
 
-      cout<<" rank "<<my_rank<<"  coords size  "<<coords.size()<<endl;
+//      cout<<" rank "<<my_rank<<"  coords size  "<<coords.size()<<endl;
 
       Tuple<T>* sendbuf = new Tuple<T>[coords.size()];
 
@@ -66,9 +66,9 @@ namespace distblas::partition  {
       bufindices = offsets;
 
 
-      for(int i=0;i<sendcounts.size();i++){
-        cout<<" rank "<<my_rank<<"  size "<<sendcounts[i]<<endl;
-      }
+//      for(int i=0;i<sendcounts.size();i++){
+//        cout<<" rank "<<my_rank<<"  size "<<sendcounts[i]<<endl;
+//      }
 
 #pragma omp parallel for
       for(int i = 0; i < coords.size(); i++) {
@@ -95,7 +95,7 @@ namespace distblas::partition  {
       int total_received_coords =
           std::accumulate(recvcounts.begin(), recvcounts.end(), 0);
 
-      cout<<" rank "<<my_rank<<" total_coords "<<total_received_coords<<endl;
+//      cout<<" rank "<<my_rank<<" total_coords "<<total_received_coords<<endl;
 
 
       (sp_mat->coords).resize(total_received_coords);
