@@ -54,9 +54,15 @@ SET(SOURCES cpp/distblas.cpp)
 
 add_executable(distblas ${SOURCES})
 
+find_package(MKL REQUIRED)
+include_directories(${MKL_INCLUDE_DIRS})
+link_directories(${MKL_LIBRARIES})
+
+
 
 target_link_libraries(distblas disblas_lib)
 
 target_link_libraries(distblas MPI::MPI_CXX)
 target_link_libraries(distblas OpenMP::OpenMP_CXX)
 target_link_libraries(distblas CombBLAS)
+target_link_libraries(distblas MKL)
