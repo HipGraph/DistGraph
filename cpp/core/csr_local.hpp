@@ -26,7 +26,7 @@ public:
 
   int active;
 
-  CSRHandle *buffer;
+  CSRHandle<T> *buffer;
 
   CSRLocal() {}
   /*
@@ -39,7 +39,7 @@ public:
     this->rows = rows;
     this->cols = cols;
 
-    this->buffer = new CSRHandle[2];
+    this->buffer = new CSRHandle<T>[2];
 
     // This setup is really clunky, but I don't have time to fix it.
     vector<MKL_INT> rArray(num_coords, 0.0);
