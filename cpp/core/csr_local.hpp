@@ -9,6 +9,7 @@
 #include <numeric>
 #include <parallel/algorithm>
 #include <string.h>
+#include <cassert>
 
 using namespace std;
 
