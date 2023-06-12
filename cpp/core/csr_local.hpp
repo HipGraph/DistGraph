@@ -45,7 +45,7 @@ public:
     // This setup is really clunky, but I don't have time to fix it.
     vector<MKL_INT> rArray(num_coords, 0.0);
     vector<MKL_INT> cArray(num_coords, 0.0);
-    vector<double > vArray(num_coords, 0.0);
+    vector<T> vArray(num_coords, 0.0);
 
     // Put a dummy value in if the number of coordinates is 0, so that
     // everything doesn't blow up
@@ -57,8 +57,8 @@ public:
 
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
-      rArray[i] = coords[i].r;
-      cArray[i] = coords[i].c;
+      rArray[i] = coords[i].row;
+      cArray[i] = coords[i].col;
       vArray[i] = coords[i].value;
     }
 
@@ -79,11 +79,11 @@ public:
     mkl_sparse_destroy(tempCOO);
     vector<MKL_INT>().swap(rArray);
     vector<MKL_INT>().swap(cArray);
-    vector<double>().swap(vArray);
+    vector<T>().swap(vArray);
 
     sparse_index_base_t indexing;
     MKL_INT *rows_start, *rows_end, *col_idx;
-    double *values;
+    T *values;
 
     mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                             &rows_start, &rows_end, &col_idx, &values);
@@ -93,8 +93,8 @@ public:
       while (rv < this->rows && i >= rows_start[rv + 1]) {
         rv++;
       }
-      coords[i].r = rv;
-      coords[i].c = col_idx[i];
+      coords[i].row = rv;
+      coords[i].col = col_idx[i];
       coords[i].value = values[i];
     }
 
@@ -115,7 +115,7 @@ public:
       }
 
       memcpy(buffer[t].values.data(), values,
-             sizeof(double) * max(num_coords, 1));
+             sizeof(T) * max(num_coords, 1));
       memcpy(buffer[t].col_idx.data(), col_idx,
              sizeof(MKL_INT) * max(num_coords, 1));
       memcpy(buffer[t].rowStart.data(), rows_start,
