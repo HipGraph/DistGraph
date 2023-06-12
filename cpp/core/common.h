@@ -5,6 +5,7 @@
 #include <cstdint> // int64_t
 #include <mpi.h>
 #include <vector>
+#include <mkl_spblas.h>
 
 using namespace std;
 
@@ -24,6 +25,15 @@ template <typename T> struct CSR {
   int64_t row;
   int64_t col;
   T value;
+};
+
+template <typename T>
+struct CSRHandle {
+  vector<T> values;
+  vector<MKL_INT> col_idx;
+  vector<MKL_INT> rowStart;
+  vector<MKL_INT> row_idx;
+  sparse_matrix_t mkl_handle;
 };
 
 //TODO: removed reference type due to binding issue

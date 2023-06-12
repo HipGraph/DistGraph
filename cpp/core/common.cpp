@@ -14,7 +14,6 @@ int distblas::core::divide_and_round_up(int num, int denom){
   }
 }
 
-
 void distblas::core::prefix_sum(vector<int> &values, vector<int> &offsets) {
   int sum = 0;
   for(int i = 0; i < values.size(); i++) {
