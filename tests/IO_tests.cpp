@@ -65,11 +65,11 @@ int main(int argc, char **argv) {
   }
 
 
-  SpMat<int> *mat = shared_sparseMat.get();
-  int localBRows = divide_and_round_up(mat->gCols,grid.get()->world_size);
-  int localARows = divide_and_round_up(mat->gRows,grid.get()->world_size);
-  mat->divide_block_cols(localBRows,grid.get()->world_size, false);
-  mat->initialize_CSR_blocks(localARows,localBRows,-1, false)
+
+  int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,grid.get()->world_size);
+  int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->world_size);
+  shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, false);
+  shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false)
 
 
 
