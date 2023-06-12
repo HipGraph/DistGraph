@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <cstring>
+#include "../cpp/core/csr_local.hpp"
 
 using namespace std;
 using namespace distblas::io;
@@ -62,6 +63,10 @@ int main(int argc, char **argv) {
          << shared_sparseMat.get()->coords[i].value
          <<endl;
   }
+
+  CSRLocal<int> csrL = new CSRLocal<int>();
+
+
 
 
   cout<< " gRows "<<shared_sparseMat.get()->gRows
