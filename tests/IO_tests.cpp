@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
          <<endl;
   }
 
-  CSRLocal<int> csrL = new CSRLocal<int>();
+  CSRLocal<int> *csrL = new CSRLocal<int>();
 
 
 
