@@ -64,7 +64,14 @@ int main(int argc, char **argv) {
          <<endl;
   }
 
-  CSRLocal<int> *csrL = new CSRLocal<int>();
+
+  SpMat<int> *mat = shared_sparseMat.get();
+  int localBRows = divide_and_round_up(mat->gCols,grid.get()->world_size);
+  int localARows = divide_and_round_up(mat->gRows,grid.get()->world_size);
+  mat->divide_block_cols(localBRows,grid.get()->world_size, false);
+  mat->initialize_CSR_blocks(localARows,localBRows,-1, false)
+
+
 
 
 
