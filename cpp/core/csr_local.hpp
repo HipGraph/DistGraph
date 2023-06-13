@@ -27,7 +27,7 @@ public:
 
   int active;
 
-  CSRHandle<double> *buffer;
+  CSRHandle *buffer;
 
   CSRLocal() {}
   /*
@@ -40,7 +40,7 @@ public:
     this->rows = rows;
     this->cols = cols;
 
-    this->buffer = new CSRHandle<double>[2];
+    this->buffer = new CSRHandle[2];
 
     // This setup is really clunky, but I don't have time to fix it.
     vector<MKL_INT> rArray(num_coords, 0.0);
@@ -95,7 +95,7 @@ public:
       }
       coords[i].row = rv;
       coords[i].col = col_idx[i];
-      coords[i].value = static_cast<T>values[i];
+      coords[i].value = static_cast<T>(values[i]);
     }
 
     active = 0;
