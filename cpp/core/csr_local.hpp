@@ -111,7 +111,7 @@ public:
 // Copy over row indices
 #pragma omp parallel for
       for (int i = 0; i < num_coords; i++) {
-        buffer[t].row_idx[i] = coords[i].r;
+        buffer[t].row_idx[i] = coords[i].row;
       }
 
       memcpy(buffer[t].values.data(), values,

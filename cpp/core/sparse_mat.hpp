@@ -49,14 +49,14 @@ public:
     // block row into subtiles)
     int current_start = 0;
     for(uint64_t i = 0; i < coords.size(); i++) {
-      while(coords[i].c >= current_start) {
+      while(coords[i].col >= current_start) {
         block_starts.push_back(i);
         current_start += block_width;
       }
 
       // This modding step helps indexing.
       if(mod_ind) {
-        coords[i].c %= block_width;
+        coords[i].col %= block_width;
       }
     }
 
