@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
          <<endl;
   }
 
-  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(1, 1, 1, 1));
 
   auto  partitioner = unique_ptr<GlobalAdjacency1DPartitioner>
       (new GlobalAdjacency1DPartitioner(shared_sparseMat.get()->gRows,
@@ -70,9 +70,6 @@ int main(int argc, char **argv) {
   int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->world_size);
   shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, false);
 //  shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false);
-
-
-
 
 
 
