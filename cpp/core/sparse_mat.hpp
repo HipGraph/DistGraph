@@ -78,8 +78,11 @@ public:
         int num_coords = block_starts[i + 1] - block_starts[i];
 
         if(num_coords > 0) {
-          cout<<" i "<<i<<"  coords "<<num_coords<<endl;
+          cout<<" i "<<i<<"  coords "<<num_coords<<
+              " block_starts[i] "<<block_starts[i] <<endl;
 
+          cout<<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
+               <<" num_coords "<<num_coords<<endl;
           CSRLocal<T>* block
               = new CSRLocal<T>(block_rows, block_cols, num_coords,
                                 coords.data() + block_starts[i],
