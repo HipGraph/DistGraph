@@ -35,12 +35,12 @@ int main(int argc, char **argv) {
 
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
 
-  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
-    fout<<shared_sparseMat.get()->coords[i].row << " "
-         << shared_sparseMat.get()->coords[i].col<<" "
-         << shared_sparseMat.get()->coords[i].value
-         <<endl;
-  }
+//  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
+//    fout<<shared_sparseMat.get()->coords[i].row << " "
+//         << shared_sparseMat.get()->coords[i].col<<" "
+//         << shared_sparseMat.get()->coords[i].value
+//         <<endl;
+//  }
 
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
@@ -61,13 +61,13 @@ int main(int argc, char **argv) {
   strcpy(stats1, output_path1.c_str());
   ofstream fout1(stats1, std::ios_base::app);
 
-
-  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
-    fout1<<shared_sparseMat.get()->coords[i].row << " "
-         << shared_sparseMat.get()->coords[i].col<<" "
-         << shared_sparseMat.get()->coords[i].value
-         <<endl;
-  }
+//
+//  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
+//    fout1<<shared_sparseMat.get()->coords[i].row << " "
+//         << shared_sparseMat.get()->coords[i].col<<" "
+//         << shared_sparseMat.get()->coords[i].value
+//         <<endl;
+//  }
 
 
 
