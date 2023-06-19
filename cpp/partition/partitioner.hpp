@@ -112,6 +112,7 @@ namespace distblas::partition  {
       //std::sort((result->coords).begin(), (result->coords).end(), column_major);
       __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major<T>);
       delete[] sendbuf;
+      cout<<" rank "<< my_rank << " delete sendbuf completeed "<<endl;
     }
 
   };
