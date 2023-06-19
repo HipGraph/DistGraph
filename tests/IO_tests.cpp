@@ -49,7 +49,12 @@ int main(int argc, char **argv) {
                                         shared_sparseMat.get()->gCols,
                                         grid.get()));
 
+  cout<<" rank "<< rank << " partitioning data started "<<endl;
+
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
+
+  cout<<" rank "<< rank << " partitioning data stopped "<<endl;
+
 
   string output_path1 =  "output_partitioned.txt"+ to_string(rank);
   char stats1[500];
