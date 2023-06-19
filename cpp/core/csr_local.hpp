@@ -71,12 +71,27 @@ public:
 
     sparse_matrix_t tempCOO, tempCSR;
 
+    cout<<" number of coords "<< num_coords << " attempting to creae coo "<<endl;
+
     mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
                             max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
+
+
+    cout<<" number of coords "<< num_coords << "  coo created succeeded "<<endl;
+
+
     mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
+
+    cout<<" number of coords "<< num_coords << "  csr created succeeded "<<endl;
+
     mkl_sparse_destroy(tempCOO);
+
+
+    cout<<" number of coords "<< num_coords << "  coo created succeeded "<<endl;
+
+
     vector<MKL_INT>().swap(rArray);
     vector<MKL_INT>().swap(cArray);
     vector<double>().swap(vArray);
@@ -85,8 +100,14 @@ public:
     MKL_INT *rows_start, *rows_end, *col_idx;
     double *values;
 
+
+    cout<<" number of coords "<< num_coords << "  csr exported "<<endl;
+
     mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                             &rows_start, &rows_end, &col_idx, &values);
+
+
+    cout<<" number of coords "<< num_coords << "  csr exported done "<<endl;
 
     int rv = 0;
     for (int i = 0; i < num_coords; i++) {
@@ -123,10 +144,16 @@ public:
 
       buffer[t].rowStart[this->rows] = max(num_coords, 1);
 
+
+      cout<<" number of coords "<< num_coords << " creating csr ... "<<endl;
+
       mkl_sparse_d_create_csr(
           &(buffer[t].mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
           this->cols, buffer[t].rowStart.data(), buffer[t].rowStart.data() + 1,
           buffer[t].col_idx.data(), buffer[t].values.data());
+
+
+      cout<<" number of coords "<< num_coords << " creating csr completed "<<endl;
 
       // This madness is just trying to get around the inspector routine
       if (num_coords == 0) {

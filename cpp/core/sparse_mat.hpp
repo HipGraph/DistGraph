@@ -83,6 +83,7 @@ public:
 
           cout<<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
                <<" num_coords "<<num_coords<<endl;
+
           CSRLocal<T>* block
               = new CSRLocal<T>(block_rows, block_cols, num_coords,
                                 coords.data() + block_starts[i],
