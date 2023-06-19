@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,grid.get()->world_size);
   int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->world_size);
+  cout<<" rank "<< rank << " divide_block_cols "<<endl;
   shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, false);
 
 

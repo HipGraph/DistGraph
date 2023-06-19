@@ -6,6 +6,7 @@
 #include "distributed_mat.hpp"
 #include "csr_local.hpp"
 
+
 using namespace std;
 
 namespace distblas::core {
