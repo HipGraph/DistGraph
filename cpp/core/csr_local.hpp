@@ -60,12 +60,25 @@ public:
       vArray.push_back(0.0);
     }
 
+
+
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
       rArray[i] = coords[i].row;
       cArray[i] = coords[i].col;
       vArray[i] = static_cast<double>(coords[i].value);
     }
+
+    string output_path =  "output.txt"+ to_string(rank);
+    char stats[500];
+    strcpy(stats, output_path.c_str());
+    ofstream fout(stats, std::ios_base::app);
+
+    for (int i = 0; i < num_coords; i++) {
+
+      fout<<" rank "<<rank<<" "<< rArray[i] << " "<< cArray[i]<<" " << vArray[i] <<endl;
+    }
+
 
     sparse_operation_t op;
     if (transpose) {

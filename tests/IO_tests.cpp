@@ -24,10 +24,10 @@ int main(int argc, char **argv) {
 
   initialize_mpi_datatypes<int>();
 
-  string output_path =  "output.txt"+ to_string(rank);
-  char stats[500];
-  strcpy(stats, output_path.c_str());
-  ofstream fout(stats, std::ios_base::app);
+//  string output_path =  "output.txt"+ to_string(rank);
+//  char stats[500];
+//  strcpy(stats, output_path.c_str());
+//  ofstream fout(stats, std::ios_base::app);
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
@@ -56,10 +56,10 @@ int main(int argc, char **argv) {
   cout<<" rank "<< rank << " partitioning data stopped "<<endl;
 
 
-  string output_path1 =  "output_partitioned.txt"+ to_string(rank);
-  char stats1[500];
-  strcpy(stats1, output_path1.c_str());
-  ofstream fout1(stats1, std::ios_base::app);
+//  string output_path1 =  "output_partitioned.txt"+ to_string(rank);
+//  char stats1[500];
+//  strcpy(stats1, output_path1.c_str());
+//  ofstream fout1(stats1, std::ios_base::app);
 
 //
 //  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
