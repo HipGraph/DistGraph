@@ -71,25 +71,29 @@ public:
 
 
   void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz, bool transpose) {
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
     if(max_nnz == -1) {
-      cout<<" size "<<block_starts.size() <<endl;
+      cout<<" rank "<< rank <<" size "<<block_starts.size() <<endl;
 
       for(int i = 0; i < block_starts.size() - 1; i++) {
         int num_coords = block_starts[i + 1] - block_starts[i];
 
         if(num_coords > 0) {
-          cout<<" i "<<i<<"  coords "<<num_coords<<
-              " block_starts[i] "<<block_starts[i] <<endl;
+          cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
+              " block_starts[i] " <<block_starts[i] <<endl;
 
-          cout<<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
+          cout<<" rank "<< rank <<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
                <<" num_coords "<<num_coords<<endl;
 
           CSRLocal<T>* block
               = new CSRLocal<T>(block_rows, block_cols, num_coords,
                                 coords.data() + block_starts[i],
-                                num_coords, transpose);
+                                num_coords, transpose, my);
 
-          cout<<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
+          cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
           csr_blocks.push_back(block);
         }
         else {

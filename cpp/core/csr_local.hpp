@@ -29,18 +29,23 @@ public:
 
   CSRHandle *buffer;
 
+
+
   CSRLocal() {}
   /*
    * TODO: Need to check this function for memory leaks!
    */
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
-           int num_coords, bool transpose) {
+           int num_coords, bool transpose, ) {
     this->transpose = transpose;
     this->num_coords = num_coords;
     this->rows = rows;
     this->cols = cols;
 
     this->buffer = new CSRHandle[2];
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     // This setup is really clunky, but I don't have time to fix it.
     vector<MKL_INT> rArray(num_coords, 0.0);
@@ -71,25 +76,22 @@ public:
 
     sparse_matrix_t tempCOO, tempCSR;
 
-    cout<<" number of coords "<< num_coords << " attempting to creae coo "<<endl;
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to creae coo "<<endl;
 
     mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
                             max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
-
-    cout<<" number of coords "<< num_coords << "  coo created succeeded "<<endl;
-
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  coo created succeeded "<<endl;
 
     mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
-
-    cout<<" number of coords "<< num_coords << "  csr created succeeded "<<endl;
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  csr created succeeded "<<endl;
 
     mkl_sparse_destroy(tempCOO);
 
 
-    cout<<" number of coords "<< num_coords << "  coo destroy succeeded "<<endl;
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  coo destroy succeeded "<<endl;
 
 
     vector<MKL_INT>().swap(rArray);
@@ -101,13 +103,13 @@ public:
     double *values;
 
 
-    cout<<" number of coords "<< num_coords << "  csr exported "<<endl;
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  csr exported "<<endl;
 
     mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                             &rows_start, &rows_end, &col_idx, &values);
 
 
-    cout<<" number of coords "<< num_coords << "  csr exported done "<<endl;
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  csr exported done "<<endl;
 
     int rv = 0;
     for (int i = 0; i < num_coords; i++) {
@@ -145,7 +147,7 @@ public:
       buffer[t].rowStart[this->rows] = max(num_coords, 1);
 
 
-      cout<<" number of coords "<< num_coords << " creating csr ... "<<endl;
+      cout<<" rank "<< rank <<" number of coords "<< num_coords << " creating csr ... "<<endl;
 
       mkl_sparse_d_create_csr(
           &(buffer[t].mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
@@ -153,7 +155,7 @@ public:
           buffer[t].col_idx.data(), buffer[t].values.data());
 
 
-      cout<<" number of coords "<< num_coords << " creating csr completed "<<endl;
+      cout<<" rank "<< rank <<" number of coords "<< num_coords << " creating csr completed "<<endl;
 
       // This madness is just trying to get around the inspector routine
       if (num_coords == 0) {
