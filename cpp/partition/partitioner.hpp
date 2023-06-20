@@ -117,9 +117,9 @@ namespace distblas::partition  {
       // TODO: Parallelize the sort routine?
       std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major<T>);
   //    __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major<T>);
-      cout<<" rank "<< my_rank << " delete sorting completeed "<<endl;
+      cout<<" rank "<< my_rank << " delete sorting completed "<<endl;
       delete[] sendbuf;
-      cout<<" rank "<< my_rank << " delete sendbuf completeed "<<endl;
+      cout<<" rank "<< my_rank << " delete sendbuf completed "<<endl;
     }
 
   };
