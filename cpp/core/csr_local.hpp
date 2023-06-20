@@ -36,7 +36,7 @@ public:
    * TODO: Need to check this function for memory leaks!
    */
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
-           int num_coords, bool transpose, ) {
+           int num_coords, bool transpose ) {
     this->transpose = transpose;
     this->num_coords = num_coords;
     this->rows = rows;

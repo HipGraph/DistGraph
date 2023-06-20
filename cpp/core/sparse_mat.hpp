@@ -91,7 +91,7 @@ public:
           CSRLocal<T>* block
               = new CSRLocal<T>(block_rows, block_cols, num_coords,
                                 coords.data() + block_starts[i],
-                                num_coords, transpose, my);
+                                num_coords, transpose);
 
           cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
           csr_blocks.push_back(block);
