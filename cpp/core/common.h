@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include <vector>
 #include <mkl_spblas.h>
+#include <iostream>
 
 using namespace std;
 
@@ -39,6 +40,7 @@ struct CSRHandle {
 //TODO: removed reference type due to binding issue
 template <typename T>
 bool column_major(Tuple<T> a, Tuple<T> b) {
+  cout<<" sorting "<<a.col << " "<<b.col<<endl;
   if (a.col == b.col) {
     return a.row < b.row;
   } else {
