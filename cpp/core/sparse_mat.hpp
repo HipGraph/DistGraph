@@ -76,7 +76,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if(max_nnz == -1) {
-      cout<<" rank "<< rank <<" size "<<block_starts.size() <<endl;
+      cout<<" rank "<< rank <<" block size "<<block_starts.size()<<" full code size "<<coords.size() <<endl;
 
       for(int i = 0; i < block_starts.size() - 1; i++) {
         int num_coords = block_starts[i + 1] - block_starts[i];
@@ -89,8 +89,8 @@ public:
                <<" num_coords "<<num_coords<<endl;
 
           CSRLocal<T>* block
-              = new CSRLocal<T>(block_rows, block_cols, num_coords,
-                                coords.data() + block_starts[i],
+              = new CSRLocal<T>(block_rows, block_cols,
+                                num_coords, coords.data() + block_starts[i],
                                 num_coords, transpose);
 
           cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;

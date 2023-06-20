@@ -48,6 +48,7 @@ public:
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+
     // This setup is really clunky, but I don't have time to fix it.
     vector<MKL_INT> rArray(num_coords, 0.0);
     vector<MKL_INT> cArray(num_coords, 0.0);
