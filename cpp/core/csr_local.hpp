@@ -89,7 +89,7 @@ public:
     mkl_sparse_destroy(tempCOO);
 
 
-    cout<<" number of coords "<< num_coords << "  coo created succeeded "<<endl;
+    cout<<" number of coords "<< num_coords << "  coo destroy succeeded "<<endl;
 
 
     vector<MKL_INT>().swap(rArray);
