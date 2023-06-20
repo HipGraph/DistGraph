@@ -103,7 +103,7 @@ public:
     }
 
     cout<<" rank "<< rank << " mkl_sparse_d_create_coo  stats: " << status_coo << endl;
-
+    mkl_sparse_set_memory_error_handler(MKL_MEMORY_ERROR_AFFIRM);
     sparse_status_t  status_csr = mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
     cout<<" rank "<< rank << " mkl_sparse_convert_csr  stats: " << status_csr <<endl;
