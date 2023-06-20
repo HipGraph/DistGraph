@@ -10,6 +10,7 @@
 #include <parallel/algorithm>
 #include <string.h>
 #include <cassert>
+#include <fstream>
 
 using namespace std;
 
