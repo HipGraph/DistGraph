@@ -93,15 +93,17 @@ public:
 
     cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
-    mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
+    sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
                             max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  coo created succeeded "<<endl;
 
-    mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  csr created succeeded "<<endl;
+    cout<<" rank "<< rank << " mkl_sparse_d_create_coo  stats: " << status_coo << endl;
+
+    sparse_status_t  status_csr = mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
+
+    cout<<" rank "<< rank << " mkl_sparse_convert_csr  stats: " << status_csr <<endl;
 
     mkl_sparse_destroy(tempCOO);
 
