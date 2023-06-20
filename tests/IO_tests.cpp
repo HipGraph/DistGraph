@@ -89,6 +89,6 @@ int main(int argc, char **argv) {
 
   cout<<" rank "<<rank<< " size "<<shared_sparseMat.get()->coords.size()<<endl;
 
-  //MPI_Finalize();
+  MPI_Finalize();
   return 0;
 }
