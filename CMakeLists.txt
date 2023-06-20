@@ -69,5 +69,5 @@ target_link_libraries(distblas disblas_lib)
 target_link_libraries(distblas MPI::MPI_CXX)
 target_link_libraries(distblas OpenMP::OpenMP_CXX)
 target_link_libraries(distblas CombBLAS)
-target_link_libraries(distblas $ENV{MKLROOT})
+#target_link_libraries(distblas $ENV{MKLROOT})
 
