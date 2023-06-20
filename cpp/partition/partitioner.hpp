@@ -109,7 +109,7 @@ namespace distblas::partition  {
       cout<<" rank "<< my_rank << " MPI_Alltoallv completed "<<endl;
 
 
-      for (std::vector<Tuple<T>>::iterator it = (sp_mat->coords).begin(); it != (sp_mat->coords).end(); ++it) {
+      for (typename vector<Tuple<T>>::iterator it = (sp_mat->coords).begin(); it != (sp_mat->coords).end(); ++it) {
            cout<< *it->value <<endl;
       }
       cout<<" rank "<< my_rank << " Loop traversing completed "<<endl;
