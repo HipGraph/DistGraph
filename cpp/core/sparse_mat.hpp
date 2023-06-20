@@ -78,6 +78,13 @@ public:
     if(max_nnz == -1) {
       cout<<" rank "<< rank <<" block size "<<block_starts.size()<<" full code size "<<coords.size() <<endl;
 
+
+      for (int i=0; i < block_starts.size() - 1; i++){
+        int num_coords = block_starts[i + 1] - block_starts[i];
+        cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
+            " block_starts[i] " <<block_starts[i] <<endl;
+      }
+
       for(int i = 0; i < block_starts.size() - 1; i++) {
         int num_coords = block_starts[i + 1] - block_starts[i];
 

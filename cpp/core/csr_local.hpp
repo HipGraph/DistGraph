@@ -91,7 +91,7 @@ public:
 
     sparse_matrix_t tempCOO, tempCSR;
 
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to creae coo "<<endl;
+    cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
     mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
                             max(num_coords, 1), rArray.data(), cArray.data(),
