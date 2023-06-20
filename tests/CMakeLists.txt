@@ -55,8 +55,8 @@ link_directories($ENV{COMBLAS_ROOT}/install/lib $ENV{MKLROOT}/lib/intel64)
 
 target_link_libraries(distblas_test disblas_lib)
 
-#target_compile_options(distblas_test PRIVATE  -DMKL_ILP64  -m64 -fopenmp -I$ENV{MKLROOT}/include)
-#target_link_options(distblas_test PRIVATE -L$ENV{MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl)
+target_compile_options(distblas_test PRIVATE  -DMKL_ILP64  -m64 -fopenmp -I$ENV{MKLROOT}/include)
+target_link_options(distblas_test PRIVATE -L$ENV{MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl)
 
 #target_link_libraries(distblas_test GTest::gtest_main)
 target_link_libraries(distblas_test MPI::MPI_CXX)
