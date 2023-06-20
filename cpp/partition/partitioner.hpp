@@ -110,7 +110,7 @@ namespace distblas::partition  {
 
 
       for (typename vector<Tuple<T>>::iterator it = (sp_mat->coords).begin(); it != (sp_mat->coords).end(); ++it) {
-           cout<< (*it).value <<endl;
+         T val =  (*it).value ;
       }
       cout<<" rank "<< my_rank << " Loop traversing completed "<<endl;
 
