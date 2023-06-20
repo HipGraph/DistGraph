@@ -97,7 +97,10 @@ public:
                             max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
-
+    if (status_coo != SPARSE_STATUS_SUCCESS) {
+      std::cerr << " rank "<<rank<< "Error: Conversion from COO to CSR failed." << std::endl;
+      // Handle the error or exit the program
+    }
 
     cout<<" rank "<< rank << " mkl_sparse_d_create_coo  stats: " << status_coo << endl;
 
