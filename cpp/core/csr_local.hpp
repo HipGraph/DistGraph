@@ -11,6 +11,7 @@
 #include <string.h>
 #include <cassert>
 #include <fstream>
+#include <mkl.h>
 
 using namespace std;
 
