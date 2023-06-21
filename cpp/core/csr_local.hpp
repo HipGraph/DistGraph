@@ -99,8 +99,8 @@ public:
 
     cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
-    sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
-                            max(num_coords, 1), rArray.data(), cArray.data(),
+    sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, 5, 5,
+                            max(3, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
     if (status_coo != SPARSE_STATUS_SUCCESS) {
