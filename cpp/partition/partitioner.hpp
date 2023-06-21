@@ -66,8 +66,6 @@ namespace distblas::partition  {
       prefix_sum(sendcounts, offsets);
       bufindices = offsets;
 
-
-      cout<<" rank "<< my_rank << " sendcount completed "<<endl;
 #pragma omp parallel for
       for(int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
@@ -81,14 +79,9 @@ namespace distblas::partition  {
         sendbuf[idx].value = coords[i].value;
       }
 
-      cout<<" rank "<< my_rank << " sendbyuf completed "<<endl;
-
-
       // Broadcast the number of nonzeros that each processor is going to receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1,
                    MPI_INT, process_3D_grid->global);
-
-      cout<<" rank "<< my_rank << " broadcasting completed "<<endl;
 
       vector<int> recvoffsets;
       prefix_sum(recvcounts, recvoffsets);
@@ -99,27 +92,18 @@ namespace distblas::partition  {
 
       (sp_mat->coords).resize(total_received_coords);
 
-      cout<<" rank "<< my_rank << " MPI_Alltoallv starting "<<endl;
 
       MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(),
                     SPTUPLE, (sp_mat->coords).data(), recvcounts.data(), recvoffsets.data(),
                     SPTUPLE, process_3D_grid->global);
 
 
-      cout<<" rank "<< my_rank << " MPI_Alltoallv completed "<<endl;
-
-
-      for (typename vector<Tuple<T>>::iterator it = (sp_mat->coords).begin(); it != (sp_mat->coords).end(); ++it) {
-         T val =  (*it).value ;
-      }
-      cout<<" rank "<< my_rank << " Loop traversing completed "<<endl;
-
       // TODO: Parallelize the sort routine?
 //      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major<T>);
       __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(), column_major<T>);
-      cout<<" rank "<< my_rank << " delete sorting completed "<<endl;
+
       delete[] sendbuf;
-      cout<<" rank "<< my_rank << " delete sendbuf completed "<<endl;
+
     }
 
   };
