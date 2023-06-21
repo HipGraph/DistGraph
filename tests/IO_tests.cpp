@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
          <<endl;
   }
 
-  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(1, 1, 1, 1));
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
   auto  partitioner = unique_ptr<GlobalAdjacency1DPartitioner>
       (new GlobalAdjacency1DPartitioner(shared_sparseMat.get()->gRows,
