@@ -24,10 +24,10 @@ int main(int argc, char **argv) {
 
   initialize_mpi_datatypes<int>();
 
-  string output_path =  "output.txt"+ to_string(rank);
-  char stats[500];
-  strcpy(stats, output_path.c_str());
-  ofstream fout(stats, std::ios_base::app);
+//  string output_path =  "output.txt"+ to_string(rank);
+//  char stats[500];
+//  strcpy(stats, output_path.c_str());
+//  ofstream fout(stats, std::ios_base::app);
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
@@ -35,12 +35,12 @@ int main(int argc, char **argv) {
 
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
 
-  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
-    fout<<shared_sparseMat.get()->coords[i].row << " "
-         << shared_sparseMat.get()->coords[i].col<<" "
-         << shared_sparseMat.get()->coords[i].value
-         <<endl;
-  }
+//  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
+//    fout<<shared_sparseMat.get()->coords[i].row << " "
+//         << shared_sparseMat.get()->coords[i].col<<" "
+//         << shared_sparseMat.get()->coords[i].value
+//         <<endl;
+//  }
 
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(4, 1, 1, 1));
 
