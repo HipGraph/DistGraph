@@ -65,12 +65,13 @@ public:
 
 
 
-//#pragma omp parallel for
-//    for (int i = 0; i < num_coords; i++) {
-//      rArray[i] = coords[i].row;
-//      cArray[i] = coords[i].col;
-//      vArray[i] = static_cast<double>(coords[i].value);
-//    }
+#pragma omp parallel for
+    for (int i = 0; i < num_coords; i++) {
+      rArray[i] = coords[i].row;
+      cArray[i] = coords[i].col;
+      vArray[i] = static_cast<double>(coords[i].value);
+      vArray[i] = 2.0
+    }
 
 //    string output_path =  "output.txt"+ to_string(rank);
 //    char stats[500];
@@ -84,9 +85,9 @@ public:
 
 //    mkl_set_num_threads(1);
 
-    std::vector<MKL_INT> rArray = {0, 1, 2};
-    std::vector<MKL_INT> cArray = {0, 1, 2};
-    std::vector<double> vArray = {1.0, 2.0, 3.0};
+//    std::vector<MKL_INT> rArray = {0, 1, 2};
+//    std::vector<MKL_INT> cArray = {0, 1, 2};
+//    std::vector<double> vArray = {1.0, 2.0, 3.0};
 
     sparse_operation_t op;
     if (transpose) {
@@ -100,7 +101,7 @@ public:
     cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
     sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, 30000, 30000,
-                            max(3, 1), rArray.data(), cArray.data(),
+                            max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
     if (status_coo != SPARSE_STATUS_SUCCESS) {
