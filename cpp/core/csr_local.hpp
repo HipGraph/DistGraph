@@ -82,7 +82,7 @@ public:
       fout<<" rank "<<rank<<" "<< rArray[i] << " "<< cArray[i]<<" " << vArray[i] <<endl;
     }
 
-    mkl_set_num_threads(2);
+    mkl_set_num_threads(1);
 
     sparse_operation_t op;
     if (transpose) {
