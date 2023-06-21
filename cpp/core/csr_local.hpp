@@ -65,24 +65,28 @@ public:
 
 
 
-#pragma omp parallel for
-    for (int i = 0; i < num_coords; i++) {
-      rArray[i] = coords[i].row;
-      cArray[i] = coords[i].col;
-      vArray[i] = static_cast<double>(coords[i].value);
-    }
+//#pragma omp parallel for
+//    for (int i = 0; i < num_coords; i++) {
+//      rArray[i] = coords[i].row;
+//      cArray[i] = coords[i].col;
+//      vArray[i] = static_cast<double>(coords[i].value);
+//    }
 
-    string output_path =  "output.txt"+ to_string(rank);
-    char stats[500];
-    strcpy(stats, output_path.c_str());
-    ofstream fout(stats, std::ios_base::app);
+//    string output_path =  "output.txt"+ to_string(rank);
+//    char stats[500];
+//    strcpy(stats, output_path.c_str());
+//    ofstream fout(stats, std::ios_base::app);
+//
+//    for (int i = 0; i < num_coords; i++) {
+//
+//      fout<<" rank "<<rank<<" "<< rArray[i] << " "<< cArray[i]<<" " << vArray[i] <<endl;
+//    }
 
-    for (int i = 0; i < num_coords; i++) {
+//    mkl_set_num_threads(1);
 
-      fout<<" rank "<<rank<<" "<< rArray[i] << " "<< cArray[i]<<" " << vArray[i] <<endl;
-    }
-
-    mkl_set_num_threads(1);
+    std::vector<int> rArray = {0, 1, 2};
+    std::vector<int> cArray = {0, 1, 2};
+    std::vector<double> vArray = {1.0, 2.0, 3.0};
 
     sparse_operation_t op;
     if (transpose) {
