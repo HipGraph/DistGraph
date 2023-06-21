@@ -67,10 +67,12 @@ public:
 
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
-      rArray[i] = coords[i].row;
-      cArray[i] = coords[i].col;
-      vArray[i] = static_cast<double>(coords[i].value);
-      vArray[i] = 2.0;
+//      rArray[i] = coords[i].row;
+//      cArray[i] = coords[i].col;
+      rArray[i] = i;
+      cArray[i] = i;
+//      vArray[i] = static_cast<double>(coords[i].value);
+      vArray[i] = 1.0;
     }
 
 //    string output_path =  "output.txt"+ to_string(rank);
