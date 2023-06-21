@@ -70,7 +70,7 @@ public:
       rArray[i] = coords[i].row;
       cArray[i] = coords[i].col;
       vArray[i] = static_cast<double>(coords[i].value);
-      vArray[i] = 2.0
+      vArray[i] = 2.0;
     }
 
 //    string output_path =  "output.txt"+ to_string(rank);
