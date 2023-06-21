@@ -51,9 +51,9 @@ public:
 
 
     // This setup is really clunky, but I don't have time to fix it.
-    vector<MKL_INT> rArray(num_coords, 0);
-    vector<MKL_INT> cArray(num_coords, 0);
-    vector<double> vArray(num_coords, 0.0);
+    vector<MKL_INT> rArray(500, 0);
+    vector<MKL_INT> cArray(500, 0);
+    vector<double> vArray(500, 0.0);
 //
 //    // Put a dummy value in if the number of coordinates is 0, so that
 //    // everything doesn't blow up
