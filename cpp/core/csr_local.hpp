@@ -50,10 +50,10 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 
-//    // This setup is really clunky, but I don't have time to fix it.
-//    vector<MKL_INT> rArray(num_coords, 0);
-//    vector<MKL_INT> cArray(num_coords, 0);
-//    vector<double> vArray(num_coords, 0.0);
+    // This setup is really clunky, but I don't have time to fix it.
+    vector<MKL_INT> rArray(num_coords, 0);
+    vector<MKL_INT> cArray(num_coords, 0);
+    vector<double> vArray(num_coords, 0.0);
 //
 //    // Put a dummy value in if the number of coordinates is 0, so that
 //    // everything doesn't blow up
@@ -66,14 +66,14 @@ public:
 
 
 //#pragma omp parallel for
-//    for (int i = 0; i < num_coords; i++) {
-////      rArray[i] = coords[i].row;
-////      cArray[i] = coords[i].col;
-//      rArray[i] = i;
-//      cArray[i] = i;
-////      vArray[i] = static_cast<double>(coords[i].value);
-//      vArray[i] = 1.0;
-//    }
+    for (int i = 0; i < 500; i++) {
+//      rArray[i] = coords[i].row;
+//      cArray[i] = coords[i].col;
+      rArray[i] = i;
+      cArray[i] = i;
+//      vArray[i] = static_cast<double>(coords[i].value);
+      vArray[i] = 1.0;
+    }
 
 //    string output_path =  "output.txt"+ to_string(rank);
 //    char stats[500];
@@ -103,7 +103,7 @@ public:
     cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
     sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, 30000, 30000,
-                            max(3, 1), rArray.data(), cArray.data(),
+                            max(500, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
     if (status_coo != SPARSE_STATUS_SUCCESS) {
