@@ -87,9 +87,9 @@ public:
 
 //    mkl_set_num_threads(1);
 
-    std::vector<MKL_INT> rArray = {0, 1, 2};
-    std::vector<MKL_INT> cArray = {0, 1, 2};
-    std::vector<double> vArray = {1.0, 2.0, 3.0};
+//    std::vector<MKL_INT> rArray = {0, 1, 2};
+//    std::vector<MKL_INT> cArray = {0, 1, 2};
+//    std::vector<double> vArray = {1.0, 2.0, 3.0};
 
     sparse_operation_t op;
     if (transpose) {
