@@ -131,7 +131,7 @@ public:
       int current_col_block = 0;
       for(int j=0;j<block_row_starts.size()-1;j++){
 
-            if (block_row_starts[j]> block_col_starts[current_col_block+1]){
+            if (block_row_starts[j]>= block_col_starts[current_col_block+1]){
               ++current_col_block;
             }
 
