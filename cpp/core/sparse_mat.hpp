@@ -92,6 +92,8 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i+1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
+          cout<<"adding block_row "<<j<<endl;
+
           int current_step =   std::min(static_cast<int>(block_width), static_cast<int>((block_col_starts[i+1]-block_col_starts[i])));
           current_start += current_step;
         }
