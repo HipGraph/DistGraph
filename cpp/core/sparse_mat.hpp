@@ -98,7 +98,7 @@ public:
           block_row_starts.push_back(j);
           cout<<"rank"<<rank<<"adding block_row "<<j<<endl;
 
-          int current_step =   std::min(static_cast<int>(block_width),
+          int current_step =   std::min(static_cast<int>(block_width_row),
                                       static_cast<int>((block_col_starts[i+1]-block_col_starts[i])));
           current_start += current_step;
         }
@@ -106,7 +106,7 @@ public:
         // This modding step helps indexing.
         if (mod_ind) {
           //        coords[i].col %= block_width;
-          coords[i].row %= block_width;
+          coords[i].row %= block_width_row;
         }
       }
     }
