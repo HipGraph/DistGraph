@@ -82,19 +82,24 @@ public:
     }
   }
 
-  void divide_block_rows(int block_width, int target_divisions, bool mod_ind) {
+  void divide_block_rows(int block_width_row, int block_width_col,
+                         int target_divisions, bool mod_ind) {
     block_row_starts.clear();
     // Locate block starts within the local sparse matrix (i.e. divide a long
     // block row into subtiles)
-    int current_start = 0;
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    int current_start = block_width_col*rank;
     for (uint64_t i = 0;i< block_col_starts.size() - 1;i++) {
 
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i+1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout<<"adding block_row "<<j<<endl;
+          cout<<"rank"<<rank<<"adding block_row "<<j<<endl;
 
-          int current_step =   std::min(static_cast<int>(block_width), static_cast<int>((block_col_starts[i+1]-block_col_starts[i])));
+          int current_step =   std::min(static_cast<int>(block_width),
+                                      static_cast<int>((block_col_starts[i+1]-block_col_starts[i])));
           current_start += current_step;
         }
 
@@ -106,11 +111,11 @@ public:
       }
     }
 
-    assert(block_row_starts.size() <= target_divisions + 1);
+//    assert(block_row_starts.size() <= target_divisions + 1);
 
-    while(block_row_starts.size() < target_divisions + 1) {
+//    while(block_row_starts.size() < target_divisions + 1) {
       block_row_starts.push_back(coords.size());
-    }
+//    }
 
   }
 
