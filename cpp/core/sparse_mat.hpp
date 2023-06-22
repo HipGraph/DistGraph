@@ -92,7 +92,7 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i+1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          int current_step =   min(block_width, (block_col_starts[i+1]-block_col_starts[i]));
+          int current_step =   std::min(block_width, (block_col_starts[i+1]-block_col_starts[i]));
           current_start += current_step;
         }
 
