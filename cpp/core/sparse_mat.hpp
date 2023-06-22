@@ -103,9 +103,10 @@ public:
                <<block_col_starts[i+1] << " : "<<block_col_starts[i] << endl;
 
           int current_step =   std::min(static_cast<int>(block_width_row),
-                                      static_cast<int>((block_col_starts[i+1]-block_col_starts[i])));
+                                      static_cast<int>((coords[block_col_starts[i+1]].row
+                                                        - coords[block_col_starts[i]].row)));
           current_start += current_step;
-          cout<<"rank"<<rank<<"next checking start "<<current_start<<endl;
+          cout<<"rank "<<rank<<" next checking start "<<current_start<<endl;
         }
 
         // This modding step helps indexing.
