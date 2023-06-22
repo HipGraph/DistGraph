@@ -11,8 +11,8 @@ message(STATUS "MPI include dir: ${MPI_CXX_INCLUDE_PATH}")
 message(STATUS "MPI libs: ${MPI_CXX_LIBRARIES}")
 message(STATUS "MPI executable: ${MPIEXEC_EXECUTABLE}")
 
-message("Finding MKL")
-find_package(MKL REQUIRED)
+#message("Finding MKL")
+#find_package(MKL REQUIRED)
 
 
 message("Finding OpenMP")
