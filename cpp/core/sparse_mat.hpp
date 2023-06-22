@@ -5,6 +5,8 @@
 #include "common.h"
 #include "distributed_mat.hpp"
 #include "csr_local.hpp"
+#include <parallel/algorithm>
+#include <algorithm>
 
 
 using namespace std;
@@ -22,8 +24,9 @@ public:
   vector<Tuple<T>> coords;
 
 
-  vector<uint64_t> block_starts;
+  vector<uint64_t> block_col_starts;
   vector<CSRLocal<T>*> csr_blocks;
+  vector<uint64_t> block_row_starts;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -45,13 +48,14 @@ public:
 
 
   void divide_block_cols(int block_width, int target_divisions, bool mod_ind) {
-    block_starts.clear();
+    block_col_starts.clear();
     // Locate block starts within the local sparse matrix (i.e. divide a long
     // block row into subtiles)
     int current_start = 0;
+
     for(uint64_t i = 0; i < coords.size(); i++) {
       while(coords[i].col >= current_start) {
-        block_starts.push_back(i);
+        block_col_starts.push_back(i);
         current_start += block_width;
       }
 
@@ -61,12 +65,76 @@ public:
       }
     }
 
-    assert(block_starts.size() <= target_divisions + 1);
+    assert(block_col_starts.size() <= target_divisions + 1);
 
-    while(block_starts.size() < target_divisions + 1) {
-      block_starts.push_back(coords.size());
+    while(block_col_starts.size() < target_divisions + 1) {
+      block_col_starts.push_back(coords.size());
     }
 
+  }
+
+
+  void sort_by_rows() {
+    for(int i = 0; i < block_col_starts.size() - 1; i++) {
+      __gnu_parallel::sort(coords.data() + block_col_starts[i],
+                           coords.data() + block_col_starts[i+1],
+                           row_major<T>);
+    }
+  }
+
+  void divide_block_rows(int block_width, int target_divisions, bool mod_ind) {
+    block_row_starts.clear();
+    // Locate block starts within the local sparse matrix (i.e. divide a long
+    // block row into subtiles)
+    int current_start = 0;
+    for (uint64_t i = 0;i< block_col_starts.size() - 1;i++) {
+
+      for (uint64_t j = block_col_starts[i]; j < block_col_starts[i+1]; j++) {
+        while (coords[j].row >= current_start) {
+          block_row_starts.push_back(j);
+          int current_step =   min(block_width, (block_col_starts[i+1]-block_col_starts[i]));
+          current_start += current_step;
+        }
+
+        // This modding step helps indexing.
+        if (mod_ind) {
+          //        coords[i].col %= block_width;
+          coords[i].row %= block_width;
+        }
+      }
+    }
+
+    assert(block_row_starts.size() <= target_divisions + 1);
+
+    while(block_row_starts.size() < target_divisions + 1) {
+      block_row_starts.push_back(coords.size());
+    }
+
+  }
+
+  void print_blocks_and_cols() {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+      int current_col_block = 0;
+      for(int j=0;j<block_row_starts.size()-1;j++){
+
+            if (block_row_starts[j]> block_col_starts[current_col_block+1]){
+              ++current_col_block;
+            }
+
+            string output_path =  "blocks_rank"+ to_string(rank)+"_col_"+to_string(current_col_block)+"_row_"+to_string(j)+".txt";
+            char stats[500];
+            strcpy(stats, output_path.c_str());
+            ofstream fout(stats, std::ios_base::app);
+            int num_coords = block_row_starts[j+1] -block_row_starts[j];
+
+            for (int i = 0; i < num_coords; i++) {
+
+              fout <<coords[coords.data()+block_row_starts[j]+i].row<<" "<<coords[coords.data()+block_row_starts[j]+i].col<< endl;
+            }
+
+    }
   }
 
 
@@ -74,46 +142,46 @@ public:
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+    csr_blocks =  vector<CSRLocal<T>*>(block_col_starts.size()-1,nullptr);
     if(max_nnz == -1) {
-      cout<<" rank "<< rank <<" block size "<<block_starts.size()<<" full code size "<<coords.size() <<endl;
+      cout<<" rank "<< rank <<" block size "<<block_col_starts.size()<<" full code size "<<coords.size() <<endl;
 
 
-      for (int i=0; i < block_starts.size() - 1; i++){
-        int num_coords = block_starts[i + 1] - block_starts[i];
+      for (int i=0; i < block_col_starts.size() - 1; i++){
+        int num_coords = block_col_starts[i + 1] - block_col_starts[i];
         cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
-            " block_starts[i] " <<block_starts[i] <<endl;
+            " block_col_starts[i] " <<block_col_starts[i] <<endl;
       }
 
-      for(int i = 0; i < block_starts.size() - 1; i++) {
-        int num_coords = block_starts[i + 1] - block_starts[i];
+      for(int i = 0; i < block_col_starts.size() - 1; i++) {
+        int num_coords = block_col_starts[i + 1] - block_col_starts[i];
 
         if(num_coords > 0) {
           cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
-              " block_starts[i] " <<block_starts[i] <<endl;
+              " block_col_starts[i] " <<block_col_starts[i] <<endl;
 
           cout<<" rank "<< rank <<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
                <<" num_coords "<<num_coords<<endl;
 
           CSRLocal<T>* block
               = new CSRLocal<T>(block_rows, block_cols,
-                                num_coords, coords.data() + block_starts[i],
+                                num_coords, coords.data() + block_col_starts[i],
                                 num_coords, transpose);
 
           cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
-          csr_blocks.push_back(block);
+          csr_blocks[i]=block;
         }
-        else {
-          csr_blocks.push_back(nullptr);
-        }
+//        else {
+//          csr_blocks.push_back(nullptr);
+//        }
       }
     }
     else {
-      int num_coords = block_starts[1] - block_starts[0];
+      int num_coords = block_col_starts[1] - block_col_starts[0];
       CSRLocal<T>* block = new CSRLocal<T>(block_rows, block_cols,
                                            max_nnz, coords.data(),
                                            num_coords, transpose);
-      csr_blocks.push_back(block);
+      block_col_starts.push_back(block);
     }
   }
 

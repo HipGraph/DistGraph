@@ -74,13 +74,22 @@ int main(int argc, char **argv) {
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,grid.get()->world_size);
   int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->world_size);
   cout<<" rank "<< rank << " divide_block_cols "<<endl;
+
   shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, false);
+  shared_sparseMat.get()->sort_by_rows();
+  shared_sparseMat.get()->divide_block_rows(localARows,grid.get()->world_size, false);
+
+  shared_sparseMat.get()->print_blocks_and_cols();
+
+
+
+
 
 
   cout<<" rank "<< rank << " localARows "<<localARows<<endl;
   cout<<" rank "<< rank << " localBRows "<<localBRows<<endl;
 
-  shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false);
+//  shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false);
 
 
 
