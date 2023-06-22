@@ -64,7 +64,7 @@ public:
     }
 
 
-
+   cout<<" number of coordinates "<<num_coords<<endl;
 //#pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
 //      rArray[i] = coords[i].row;
@@ -102,7 +102,7 @@ public:
 
     cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
-    sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
+    sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, 30000, 30000,
                             max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
