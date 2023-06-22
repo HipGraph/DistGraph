@@ -47,7 +47,7 @@ bool column_major(Tuple<T> a, Tuple<T> b) {
   }
 }
 
-template <typename T> bool row_major(Tuple<T> &a, Tuple<T> &b) {
+template <typename T> bool row_major(Tuple<T> a, Tuple<T> b) {
   if (a.row == b.row) {
     return a.col < b.col;
   } else {

@@ -76,8 +76,8 @@ public:
 
   void sort_by_rows() {
     for(int i = 0; i < block_col_starts.size() - 1; i++) {
-      __gnu_parallel::sort(coords.data() + block_col_starts[i],
-                           coords.data() + block_col_starts[i+1],
+      __gnu_parallel::sort(coords.begin() + block_col_starts[i],
+                           coords.begin() + block_col_starts[i+1],
                            row_major<T>);
     }
   }
