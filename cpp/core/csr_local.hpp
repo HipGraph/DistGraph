@@ -51,9 +51,9 @@ public:
 
 
     // This setup is really clunky, but I don't have time to fix it.
-    vector<MKL_INT> rArray(500, 0);
-    vector<MKL_INT> cArray(500, 0);
-    vector<double> vArray(500, 0.0);
+    vector<MKL_INT> rArray(1000, 0);
+    vector<MKL_INT> cArray(1000, 0);
+    vector<double> vArray(1000, 0.0);
 //
 //    // Put a dummy value in if the number of coordinates is 0, so that
 //    // everything doesn't blow up
@@ -66,7 +66,7 @@ public:
 
 
 //#pragma omp parallel for
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 1000; i++) {
 //      rArray[i] = coords[i].row;
 //      cArray[i] = coords[i].col;
       rArray[i] = i;
