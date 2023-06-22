@@ -93,6 +93,9 @@ public:
     int current_start = block_width_col*rank;
     for (uint64_t i = 0;i< block_col_starts.size() - 1;i++) {
 
+      cout<<" rank "<< rank <<" block start "<< block_col_starts[i]
+           << " block end "<< block_col_starts[i+1] << endl;
+
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i+1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
