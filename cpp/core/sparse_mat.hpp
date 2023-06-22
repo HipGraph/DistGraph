@@ -131,7 +131,7 @@ public:
 
             for (int i = 0; i < num_coords; i++) {
 
-              fout <<coords[coords.data()+block_row_starts[j]+i].row<<" "<<coords[coords.data()+block_row_starts[j]+i].col<< endl;
+              fout <<(coords.data()+block_row_starts[j]+i).row<<" "<<(coords.data()+block_row_starts[j]+i).col<< endl;
             }
 
     }
