@@ -99,7 +99,8 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i+1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout<<"rank"<<rank<<"adding block_row "<<j<<endl;
+          cout<<"rank"<<rank<<"adding block_row "<<j<< " candidate numbers "
+               <<block_col_starts[i+1] << " : "<<block_col_starts[i] << endl;
 
           int current_step =   std::min(static_cast<int>(block_width_row),
                                       static_cast<int>((block_col_starts[i+1]-block_col_starts[i])));
