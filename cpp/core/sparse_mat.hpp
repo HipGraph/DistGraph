@@ -178,11 +178,11 @@ public:
   }
 
   ~SpMat() {
-    for (int i = 0; i < csr_linked_lists.size(); i++) {
-      if (csr_linked_lists[i] != nullptr) {
-        delete csr_linked_lists[i];
-      }
-    }
+//    for (int i = 0; i < csr_linked_lists.size(); i++) {
+//      if (csr_linked_lists[i] != nullptr) {
+//        delete csr_linked_lists[i];
+//      }
+//    }
   }
 };
 
