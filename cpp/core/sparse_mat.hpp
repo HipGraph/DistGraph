@@ -185,7 +185,7 @@ public:
                                 num_coords, coords.data()+block_row_starts[j],
                                 num_coords, transpose);
           csr_linked_lists[current_vector_pos].insert(block);
-          cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
+          cout<<" rank "<< rank <<" i "<<j<<"  coords "<<num_coords<<" csr creation completed "<<endl;
           ++current_vector_pos;
         }
 
