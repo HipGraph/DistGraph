@@ -81,17 +81,12 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->divide_block_rows(localARows,localBRows,
                                             grid.get()->world_size, true);
 
-  shared_sparseMat.get()->print_blocks_and_cols();
-
-
-
-
-
 
   cout<<" rank "<< rank << " localARows "<<localARows<<endl;
   cout<<" rank "<< rank << " localBRows "<<localBRows<<endl;
 
   shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false);
+  shared_sparseMat.get()->print_blocks_and_cols();
 
 
 

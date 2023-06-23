@@ -193,6 +193,9 @@ public:
     mkl_sparse_destroy(tempCSR);
   }
 
+
+
+
   ~CSRLocal() {
     for (int t = 0; t < 2; t++) {
       mkl_sparse_destroy(buffer[t].mkl_handle);
