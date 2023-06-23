@@ -29,6 +29,8 @@ template <typename T> struct CSR {
 };
 
 
+
+
 struct CSRHandle {
   vector<double> values;
   vector<MKL_INT> col_idx;
