@@ -169,7 +169,7 @@ public:
 
             fout << "(" << col << ", " << value << ") ";
           }
-          fount <<endl;
+          fout <<endl;
         }
       }
     }
