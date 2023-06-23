@@ -29,6 +29,8 @@ public:
   vector<CSRLocal<T>*> csr_blocks;
   vector<uint64_t> block_row_starts;
 
+  vector<CSRLinkedList<T>> csr_linked_lists;
+
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
    * @param coords  (src, dst, value) Tuple vector loaded as input
@@ -155,47 +157,69 @@ public:
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    csr_blocks =  vector<CSRLocal<T>*>(block_col_starts.size()-1,nullptr);
-    if(max_nnz == -1) {
+//    csr_blocks =  vector<CSRLocal<T>*>(block_col_starts.size()-1,nullptr);
+//    if(max_nnz == -1) {
       cout<<" rank "<< rank <<" block size "<<block_col_starts.size()<<" full code size "<<coords.size() <<endl;
 
 
-      for (int i=0; i < block_col_starts.size() - 1; i++){
-        int num_coords = block_col_starts[i + 1] - block_col_starts[i];
-        cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
-            " block_col_starts[i] " <<block_col_starts[i] <<endl;
-      }
+      int current_col_block = 0;
+      csr_linked_lists = vector<CSRLinkedList<T>>(block_row_starts.size()-1);
+      int current_vector_pos=0;
+      for(int j=0;j<block_row_starts.size()-1;j++){
 
-      for(int i = 0; i < block_col_starts.size() - 1; i++) {
-        int num_coords = block_col_starts[i + 1] - block_col_starts[i];
+        if (block_row_starts[j]>= block_col_starts[current_col_block+1]){
+          ++current_col_block;
+          current_vector_pos=0;
+        }
+
+        if (current_col_block==0) {
+          CSRLinkedList<T>() CSRlist;
+          csr_linked_lists[j]= CSRlist;
+        }
+
+        int num_coords = block_row_starts[j+1] -block_row_starts[j];
 
         if(num_coords > 0) {
-          cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
-              " block_col_starts[i] " <<block_col_starts[i] <<endl;
-
-          cout<<" rank "<< rank <<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
-               <<" num_coords "<<num_coords<<endl;
-
           CSRLocal<T>* block
               = new CSRLocal<T>(block_rows, block_cols,
-                                num_coords, coords.data() + block_col_starts[i],
+                                num_coords, coords.data()+block_row_starts[j],
                                 num_coords, transpose);
-
+          csr_linked_lists[current_vector_pos].insert(block);
           cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
-          csr_blocks[i]=block;
+          ++current_vector_pos;
         }
-//        else {
-//          csr_blocks.push_back(nullptr);
-//        }
+
       }
-    }
-    else {
-      int num_coords = block_col_starts[1] - block_col_starts[0];
-      CSRLocal<T>* block = new CSRLocal<T>(block_rows, block_cols,
-                                           max_nnz, coords.data(),
-                                           num_coords, transpose);
-      block_col_starts.push_back(block);
-    }
+//      for(int i = 0; i < block_col_starts.size() - 1; i++) {
+//        int num_coords = block_col_starts[i + 1] - block_col_starts[i];
+//
+//        if(num_coords > 0) {
+//          cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<
+//              " block_col_starts[i] " <<block_col_starts[i] <<endl;
+//
+//          cout<<" rank "<< rank <<" i "<<i<<"  blockrows "<<block_rows<<" block_cols "<<block_cols
+//               <<" num_coords "<<num_coords<<endl;
+//
+//          CSRLocal<T>* block
+//              = new CSRLocal<T>(block_rows, block_cols,
+//                                num_coords, coords.data() + block_col_starts[i],
+//                                num_coords, transpose);
+//
+//          cout<<" rank "<< rank <<" i "<<i<<"  coords "<<num_coords<<" csr creation completed "<<endl;
+//          csr_blocks[i]=block;
+//        }
+////        else {
+////          csr_blocks.push_back(nullptr);
+////        }
+//      }
+//    }
+//    else {
+//      int num_coords = block_col_starts[1] - block_col_starts[0];
+//      CSRLocal<T>* block = new CSRLocal<T>(block_rows, block_cols,
+//                                           max_nnz, coords.data(),
+//                                           num_coords, transpose);
+//      block_col_starts.push_back(block);
+//    }
   }
 
 
