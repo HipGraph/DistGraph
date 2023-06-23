@@ -173,7 +173,7 @@ public:
         }
 
         if (current_col_block==0) {
-          CSRLinkedList<T>() CSRlist;
+          CSRLinkedList<T> CSRlist;
           csr_linked_lists[j]= CSRlist;
         }
 
