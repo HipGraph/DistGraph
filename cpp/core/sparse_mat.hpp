@@ -109,7 +109,7 @@ public:
                              bool transpose) {
 
     int current_col_block = 0;
-    csr_linked_lists = vector<CSRLinkedList<T>>(block_row_starts.size() - 1,nullptr);
+    csr_linked_lists = vector<CSRLinkedList<T>>(block_row_starts.size() - 1);
     int current_vector_pos = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
