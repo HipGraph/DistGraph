@@ -7,6 +7,7 @@
 #include "csr_local.hpp"
 #include <parallel/algorithm>
 #include <algorithm>
+#include "csr_linked_list.hpp"
 
 
 using namespace std;

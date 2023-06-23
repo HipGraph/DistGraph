@@ -76,10 +76,10 @@ int main(int argc, char **argv) {
 
   cout<<" rank "<< rank << " divide_block_cols "<<endl;
 
-  shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, false);
+  shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, true);
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(5000,localBRows,
-                                            grid.get()->world_size, false);
+                                            grid.get()->world_size, true);
 
   shared_sparseMat.get()->print_blocks_and_cols();
 
