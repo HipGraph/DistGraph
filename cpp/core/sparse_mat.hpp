@@ -79,6 +79,8 @@ public:
 
   void divide_block_rows(int block_width_row, int block_width_col,
                          int target_divisions, bool mod_ind) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
