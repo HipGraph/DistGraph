@@ -8,7 +8,7 @@ namespace distblas::core {
 
 template <typename T>
 struct CSRLocalNode {
-  CSRLocal<T> data;
+  CSRLocal<T>* data;
   CSRLocalNode<T> *next;
 };
 
@@ -34,7 +34,7 @@ public:
    head = nullptr;
   }
 
-  void insert(CSRLocal<T> &dataPoint) {
+  void insert(CSRLocal<T>* dataPoint) {
     CSRLocalNode<T>* newNode = new CSRLocalNode<T>();
     newNode->data = dataPoint;
     if (this->head == nullptr) {
