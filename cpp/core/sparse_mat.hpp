@@ -173,6 +173,8 @@ public:
           }
           fout <<endl;
         }
+        head = head->next;
+        ++count;
       }
     }
   }
