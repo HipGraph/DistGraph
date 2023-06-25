@@ -26,12 +26,6 @@ public:
   }
 
   ~CSRLinkedList() {
-//   CSRLocalNode<T>* temp = head;
-//   while(temp != nullptr) {
-//     CSRLocalNode<T>* nextTemp = temp->next;
-//     delete temp;
-//     temp = nextTemp;
-//   }
   }
 
   void insert(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
