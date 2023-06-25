@@ -142,9 +142,11 @@ public:
     for (int j = 0; j < csr_linked_lists.size() ; j++) {
 
       CSRLinkedList<T> linkedList = csr_linked_lists[j];
-      CSRLocalNode<T> *head = linkedList.getHeadNode();
+
+      auto head = linkedList.getHeadNode();
+
       int count=0;
-      while (head != nullptr) {
+      while (head.get() != nullptr) {
         string output_path = "blocks_rank" + to_string(rank) + "_col_" +
                              to_string(count) + "_row_" +
                              to_string(j) + ".txt";
@@ -153,10 +155,10 @@ public:
         ofstream fout(stats, std::ios_base::app);
 
 
-        CSRLocal<T>* csr_data= head->data;
+        auto csr_data= head.get()->data;
 
 
-        distblas::core::CSRHandle* handle = csr_data->handler.get();
+        distblas::core::CSRHandle* handle = (csr_data.get())->handler.get();
         int numRows = handle->rowStart.size()-1;
 
         for (int i = 0; i < numRows; i++) {
