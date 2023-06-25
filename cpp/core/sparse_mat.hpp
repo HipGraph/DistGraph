@@ -8,6 +8,7 @@
 #include <mpi.h>
 #include <parallel/algorithm>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
