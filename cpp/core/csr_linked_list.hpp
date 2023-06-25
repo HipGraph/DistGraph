@@ -9,15 +9,15 @@ namespace distblas::core {
 
 template <typename T>
 struct CSRLocalNode {
-  unique_ptr<CSRLocal<T>> data;
-  unique_ptr<CSRLocalNode<T>> next;
+  shared_ptr<CSRLocal<T>> data;
+  shared_ptr<CSRLocalNode<T>> next;
 };
 
 template <typename T>
 class CSRLinkedList {
 
 private:
-  unique_ptr<CSRLocalNode<T>> head;
+  shared_ptr<CSRLocalNode<T>> head;
 
 public:
 
@@ -36,12 +36,12 @@ public:
 
   void insert(CSRLocal<T>* dataPoint) {
 
-    auto newNode = unique_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
-    newNode.get()->data = unique_ptr<CSRLocal<T>>(dataPoint);
+    auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
+    newNode.get()->data = shared_ptr<CSRLocal<T>>(dataPoint);
     if (this->head == nullptr) {
       head = newNode;
     }else {
-      unique_ptr<CSRLocalNode<T>> temp = head;
+      shared_ptr<CSRLocalNode<T>> temp = head;
       while(temp.get()->next != nullptr) {
         temp = temp.get()->next;
       }
@@ -49,7 +49,7 @@ public:
     }
   }
 
-  unique_ptr<CSRLocalNode<T>>  getHeadNode() {
+  shared_ptr<CSRLocalNode<T>>  getHeadNode() {
     return head;
   }
 
