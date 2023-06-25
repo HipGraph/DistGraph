@@ -157,17 +157,17 @@ public:
         CSRLocal<T>* csr_data= head->data;
 
 
-        distblas::core::CSRHandle handle = csr_data->handler;
+        distblas::core::CSRHandle* handle = csr_data.handler;
         int numRows = handle.rowStart.size()-1;
 
         for (int i = 0; i < numRows; i++) {
-          int start = handle.rowStart[i];
-          int end = handle.rowStart[i + 1];
+          int start = handle->rowStart[i];
+          int end = handle->rowStart[i + 1];
 
           fout << "Row " << i << ": ";
           for (int j = start; j < end; j++) {
-            int col = handle.col_idx[j];
-            int value = handle.values[j];
+            int col = handle->col_idx[j];
+            int value = handle->values[j];
 
             fout << "(" << col << ", " << value << ") ";
           }

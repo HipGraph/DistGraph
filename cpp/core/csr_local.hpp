@@ -26,7 +26,7 @@ public:
 
   bool transpose;
 
-  CSRHandle *handler;
+  CSRHandle* handler;
 
   CSRLocal() {}
 
@@ -37,7 +37,7 @@ public:
     this->rows = rows;
     this->cols = cols;
 
-    this->buffer = new CSRHandle();
+    this->handler = new CSRHandle();
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
