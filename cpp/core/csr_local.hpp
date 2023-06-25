@@ -1,24 +1,23 @@
 #pragma once
 #include "common.h"
 #include <algorithm>
+#include <cassert>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <mkl.h>
 #include <mkl_spblas.h>
 #include <mpi.h>
 #include <numeric>
 #include <parallel/algorithm>
 #include <string.h>
-#include <cassert>
-#include <fstream>
-#include <mkl.h>
 
 using namespace std;
 
 namespace distblas::core {
 
-template <typename T>
-class CSRLocal {
+template <typename T> class CSRLocal {
 
 public:
   MKL_INT rows, cols;
@@ -27,49 +26,42 @@ public:
 
   bool transpose;
 
-  int active;
-
-  CSRHandle *buffer;
-
-
+  CSRHandle *handler;
 
   CSRLocal() {}
 
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
-           int num_coords, bool transpose ) {
+           int num_coords, bool transpose) {
     this->transpose = transpose;
     this->num_coords = num_coords;
     this->rows = rows;
     this->cols = cols;
 
-    this->buffer = new CSRHandle[2];
+    this->buffer = new CSRHandle();
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
 
     // This setup is really clunky, but I don't have time to fix it.
     vector<MKL_INT> rArray(num_coords, 0);
     vector<MKL_INT> cArray(num_coords, 0);
     vector<double> vArray(num_coords, 0.0);
-//
-//    // Put a dummy value in if the number of coordinates is 0, so that
-//    // everything doesn't blow up
+    //
+    //    // Put a dummy value in if the number of coordinates is 0, so that
+    //    // everything doesn't blow up
     if (num_coords == 0) {
       rArray.push_back(0);
       cArray.push_back(0);
       vArray.push_back(0.0);
     }
 
-
-   cout<<" number of coordinates "<<num_coords<<endl;
+    cout << " number of coordinates " << num_coords << endl;
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
       rArray[i] = coords[i].row;
       cArray[i] = coords[i].col;
       vArray[i] = static_cast<double>(coords[i].value);
     }
-
 
     sparse_operation_t op;
     if (transpose) {
@@ -80,14 +72,11 @@ public:
 
     sparse_matrix_t tempCOO, tempCSR;
 
+    sparse_status_t status_coo = mkl_sparse_d_create_coo(
+        &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
+        rArray.data(), cArray.data(), vArray.data());
 
-    sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
-                            max(num_coords, 1), rArray.data(), cArray.data(),
-                            vArray.data());
-
-
-    sparse_status_t  status_csr = mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
-
+    sparse_status_t status_csr = mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
     mkl_sparse_destroy(tempCOO);
 
@@ -98,7 +87,6 @@ public:
     sparse_index_base_t indexing;
     MKL_INT *rows_start, *rows_end, *col_idx;
     double *values;
-
 
     mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                             &rows_start, &rows_end, &col_idx, &values);
@@ -113,53 +101,45 @@ public:
       coords[i].value = static_cast<T>(values[i]);
     }
 
-    active = 0;
-
     assert(num_coords <= max_nnz);
 
-    for (int t = 0; t < 2; t++) {
-      buffer[t].values.resize(max_nnz == 0 ? 1 : max_nnz);
-      buffer[t].col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-      buffer[t].row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-      buffer[t].rowStart.resize(this->rows + 1);
+    handler.values.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler.col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler.row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler.rowStart.resize(this->rows + 1);
 
 // Copy over row indices
 #pragma omp parallel for
-      for (int i = 0; i < num_coords; i++) {
-        buffer[t].row_idx[i] = coords[i].row;
-      }
-
-      memcpy(buffer[t].values.data(), values,
-             sizeof(double) * max(num_coords, 1));
-      memcpy(buffer[t].col_idx.data(), col_idx,
-             sizeof(MKL_INT) * max(num_coords, 1));
-      memcpy(buffer[t].rowStart.data(), rows_start,
-             sizeof(MKL_INT) * this->rows);
-
-      buffer[t].rowStart[this->rows] = max(num_coords, 1);
-
-      mkl_sparse_d_create_csr(
-          &(buffer[t].mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
-          this->cols, buffer[t].rowStart.data(), buffer[t].rowStart.data() + 1,
-          buffer[t].col_idx.data(), buffer[t].values.data());
-
-
-      // This madness is just trying to get around the inspector routine
-      if (num_coords == 0) {
-        buffer[t].rowStart[this->rows] = 0;
-      }
+    for (int i = 0; i < num_coords; i++) {
+      handler.row_idx[i] = coords[i].row;
     }
 
-    mkl_sparse_destroy(tempCSR);
-  }
+    memcpy(handler.values.data(), values, sizeof(double) * max(num_coords, 1));
+    memcpy(handler.col_idx.data(), col_idx,
+           sizeof(MKL_INT) * max(num_coords, 1));
+    memcpy(handler.rowStart.data(), rows_start, sizeof(MKL_INT) * this->rows);
 
+    handler.rowStart[this->rows] = max(num_coords, 1);
 
-  ~CSRLocal() {
-    for (int t = 0; t < 2; t++) {
-      mkl_sparse_destroy(buffer[t].mkl_handle);
+    mkl_sparse_d_create_csr(&(handler.mkl_handle), SPARSE_INDEX_BASE_ZERO,
+                            this->rows, this->cols, handler.rowStart.data(),
+                            handler.rowStart.data() + 1, handler.col_idx.data(),
+                            handler.values.data());
+
+    // This madness is just trying to get around the inspector routine
+    if (num_coords == 0) {
+      handler.rowStart[this->rows] = 0;
     }
-    delete[] buffer;
   }
+
+  mkl_sparse_destroy(tempCSR);
+}
+
+~CSRLocal() {
+
+  mkl_sparse_destroy(handler.mkl_handle);
+  delete[] handler;
+}
 };
 
 } // namespace distblas::core
