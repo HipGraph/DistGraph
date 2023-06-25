@@ -130,16 +130,15 @@ public:
     if (num_coords == 0) {
       handler.rowStart[this->rows] = 0;
     }
+
+    mkl_sparse_destroy(tempCSR);
   }
 
-  mkl_sparse_destroy(tempCSR);
-}
+  ~CSRLocal() {
 
-~CSRLocal() {
-
-  mkl_sparse_destroy(handler.mkl_handle);
-  delete[] handler;
-}
+    mkl_sparse_destroy(handler.mkl_handle);
+    delete[] handler;
+  }
 };
 
 } // namespace distblas::core
