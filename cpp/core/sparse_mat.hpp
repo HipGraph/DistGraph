@@ -143,7 +143,7 @@ public:
       auto head = (linkedList.get())->getHeadNode();
 
       int count=0;
-      while (head.get() != nullptr) {
+      while (head != nullptr) {
         string output_path = "blocks_rank" + to_string(rank) + "_col_" +
                              to_string(count) + "_row_" +
                              to_string(j) + ".txt";
