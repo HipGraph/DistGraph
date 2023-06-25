@@ -34,9 +34,7 @@ public:
 
 
   CSRLocal() {}
-  /*
-   * TODO: Need to check this function for memory leaks!
-   */
+
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
            int num_coords, bool transpose ) {
     this->transpose = transpose;
@@ -65,29 +63,13 @@ public:
 
 
    cout<<" number of coordinates "<<num_coords<<endl;
-//#pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
       rArray[i] = coords[i].row;
       cArray[i] = coords[i].col;
-//      vArray[i] = static_cast<double>(coords[i].value);
-      vArray[i] = 1.0;
+      vArray[i] = static_cast<double>(coords[i].value);
     }
 
-//    string output_path =  "output.txt"+ to_string(rank);
-//    char stats[500];
-//    strcpy(stats, output_path.c_str());
-//    ofstream fout(stats, std::ios_base::app);
-//
-//    for (int i = 0; i < num_coords; i++) {
-//
-//      fout<<" rank "<<rank<<" "<< rArray[i] << " "<< cArray[i]<<" " << vArray[i] <<endl;
-//    }
-
-//    mkl_set_num_threads(1);
-
-//    std::vector<MKL_INT> rArray = {0, 1, 2};
-//    std::vector<MKL_INT> cArray = {0, 1, 2};
-//    std::vector<double> vArray = {1.0, 2.0, 3.0};
 
     sparse_operation_t op;
     if (transpose) {
@@ -98,28 +80,16 @@ public:
 
     sparse_matrix_t tempCOO, tempCSR;
 
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << " attempting to create coo "<<endl;
 
     sparse_status_t  status_coo = mkl_sparse_d_create_coo(&tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols,
                             max(num_coords, 1), rArray.data(), cArray.data(),
                             vArray.data());
 
-    if (status_coo != SPARSE_STATUS_SUCCESS) {
-      std::cerr << " rank "<<rank<< "Error: Conversion from COO to CSR failed." << std::endl;
-      // Handle the error or exit the program
-    }
-
-    cout<<" rank "<< rank << " mkl_sparse_d_create_coo  stats: " << status_coo << endl;
 
     sparse_status_t  status_csr = mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
-    cout<<" rank "<< rank << " mkl_sparse_convert_csr  stats: " << status_csr <<endl;
 
     mkl_sparse_destroy(tempCOO);
-
-
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  coo destroy succeeded "<<endl;
-
 
     vector<MKL_INT>().swap(rArray);
     vector<MKL_INT>().swap(cArray);
@@ -130,13 +100,8 @@ public:
     double *values;
 
 
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  csr exported "<<endl;
-
     mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                             &rows_start, &rows_end, &col_idx, &values);
-
-
-    cout<<" rank "<< rank <<" number of coords "<< num_coords << "  csr exported done "<<endl;
 
     int rv = 0;
     for (int i = 0; i < num_coords; i++) {
@@ -173,16 +138,11 @@ public:
 
       buffer[t].rowStart[this->rows] = max(num_coords, 1);
 
-
-      cout<<" rank "<< rank <<" number of coords "<< num_coords << " creating csr ... "<<endl;
-
       mkl_sparse_d_create_csr(
           &(buffer[t].mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
           this->cols, buffer[t].rowStart.data(), buffer[t].rowStart.data() + 1,
           buffer[t].col_idx.data(), buffer[t].values.data());
 
-
-      cout<<" rank "<< rank <<" number of coords "<< num_coords << " creating csr completed "<<endl;
 
       // This madness is just trying to get around the inspector routine
       if (num_coords == 0) {
@@ -192,8 +152,6 @@ public:
 
     mkl_sparse_destroy(tempCSR);
   }
-
-
 
 
   ~CSRLocal() {
