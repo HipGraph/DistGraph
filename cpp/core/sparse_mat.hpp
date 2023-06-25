@@ -25,7 +25,7 @@ public:
   vector<uint64_t> block_col_starts;
   vector<uint64_t> block_row_starts;
 
-  vector<CSRLinkedList<T>> csr_linked_lists;
+  vector<unique_ptr<CSRLinkedList<T>>> csr_linked_lists;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -108,7 +108,8 @@ public:
                              bool transpose) {
 
     int current_col_block = 0;
-    csr_linked_lists = vector<CSRLinkedList<T>>(block_row_starts.size() - 1);
+    csr_linked_lists = vector<unique_ptr<CSRLinkedList<T>>>(block_row_starts.size() - 1,
+                                                            make_unique<CSRLinkedList<T>>());
     int current_vector_pos = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
@@ -117,18 +118,13 @@ public:
         current_vector_pos = 0;
       }
 
-      if (current_col_block == 0) {
-        CSRLinkedList<T> CSRlist;
-        csr_linked_lists[j] = CSRlist;
-      }
-
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
       if (num_coords > 0) {
         CSRLocal<T> *block = new CSRLocal<T>(
             block_rows, block_cols, num_coords,
             coords.data() + block_row_starts[j], num_coords, transpose);
-        csr_linked_lists[current_vector_pos].insert(block);
+        (csr_linked_lists[current_vector_pos].get())->insert(block);
         ++current_vector_pos;
       }
     }
@@ -141,9 +137,9 @@ public:
     int current_col_block = 0;
     for (int j = 0; j < csr_linked_lists.size() ; j++) {
 
-      CSRLinkedList<T> linkedList = csr_linked_lists[j];
+      auto linkedList = csr_linked_lists[j];
 
-      auto head = linkedList.getHeadNode();
+      auto head = (linkedList.get())->getHeadNode();
 
       int count=0;
       while (head.get() != nullptr) {
@@ -155,7 +151,7 @@ public:
         ofstream fout(stats, std::ios_base::app);
 
 
-        auto csr_data= head.get()->data;
+        auto csr_data= (head.get())->data;
 
 
         distblas::core::CSRHandle* handle = (csr_data.get())->handler.get();
@@ -174,7 +170,7 @@ public:
           }
           fout <<endl;
         }
-        head = head->next;
+        head = (head.get())->next;
         ++count;
       }
     }
