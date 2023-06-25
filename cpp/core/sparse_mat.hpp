@@ -156,7 +156,7 @@ public:
         CSRLocal<T>* csr_data= head->data;
 
 
-        distblas::core::CSRHandle* handle = csr_data->handler;
+        distblas::core::CSRHandle* handle = csr_data->handler.get();
         int numRows = handle->rowStart.size()-1;
 
         for (int i = 0; i < numRows; i++) {
