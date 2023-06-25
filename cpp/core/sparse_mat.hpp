@@ -109,8 +109,8 @@ public:
                              bool transpose) {
 
     int current_col_block = 0;
-    csr_linked_lists = vector<shared_ptr<CSRLinkedList<T>>(block_row_starts.size() - 1,
-                                                            make_shared<CSRLinkedList<T>>());
+    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(block_row_starts.size() - 1,
+                                                                      std::make_shared<CSRLinkedList<T>>());
     int current_vector_pos = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
