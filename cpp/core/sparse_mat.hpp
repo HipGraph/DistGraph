@@ -134,9 +134,10 @@ public:
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    cout<<" rank "<<rank << " printing print_blocks_and_cols"<<endl;
     int current_col_block = 0;
     for (int j = 0; j < csr_linked_lists.size(); j++) {
-
+      cout<<" rank "<<rank << " j "<<j <<endl;
       auto linkedList = csr_linked_lists[j];
 
       auto head = (linkedList.get())->getHeadNode();
