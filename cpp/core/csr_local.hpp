@@ -135,9 +135,7 @@ public:
   }
 
   ~CSRLocal() {
-
     mkl_sparse_destroy(handler->mkl_handle);
-    delete[] handler;
   }
 };
 
