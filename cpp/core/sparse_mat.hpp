@@ -122,11 +122,12 @@ public:
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
       if (num_coords > 0) {
+        Tuple<T> *coords =   coords.data() + block_row_starts[j]
 //        CSRLocal<T> *block = new CSRLocal<T>(
 //            block_rows, block_cols, num_coords,
 //            coords.data() + block_row_starts[j], num_coords, transpose);
         (csr_linked_lists[current_vector_pos].get())->insert( block_rows, block_cols, num_coords,
-                                                             &(coords.data() + block_row_starts[j]), num_coords, transpose);
+                                                        coords, num_coords, transpose);
         ++current_vector_pos;
       }
     }
