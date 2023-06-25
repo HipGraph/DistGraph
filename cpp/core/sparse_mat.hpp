@@ -23,7 +23,6 @@ public:
   vector<Tuple<T>> coords;
 
   vector<uint64_t> block_col_starts;
-  vector<CSRLocal<T> *> csr_blocks;
   vector<uint64_t> block_row_starts;
 
   vector<CSRLinkedList<T>> csr_linked_lists;

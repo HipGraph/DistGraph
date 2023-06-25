@@ -26,7 +26,7 @@ public:
 
   bool transpose;
 
-  CSRHandle* handler;
+  unique_ptr<CSRHandle<T>*> handler;
 
   CSRLocal() {}
 
@@ -37,7 +37,7 @@ public:
     this->rows = rows;
     this->cols = cols;
 
-    this->handler = new CSRHandle();
+    this->handler = unique_ptr<CSRHandle<T>>(new CSRHandle<T>());
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -103,40 +103,39 @@ public:
 
     assert(num_coords <= max_nnz);
 
-    handler->values.resize(max_nnz == 0 ? 1 : max_nnz);
-    handler->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-    handler->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-    handler->rowStart.resize(this->rows + 1);
+    handler.get()->values.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler.get()->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler.get()->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler.get()->rowStart.resize(this->rows + 1);
 
 // Copy over row indices
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
-      handler->row_idx[i] = coords[i].row;
+      handler.get()->row_idx[i] = coords[i].row;
     }
 
-    memcpy(handler->values.data(), values, sizeof(double) * max(num_coords, 1));
-    memcpy(handler->col_idx.data(), col_idx,
+    memcpy(handler.get()->values.data(), values, sizeof(double) * max(num_coords, 1));
+    memcpy(handler.get()->col_idx.data(), col_idx,
            sizeof(MKL_INT) * max(num_coords, 1));
-    memcpy(handler->rowStart.data(), rows_start, sizeof(MKL_INT) * this->rows);
+    memcpy(handler.get()->rowStart.data(), rows_start, sizeof(MKL_INT) * this->rows);
 
-    handler->rowStart[this->rows] = max(num_coords, 1);
+    handler.get()->rowStart[this->rows] = max(num_coords, 1);
 
-    mkl_sparse_d_create_csr(&(handler->mkl_handle), SPARSE_INDEX_BASE_ZERO,
-                            this->rows, this->cols, handler->rowStart.data(),
-                            handler->rowStart.data() + 1, handler->col_idx.data(),
-                            handler->values.data());
+    mkl_sparse_d_create_csr(&(handler.get()->mkl_handle), SPARSE_INDEX_BASE_ZERO,
+                            this->rows, this->cols, handler.get()->rowStart.data(),
+                            handler.get()->rowStart.data() + 1, handler.get()->col_idx.data(),
+                            handler.get()->values.data());
 
     // This madness is just trying to get around the inspector routine
     if (num_coords == 0) {
-      handler->rowStart[this->rows] = 0;
+      handler.get()->rowStart[this->rows] = 0;
     }
 
     mkl_sparse_destroy(tempCSR);
   }
 
   ~CSRLocal() {
-    mkl_sparse_destroy(handler->mkl_handle);
-    delete[] handler;
+    mkl_sparse_destroy(handler.get()->mkl_handle);
   }
 };
 
