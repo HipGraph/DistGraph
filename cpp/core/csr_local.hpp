@@ -103,32 +103,32 @@ public:
 
     assert(num_coords <= max_nnz);
 
-    handler.values.resize(max_nnz == 0 ? 1 : max_nnz);
-    handler.col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-    handler.row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-    handler.rowStart.resize(this->rows + 1);
+    handler->values.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+    handler->rowStart.resize(this->rows + 1);
 
 // Copy over row indices
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
-      handler.row_idx[i] = coords[i].row;
+      handler->row_idx[i] = coords[i].row;
     }
 
-    memcpy(handler.values.data(), values, sizeof(double) * max(num_coords, 1));
-    memcpy(handler.col_idx.data(), col_idx,
+    memcpy(handler->values.data(), values, sizeof(double) * max(num_coords, 1));
+    memcpy(handler->col_idx.data(), col_idx,
            sizeof(MKL_INT) * max(num_coords, 1));
-    memcpy(handler.rowStart.data(), rows_start, sizeof(MKL_INT) * this->rows);
+    memcpy(handler->rowStart.data(), rows_start, sizeof(MKL_INT) * this->rows);
 
-    handler.rowStart[this->rows] = max(num_coords, 1);
+    handler->rowStart[this->rows] = max(num_coords, 1);
 
-    mkl_sparse_d_create_csr(&(handler.mkl_handle), SPARSE_INDEX_BASE_ZERO,
-                            this->rows, this->cols, handler.rowStart.data(),
-                            handler.rowStart.data() + 1, handler.col_idx.data(),
-                            handler.values.data());
+    mkl_sparse_d_create_csr(&(handler->mkl_handle), SPARSE_INDEX_BASE_ZERO,
+                            this->rows, this->cols, handler->rowStart.data(),
+                            handler->rowStart.data() + 1, handler->col_idx.data(),
+                            handler->values.data());
 
     // This madness is just trying to get around the inspector routine
     if (num_coords == 0) {
-      handler.rowStart[this->rows] = 0;
+      handler->rowStart[this->rows] = 0;
     }
 
     mkl_sparse_destroy(tempCSR);
@@ -136,7 +136,7 @@ public:
 
   ~CSRLocal() {
 
-    mkl_sparse_destroy(handler.mkl_handle);
+    mkl_sparse_destroy(handler->mkl_handle);
     delete[] handler;
   }
 };
