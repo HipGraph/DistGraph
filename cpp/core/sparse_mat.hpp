@@ -158,7 +158,7 @@ public:
 
 
         distblas::core::CSRHandle* handle = csr_data.handler;
-        int numRows = handle.rowStart.size()-1;
+        int numRows = handle->rowStart.size()-1;
 
         for (int i = 0; i < numRows; i++) {
           int start = handle->rowStart[i];
