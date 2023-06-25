@@ -26,11 +26,12 @@ public:
 
   ~CSRLinkedList() {
    CSRLocalNode<T>* temp = head;
-   while(temp != nullptr) {
+   while(temp->next != nullptr) {
      CSRLocalNode<T>* nextTemp = temp->next;
      delete temp;
      temp = nextTemp;
    }
+   delete temp;
   }
 
   void insert(CSRLocal<T>* dataPoint) {
