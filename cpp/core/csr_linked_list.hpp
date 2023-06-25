@@ -34,10 +34,11 @@ public:
 //   }
   }
 
-  void insert(CSRLocal<T>* dataPoint) {
+  void insert(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
+              int num_coords, bool transpose) {
 
     auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
-    newNode.get()->data = shared_ptr<CSRLocal<T>>(dataPoint);
+    newNode.get()->data = make_shared<CSRLocal<T>>(rows,cols,max_nnz,*coords,num_coords,transpose);
     if (this->head == nullptr) {
       head = newNode;
     }else {
