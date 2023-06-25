@@ -5,10 +5,10 @@
 #include "distributed_mat.hpp"
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include <mpi.h>
 #include <parallel/algorithm>
 #include <vector>
-#include <memory>
 
 using namespace std;
 
@@ -104,13 +104,12 @@ public:
     block_row_starts.push_back(coords.size());
   }
 
-
   void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz,
                              bool transpose) {
 
     int current_col_block = 0;
-    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(block_row_starts.size() - 1,
-                                                                      std::make_shared<CSRLinkedList<T>>());
+    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
+        block_row_starts.size() - 1, std::make_shared<CSRLinkedList<T>>());
     int current_vector_pos = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
@@ -122,12 +121,10 @@ public:
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
       if (num_coords > 0) {
-        Tuple<T>* coords_ptr =   (coords.data() + block_row_starts[j]);
-//        CSRLocal<T> *block = new CSRLocal<T>(
-//            block_rows, block_cols, num_coords,
-//            coords.data() + block_row_starts[j], num_coords, transpose);
-        (csr_linked_lists[current_vector_pos].get())->insert( block_rows, block_cols, num_coords,
-                                                            coords_ptr, num_coords, transpose);
+        Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+        (csr_linked_lists[current_vector_pos].get())
+            ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
+                     transpose);
         ++current_vector_pos;
       }
     }
@@ -138,40 +135,37 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     int current_col_block = 0;
-    for (int j = 0; j < csr_linked_lists.size() ; j++) {
+    for (int j = 0; j < csr_linked_lists.size(); j++) {
 
       auto linkedList = csr_linked_lists[j];
 
       auto head = (linkedList.get())->getHeadNode();
 
-      int count=0;
+      int count = 0;
       while (head != nullptr) {
         string output_path = "blocks_rank" + to_string(rank) + "_col_" +
-                             to_string(count) + "_row_" +
-                             to_string(j) + ".txt";
+                             to_string(count) + "_row_" + to_string(j) + ".txt";
         char stats[500];
         strcpy(stats, output_path.c_str());
         ofstream fout(stats, std::ios_base::app);
 
+        auto csr_data = (head.get())->data;
 
-        auto csr_data= (head.get())->data;
-
-
-        distblas::core::CSRHandle* handle = (csr_data.get())->handler.get();
-        int numRows = handle->rowStart.size()-1;
+        distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+        int numRows = handle->rowStart.size() - 1;
 
         for (int i = 0; i < numRows; i++) {
           int start = handle->rowStart[i];
           int end = handle->rowStart[i + 1];
 
           fout << "Row " << i << ": ";
-          for (int j = start; j < end; j++) {
-            int col = handle->col_idx[j];
-            int value = handle->values[j];
+          for (int k = start; k < end; k++) {
+            int col = handle->col_idx[k];
+            int value = handle->values[k];
 
             fout << "(" << col << ", " << value << ") ";
           }
-          fout <<endl;
+          fout << endl;
         }
         head = (head.get())->next;
         ++count;
@@ -179,13 +173,7 @@ public:
     }
   }
 
-  ~SpMat() {
-//    for (int i = 0; i < csr_linked_lists.size(); i++) {
-//      if (csr_linked_lists[i] != nullptr) {
-//        delete csr_linked_lists[i];
-//      }
-//    }
-  }
+  ~SpMat() {}
 };
 
 } // namespace distblas::core
