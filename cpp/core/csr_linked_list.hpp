@@ -38,7 +38,7 @@ public:
               int num_coords, bool transpose) {
 
     auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
-    newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  *coords,
+    newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
     if (this->head == nullptr) {
       head = newNode;
