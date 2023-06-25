@@ -122,7 +122,7 @@ public:
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
       if (num_coords > 0) {
-        Tuple<T> *coords_ptr =   coords.data() + block_row_starts[j]
+        Tuple<T> *coords_ptr =   (coords.data() + block_row_starts[j])
 //        CSRLocal<T> *block = new CSRLocal<T>(
 //            block_rows, block_cols, num_coords,
 //            coords.data() + block_row_starts[j], num_coords, transpose);
