@@ -64,10 +64,10 @@ public:
   ~DenseMat() {}
 
   void print_matrix() {
-
-    for (int i = 0; i < (this->matrixPtr.get())->rows(); ++i) {
-      for (int j = 0; j < (this->matrixPtr.get())->cols(); ++j) {
-        cout << (this->matrixPtr.get())->(i, j) << " ";
+    MatrixXd& matrix = *this->matrixPtr;
+    for (int i = 0; i < matrix.rows(); ++i) {
+      for (int j = 0; j < matrix.cols(); ++j) {
+        cout << matrix.(i, j) << " ";
       }
       cout << endl;
     }
