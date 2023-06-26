@@ -22,6 +22,7 @@ find_package(OpenMP REQUIRED)
 message("Finding BLAS")
 find_package(BLAS REQUIRED)
 
+setenv("EIGEN_DIR","/global/common/software/nersc/pm-2022q4/spack/linux-sles15-zen3/eigen-3.4.0-bj2v3uo")
 message("Finding eigen")
 find_package(Eigen REQUIRED)
 
