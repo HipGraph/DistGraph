@@ -29,7 +29,7 @@ public:
    */
   DenseMat(uint64_t rows, uint64_t cols) {
 
-    this->matrixPtr = unique_ptr<MatrixXd>(MatrixXd::Random(rows, cols));
+    this->matrixPtr = std::make_unique<MatrixXd>(MatrixXd::Random(rows, cols));
     this->rows = rows;
     this->cols = cols;
   }
@@ -49,7 +49,15 @@ public:
     mt19937 gen(rd());
     normal_distribution<> distribution(init_mean, std);
     Eigen::MatrixXd matrixL(rows, cols);
-    matrixL.setRandom([&]() { return distribution(gen); });
+    matrixL.setRandom();
+    if (init_mean != 0.0 or std != 1.0 ) {
+#pragma omp parallel
+      for (int i = 0; i < matrixL.rows(); ++i) {
+        for (int j = 0; j < matrixL.cols(); ++j) {
+          matrixL(i, j) = distribution(gen); // Generate random value with custom distribution
+        }
+      }
+    }
     this->matrixPtr = unique_ptr<MatrixXd>(matrixL);
   }
 
