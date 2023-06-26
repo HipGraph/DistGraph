@@ -63,10 +63,11 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false);
   cout<<" rank "<< rank << " initialization of CSR completed  "<<endl;
 
-  shared_sparseMat.get()->print_blocks_and_cols();
+//  shared_sparseMat.get()->print_blocks_and_cols();
 
   cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
-  DenseMat dense_mat;
+  auto dense_mat = unique_ptr<DenseMat>(new DenseMat(4,4,0,1));
+  dense_mat.get()->print_matrix();
   cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
   cout<<" rank "<< rank << " processing completed  "<<endl;

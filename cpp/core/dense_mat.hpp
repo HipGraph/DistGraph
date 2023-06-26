@@ -2,24 +2,69 @@
 #include "common.h"
 #include "distributed_mat.hpp"
 #include <Eigen/Dense>
+#include <memory>
+#include <random>
 
 using namespace std;
 using Eigen::MatrixXd;
 
 namespace distblas::core {
 
+/**
+ * This class wraps the Eigen/Dense matrix and represents
+ * local dense matrix.
+ */
 class DenseMat : DistributedMat {
+
+private:
+  unique_ptr<MatrixXd> matrixPtr;
+  uint64_t rows;
+  uint64_t cols;
+
 public:
-  DenseMat() {
-    MatrixXd m(2, 2);
-    m(0, 0) = 3;
-    m(1, 0) = 2.5;
-    m(0, 1) = -1;
-    m(1, 1) = m(1, 0) + m(0, 1);
-    std::cout << m << std::endl;
+  /**
+   * create matrix with random initialization
+   * @param rows Number of rows of the matrix
+   * @param cols Number of cols of the matrix
+   */
+  DenseMat(uint64_t rows, uint64_t cols) {
+
+    this->matrixPtr = unique_ptr<MatrixXd>(MatrixXd::Random(rows, cols));
+    this->rows = rows;
+    this->cols = cols;
+  }
+
+  /**
+   *
+   * @param rows Number of rows of the matrix
+   * @param cols  Number of cols of the matrix
+   * @param init_mean  initialize with normal distribution with given mean
+   * @param std  initialize with normal distribution with given standard
+   * deviation
+   */
+  DenseMat(uint64_t rows, uint64_t cols, double init_mean, double std) {
+    this->rows = rows;
+    this->cols = cols;
+    random_device rd;
+    mt19937 gen(rd());
+    normal_distribution<> distribution(init_mean, std);
+    Eigen::MatrixXd matrixL(rows, cols);
+    matrixL.setRandom([&]() { return distribution(gen); });
+    this->matrixPtr = unique_ptr<MatrixXd>(matrixL);
   }
 
   ~DenseMat() {}
+
+  void print_matrix() {
+
+    for (int i = 0; i < (this->matrixPtr.get()).rows(); ++i) {
+      for (int j = 0; j < (this->matrixPtr.get()).cols(); ++j) {
+        cout << (this->matrixPtr.get())(i, j) << " ";
+      }
+      cout << endl;
+    }
+
+  }
 };
 
 } // namespace distblas::core
