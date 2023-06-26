@@ -22,9 +22,15 @@ find_package(OpenMP REQUIRED)
 message("Finding BLAS")
 find_package(BLAS REQUIRED)
 
-include_directories($ENV{COMBLAS_ROOT}/install/include $ENV{MKLROOT}/include)
+message("Finding Eigen")
+find_package(Eigen REQUIRED)
+
+include_directories($ENV{COMBLAS_ROOT}/install/include $ENV{MKLROOT}/include $ENV{EIGEN_ROOT}/include)
 
 link_directories($ENV{COMBLAS_ROOT}/install/lib $ENV{MKLROOT}/lib/intel64)
+
+
+
 
 
 
