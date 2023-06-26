@@ -17,7 +17,8 @@ namespace distblas::core {
 /**
  * This class represents the Sparse Matrix
  */
-template <typename T> class SpMat : public DistributedMat {
+template <typename T>
+class SpMat : public DistributedMat {
 
 public:
   int gRows, gCols, gNNz;

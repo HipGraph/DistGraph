@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cstring>
 #include "../cpp/core/csr_local.hpp"
+#include "../cpp/core/dense_mat.hpp"
 
 using namespace std;
 using namespace distblas::io;
@@ -24,23 +25,13 @@ int main(int argc, char **argv) {
 
   initialize_mpi_datatypes<int>();
 
-//  string output_path =  "output.txt"+ to_string(rank);
-//  char stats[500];
-//  strcpy(stats, output_path.c_str());
-//  ofstream fout(stats, std::ios_base::app);
-
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
   auto shared_sparseMat = shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
 
+  cout<<" rank "<< rank << " reading data from file path:  "<<file_path<<endl;
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
-
-//  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
-//    fout<<shared_sparseMat.get()->coords[i].row << " "
-//         << shared_sparseMat.get()->coords[i].col<<" "
-//         << shared_sparseMat.get()->coords[i].value
-//         <<endl;
-//  }
+  cout<<" rank "<< rank << " reading data from file path:  "<<file_path<<" completed "<<endl;
 
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
@@ -49,51 +40,36 @@ int main(int argc, char **argv) {
                                         shared_sparseMat.get()->gCols,
                                         grid.get()));
 
-  cout<<" rank "<< rank << " partitioning data started "<<endl;
+  cout<<" rank "<< rank << " partitioning data started  "<<endl;
 
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
 
-  cout<<" rank "<< rank << " partitioning data stopped "<<endl;
-
-
-//  string output_path1 =  "output_partitioned.txt"+ to_string(rank);
-//  char stats1[500];
-//  strcpy(stats1, output_path1.c_str());
-//  ofstream fout1(stats1, std::ios_base::app);
-
-//
-//  for(int i=0; i<shared_sparseMat.get()->coords.size();i++){
-//    fout1<<shared_sparseMat.get()->coords[i].row << " "
-//         << shared_sparseMat.get()->coords[i].col<<" "
-//         << shared_sparseMat.get()->coords[i].value
-//         <<endl;
-//  }
 
 
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,grid.get()->world_size);
   int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->world_size);
 
-  cout<<" rank "<< rank << " divide_block_cols "<<endl;
 
   shared_sparseMat.get()->divide_block_cols(localBRows,grid.get()->world_size, true);
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(localARows,localBRows,
                                             grid.get()->world_size, true);
 
+  cout<<" rank "<< rank << " partitioning data completed  "<<endl;
 
-  cout<<" rank "<< rank << " localARows "<<localARows<<endl;
-  cout<<" rank "<< rank << " localBRows "<<localBRows<<endl;
 
+  cout<<" rank "<< rank << " initialization of CSR started  "<<endl;
   shared_sparseMat.get()->initialize_CSR_blocks(localARows,localBRows,-1, false);
+  cout<<" rank "<< rank << " initialization of CSR completed  "<<endl;
+
   shared_sparseMat.get()->print_blocks_and_cols();
 
+  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
+  DenseMat dense_mat;
+  cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
-
-  cout<< " gRows "<<shared_sparseMat.get()->gRows
-       <<" gCols"<<shared_sparseMat.get()->gCols<<" NNz "<< shared_sparseMat.get()->gNNz<<endl;
-
-  cout<<" rank "<<rank<< " size "<<shared_sparseMat.get()->coords.size()<<endl;
+  cout<<" rank "<< rank << " processing completed  "<<endl;
 
   MPI_Finalize();
   return 0;

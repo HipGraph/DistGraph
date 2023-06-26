@@ -34,7 +34,7 @@ project(DistBLAS)
 #        ../cpp/partition/partitioner.cpp
 #        ../cpp/partition/partitioner.hpp)
 
-SET(SOURCES IO_tests.cpp)
+SET(SOURCES data_structure_tests.cpp)
 
 add_executable(distblas_test ${SOURCES})
 
