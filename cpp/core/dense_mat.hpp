@@ -58,7 +58,7 @@ public:
         }
       }
     }
-    this->matrixPtr = unique_ptr<MatrixXd>(matrixL);
+    this->matrixPtr = std::make_unique<MatrixXd>(move(matrixL));
   }
 
   ~DenseMat() {}
