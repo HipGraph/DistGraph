@@ -65,9 +65,9 @@ public:
 
   void print_matrix() {
 
-    for (int i = 0; i < (this->matrixPtr.get()).rows(); ++i) {
-      for (int j = 0; j < (this->matrixPtr.get()).cols(); ++j) {
-        cout << (this->matrixPtr.get())(i, j) << " ";
+    for (int i = 0; i < (this->matrixPtr.get())->rows(); ++i) {
+      for (int j = 0; j < (this->matrixPtr.get())->cols(); ++j) {
+        cout << (this->matrixPtr.get())->(i, j) << " ";
       }
       cout << endl;
     }
