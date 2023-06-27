@@ -144,7 +144,11 @@ public:
       }
 
       int num_coords = operator_vec[j + 1] - operator_vec[j];
+      int rank;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+      cout << " rank " << rank << "_" << transpose
+           << " csr_block_initating_index"<< operator_vec[j]<< endl;
       if (num_coords > 0) {
         Tuple<T> *coords_ptr = (coords.data() + operator_vec[j]);
         (csr_linked_lists[current_vector_pos].get())
