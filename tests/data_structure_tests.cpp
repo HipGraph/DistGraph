@@ -70,7 +70,6 @@ int main(int argc, char **argv) {
   shared_sparseMat_Trans.get()->divide_block_rows(
       localARows, localBRows, grid.get()->world_size, true, true);
 
-  shared_sparseMat_Trans.get()->print_blocks_and_cols();
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
