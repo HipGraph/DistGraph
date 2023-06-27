@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
   cout<<" rank "<< rank << " processing completed  "<<endl;
 
   int col_rank;
-  MPI_Comm_rank(shared_sparseMat.get()->col_world, &col_rank);
+  MPI_Comm_rank(grid.get()->col_world, &col_rank);
 
   cout<<" rank "<< rank << " col rank  "<<col_rank<<endl;
 
