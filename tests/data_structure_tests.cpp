@@ -61,13 +61,13 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->print_coords(false);
   shared_sparseMat_Trans.get()->print_coords(true);
 
-  shared_sparseMat.get()->divide_block_cols(localBRows, grid.get()->world_size,
+  shared_sparseMat.get()->divide_block_cols(localBRows,localBRows, grid.get()->world_size,
                                             true,false);
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(
       15000, localBRows, grid.get()->world_size, true, false);
 
-  shared_sparseMat_Trans.get()->divide_block_cols(15000,
+  shared_sparseMat_Trans.get()->divide_block_cols(15000,localBRows,
                                                   grid.get()->world_size, true,true);
   shared_sparseMat_Trans.get()->sort_by_rows();
   shared_sparseMat_Trans.get()->divide_block_rows(

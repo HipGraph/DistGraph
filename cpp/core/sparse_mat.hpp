@@ -44,7 +44,7 @@ public:
 
   SpMat() {}
 
-  void divide_block_cols(int block_width, int target_divisions, bool mod_ind,
+  void divide_block_cols(int batch_size,int col_block_with int target_divisions, bool mod_ind,
                          bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -54,7 +54,7 @@ public:
     // block row into subtiles)
     int current_start = 0;
     if (trans) {
-      current_start = block_width * rank;
+      current_start = col_block_with * rank;
     }
 
     cout << "rank " << rank << " trans" << trans << " current_start "
@@ -66,12 +66,12 @@ public:
         block_col_starts.push_back(i);
         cout << "rank " << rank << " trans" << trans << " col adding i " << i
              << endl;
-        current_start += block_width;
+        current_start += batch_size;
       }
 
       // This modding step helps indexing.
       if (mod_ind) {
-        coords[i].col %= block_width;
+        coords[i].col %= batch_size;
       }
     }
 
