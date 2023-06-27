@@ -17,8 +17,7 @@ namespace distblas::core {
 /**
  * This class represents the Sparse Matrix
  */
-template <typename T>
-class SpMat : public DistributedMat {
+template <typename T> class SpMat : public DistributedMat {
 
 public:
   int gRows, gCols, gNNz;
@@ -45,12 +44,20 @@ public:
 
   SpMat() {}
 
-  void divide_block_cols(int block_width, int target_divisions, bool mod_ind) {
+  void divide_block_cols(int block_width, int target_divisions, bool mod_ind,
+                         bool trans) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_col_starts.clear();
+
     // Locate block starts within the local sparse matrix (i.e. divide a long
     // block row into subtiles)
     int current_start = 0;
+    if (trans) {
+      current_start = block_width * rank;
+    }
 
+    // TODO: introduce atomic capture
     for (uint64_t i = 0; i < coords.size(); i++) {
       while (coords[i].col >= current_start) {
         block_col_starts.push_back(i);
@@ -79,19 +86,22 @@ public:
   }
 
   void divide_block_rows(int block_width_row, int block_width_col,
-                         int target_divisions, bool mod_ind) {
+                         int target_divisions, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = block_width_col * rank;
+
+      if (trans) {
+        current_start = 0;
+      }
+
+      // TODO: introduce atomic capture
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          int current_step =
-              std::min(static_cast<int>(block_width_row),
-                       static_cast<int>(coords[block_col_starts[i + 1]].row));
           current_start += block_width_row;
         }
 
@@ -101,27 +111,33 @@ public:
         }
       }
     }
-
   }
 
   void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz,
                              bool transpose) {
 
-    int current_col_block = 0;
-    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
-        block_row_starts.size() - 1, std::make_shared<CSRLinkedList<T>>());
+    int current_block = 0;
     int current_vector_pos = 0;
-    for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
-      if (block_row_starts[j] >= block_col_starts[current_col_block + 1]) {
-        ++current_col_block;
+    vector<uint64_t> operator_vec =
+        (transpose) ? block_col_starts : block_row_starts;
+    vector<uint64_t> operator_vec_comp =
+        (transpose) ? block_row_starts : block_col_starts;
+
+    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
+        operator_vec.size() - 1, std::make_shared<CSRLinkedList<T>>());
+
+    for (int j = 0; j < operator_vec.size() - 1; j++) {
+
+      if (operator_vec[j] >= operator_vec_comp[current_block + 1]) {
+        ++current_block;
         current_vector_pos = 0;
       }
 
-      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
+      int num_coords = operator_vec[j + 1] - operator_vec[j];
 
       if (num_coords > 0) {
-        Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+        Tuple<T> *coords_ptr = (coords.data() + operator_vec[j]);
         (csr_linked_lists[current_vector_pos].get())
             ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                      transpose);
@@ -130,14 +146,15 @@ public:
     }
   }
 
-  void print_blocks_and_cols() {
+  void print_blocks_and_cols(bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    cout<<" rank "<<rank << " printing print_blocks_and_cols"<<endl;
+    cout << " rank " << rank << "_" << trans
+         << " printing print_blocks_and_cols" << endl;
     int current_col_block = 0;
     for (int j = 0; j < csr_linked_lists.size(); j++) {
-      cout<<" rank "<<rank << " j "<<j <<endl;
+      cout << " rank " << rank << " j " << j << endl;
       auto linkedList = csr_linked_lists[j];
 
       auto head = (linkedList.get())->getHeadNode();
