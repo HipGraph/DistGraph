@@ -204,7 +204,7 @@ public:
   void print_coords(bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    string output_path = "coords" + to_string(rank)+"trans "+to_string(trans)+".txt";
+    string output_path = "coords" + to_string(rank)+"trans"+to_string(trans)+".txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
