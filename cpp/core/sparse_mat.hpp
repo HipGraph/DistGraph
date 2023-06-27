@@ -74,6 +74,7 @@ public:
     assert(block_col_starts.size() <= target_divisions + 1);
 
     while (block_col_starts.size() < target_divisions + 1) {
+      cout<<"rank "<< rank<<" trans"<<trans <<" col adding i "<<coords.size()<<endl;
       block_col_starts.push_back(coords.size());
     }
   }
