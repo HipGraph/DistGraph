@@ -61,7 +61,7 @@ public:
     for (uint64_t i = 0; i < coords.size(); i++) {
       while (coords[i].col >= current_start) {
         block_col_starts.push_back(i);
-        cout<<"rank "<< rank <<" col adding i "<<i<<endl;
+        cout<<"rank "<< rank<<" trans"<<trans <<" col adding i "<<i<<endl;
         current_start += block_width;
       }
 
@@ -103,7 +103,7 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout<<"rank "<< rank <<" row adding j "<<j<<endl;
+          cout<<"rank "<< rank<<" trans"<<trans <<" row adding j "<<j<<endl;
           current_start += block_width_row;
         }
 
