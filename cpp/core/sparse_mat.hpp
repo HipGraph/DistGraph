@@ -44,7 +44,7 @@ public:
 
   SpMat() {}
 
-  void divide_block_cols(int batch_size,int col_block_with int target_divisions, bool mod_ind,
+  void divide_block_cols(int batch_size,int col_block_with, int target_divisions, bool mod_ind,
                          bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
