@@ -38,7 +38,8 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
 
-  shared_sparseMat_Trans.get()->coords(shared_sparseMat.get()->coords);
+  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+  shared_sparseMat_Trans.get()->coords= copiedVector;
 
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
@@ -58,13 +59,13 @@ int main(int argc, char **argv) {
                                        grid.get()->world_size);
 
   shared_sparseMat.get()->divide_block_cols(localBRows, grid.get()->world_size,
-                                            true);
+                                            true,false);
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(
       localARows, localBRows, grid.get()->world_size, true, false);
 
   shared_sparseMat_Trans.get()->divide_block_cols(localBRows,
-                                                  grid.get()->world_size, true);
+                                                  grid.get()->world_size, true,true);
   shared_sparseMat_Trans.get()->sort_by_rows();
   shared_sparseMat_Trans.get()->divide_block_rows(
       localARows, localBRows, grid.get()->world_size, true, true);
