@@ -161,7 +161,7 @@ public:
 
       int count = 0;
       while (head != nullptr) {
-        string output_path = "blocks_rank" + to_string(rank) + "_col_" +
+        string output_path = "blocks_rank" + to_string(rank)+"_trans"+to_string(trans) + "_col_" +
                              to_string(count) + "_row_" + to_string(j) + ".txt";
         char stats[500];
         strcpy(stats, output_path.c_str());
