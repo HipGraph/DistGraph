@@ -35,11 +35,12 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << endl;
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
+  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat_Trans.get());
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
 
-  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  shared_sparseMat_Trans.get()->coords= copiedVector;
+//  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+//  shared_sparseMat_Trans.get()->coords= copiedVector;
 
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
