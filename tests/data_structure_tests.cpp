@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
                                             true,false);
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(
-      15000, localBRows, grid.get()->world_size, true, false);
+      localBRows , localBRows, grid.get()->world_size, true, false);
 
   shared_sparseMat_Trans.get()->divide_block_cols(15000,localBRows,
                                                   grid.get()->world_size, true,true);
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
-  shared_sparseMat.get()->initialize_CSR_blocks(15000, localBRows, -1,
+  shared_sparseMat.get()->initialize_CSR_blocks(localBRows, localBRows, -1,
                                                 false);
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 15000,
                                                       -1, true);

@@ -109,7 +109,7 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout << "rank " << rank << " trans" << trans << " row adding j " << j
+          cout << "rank " << rank << " trans" << trans << " current start "<<current_start << " row adding j " << j
                << endl;
           current_start += block_width_row;
         }
@@ -171,8 +171,8 @@ public:
       int count = 0;
       while (head != nullptr) {
         string output_path = "blocks_rank" + to_string(rank) + "_trans" +
-                             to_string(trans) + "_col_" + to_string(count) +
-                             "_row_" + to_string(j) + ".txt";
+                             to_string(trans) + "_col_" + to_string( (trans)? j: count) +
+                             "_row_" + to_string( (trans)? count: j) + ".txt";
         char stats[500];
         strcpy(stats, output_path.c_str());
         ofstream fout(stats, std::ios_base::app);
