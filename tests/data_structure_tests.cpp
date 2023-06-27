@@ -70,7 +70,13 @@ int main(int argc, char **argv) {
   dense_mat.get()->print_matrix();
   cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
+
   cout<<" rank "<< rank << " processing completed  "<<endl;
+
+  int col_rank;
+  MPI_Comm_rank(shared_sparseMat.get()->col_world, &col_rank);
+
+  cout<<" rank "<< rank << " col rank  "<<col_rank<<endl;
 
   MPI_Finalize();
   return 0;
