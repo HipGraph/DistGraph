@@ -146,13 +146,12 @@ public:
            << " current vec pos" << current_vector_pos << " col_block"
            << col_block << endl;
 
-      if (num_coords > 0) {
-        Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
-        (csr_linked_lists[current_vector_pos].get())
-            ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
-                     transpose);
-      }
-      if (block_row_starts[j+1] >= block_col_starts[col_block + 1]) {
+      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+      (csr_linked_lists[current_vector_pos].get())
+          ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
+                   transpose);
+
+      if (block_row_starts[j + 1] >= block_col_starts[col_block + 1]) {
         ++col_block;
         if (!transpose) {
           current_vector_pos = 0;
@@ -210,6 +209,7 @@ public:
         }
         head = (head.get())->next;
         ++count;
+        cout <<" rank "<< rank<< " j "<<j<<" count "<<count<<endl;
       }
     }
   }
