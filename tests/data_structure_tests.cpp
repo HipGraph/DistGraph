@@ -53,10 +53,10 @@ int main(int argc, char **argv) {
 //  partitioner.get()->partition_data(shared_sparseMat.get(), false);
   partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
 
-//  int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
-//                                       grid.get()->world_size);
-//  int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
-//                                       grid.get()->world_size);
+  int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
+                                       grid.get()->world_size);
+  int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
+                                       grid.get()->world_size);
 
 
 //  shared_sparseMat.get()->divide_block_cols(localBRows,localBRows, grid.get()->world_size,
