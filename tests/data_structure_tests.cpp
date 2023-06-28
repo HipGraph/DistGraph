@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
 //  shared_sparseMat.get()->initialize_CSR_blocks(localBRows, localBRows, -1,
-                                                false);
+//                                                false);
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 15000,
                                                       -1, true);
   cout << " rank " << rank << " initialization of CSR completed  " << endl;
