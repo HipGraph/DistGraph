@@ -138,7 +138,7 @@ public:
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
       cout << " rank " << rank << "_" << transpose
-           << " csr_block_initating_index" << operator_vec[j] << endl;
+           << " csr_block_initating_index" << block_row_starts[j] << endl;
 
       if (num_coords > 0) {
         Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
