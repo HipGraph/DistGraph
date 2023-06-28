@@ -148,13 +148,13 @@ public:
       }
       if (block_row_starts[j] >= block_col_starts[col_block + 1]) {
         ++col_block;
-        if (!transponse) {
+        if (!transpose) {
           current_vector_pos = 0;
         } else {
           ++current_vector_pos;
         }
       } else {
-        if (!transponse) {
+        if (!transpose) {
           ++current_vector_pos;
         }
       }
