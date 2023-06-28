@@ -92,8 +92,8 @@ public:
     }
   }
 
-  void divide_block_rows(int block_width_row, int block_width_col,
-                         bool mod_ind, bool trans) {
+  void divide_block_rows(int block_width_row, int block_width_col, bool mod_ind,
+                         bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
@@ -129,8 +129,11 @@ public:
     int col_block = 0;
     int current_vector_pos = 0;
 
+    int size =
+        (transpose) ? block_col_starts.size() - 1 : block_row_starts.size() - 1;
+
     csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
-        block_row_starts.size() - 1, std::make_shared<CSRLinkedList<T>>());
+        size, std::make_shared<CSRLinkedList<T>>());
 
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
@@ -139,8 +142,9 @@ public:
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
       cout << " rank " << rank << "_" << transpose
-           << " csr_block_initating_index" << block_row_starts[j]<<" current vec pos"<<current_vector_pos<<
-          " col_block"<<col_block << endl;
+           << " csr_block_initating_index" << block_row_starts[j]
+           << " current vec pos" << current_vector_pos << " col_block"
+           << col_block << endl;
 
       if (num_coords > 0) {
         Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
@@ -148,7 +152,7 @@ public:
             ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                      transpose);
       }
-      if (block_row_starts[j] >= block_col_starts[col_block + 1]) {
+      if (block_row_starts[j+1] >= block_col_starts[col_block + 1]) {
         ++col_block;
         if (!transpose) {
           current_vector_pos = 0;
