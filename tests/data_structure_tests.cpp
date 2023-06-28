@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
                                                       -1, true);
   cout << " rank " << rank << " initialization of CSR completed  " << endl;
 
-//  shared_sparseMat.get()->print_blocks_and_cols(false);
+  shared_sparseMat.get()->print_blocks_and_cols(false);
   shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
   //  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
