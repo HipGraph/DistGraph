@@ -132,8 +132,13 @@ public:
     int size =
         (transpose) ? block_col_starts.size() - 1 : block_row_starts.size() - 1;
 
-    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
-        size, std::make_shared<CSRLinkedList<T>>());
+//    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
+//        size, std::make_shared<CSRLinkedList<T>>());
+        csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(size);
+
+    for(int i=0;i<size;i++){
+      csr_linked_lists[i]=std::make_shared<CSRLinkedList<T>>();
+    }
 
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
