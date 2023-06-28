@@ -120,7 +120,7 @@ public:
         }
       }
     }
-    block_row_starts.push(coords.size());
+    block_row_starts.push_back(coords.size());
   }
 
   void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz,
