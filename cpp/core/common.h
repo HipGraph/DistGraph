@@ -7,6 +7,7 @@
 #include <vector>
 #include <mkl_spblas.h>
 #include <iostream>
+#include <random>
 
 using namespace std;
 
