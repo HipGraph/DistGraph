@@ -136,6 +136,7 @@ public:
 //        size, std::make_shared<CSRLinkedList<T>>());
         csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(size);
 
+#pragma omp parallel
     for(int i=0;i<size;i++){
       csr_linked_lists[i]=std::make_shared<CSRLinkedList<T>>();
     }
