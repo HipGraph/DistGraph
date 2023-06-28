@@ -50,20 +50,20 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data started  " << endl;
 
-  partitioner.get()->partition_data(shared_sparseMat.get(), false);
+//  partitioner.get()->partition_data(shared_sparseMat.get(), false);
   partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
 
-  int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
-                                       grid.get()->world_size);
-  int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
-                                       grid.get()->world_size);
+//  int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
+//                                       grid.get()->world_size);
+//  int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
+//                                       grid.get()->world_size);
 
 
-  shared_sparseMat.get()->divide_block_cols(localBRows,localBRows, grid.get()->world_size,
+//  shared_sparseMat.get()->divide_block_cols(localBRows,localBRows, grid.get()->world_size,
                                             true,false);
-  shared_sparseMat.get()->sort_by_rows();
-  shared_sparseMat.get()->divide_block_rows(
-      localBRows , localBRows,  true, false);
+//  shared_sparseMat.get()->sort_by_rows();
+//  shared_sparseMat.get()->divide_block_rows(
+//      localBRows , localBRows,  true, false);
 
   shared_sparseMat_Trans.get()->divide_block_cols(15000,localBRows,
                                                   2, true,true);
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
-  shared_sparseMat.get()->initialize_CSR_blocks(localBRows, localBRows, -1,
+//  shared_sparseMat.get()->initialize_CSR_blocks(localBRows, localBRows, -1,
                                                 false);
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 15000,
                                                       -1, true);
