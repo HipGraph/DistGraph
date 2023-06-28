@@ -181,6 +181,7 @@ public:
 
       int count = 0;
       while (head != nullptr) {
+        cout <<" rank "<< rank<< " j "<<j<<" count "<<count<<" node id "<<(head.get())->id<<endl;
         string output_path = "blocks_rank" + to_string(rank) + "_trans" +
                              to_string(trans) + "_col_" +
                              to_string((trans) ? j : count) + "_row_" +
@@ -209,7 +210,7 @@ public:
         }
         head = (head.get())->next;
         ++count;
-        cout <<" rank "<< rank<< " j "<<j<<" count "<<count<<endl;
+
       }
     }
   }

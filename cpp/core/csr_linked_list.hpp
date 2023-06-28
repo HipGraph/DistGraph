@@ -2,6 +2,7 @@
 #include "common.h"
 #include "csr_local.hpp"
 #include <memory>
+#include <random>
 
 using namespace std;
 
@@ -11,6 +12,7 @@ template <typename T>
 struct CSRLocalNode {
   shared_ptr<CSRLocal<T>> data = nullptr;
   shared_ptr<CSRLocalNode<T>> next = nullptr;
+  uint64_t id;
 };
 
 template <typename T>
@@ -18,6 +20,8 @@ class CSRLinkedList {
 
 private:
   shared_ptr<CSRLocalNode<T>> head;
+
+
 
 public:
 
@@ -32,6 +36,7 @@ public:
               int num_coords, bool transpose) {
 
     auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
+    newNode.get()->id=generateRandomId(0,10000);
     newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
     if (this->head == nullptr) {
@@ -48,6 +53,8 @@ public:
   shared_ptr<CSRLocalNode<T>>  getHeadNode() {
     return head;
   }
+
+
 
 };
 
