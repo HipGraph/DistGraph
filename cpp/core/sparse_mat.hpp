@@ -93,7 +93,7 @@ public:
   }
 
   void divide_block_rows(int block_width_row, int block_width_col,
-                         int target_divisions, bool mod_ind, bool trans) {
+                         bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
@@ -120,6 +120,7 @@ public:
         }
       }
     }
+    block_row_starts.push(coords.size());
   }
 
   void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz,
@@ -138,7 +139,8 @@ public:
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
       cout << " rank " << rank << "_" << transpose
-           << " csr_block_initating_index" << block_row_starts[j] << endl;
+           << " csr_block_initating_index" << block_row_starts[j]<<" current vec pos"<<current_vector_pos<<
+          " col_block"<<col_block << endl;
 
       if (num_coords > 0) {
         Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
