@@ -9,8 +9,8 @@ namespace distblas::core {
 
 template <typename T>
 struct CSRLocalNode {
-  shared_ptr<CSRLocal<T>> data;
-  shared_ptr<CSRLocalNode<T>> next;
+  shared_ptr<CSRLocal<T>> data = nullptr;
+  shared_ptr<CSRLocalNode<T>> next = nullptr;
 };
 
 template <typename T>
