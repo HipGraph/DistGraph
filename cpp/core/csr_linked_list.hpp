@@ -27,16 +27,17 @@ public:
 
   CSRLinkedList() {
     head = nullptr;
+
   }
 
   ~CSRLinkedList() {
   }
 
   void insert(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
-              int num_coords, bool transpose) {
+              int num_coords, bool transpose, uint64_t id) {
 
     auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
-    newNode.get()->id=generateRandomId(0,10000);
+    newNode.get()->id=id;
     newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
     if (this->head == nullptr) {

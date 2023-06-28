@@ -58,13 +58,6 @@ template <typename T> bool row_major(Tuple<T> a, Tuple<T> b) {
   }
 }
 
-int generateRandomId(int a, int b) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<int> dis(a, b);
-  return dis(gen);
-}
-
 extern MPI_Datatype SPTUPLE;
 
 template <typename T>
