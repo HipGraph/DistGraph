@@ -44,8 +44,8 @@ public:
 
   SpMat() {}
 
-  void divide_block_cols(int batch_size,int col_block_with, int target_divisions, bool mod_ind,
-                         bool trans) {
+  void divide_block_cols(int batch_size, int col_block_with,
+                         int target_divisions, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_col_starts.clear();
@@ -109,8 +109,8 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout << "rank " << rank << " trans" << trans << " current start "<<current_start << " row adding j " << j
-               << endl;
+          cout << "rank " << rank << " trans" << trans << " current start "
+               << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
         }
 
@@ -125,36 +125,38 @@ public:
   void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz,
                              bool transpose) {
 
-    int current_block = 0;
+    int col_block = 0;
     int current_vector_pos = 0;
 
-    vector<uint64_t> operator_vec =
-        (transpose) ? block_col_starts : block_row_starts;
-    vector<uint64_t> operator_vec_comp =
-        (transpose) ? block_row_starts : block_col_starts;
-
     csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
-        operator_vec.size() - 1, std::make_shared<CSRLinkedList<T>>());
+        block_row_starts.size() - 1, std::make_shared<CSRLinkedList<T>>());
 
-    for (int j = 0; j < operator_vec.size() - 1; j++) {
+    for (int j = 0; j < block_row_starts.size() - 1; j++) {
 
-      if (operator_vec[j] >= operator_vec_comp[current_block + 1]) {
-        ++current_block;
-        current_vector_pos = 0;
-      }
-
-      int num_coords = operator_vec[j + 1] - operator_vec[j];
+      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
       int rank;
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
       cout << " rank " << rank << "_" << transpose
-           << " csr_block_initating_index"<< operator_vec[j]<< endl;
+           << " csr_block_initating_index" << operator_vec[j] << endl;
+
       if (num_coords > 0) {
-        Tuple<T> *coords_ptr = (coords.data() + operator_vec[j]);
+        Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
         (csr_linked_lists[current_vector_pos].get())
             ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                      transpose);
-        ++current_vector_pos;
+      }
+      if (block_row_starts[j] >= block_col_starts[col_block + 1]) {
+        ++col_block;
+        if (!transponse) {
+          current_vector_pos = 0;
+        } else {
+          ++current_vector_pos;
+        }
+      } else {
+        if (!transponse) {
+          ++current_vector_pos;
+        }
       }
     }
   }
@@ -175,8 +177,9 @@ public:
       int count = 0;
       while (head != nullptr) {
         string output_path = "blocks_rank" + to_string(rank) + "_trans" +
-                             to_string(trans) + "_col_" + to_string( (trans)? j: count) +
-                             "_row_" + to_string( (trans)? count: j) + ".txt";
+                             to_string(trans) + "_col_" +
+                             to_string((trans) ? j : count) + "_row_" +
+                             to_string((trans) ? count : j) + ".txt";
         char stats[500];
         strcpy(stats, output_path.c_str());
         ofstream fout(stats, std::ios_base::app);
@@ -208,7 +211,8 @@ public:
   void print_coords(bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    string output_path = "coords" + to_string(rank)+"trans"+to_string(trans)+".txt";
+    string output_path =
+        "coords" + to_string(rank) + "trans" + to_string(trans) + ".txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
