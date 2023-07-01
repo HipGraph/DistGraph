@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
 
   if (rank=0) {
-    cout << " rank " << i<<" vector size "<<id_list.size() << endl;
+    cout << " vector size "<<id_list.size() << endl;
     for (int i = 0; i < id_list.size(); i++) {
       cout << " rank " << i<<" size "<<id_list[i].size() << endl;
       for (int k = 0; k < id_list[i].size(); k++) {
