@@ -181,8 +181,7 @@ public:
       auto csr_data = (head.get())->data;
 
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-      int numRows = handle->rowStart.size() - 1;
-      col_ids.push_back(handle.col_idx);
+      col_ids.push_back(handle->col_idx);
       head = (head.get())->next;
     }
   }
