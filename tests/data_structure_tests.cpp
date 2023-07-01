@@ -88,10 +88,12 @@ int main(int argc, char **argv) {
   vector<vector<int>> id_list;
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
 
-  for(int i=0;i<id_list.size();i++){
-    cout<<" rank "<<i<<endl;
-    for(int k=0;k< id_list[i].size();k++){
-       cout <<id_list[i][k]<<" "<<endl;
+  if (rank=0) {
+    for (int i = 0; i < id_list.size(); i++) {
+      cout << " rank " << i << endl;
+      for (int k = 0; k < id_list[i].size(); k++) {
+        cout << id_list[i][k] << " " << endl;
+      }
     }
   }
 
