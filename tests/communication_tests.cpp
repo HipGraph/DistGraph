@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   ofstream fout(stats, std::ios_base::app);
 
   for(int i=0;i< random_number_vec.size();i++){
-    fout<<random_number_vec[i]<<" "
+    fout<<random_number_vec[i]<<" ";
   }
   fout<<endl;
 
