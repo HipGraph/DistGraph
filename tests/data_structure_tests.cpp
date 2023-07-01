@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
   vector<vector<uint64_t>> id_list(world_size);
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
 
-  if (rank=0) {
+  if (rank==0) {
     cout << " vector size "<<id_list.size() << endl;
     for (int i = 0; i < id_list.size(); i++) {
       cout << " rank " << i<<" size "<<id_list[i].size() << endl;
