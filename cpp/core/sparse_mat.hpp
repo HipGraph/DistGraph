@@ -180,8 +180,8 @@ public:
     int count=0;
     while (head != nullptr) {
       auto csr_data = (head.get())->data;
-      col_ids[count] = vector<uint64_t>(handle->col_idx.size());
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+      col_ids[count] = vector<uint64_t>(handle->col_idx.size());
       std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::begin(col_ids[count]),
                      [](MKL_INT value) { return static_cast<uint64_t>(value); });
       head = (head.get())->next;
