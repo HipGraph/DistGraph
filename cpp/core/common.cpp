@@ -31,7 +31,7 @@ vector<int> distblas::core::generate_random_numbers(int lower_bound, int upper_b
   std::uniform_int_distribution<int> distribution(lower_bound, upper_bound);
 
   // Generate and print random numbers
-#pragma omp parallel
+//#pragma omp parallel
   for (int i = 0; i < ns; ++i) {
     int random_number = distribution(generator);
     vec[i]=random_number;
