@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->print_blocks_and_cols(false);
   shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
-  vector<vector<int>> id_list;
+  vector<vector<uint64_t>> id_list;
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
 
   if (rank=0) {

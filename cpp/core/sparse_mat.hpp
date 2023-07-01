@@ -172,17 +172,20 @@ public:
     }
   }
 
-  void fill_col_ids(int block_id, vector<vector<int>> &col_ids) {
+  void fill_col_ids(int block_id, vector<vector<uint64_t>> &col_ids) {
     auto linkedList = csr_linked_lists[block_id];
 
     auto head = (linkedList.get())->getHeadNode();
 
+    int count=0;
     while (head != nullptr) {
       auto csr_data = (head.get())->data;
 
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-      col_ids.push_back(handle->col_idx);
+      std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::begin(col_ids[count]),
+                     [](MKL_INT value) { return static_cast<uint64_t>(value); });
       head = (head.get())->next;
+      ++count;
     }
   }
 
