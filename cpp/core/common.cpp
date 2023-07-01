@@ -25,7 +25,7 @@ void distblas::core::prefix_sum(vector<int> &values, vector<int> &offsets) {
 vector<int> distblas::core::generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                                     int ns) {
   vector<int> vec(ns);
-  std::mt19937 generator(seed);
+  std::minstd_rand generator(seed);
 
   // Define the range of the uniform distribution
   std::uniform_int_distribution<int> distribution(lower_bound, upper_bound);
