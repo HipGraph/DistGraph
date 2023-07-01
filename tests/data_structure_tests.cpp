@@ -84,8 +84,8 @@ int main(int argc, char **argv) {
                                                       -1, true);
   cout << " rank " << rank << " initialization of CSR completed  " << endl;
 
-  shared_sparseMat.get()->print_blocks_and_cols(false);
-  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
+//  shared_sparseMat.get()->print_blocks_and_cols(false);
+//  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
   vector<vector<uint64_t>> id_list(world_size);
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
