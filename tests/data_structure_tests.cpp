@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < id_list.size(); i++) {
       cout << " rank " << i<<" size "<<id_list[i].size() << endl;
       for (int k = 0; k < id_list[i].size(); k++) {
-        cout << id_list[i][k] << " " << endl;
+        cout << id_list[i][k] << " ";
       }
     }
   }
