@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
       for (int k = 0; k < id_list[i].size(); k++) {
         cout << id_list[i][k] << " ";
       }
+      cout << endl;
     }
   }
 
