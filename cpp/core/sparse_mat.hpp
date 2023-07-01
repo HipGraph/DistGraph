@@ -132,13 +132,13 @@ public:
     int size =
         (transpose) ? block_col_starts.size() - 1 : block_row_starts.size() - 1;
 
-//    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
-//        size, std::make_shared<CSRLinkedList<T>>());
-        csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(size);
+    //    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
+    //        size, std::make_shared<CSRLinkedList<T>>());
+    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(size);
 
 #pragma omp parallel
-    for(int i=0;i<size;i++){
-      csr_linked_lists[i]=std::make_shared<CSRLinkedList<T>>();
+    for (int i = 0; i < size; i++) {
+      csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>();
     }
 
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
@@ -172,6 +172,21 @@ public:
     }
   }
 
+  void fill_col_ids(int block_id, vector<vector<int>> &col_ids) {
+    auto linkedList = csr_linked_lists[block_id];
+
+    auto head = (linkedList.get())->getHeadNode();
+
+    while (head != nullptr) {
+      auto csr_data = (head.get())->data;
+
+      distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+      int numRows = handle->rowStart.size() - 1;
+      col_ids.push_back(handle.col_idx);
+      head = (head.get())->next;
+    }
+  }
+
   void print_blocks_and_cols(bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -187,7 +202,8 @@ public:
 
       int count = 0;
       while (head != nullptr) {
-        cout <<" rank "<< rank<< " j "<<j<<" count "<<count<<" node id "<<(head.get())->id<<endl;
+        cout << " rank " << rank << " j " << j << " count " << count
+             << " node id " << (head.get())->id << endl;
         string output_path = "blocks_rank" + to_string(rank) + "_trans" +
                              to_string(trans) + "_col_" +
                              to_string((trans) ? j : count) + "_row_" +
@@ -216,7 +232,6 @@ public:
         }
         head = (head.get())->next;
         ++count;
-
       }
     }
   }

@@ -85,6 +85,16 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->print_blocks_and_cols(false);
   shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
+  vector<vector<int>> id_list;
+  shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
+
+  for(int i=0;i<id_list.size();i++){
+    cout<<" rank "<<i<<endl;
+    for(int k=0;k< id_list[i].size();k++){
+       cout <<id_list[i][k]<<" "<<endl;
+    }
+  }
+
   //  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
   //  auto dense_mat = unique_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));
   //  dense_mat.get()->print_matrix();
