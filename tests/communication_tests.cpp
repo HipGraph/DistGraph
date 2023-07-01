@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   vector<int> random_number_vec = generate_random_numbers(0,60000,1234,10);
-  string output_path = "random_number_generators_"+ to_string(rank)+".txt"
+  string output_path = "random_number_generators_"+ to_string(rank)+".txt";
   char stats[500];
   strcpy(stats, output_path.c_str());
   ofstream fout(stats, std::ios_base::app);
