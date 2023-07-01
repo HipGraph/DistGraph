@@ -21,7 +21,9 @@ int main(int argc, char **argv) {
 
   MPI_Init(&argc, &argv);
   int rank;
+  int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
   initialize_mpi_datatypes<int>();
 
@@ -85,7 +87,7 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->print_blocks_and_cols(false);
   shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
-  vector<vector<uint64_t>> id_list;
+  vector<vector<uint64_t>> id_list(world_size);
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
 
   if (rank=0) {
