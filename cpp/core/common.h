@@ -13,7 +13,10 @@ using namespace std;
 
 namespace distblas::core {
 
-int divide_and_round_up(int num, int denom);
+int divide_and_round_up(int num, int denom, int seed, int ns);
+
+vector<int> generate_random_numbers(int lower_bound, int upper_bound, int seed,
+                                    int ns);
 
 void prefix_sum(vector<int> &values, vector<int> &offsets);
 
