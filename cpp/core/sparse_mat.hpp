@@ -9,6 +9,7 @@
 #include <mpi.h>
 #include <parallel/algorithm>
 #include <vector>
+#include <unordered_set>
 
 using namespace std;
 
