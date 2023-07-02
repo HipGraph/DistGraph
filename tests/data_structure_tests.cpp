@@ -90,6 +90,17 @@ int main(int argc, char **argv) {
   vector<vector<uint64_t>> id_list(world_size);
   shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
 
+  if (rank==0) {
+    cout << " vector size "<<id_list.size() << endl;
+    for (int i = 0; i < id_list.size(); i++) {
+      cout << " rank " << i<<" size "<<id_list[i].size() << endl;
+      for (int k = 0; k < id_list[i].size(); k++) {
+        cout << id_list[i][k] << " ";
+      }
+      cout << endl;
+    }
+  }
+
   //  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
   //  auto dense_mat = unique_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));
   //  dense_mat.get()->print_matrix();
