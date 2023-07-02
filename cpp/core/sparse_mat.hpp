@@ -158,7 +158,7 @@ public:
       cout << " rank " << rank << "_" << transpose
            << " csr_block_initating_index" << block_row_starts[j]
            << " current vec pos" << current_vector_pos << " col_block"
-           << col_block  "number of coords "<<num_coords<< endl;
+           << col_block << endl;
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())
