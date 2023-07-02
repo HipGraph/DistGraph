@@ -102,7 +102,7 @@ public:
       }
 
       // TODO: introduce atomic capture
-      bool matched= false;
+      int matched_count= 0;
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
@@ -111,15 +111,17 @@ public:
           current_start += block_width_row;
           cout << "rank " << rank << " trans" << trans << " updated current start "
                << current_start << " row adding j " << j << endl;
-          matched = true;
+          ++matched_count;
         }
+
 
         // This modding step helps indexing.
         if (mod_ind) {
           coords[j].row %= block_width_row;
         }
       }
-      if (!matched) {
+      int expected_matched_count = std::max(1,(block_width_col/block_width_row))
+      if (matched_count < expected_matched_count) {
         cout << "rank " << rank << " trans" << trans << " current start "
              << current_start << " not matching adding row adding j " << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
