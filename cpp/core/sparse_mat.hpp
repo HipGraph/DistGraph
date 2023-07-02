@@ -118,6 +118,8 @@ public:
         }
       }
       if (!matched) {
+        cout << "rank " << rank << " trans" << trans << " current start "
+             << current_start << " not matching adding row adding j " << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
     }
