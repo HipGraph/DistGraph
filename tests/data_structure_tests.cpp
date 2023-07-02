@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
   vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_Trans = make_shared<SpMat<int>>(copiedVector,
+  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(copiedVector,
                                                         shared_sparseMat.get()->gRows,
                                                         shared_sparseMat.get()->gCols,
                                                         shared_sparseMat.get()->gNNz);
