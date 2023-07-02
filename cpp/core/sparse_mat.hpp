@@ -168,7 +168,7 @@ public:
 
 
 
-      if (block_row_starts[j + 1] >= block_col_starts[col_block + 1] and ((j<block_row_starts.size()-2) and (block_row_starts[j+1]==block_row_starts[j+2])?false:true)) {
+      if (block_row_starts[j + 1] >= block_col_starts[col_block + 1]) {
         ++col_block;
         if (!transpose) {
           current_vector_pos = 0;
