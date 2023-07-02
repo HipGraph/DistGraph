@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
-
-  auto shared_sparseMat_Trans = make_shared<SpMat<int>>(shared_sparseMat.get()->coords,
+  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_Trans = make_shared<SpMat<int>>(copiedVector,
                                                         shared_sparseMat.get()->gRows,
                                                         shared_sparseMat.get()->gCols,
                                                         shared_sparseMat.get()->gNNz);
