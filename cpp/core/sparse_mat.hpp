@@ -195,7 +195,7 @@ public:
           return static_cast<uint64_t>(value);
         }
         return -1; // Ignore duplicates by returning a dummy value
-}));
+});
       head = (head.get())->next;
       ++count;
     }
