@@ -9,8 +9,6 @@
 #include <mpi.h>
 #include <parallel/algorithm>
 #include <vector>
-#include <unordered_set>
-
 
 using namespace std;
 
@@ -179,23 +177,15 @@ public:
 
     auto head = (linkedList.get())->getHeadNode();
 
-    int count = 0;
+    int count=0;
     while (head != nullptr) {
       auto csr_data = (head.get())->data;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
       col_ids[count] = vector<uint64_t>(handle->col_idx.size());
-      //      std::transform(std::begin(handle->col_idx),
-      //      std::end(handle->col_idx), std::begin(col_ids[count]),
-      //                     [](MKL_INT value) { return
-      //                     static_cast<uint64_t>(value); });
-      std::unordered_set<uint64_t> unique_set;
-      std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::back_inserter(col_ids[count]),
-[&unique_set](MKL_INT value)->uint64_t {
-        if (unique_set.insert(static_cast<uint64_t>(value)).second) {
-          return static_cast<uint64_t>(value);
-        }
-        return -1; // Ignore duplicates by returning a dummy value
-});
+      std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::begin(col_ids[count]),
+                     [](MKL_INT value) { return static_cast<uint64_t>(value); });
+      auto last = std::unique (col_ids[count].begin (), col_ids[count].end ());
+      col_ids[count].erase (last, col_ids[count].end ());
       head = (head.get())->next;
       ++count;
     }
