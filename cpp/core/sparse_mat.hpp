@@ -102,18 +102,23 @@ public:
       }
 
       // TODO: introduce atomic capture
+      bool matched= false;
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
           cout << "rank " << rank << " trans" << trans << " current start "
                << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
+          matched = true;
         }
 
         // This modding step helps indexing.
         if (mod_ind) {
           coords[j].row %= block_width_row;
         }
+      }
+      if (!matched) {
+        block_row_starts.push_back(block_col_starts[i + 1]);
       }
     }
     block_row_starts.push_back(coords.size());
@@ -217,6 +222,8 @@ public:
 
         auto csr_data = (head.get())->data;
 
+        int num_coords = (csr_data.get())-num_coords;
+
         distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
         int numRows = handle->rowStart.size() - 1;
 
@@ -225,11 +232,14 @@ public:
           int end = handle->rowStart[i + 1];
 
           fout << "Row " << i << ": ";
-          for (int k = start; k < end; k++) {
-            int col = handle->col_idx[k];
-            int value = handle->values[k];
+          if (num_coords>0) {
+            for (int k = start; k < end; k++) {
 
-            fout << "(" << col << ", " << value << ") ";
+              int col = handle->col_idx[k];
+              int value = handle->values[k];
+
+              fout << "(" << col << ", " << value << ") ";
+            }
           }
           fout << endl;
         }
