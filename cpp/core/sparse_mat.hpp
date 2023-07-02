@@ -182,10 +182,9 @@ public:
       auto csr_data = (head.get())->data;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
       col_ids[count] = vector<uint64_t>(handle->col_idx.size());
-      std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::begin(col_ids[count]),
+      std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(), handle->col_idx.end());
+      std::transform(std::begin(unique_set), std::end(unique_set), std::begin(col_ids[count]),
                      [](MKL_INT value) { return static_cast<uint64_t>(value); });
-      auto last = std::unique (col_ids[count].begin (), col_ids[count].end ());
-      col_ids[count].erase (last, col_ids[count].end ());
       head = (head.get())->next;
       ++count;
     }
