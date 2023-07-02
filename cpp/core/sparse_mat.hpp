@@ -190,7 +190,7 @@ public:
       //                     static_cast<uint64_t>(value); });
       std::unordered_set<uint64_t> unique_set;
       std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::back_inserter(col_ids[count]),
-[&unique_set](MKL_INT value) {
+[&unique_set](MKL_INT value)->uint64_t {
         if (unique_set.insert(static_cast<uint64_t>(value)).second) {
           return static_cast<uint64_t>(value);
         }
