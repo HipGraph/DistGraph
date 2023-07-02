@@ -126,8 +126,8 @@ public:
     int col_block = 0;
     int current_vector_pos = 0;
 
-    int size = block_rows/local_max_row_width;
-        (transpose) ? (block_cols/local_max_col_width) : (block_rows/local_max_row_width);
+    int size =
+        (transpose) ? (local_max_col_width/block_cols) : (local_max_row_width/block_rows);
 
     //    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
     //        size, std::make_shared<CSRLinkedList<T>>());
