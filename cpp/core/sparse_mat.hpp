@@ -102,54 +102,72 @@ public:
       }
 
       // TODO: introduce atomic capture
-      int matched_count= 0;
+      int matched_count = 0;
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
           cout << "rank " << rank << " trans" << trans << "  current start "
                << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
-          cout << "rank " << rank << " trans" << trans << " updated current start "
-               << current_start << " row adding j " << j << endl;
+          cout << "rank " << rank << " trans" << trans
+               << " updated current start " << current_start << " row adding j "
+               << j << endl;
           ++matched_count;
         }
-
 
         // This modding step helps indexing.
         if (mod_ind) {
           coords[j].row %= block_width_row;
         }
       }
-      int expected_matched_count = std::max(1,(block_width_col/block_width_row));
+      int expected_matched_count =
+          std::max(1, (block_width_col / block_width_row));
       if (matched_count < expected_matched_count) {
         cout << "rank " << rank << " trans" << trans << " current start "
-             << current_start << " not matching adding row adding j " << block_col_starts[i + 1] << endl;
+             << current_start << " not matching adding row adding j "
+             << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
     }
     block_row_starts.push_back(coords.size());
   }
 
-  void initialize_CSR_blocks(int block_rows, int block_cols,int local_max_row_width,
-                             int local_max_col_width, int max_nnz,
-                             bool transpose) {
+  void initialize_CSR_blocks(int block_rows, int block_cols,
+                             int local_max_row_width, int local_max_col_width,
+                             int max_nnz, bool transpose) {
 
     int col_block = 0;
-    int current_vector_pos = 0;
 
-    int size =
-        (transpose) ? (local_max_col_width/block_cols) : (local_max_row_width/block_rows);
+    int no_of_nodes = (transpose) ? (gRows / block_rows) : (gCols / block_cols);
+
+    int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
+                                  : (local_max_row_width / block_rows);
 
     //    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
     //        size, std::make_shared<CSRLinkedList<T>>());
-    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(size);
+    csr_linked_lists =
+        std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
 #pragma omp parallel
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < no_of_lists; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>();
     }
 
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
+
+      if (!transpose) {
+        int current_vector_pos = j % no_of_lists;
+        if (j>0 and current_vector_pos ==0){
+          ++col_block;
+        }
+      } else {
+        int current_vector_pos = j/no_of_nodes;
+        col_block = current_vector_pos;
+      }
+
+
+
+
 
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
       int rank;
@@ -165,21 +183,19 @@ public:
           ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                    transpose, j);
 
+      //      if (block_row_starts[j + 1] >= block_col_starts[col_block + 1]) {
+      //        ++col_block;
+      //        if (!transpose) {
+      //          current_vector_pos = 0;
+      //        } else {
+      //          ++current_vector_pos;
+      //        }
+      //      } else {
+      //        if (!transpose) {
+      //          ++current_vector_pos;
+      //        }
+      //      }
 
-
-
-      if (block_row_starts[j + 1] >= block_col_starts[col_block + 1]) {
-        ++col_block;
-        if (!transpose) {
-          current_vector_pos = 0;
-        } else {
-          ++current_vector_pos;
-        }
-      } else {
-        if (!transpose) {
-          ++current_vector_pos;
-        }
-      }
     }
   }
 
@@ -241,7 +257,7 @@ public:
           int end = handle->rowStart[i + 1];
 
           fout << "Row " << i << ": ";
-          if (num_coords>0) {
+          if (num_coords > 0) {
             for (int k = start; k < end; k++) {
 
               int col = handle->col_idx[k];
