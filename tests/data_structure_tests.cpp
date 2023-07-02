@@ -78,28 +78,28 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
-  shared_sparseMat.get()->initialize_CSR_blocks(15000, localBRows, -1,
+  shared_sparseMat.get()->initialize_CSR_blocks(15000, localBRows,localARows,localBRows, -1,
                                                 false);
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 15000,
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 15000,localARows,localBRows,
                                                       -1, true);
   cout << " rank " << rank << " initialization of CSR completed  " << endl;
 
-//  shared_sparseMat.get()->print_blocks_and_cols(false);
-//  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
+  shared_sparseMat.get()->print_blocks_and_cols(false);
+  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
-  vector<vector<uint64_t>> id_list(world_size);
-  shared_sparseMat_Trans.get()->fill_col_ids(1,id_list);
-
-  if (rank==0) {
-    cout << " vector size "<<id_list.size() << endl;
-    for (int i = 0; i < id_list.size(); i++) {
-      cout << " rank " << i<<" size "<<id_list[i].size() << endl;
-      for (int k = 0; k < id_list[i].size(); k++) {
-        cout << id_list[i][k] << " ";
-      }
-      cout << endl;
-    }
-  }
+//  vector<vector<uint64_t>> id_list(world_size);
+//  shared_sparseMat_Trans.get()->fill_col_ids(1,id_list);
+//
+//  if (rank==0) {
+//    cout << " vector size "<<id_list.size() << endl;
+//    for (int i = 0; i < id_list.size(); i++) {
+//      cout << " rank " << i<<" size "<<id_list[i].size() << endl;
+//      for (int k = 0; k < id_list[i].size(); k++) {
+//        cout << id_list[i][k] << " ";
+//      }
+//      cout << endl;
+//    }
+//  }
 
   //  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
   //  auto dense_mat = unique_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));

@@ -8,8 +8,8 @@
 #include <memory>
 #include <mpi.h>
 #include <parallel/algorithm>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 using namespace std;
 
@@ -76,13 +76,7 @@ public:
       }
     }
 
-    assert(block_col_starts.size() <= target_divisions + 1);
-
-    while (block_col_starts.size() < target_divisions + 1) {
-      cout << "rank " << rank << " trans" << trans << " col adding i "
-           << coords.size() << endl;
-      block_col_starts.push_back(coords.size());
-    }
+    block_col_starts.push_back(coords.size());
   }
 
   void sort_by_rows() {
@@ -98,6 +92,8 @@ public:
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
+
+    int col_blocks_in_proc = (block_width_col/block_width_row)
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = block_width_col * rank;
@@ -124,14 +120,15 @@ public:
     block_row_starts.push_back(coords.size());
   }
 
-  void initialize_CSR_blocks(int block_rows, int block_cols, int max_nnz,
+  void initialize_CSR_blocks(int block_rows, int block_cols,int local_max_row_width,
+                             int local_max_col_width, int max_nnz,
                              bool transpose) {
 
     int col_block = 0;
     int current_vector_pos = 0;
 
-    int size =
-        (transpose) ? block_col_starts.size() - 1 : block_row_starts.size() - 1;
+    int size = block_rows/local_max_row_width;
+        (transpose) ? (block_cols/local_max_col_width) : (block_rows/local_max_row_width);
 
     //    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
     //        size, std::make_shared<CSRLinkedList<T>>());
@@ -178,14 +175,17 @@ public:
 
     auto head = (linkedList.get())->getHeadNode();
 
-    int count=0;
+    int count = 0;
     while (head != nullptr) {
       auto csr_data = (head.get())->data;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-      std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(), handle->col_idx.end());
+      std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(),
+                                             handle->col_idx.end());
       col_ids[count] = vector<uint64_t>(unique_set.size());
-      std::transform(std::begin(unique_set), std::end(unique_set), std::begin(col_ids[count]),
-                     [](MKL_INT value) { return static_cast<uint64_t>(value); });
+      std::transform(std::begin(unique_set), std::end(unique_set),
+                     std::begin(col_ids[count]), [](MKL_INT value) {
+                       return static_cast<uint64_t>(value);
+                     });
       head = (head.get())->next;
       ++count;
     }
