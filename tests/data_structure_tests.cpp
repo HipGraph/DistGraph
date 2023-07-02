@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 //  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
   vector<vector<uint64_t>> id_list(world_size);
-  shared_sparseMat_Trans.get()->fill_col_ids(0,id_list);
+  shared_sparseMat_Trans.get()->fill_col_ids(1,id_list);
 
   if (rank==0) {
     cout << " vector size "<<id_list.size() << endl;
