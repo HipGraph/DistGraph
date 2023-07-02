@@ -120,7 +120,7 @@ public:
           coords[j].row %= block_width_row;
         }
       }
-      int expected_matched_count = std::max(1,(block_width_col/block_width_row))
+      int expected_matched_count = std::max(1,(block_width_col/block_width_row));
       if (matched_count < expected_matched_count) {
         cout << "rank " << rank << " trans" << trans << " current start "
              << current_start << " not matching adding row adding j " << block_col_starts[i + 1] << endl;
