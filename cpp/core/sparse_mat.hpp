@@ -106,9 +106,9 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout << "rank " << rank << " trans" << trans << " current start "
-               << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
+          cout << "rank " << rank << " trans" << trans << " current start "
+               << current_start << " row adding j " << j <<" updated current start "<<current_start<< endl;
           matched = true;
         }
 
