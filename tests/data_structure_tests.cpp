@@ -31,8 +31,7 @@ int main(int argc, char **argv) {
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
-  auto shared_sparseMat_Trans =
-      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
+
 
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << endl;
@@ -40,8 +39,16 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
 
-  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  shared_sparseMat_Trans.get()->coords= copiedVector;
+  auto shared_sparseMat_Trans = make_shared<SpMat<int>>(shared_sparseMat.get()->coords,
+                                                        shared_sparseMat.get()->gRows,
+                                                        shared_sparseMat.get()->gCols,
+                                                        shared_sparseMat.get()->gNNz);
+//      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
+//
+//  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+//  shared_sparseMat_Trans.get()->coords= copiedVector;
+//  shared_sparseMat_Trans.get()->gRows = shared_sparseMat.get()->gRows;
+//  shared_sparseMat_Trans.get()->gCols = shared_sparseMat.get()->gCols;
 
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
