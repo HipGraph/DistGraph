@@ -222,7 +222,7 @@ public:
 
         auto csr_data = (head.get())->data;
 
-        int num_coords = (csr_data.get())-num_coords;
+        int num_coords = (csr_data.get())->num_coords;
 
         distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
         int numRows = handle->rowStart.size() - 1;
