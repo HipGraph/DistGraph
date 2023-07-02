@@ -154,14 +154,14 @@ public:
     }
 
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
-
+      int current_vector_pos =0;
       if (!transpose) {
-        int current_vector_pos = j % no_of_lists;
+         current_vector_pos = j % no_of_lists;
         if (j>0 and current_vector_pos ==0){
           ++col_block;
         }
       } else {
-        int current_vector_pos = j/no_of_nodes;
+         current_vector_pos = j/no_of_nodes;
         col_block = current_vector_pos;
       }
 
