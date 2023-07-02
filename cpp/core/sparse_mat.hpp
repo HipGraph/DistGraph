@@ -9,6 +9,8 @@
 #include <mpi.h>
 #include <parallel/algorithm>
 #include <vector>
+#include <unordered_set>
+
 
 using namespace std;
 
@@ -186,7 +188,7 @@ public:
       //      std::end(handle->col_idx), std::begin(col_ids[count]),
       //                     [](MKL_INT value) { return
       //                     static_cast<uint64_t>(value); });
-      std::unordered_set<int> unique_set;
+      std::unordered_set<uint64_t> unique_set;
       std::transform(std::begin(handle->col_idx), std::end(handle->col_idx), std::back_inserter(col_ids[count]),
 [&unique_set](MKL_INT value) {
         if (unique_set.insert(static_cast<uint64_t>(value)).second) {
