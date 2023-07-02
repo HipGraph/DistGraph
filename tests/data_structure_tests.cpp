@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
                                        grid.get()->world_size);
 
 
-  shared_sparseMat.get()->divide_block_cols(localARows,localBRows, grid.get()->world_size,
+  shared_sparseMat.get()->divide_block_cols(15000,localBRows, grid.get()->world_size,
                                             true,false);
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(
