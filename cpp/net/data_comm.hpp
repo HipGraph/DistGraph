@@ -35,9 +35,9 @@ public:
   void invoke(int batch_id, bool fetch_all) {
 
     int no_of_nodes_per_proc_list =
-        (this->sp_local->gCols / this->sp_local->block_col_width);
+        (this->sp_local->proc_col_width / this->sp_local->block_col_width);
     int no_of_nodes_per_proc_list_trans =
-        (this->sp_local_trans->gRows /
+        (this->sp_local_trans->proc_row_width /
          this->sp_local_trans->block_row_width);
 
 
