@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
   initialize_mpi_datatypes<int>();
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
       batch_size, localARows, localBRows);
 
-  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
+
 
   auto partitioner =
       unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(
@@ -105,19 +106,14 @@ int main(int argc, char **argv) {
   if (rank == 0) {
     cout << " vector size " << id_list.size() << endl;
     for (int i = 0; i < id_list.size(); i++) {
-      for (int k = 0; k < id_list[i].size(); k++) {
         cout << id_list[i][k] << " ";
-      }
-      cout << endl;
     }
-
+    cout << endl;
     cout << " ######### vector size trans ###########" << id_list_trans.size() << endl;
     for (int i = 0; i < id_list_trans.size(); i++) {
-      for (int k = 0; k < id_list[i].size(); k++) {
         cout << id_list_trans[i][k] << " ";
-      }
-      cout << endl;
     }
+    cout << endl;
   }
 
   //  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
