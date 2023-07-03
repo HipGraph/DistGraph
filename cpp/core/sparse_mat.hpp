@@ -20,14 +20,17 @@ namespace distblas::core {
  */
 template <typename T> class SpMat : public DistributedMat {
 
-public:
-  int gRows, gCols, gNNz;
-  vector<Tuple<T>> coords;
-
+private:
   vector<uint64_t> block_col_starts;
   vector<uint64_t> block_row_starts;
 
   vector<shared_ptr<CSRLinkedList<T>>> csr_linked_lists;
+
+public:
+  int gRows, gCols, gNNz;
+  vector<Tuple<T>> coords;
+  int block_row_width, block_col_width;
+  int proc_col_width, proc_row_width;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -36,11 +39,17 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(vector<Tuple<T>>& coords, int& gRows, int& gCols, int& gNNz) {
+  SpMat(vector<Tuple<T>> &coords, int &gRows, int &gCols, int &gNNz,
+        int &block_row_width, int &block_col_width, int &proc_row_width,
+        int &proc_col_width) {
     this->gRows = gRows;
     this->gCols = gCols;
     this->gNNz = gNNz;
     this->coords = coords;
+    this->block_row_width = block_row_width;
+    this->block_col_width = block_col_width;
+    this->proc_col_width = proc_col_width;
+    this->proc_row_width = proc_row_width;
   }
 
   SpMat() {}
@@ -142,9 +151,6 @@ public:
 
     int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
                                   : (local_max_row_width / block_rows);
-
-    //    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(
-    //        size, std::make_shared<CSRLinkedList<T>>());
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
@@ -154,20 +160,16 @@ public:
     }
 
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
-      int current_vector_pos =0;
+      int current_vector_pos = 0;
       if (!transpose) {
-         current_vector_pos = j % no_of_lists;
-        if (j>0 and current_vector_pos ==0){
+        current_vector_pos = j % no_of_lists;
+        if (j > 0 and current_vector_pos == 0) {
           ++col_block;
         }
       } else {
-         current_vector_pos = j/no_of_nodes;
+        current_vector_pos = j / no_of_nodes;
         col_block = current_vector_pos;
       }
-
-
-
-
 
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
       int rank;
@@ -182,41 +184,53 @@ public:
       (csr_linked_lists[current_vector_pos].get())
           ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                    transpose, j);
-
-      //      if (block_row_starts[j + 1] >= block_col_starts[col_block + 1]) {
-      //        ++col_block;
-      //        if (!transpose) {
-      //          current_vector_pos = 0;
-      //        } else {
-      //          ++current_vector_pos;
-      //        }
-      //      } else {
-      //        if (!transpose) {
-      //          ++current_vector_pos;
-      //        }
-      //      }
-
     }
   }
 
-  void fill_col_ids(int block_id, vector<vector<uint64_t>> &col_ids) {
-    auto linkedList = csr_linked_lists[block_id];
+  void fill_col_ids(int block_row_id, int block_col_id,
+                    vector<uint64_t> &col_ids, bool transponse,
+                    bool return_global_ids) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    int csr_linked_list_id = (transpose) ? block_col_id : block_row_id;
+    int batch_id = (transpose) ? block_row_id : block_col_id;
+
+    int no_of_nodes_per_proc_list = (transpose)
+                                        ? (proc_row_width / block_row_width)
+                                        : (proc_col_width / block_col_width);
+    int no_of_lists = (transpose) ? (proc_col_width / block_col_width)
+                                  : (proc_row_width / block_row_width);
+
+    auto linkedList = csr_linked_lists[csr_linked_list_id];
 
     auto head = (linkedList.get())->getHeadNode();
 
     int count = 0;
-    while (head != nullptr) {
+    while (count < batch_id) {
       auto csr_data = (head.get())->data;
+      head = (head.get())->next;
+      ++count;
+    }
+    if (count == batch_id) {
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
       std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(),
                                              handle->col_idx.end());
-      col_ids[count] = vector<uint64_t>(unique_set.size());
-      std::transform(std::begin(unique_set), std::end(unique_set),
-                     std::begin(col_ids[count]), [](MKL_INT value) {
-                       return static_cast<uint64_t>(value);
-                     });
-      head = (head.get())->next;
-      ++count;
+      col_ids = vector<uint64_t>(unique_set.size());
+      std::transform(
+          std::begin(unique_set), std::end(unique_set), std::begin(col_ids),
+          [](MKL_INT value) {
+            if (!return_global_ids) {
+              return static_cast<uint64_t>(value);
+            } else {
+              uint64_t base_id = static_cast<uint64_t>(rank * proc_col_width);
+              uint64_t block_base_id =
+                  base_id +
+                  static_cast<uint64_t>(block_col_id * block_col_width);
+              uint64_t g_index = static_cast<uint64_t>(value) + block_base_id;
+              return g_index;
+            }
+          });
     }
   }
 
