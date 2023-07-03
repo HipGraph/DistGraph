@@ -8,6 +8,7 @@
 #include <mkl_spblas.h>
 #include <iostream>
 #include <random>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -20,7 +21,8 @@ vector<int> generate_random_numbers(int lower_bound, int upper_bound, int seed,
 
 void prefix_sum(vector<int> &values, vector<int> &offsets);
 
-template <typename T> struct Tuple {
+template <typename T>
+struct Tuple {
   int64_t row;
   int64_t col;
   T value;
@@ -30,6 +32,12 @@ template <typename T> struct CSR {
   int64_t row;
   int64_t col;
   T value;
+};
+
+template <typename T>
+struct DataTuple {
+  uint64_t col;
+  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 };
 
 
@@ -63,8 +71,10 @@ template <typename T> bool row_major(Tuple<T> a, Tuple<T> b) {
 
 extern MPI_Datatype SPTUPLE;
 
+extern MPI_Datatype DENSETUPLE;
+
 template <typename T>
-void initialize_mpi_datatypes() {
+void initialize_mpi_datatype_SPTUPLE() {
   const int nitems = 3;
   int blocklengths[3] = {1, 1, 1};
   MPI_Datatype*  types = new MPI_Datatype[3];
@@ -87,7 +97,26 @@ void initialize_mpi_datatypes() {
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
   delete[] types;
+
 }
+
+template <typename T>
+void initialize_mpi_datatype_DENSETUPLE() {
+  int blockcounts[] = {1, 1};
+  MPI_Aint offsets[] = {offsetof(DataTuple<T>, col), offsetof(DataTuple<T>, value)};
+  MPI_Datatype types[] = {MPI_UINT64_T, MPI_DOUBLE};
+  MPI_Datatype mpi_data_tuple_type;
+  MPI_Type_create_struct(2, blockcounts, offsets, types, &DENSETUPLE);
+  MPI_Type_commit(&DENSETUPLE);
+}
+
+template <typename SPT, DENT>
+void initialize_mpi_datatypes() {
+  initialize_mpi_datatype_SPTUPLE<SPT>();
+  initialize_mpi_datatype_DENSETUPLE<DENT>();
+}
+
+
 
 }; // namespace distblas::core
 
