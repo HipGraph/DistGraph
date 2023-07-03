@@ -212,14 +212,15 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
+      int proc_col_width = this->proc_col_width;
+      int block_col_width = this->block_col_width;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
       std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(),
                                              handle->col_idx.end());
       col_ids = vector<uint64_t>(unique_set.size());
       std::transform(
           std::begin(unique_set), std::end(unique_set), std::begin(col_ids),
-          [&return_global_ids, &rank,  &block_col_id, &this->proc_col_width,
-           &this->block_col_width, ](MKL_INT value) {
+          [&return_global_ids, &rank,  &block_col_id,&proc_col_width, &block_col_width](MKL_INT value) {
             if (!return_global_ids) {
               return static_cast<uint64_t>(value);
             } else {
