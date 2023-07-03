@@ -106,12 +106,12 @@ int main(int argc, char **argv) {
   if (rank == 0) {
     cout << " vector size " << id_list.size() << endl;
     for (int i = 0; i < id_list.size(); i++) {
-        cout << id_list[i][k] << " ";
+        cout << id_list[i] << " ";
     }
     cout << endl;
     cout << " ######### vector size trans ###########" << id_list_trans.size() << endl;
     for (int i = 0; i < id_list_trans.size(); i++) {
-        cout << id_list_trans[i][k] << " ";
+        cout << id_list_trans[i] << " ";
     }
     cout << endl;
   }
