@@ -40,11 +40,19 @@ public:
         (this->sp_local_trans->proc_row_width /
          this->sp_local_trans->block_row_width);
 
+
+
     int no_of_lists =
         (this->sp_local->proc_col_width / this->sp_local->block_col_width);
 
     int no_of_lists_trans = (this->sp_local_trans->proc_row_width /
                              this->sp_local_trans->block_row_width);
+
+    cout<< " rank "<<grid->world_size<< " no_of_nodes_per_proc_list "
+         <<no_of_nodes_per_proc_list<< " no_od_lists "<<no_of_lists<<endl;
+
+    cout<< " rank "<<grid->world_size<< " no_of_nodes_per_proc_list_trans "
+         <<no_of_nodes_per_proc_list_trans<< " no_of_lists_trans "<<no_of_lists_trans<<endl;
 
     int *sdispls = new int[grid->world_size];
     int *sendcounts = new int[grid->world_size];
@@ -96,7 +104,7 @@ public:
             ++working_rank;
           }
           vector<uint64_t> col_ids;
-          this->sp_local_trans->fill_col_ids(i, j, col_ids, true, true);
+          this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
           send_col_ids_list[working_rank].insert(send_col_ids_list[working_rank].end(),
                                                  col_ids.begin(),col_ids.end());
           std::unordered_set<MKL_INT> unique_set(send_col_ids_list[working_rank].begin(),
@@ -120,6 +128,8 @@ public:
     } else {
     }
 
+    cout<<" rank "<< grid->global_rank <<" send count "<<total_send_count<<endl;
+    cout<<" rank "<< grid->global_rank <<" receive count "<<total_receive_count<<endl;
 
     for (int i = 0; i < grid->world_size; i++) {
       vector<uint64_t> sending_vec = send_col_ids_list[i];
