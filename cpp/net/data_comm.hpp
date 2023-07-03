@@ -49,10 +49,12 @@ public:
     int no_of_lists_trans = (this->sp_local_trans->proc_col_width /
                              this->sp_local_trans->block_col_width);
 
-    cout << " rank " << grid->global_rank << "total nodes" << total_nodes << " no_of_nodes_per_proc_list "
-         << no_of_nodes_per_proc_list << " no_od_lists " << no_of_lists << endl;
+    cout << " rank " << grid->global_rank << "total nodes" << total_nodes
+         << " no_of_nodes_per_proc_list " << no_of_nodes_per_proc_list
+         << " no_od_lists " << no_of_lists << endl;
 
-    cout << " rank " << grid->global_rank <<"total nodes trans " << total_nodes_trans <<  " no_of_nodes_per_proc_list_trans "
+    cout << " rank " << grid->global_rank << "total nodes trans "
+         << total_nodes_trans << " no_of_nodes_per_proc_list_trans "
          << no_of_nodes_per_proc_list_trans << " no_of_lists_trans "
          << no_of_lists_trans << endl;
 
@@ -87,9 +89,9 @@ public:
           }
           vector<uint64_t> col_ids;
           this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-          if (receive_col_ids_list[working_rank].size()==0){
+          if (receive_col_ids_list[working_rank].size() == 0) {
             receive_col_ids_list[working_rank] = col_ids;
-          }else {
+          } else {
             receive_col_ids_list[working_rank].insert(
                 receive_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
@@ -115,9 +117,9 @@ public:
           }
           vector<uint64_t> col_ids;
           this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-          if (send_col_ids_list[working_rank].size()==0){
+          if (send_col_ids_list[working_rank].size() == 0) {
             send_col_ids_list[working_rank] = col_ids;
-          }else {
+          } else {
             send_col_ids_list[working_rank].insert(
                 send_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
@@ -131,9 +133,11 @@ public:
         }
       }
 
-      for (int i = 1; i < grid->world_size; i++) {
-        sdispls[i] = sdispls[i - 1] + sendcounts[i];
-        rdispls[i] = rdispls[i - 1] + receivecounts[i];
+      for (int i = 0; i < grid->world_size; i++) {
+
+        sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
+        rdispls[i] =
+            (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
 
         total_send_count = total_send_count + sendcounts[i];
         total_receive_count = total_receive_count + receivecounts[i];
