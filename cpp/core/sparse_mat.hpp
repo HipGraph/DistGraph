@@ -214,7 +214,7 @@ public:
       col_ids = vector<uint64_t>(unique_set.size());
       std::transform(
           std::begin(unique_set), std::end(unique_set), std::begin(col_ids),
-          [&return_global_ids, &rank,  &block_col_id,&block_row_width, &block_col_width](MKL_INT value) {
+          [&return_global_ids, &rank, &transpose, &block_col_id,&block_row_width, &block_col_width](MKL_INT value) {
             if (!return_global_ids) {
               return static_cast<uint64_t>(value);
             } else {
