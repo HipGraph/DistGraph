@@ -17,12 +17,12 @@ using namespace distblas::core;
   class DataComm {
 
   private:
-    disblas::core::SpMat<SPT> *sp_local;
-    disblas::core::SpMat<SPT> *sp_local_trans;
-    disblas::core::DenseMat *dense_local;
+    distblas::core::SpMat<SPT> *sp_local;
+    distblas::core::SpMat<SPT> *sp_local_trans;
+    distblas::core::DenseMat *dense_local;
 
   public:
-    DataComm(disblas::core::SpMat<SPT> *sp_local, disblas::core::SpMat<SPT> *sp_local_trans,
+    DataComm(distblas::core::SpMat<SPT> *sp_local, distblas::core::SpMat<SPT> *sp_local_trans,
              DenseMat *dense_local) {
       this->sp_local = sp_local;
       this->sp_local_trans = sp_local_trans;
