@@ -43,6 +43,7 @@ add_library(disblas_lib SHARED
         cpp/io/parrallel_IO.hpp
         cpp/net/process_3D_grid.cpp
         cpp/net/process_3D_grid.hpp
+        cpp/net/data_comm.hpp
         cpp/partition/partitioner.cpp
         cpp/core/csr_linked_list.hpp
         cpp/partition/partitioner.hpp)

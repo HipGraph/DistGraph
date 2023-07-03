@@ -4,6 +4,7 @@
 #include "../cpp/core/sparse_mat.hpp"
 #include "../cpp/io/parrallel_IO.hpp"
 #include "../cpp/partition/partitioner.hpp"
+#include "../cpp/net/data_comm.hpp"
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -13,6 +14,7 @@
 using namespace std;
 using namespace distblas::io;
 using namespace distblas::partition;
+using namespace distblas::net;
 
 int main(int argc, char **argv) {
   string file_path = argv[1];
@@ -103,6 +105,15 @@ int main(int argc, char **argv) {
   shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
   shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
+    cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
+    auto dense_mat = shared_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));
+//    dense_mat.get()->print_matrix();
+    cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
+
+  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),shared_sparseMat_Trans.get(),dense_mat.get()));
+  communicator.get()->invoke(0,true);
+
+
   if (rank == 0) {
     cout << " vector size " << id_list.size() << endl;
     for (int i = 0; i < id_list.size(); i++) {
@@ -116,10 +127,7 @@ int main(int argc, char **argv) {
     cout << endl;
   }
 
-  //  cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
-  //  auto dense_mat = unique_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));
-  //  dense_mat.get()->print_matrix();
-  //  cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
+
 
   cout << " rank " << rank << " processing completed  " << endl;
 
