@@ -110,7 +110,7 @@ void initialize_mpi_datatype_DENSETUPLE() {
   MPI_Type_commit(&DENSETUPLE);
 }
 
-template <typename SPT, DENT>
+template <typename SPT, typename DENT>
 void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<SPT>();
   initialize_mpi_datatype_DENSETUPLE<DENT>();
