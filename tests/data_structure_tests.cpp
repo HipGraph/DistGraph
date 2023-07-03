@@ -110,22 +110,25 @@ int main(int argc, char **argv) {
 //    dense_mat.get()->print_matrix();
     cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
-  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),shared_sparseMat_Trans.get(),dense_mat.get()));
+  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),
+                                                                                    shared_sparseMat_Trans.get(),
+                                                                                    dense_mat.get(),
+                                                                                    grid.get()));
   communicator.get()->invoke(0,true);
 
 
-  if (rank == 0) {
-    cout << " vector size " << id_list.size() << endl;
-    for (int i = 0; i < id_list.size(); i++) {
-        cout << id_list[i] << " ";
-    }
-    cout << endl;
-    cout << " ######### vector size trans ###########" << id_list_trans.size() << endl;
-    for (int i = 0; i < id_list_trans.size(); i++) {
-        cout << id_list_trans[i] << " ";
-    }
-    cout << endl;
-  }
+//  if (rank == 0) {
+//    cout << " vector size " << id_list.size() << endl;
+//    for (int i = 0; i < id_list.size(); i++) {
+//        cout << id_list[i] << " ";
+//    }
+//    cout << endl;
+//    cout << " ######### vector size trans ###########" << id_list_trans.size() << endl;
+//    for (int i = 0; i < id_list_trans.size(); i++) {
+//        cout << id_list_trans[i] << " ";
+//    }
+//    cout << endl;
+//  }
 
 
 
