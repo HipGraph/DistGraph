@@ -34,13 +34,14 @@ public:
 
   void invoke(int batch_id, bool fetch_all) {
 
+    int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
+    int total_nodes_trans =
+        this->sp_local_trans->gRows / this->sp_local->block_row_width;
     int no_of_nodes_per_proc_list =
         (this->sp_local->proc_col_width / this->sp_local->block_col_width);
     int no_of_nodes_per_proc_list_trans =
         (this->sp_local_trans->proc_row_width /
          this->sp_local_trans->block_row_width);
-
-
 
     int no_of_lists =
         (this->sp_local->proc_row_width / this->sp_local->block_row_width);
@@ -48,11 +49,12 @@ public:
     int no_of_lists_trans = (this->sp_local_trans->proc_col_width /
                              this->sp_local_trans->block_col_width);
 
-    cout<< " rank "<<grid->global_rank<< " no_of_nodes_per_proc_list "
-         <<no_of_nodes_per_proc_list<< " no_od_lists "<<no_of_lists<<endl;
+    cout << " rank " << grid->global_rank << "total nodes" << total_nodes << " no_of_nodes_per_proc_list "
+         << no_of_nodes_per_proc_list << " no_od_lists " << no_of_lists << endl;
 
-    cout<< " rank "<<grid->global_rank<< " no_of_nodes_per_proc_list_trans "
-         <<no_of_nodes_per_proc_list_trans<< " no_of_lists_trans "<<no_of_lists_trans<<endl;
+    cout << " rank " << grid->global_rank <<"total nodes trans " << total_nodes_trans <<  " no_of_nodes_per_proc_list_trans "
+         << no_of_nodes_per_proc_list_trans << " no_of_lists_trans "
+         << no_of_lists_trans << endl;
 
     int *sdispls = new int[grid->world_size];
     int *sendcounts = new int[grid->world_size];
@@ -79,19 +81,22 @@ public:
       for (int i = 0; i < no_of_lists; i++) {
         int working_rank = 0;
 
-        for (int j = 0; j < no_of_nodes_per_proc_list; j++) {
+        for (int j = 0; j < total_nodes; j++) {
           if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
             ++working_rank;
           }
           vector<uint64_t> col_ids;
           this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-          receive_col_ids_list[working_rank].insert(receive_col_ids_list[working_rank].end(),
-                                                    col_ids.begin(),col_ids.end());
-          std::unordered_set<MKL_INT> unique_set(receive_col_ids_list[working_rank].begin(),
-                                                 receive_col_ids_list[working_rank].end());
-          receive_col_ids_list[working_rank] = vector<uint64_t>(unique_set.begin(),unique_set.end());
-          receivecounts[working_rank] =receive_col_ids_list[working_rank].size();
-
+          receive_col_ids_list[working_rank].insert(
+              receive_col_ids_list[working_rank].end(), col_ids.begin(),
+              col_ids.end());
+          std::unordered_set<MKL_INT> unique_set(
+              receive_col_ids_list[working_rank].begin(),
+              receive_col_ids_list[working_rank].end());
+          receive_col_ids_list[working_rank] =
+              vector<uint64_t>(unique_set.begin(), unique_set.end());
+          receivecounts[working_rank] =
+              receive_col_ids_list[working_rank].size();
         }
       }
 
@@ -99,18 +104,21 @@ public:
       for (int i = 0; i < no_of_lists_trans; i++) {
         int working_rank = 0;
 
-        for (int j = 0; j < no_of_nodes_per_proc_list_trans; j++) {
+        for (int j = 0; j < total_nodes_trans; j++) {
           if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
             ++working_rank;
           }
           vector<uint64_t> col_ids;
           this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-          send_col_ids_list[working_rank].insert(send_col_ids_list[working_rank].end(),
-                                                 col_ids.begin(),col_ids.end());
-          std::unordered_set<MKL_INT> unique_set(send_col_ids_list[working_rank].begin(),
-                                                 send_col_ids_list[working_rank].end());
-          send_col_ids_list[working_rank] = vector<uint64_t>(unique_set.begin(),unique_set.end());
-          sendcounts[working_rank] =send_col_ids_list[working_rank].size();
+          send_col_ids_list[working_rank].insert(
+              send_col_ids_list[working_rank].end(), col_ids.begin(),
+              col_ids.end());
+          std::unordered_set<MKL_INT> unique_set(
+              send_col_ids_list[working_rank].begin(),
+              send_col_ids_list[working_rank].end());
+          send_col_ids_list[working_rank] =
+              vector<uint64_t>(unique_set.begin(), unique_set.end());
+          sendcounts[working_rank] = send_col_ids_list[working_rank].size();
         }
       }
 
@@ -128,27 +136,28 @@ public:
     } else {
     }
 
-    cout<<" rank "<< grid->global_rank <<" send count "<<total_send_count<<endl;
-    cout<<" rank "<< grid->global_rank <<" receive count "<<total_receive_count<<endl;
+    cout << " rank " << grid->global_rank << " send count " << total_send_count
+         << endl;
+    cout << " rank " << grid->global_rank << " receive count "
+         << total_receive_count << endl;
 
     for (int i = 0; i < grid->world_size; i++) {
       vector<uint64_t> sending_vec = send_col_ids_list[i];
       vector<uint64_t> receiving_vec = receive_col_ids_list[i];
 
-      cout<<" rank "<< grid->global_rank <<" sending to dst "<<i<<" count "
-           << sendcounts[i]<<endl;
-      cout<<" rank "<< grid->global_rank <<" receving  from src "<<i<<" count "
-           << receivecounts[i]<<endl;
-      for(int j=0;j<sending_vec.size();j++) {
-        int index = sdispls[i]+j;
+      cout << " rank " << grid->global_rank << " sending to dst " << i
+           << " count " << sendcounts[i] << endl;
+      cout << " rank " << grid->global_rank << " receving  from src " << i
+           << " count " << receivecounts[i] << endl;
+      for (int j = 0; j < sending_vec.size(); j++) {
+        int index = sdispls[i] + j;
         sendbuf[index].col = sending_vec[j];
       }
 
-      for(int j=0;j<receiving_vec.size();j++) {
-        int index = rdispls[i]+j;
+      for (int j = 0; j < receiving_vec.size(); j++) {
+        int index = rdispls[i] + j;
         receivebuf[index].col = receiving_vec[j];
       }
-
     }
   }
 };
