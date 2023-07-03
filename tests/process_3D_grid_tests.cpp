@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 
   MPI_Init(&argc, &argv);
 
-  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(nr, nc, nl, adj));
+  auto grid = shared_ptr<Process3DGrid>(new Process3DGrid(nr, nc, nl, adj));
   grid.get()->gather_and_pretty_print("Global Ranks", grid.get()->global_rank);
   grid.get()->gather_and_pretty_print("i values", grid.get()->i);
   grid.get()->gather_and_pretty_print("j values", grid.get()->j);
