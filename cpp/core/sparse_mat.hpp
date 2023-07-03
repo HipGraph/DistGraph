@@ -188,7 +188,7 @@ public:
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
-                    vector<uint64_t> &col_ids, bool transponse,
+                    vector<uint64_t> &col_ids, bool transpose,
                     bool return_global_ids) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -205,21 +205,20 @@ public:
     auto linkedList = csr_linked_lists[csr_linked_list_id];
 
     auto head = (linkedList.get())->getHeadNode();
-
     int count = 0;
-    while (count < batch_id) {
-      auto csr_data = (head.get())->data;
+    while (count < batch_id && (head.get())->next != nullptr) {
       head = (head.get())->next;
       ++count;
     }
     if (count == batch_id) {
+      auto csr_data = (head.get())->data;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
       std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(),
                                              handle->col_idx.end());
       col_ids = vector<uint64_t>(unique_set.size());
       std::transform(
           std::begin(unique_set), std::end(unique_set), std::begin(col_ids),
-          [](MKL_INT value) {
+          [&return_global_ids, &rank, &proc_col_width, &block_col_id, &block_col_width](MKL_INT value) {
             if (!return_global_ids) {
               return static_cast<uint64_t>(value);
             } else {
