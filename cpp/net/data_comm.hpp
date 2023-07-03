@@ -87,7 +87,7 @@ public:
           }
           vector<uint64_t> col_ids;
           this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-          if (receive_col_ids_list[working_rank]==nullptr or receive_col_ids_list[working_rank].size()==0){
+          if (receive_col_ids_list[working_rank].size()==0){
             receive_col_ids_list[working_rank] = col_ids;
           }else {
             receive_col_ids_list[working_rank].insert(
@@ -115,7 +115,7 @@ public:
           }
           vector<uint64_t> col_ids;
           this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-          if (send_col_ids_list[working_rank]==nullptr or send_col_ids_list[working_rank].size()==0){
+          if (send_col_ids_list[working_rank].size()==0){
             send_col_ids_list[working_rank] = col_ids;
           }else {
             send_col_ids_list[working_rank].insert(
