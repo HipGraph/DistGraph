@@ -36,7 +36,7 @@ public:
 
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
-        this->sp_local_trans->gRows / this->sp_local->block_row_width;
+        this->sp_local_trans->gRows / this->sp_local_trans->block_row_width;
     int no_of_nodes_per_proc_list =
         (this->sp_local->proc_col_width / this->sp_local->block_col_width);
     int no_of_nodes_per_proc_list_trans =
