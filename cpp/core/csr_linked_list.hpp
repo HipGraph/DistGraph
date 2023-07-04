@@ -32,6 +32,7 @@ public:
   }
 
   ~CSRLinkedList() {
+
   }
 
   void insert(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,

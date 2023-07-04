@@ -140,7 +140,9 @@ public:
     mkl_sparse_destroy(tempCSR);
   }
 
-  ~CSRLocal() { mkl_sparse_destroy((handler.get())->mkl_handle); }
+  ~CSRLocal() {
+//    mkl_sparse_destroy((handler.get())->mkl_handle);
+  }
 };
 
 } // namespace distblas::core

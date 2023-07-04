@@ -181,9 +181,9 @@ public:
            << col_block << endl;
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
-//      (csr_linked_lists[current_vector_pos].get())
-//          ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
-//                   transpose, j);
+      (csr_linked_lists[current_vector_pos].get())
+          ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
+                   transpose, j);
     }
   }
 
