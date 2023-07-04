@@ -267,11 +267,18 @@ public:
       int size = receivecounts[i];
       for(int k=0;k<size;k++){
         int index = rdispls[i] + k;
+         int col_index = receivebuf[index].col
         vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-        if (receiving_vec[k] !=receivebuf[index].col) {
-          cout<<" error in rank "<<grid->global_rank <<" for rank"<<i<<" index "
-               <<index <<endl;
-        }
+         bool check = false;
+         for(int m=0;m<receiving_vec.size();m++){
+           if (receiving_vec[m] ==col_index) {
+            check=true;
+           }
+         }
+         if (!check) {
+           cout<<" error in rank "<< grid->global_rank <<" for rank "<<i<<" for index "<<col_index<<endl;
+         }
+
       }
     }
   }
