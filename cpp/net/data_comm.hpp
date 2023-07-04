@@ -258,12 +258,11 @@ public:
     }
 
     MPI_Request request;
-    MPI_Ialltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE, receivebuf,
-                   receivecounts, rdispls, DENSETUPLE, MPI_COMM_WORLD,
-                   &request);
+    MPI_alltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE, receivebuf,
+                   receivecounts, rdispls, DENSETUPLE, MPI_COMM_WORLD);
 
-    MPI_Status status;
-    MPI_Wait(&request, &status);
+//    MPI_Status status;
+//    MPI_Wait(&request, &status);
 
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdispls[i];
