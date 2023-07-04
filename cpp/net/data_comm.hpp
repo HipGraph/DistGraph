@@ -27,6 +27,7 @@ private:
   int *receivecounts;
   DataTuple<DENT> *sendbuf;
   DataTuple<DENT> *receivebuf;
+  DataTuple<DENT> *receivebufvertify;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
@@ -159,7 +160,7 @@ public:
 
       sendbuf = new DataTuple<DENT>[total_send_count];
       receivebuf = new DataTuple<DENT>[total_receive_count];
-
+      receivebufverify = new DataTuple<DENT>[total_receive_count];
     } else {
       // processing chunks
       // calculating receiving data cols
@@ -181,11 +182,12 @@ public:
             receive_col_ids_list[working_rank].insert(
                 receive_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
-//            std::unordered_set<MKL_INT> unique_set(
-//                receive_col_ids_list[working_rank].begin(),
-//                receive_col_ids_list[working_rank].end());
-//            receive_col_ids_list[working_rank] =
-//                vector<uint64_t>(unique_set.begin(), unique_set.end());
+            //            std::unordered_set<MKL_INT> unique_set(
+            //                receive_col_ids_list[working_rank].begin(),
+            //                receive_col_ids_list[working_rank].end());
+            //            receive_col_ids_list[working_rank] =
+            //                vector<uint64_t>(unique_set.begin(),
+            //                unique_set.end());
 
             receivecounts[working_rank] =
                 receive_col_ids_list[working_rank].size();
@@ -207,11 +209,11 @@ public:
         send_col_ids_list[working_rank].insert(
             send_col_ids_list[working_rank].end(), col_ids.begin(),
             col_ids.end());
-//        std::unordered_set<MKL_INT> unique_set(
-//            send_col_ids_list[working_rank].begin(),
-//            send_col_ids_list[working_rank].end());
-//        send_col_ids_list[working_rank] =
-//            vector<uint64_t>(unique_set.begin(), unique_set.end());
+        //        std::unordered_set<MKL_INT> unique_set(
+        //            send_col_ids_list[working_rank].begin(),
+        //            send_col_ids_list[working_rank].end());
+        //        send_col_ids_list[working_rank] =
+        //            vector<uint64_t>(unique_set.begin(), unique_set.end());
 
         sendcounts[working_rank] = send_col_ids_list[working_rank].size();
       }
@@ -228,6 +230,7 @@ public:
 
       sendbuf = new DataTuple<DENT>[total_send_count];
       receivebuf = new DataTuple<DENT>[total_receive_count];
+      receivebufverify = new DataTuple<DENT>[total_receive_count];
     }
 
     cout << " rank " << grid->global_rank << " send count " << total_send_count
@@ -248,36 +251,28 @@ public:
         sendbuf[index].col = sending_vec[j];
       }
 
-//      for (int j = 0; j < receiving_vec.size(); j++) {
-//        int index = rdispls[i] + j;
-//        receivebuf[index].col = receiving_vec[j];
-//      }
+      for (int j = 0; j < receiving_vec.size(); j++) {
+        int index = rdispls[i] + j;
+        receivebufverify[index].col = receiving_vec[j];
+      }
     }
 
     MPI_Request request;
-    MPI_Ialltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE,
-                   receivebuf, receivecounts, rdispls, DENSETUPLE,
-                   MPI_COMM_WORLD, &request);
+    MPI_Ialltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE, receivebuf,
+                   receivecounts, rdispls, DENSETUPLE, MPI_COMM_WORLD,
+                   &request);
 
     MPI_Status status;
     MPI_Wait(&request, &status);
 
-    for(int i=0;i<grid->world_size;i++){
+    for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdispls[i];
       int size = receivecounts[i];
-      for(int k=0;k<size;k++){
+      for (int k = 0; k < size; k++) {
         int index = rdispls[i] + k;
-         int col_index = receivebuf[index].col;
-        vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-         bool check = false;
-         for(int m=0;m<receiving_vec.size();m++){
-           if (receiving_vec[m] ==col_index) {
-            check=true;
-           }
-         }
-         if (!check) {
-           cout<<" error in rank "<< grid->global_rank <<" for rank "<<i<<" for index "<<col_index<<endl;
-         }
+        if (receivebuf[index].col != receivebufverify[index].col) {
+          cout<<" error rank "<<grid->global_rank <<" recevied col "<< receivebuf[index].col <<" expected col "<<receivebufverify[index].col<<endl;
+        }
 
       }
     }
