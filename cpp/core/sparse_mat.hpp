@@ -221,12 +221,7 @@ public:
               if (!return_global_ids) {
                 return static_cast<uint64_t>(value);
               } else {
-                uint64_t base_id = 0;
-                if (transpose) {
-                  base_id = static_cast<uint64_t>(batch_id * block_row_width);
-                } else {
-                  base_id = static_cast<uint64_t>(batch_id * block_col_width);
-                }
+                uint64_t base_id = static_cast<uint64_t>(batch_id * block_col_width)
                 uint64_t g_index = static_cast<uint64_t>(value) + base_id;
                 return g_index;
               }
