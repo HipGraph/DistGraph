@@ -27,7 +27,7 @@ private:
   int *receivecounts;
   DataTuple<DENT> *sendbuf;
   DataTuple<DENT> *receivebuf;
-  DataTuple<DENT> *receivebufvertify;
+  DataTuple<DENT> *receivebufverify;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
