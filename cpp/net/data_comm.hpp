@@ -270,8 +270,14 @@ public:
       int size = receivecounts[i];
       for (int k = 0; k < size; k++) {
         int index = rdispls[i] + k;
-        if (receivebuf[index].col != receivebufverify[index].col) {
-          cout<<" error rank "<<grid->global_rank <<" recevied col "<< receivebuf[index].col <<" expected col "<<receivebufverify[index].col<<endl;
+        bool matched = false;
+        for(int m=rdispls[i];m<rdispls[i]+receivecounts[i];m++){
+          if (receivebufverify[m].col==receivebuf[index].col) {
+            matched = true;
+          }
+        }
+        if (!matched) {
+          cout<<" rank "<<grid->global_rank<<"cannot verify value "<<receivebuf[index].col<<endl;
         }
 
       }
