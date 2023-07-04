@@ -82,20 +82,20 @@ int main(int argc, char **argv) {
   shared_sparseMat_Trans.get()->divide_block_rows(localARows, 15000, true,
                                                   true);
 
-  //  shared_sparseMat.get()->print_coords(false);
-  //  shared_sparseMat_Trans.get()->print_coords(true);
-//  cout << " rank " << rank << " partitioning data completed  " << endl;
-//
-//  cout << " rank " << rank << " initialization of CSR started  " << endl;
-//  shared_sparseMat.get()->initialize_CSR_blocks(15000, localBRows, localARows,
-//                                                localBRows, -1, false);
-//  cout << " rank " << rank << " initialization of  CSR completed  " << endl;
-//  cout << " rank " << rank << " initialization of transpose CSR started  "
-//       << endl;
-//  shared_sparseMat_Trans.get()->initialize_CSR_blocks(
-//      localARows, 15000, localARows, localBRows, -1, true);
-//  cout << " rank " << rank << " initialization of transpose CSR completed  "
-//       << endl;
+    shared_sparseMat.get()->print_coords(false);
+    shared_sparseMat_Trans.get()->print_coords(true);
+  cout << " rank " << rank << " partitioning data completed  " << endl;
+
+  cout << " rank " << rank << " initialization of CSR started  " << endl;
+  shared_sparseMat.get()->initialize_CSR_blocks(15000, localBRows, localARows,
+                                                localBRows, -1, false);
+  cout << " rank " << rank << " initialization of  CSR completed  " << endl;
+  cout << " rank " << rank << " initialization of transpose CSR started  "
+       << endl;
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(
+      localARows, 15000, localARows, localBRows, -1, true);
+  cout << " rank " << rank << " initialization of transpose CSR completed  "
+       << endl;
 
   //  shared_sparseMat.get()->print_blocks_and_cols(false);
   //  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
@@ -133,11 +133,6 @@ int main(int argc, char **argv) {
 
 
   cout << " rank " << rank << " processing completed  " << endl;
-
-  int col_rank;
-  MPI_Comm_rank(grid.get()->col_world, &col_rank);
-
-  cout << " rank " << rank << " col rank  " << col_rank << endl;
 
   MPI_Finalize();
   return 0;
