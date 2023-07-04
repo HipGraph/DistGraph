@@ -264,7 +264,7 @@ public:
     //    MPI_Status status;
     //    MPI_Wait(&request, &status);
 
-    string output_path = "recived_" + to_string(rank) + ".txt";
+    string output_path = "recived_" + to_string(grid->global_rank) + ".txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
