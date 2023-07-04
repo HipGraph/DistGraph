@@ -193,7 +193,7 @@ public:
         receivebuf[index].col = receiving_vec[j];
       }
     }
-    delete
+
   }
 };
 } // namespace distblas::net
