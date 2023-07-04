@@ -21,6 +21,12 @@ private:
   distblas::core::SpMat<SPT> *sp_local_trans;
   distblas::core::DenseMat *dense_local;
   Process3DGrid *grid;
+  int *sdispls ;
+  int *sendcounts;
+  int *rdispls;
+  int *receivecounts;
+  DataTuple<DENT> *sendbuf;
+  DataTuple<DENT> *receivebuf;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
@@ -30,10 +36,25 @@ public:
     this->sp_local_trans = sp_local_trans;
     this->dense_local = dense_local;
     this->grid = grid;
+    this->sdispls = new int[grid->world_size];
+    this->sendcounts = new int[grid->world_size];
+    this->rdispls = new int[grid->world_size];
+    this->receivecounts = new int[grid->world_size];
+    std::fill_n(sdispls, grid->world_size, 0);
+    std::fill_n(rdispls, grid->world_size, 0);
+    std::fill_n(sendcounts, grid->world_size, 0);
+    std::fill_n(receivecounts, grid->world_size, 0);
+
   }
 
   ~DataComm(){
-    cout<<"executing deletion"<<endl;
+    delete[] sdispls;
+    delete[] sendcounts;
+    delete[] rdispls;
+    delete[] receivecounts;
+    delete[] sendbuf;
+    delete[] receivebuf;
+    cout<<" pointer deleteion completed "<<endl;
   }
 
   void invoke(int batch_id, bool fetch_all) {
@@ -62,18 +83,18 @@ public:
          << no_of_nodes_per_proc_list_trans << " no_of_lists_trans "
          << no_of_lists_trans << endl;
 
-    int *sdispls = new int[grid->world_size];
-    int *sendcounts = new int[grid->world_size];
-    int *rdispls = new int[grid->world_size];
-    int *receivecounts = new int[grid->world_size];
+//    int *sdispls = new int[grid->world_size];
+//    int *sendcounts = new int[grid->world_size];
+//    int *rdispls = new int[grid->world_size];
+//    int *receivecounts = new int[grid->world_size];
 
-    std::fill_n(sdispls, grid->world_size, 0);
-    std::fill_n(rdispls, grid->world_size, 0);
-    std::fill_n(sendcounts, grid->world_size, 0);
-    std::fill_n(receivecounts, grid->world_size, 0);
+//    std::fill_n(sdispls, grid->world_size, 0);
+//    std::fill_n(rdispls, grid->world_size, 0);
+//    std::fill_n(sendcounts, grid->world_size, 0);
+//    std::fill_n(receivecounts, grid->world_size, 0);
 
-    DataTuple<DENT> *sendbuf;
-    DataTuple<DENT> *receivebuf;
+//    DataTuple<DENT> *sendbuf;
+//    DataTuple<DENT> *receivebuf;
 
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<vector<uint64_t>> send_col_ids_list(grid->world_size);
@@ -172,6 +193,7 @@ public:
         receivebuf[index].col = receiving_vec[j];
       }
     }
+    delete
   }
 };
 } // namespace distblas::net
