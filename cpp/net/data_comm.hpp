@@ -131,7 +131,7 @@ public:
 //          send_col_ids_list[working_rank] =
 //              vector<uint64_t>(unique_set.begin(), unique_set.end());
 //          //          }
-//          sendcounts[working_rank] = send_col_ids_list[working_rank].size();
+          sendcounts[working_rank] = send_col_ids_list[working_rank].size();
         }
       }
 
