@@ -274,7 +274,7 @@ public:
       int size = receivecounts[i];
       for (int k = 0; k < size; k++) {
         int index = rdispls[i] + k;
-        fout << i << " " << receivebuf[index].col;
+        fout << i << " " << receivebufverify[index].col;
         //        bool matched = false;
         //        for(int m=rdispls[i];m<rdispls[i]+receivecounts[i];m++){
         //          if (receivebufverify[m].col==receivebuf[index].col) {
