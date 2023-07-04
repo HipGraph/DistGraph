@@ -206,6 +206,8 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
+      cout<<" rank  "<<rank <<" inside fill_col_ids coords ( "<<block_row_id<<" ,"<<block_col_id<<")"
+           <<(csr_data.get())->num_coords <<endl;
       if ((csr_data.get())->num_coords > 0) {
         int block_row_width = this->block_row_width;
         int block_col_width = this->block_col_width;
