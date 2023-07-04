@@ -175,7 +175,7 @@ public:
     } else {
       // processing chunks
       // calculating receiving data cols
-      working_rank = 0;
+      int working_rank = 0;
 
       for (int j = 0; j < total_nodes; j++) {
         if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
@@ -197,7 +197,9 @@ public:
         receivecounts[working_rank] = receive_col_ids_list[working_rank].size();
       }
 
+
       // calculating sending data cols
+      working_rank = 0;
       for (int j = 0; j < total_nodes_trans; j++) {
         if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
           ++working_rank;
