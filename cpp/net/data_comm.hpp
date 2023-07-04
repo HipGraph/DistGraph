@@ -84,19 +84,6 @@ public:
          << no_of_nodes_per_proc_list_trans << " no_of_lists_trans "
          << no_of_lists_trans << endl;
 
-    //    int *sdispls = new int[grid->world_size];
-    //    int *sendcounts = new int[grid->world_size];
-    //    int *rdispls = new int[grid->world_size];
-    //    int *receivecounts = new int[grid->world_size];
-
-    //    std::fill_n(sdispls, grid->world_size, 0);
-    //    std::fill_n(rdispls, grid->world_size, 0);
-    //    std::fill_n(sendcounts, grid->world_size, 0);
-    //    std::fill_n(receivecounts, grid->world_size, 0);
-
-    //    DataTuple<DENT> *sendbuf;
-    //    DataTuple<DENT> *receivebuf;
-
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<vector<uint64_t>> send_col_ids_list(grid->world_size);
 
@@ -194,18 +181,17 @@ public:
             receive_col_ids_list[working_rank].insert(
                 receive_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
-            //        std::unordered_set<MKL_INT> unique_set(
-            //            receive_col_ids_list[working_rank].begin(),
-            //            receive_col_ids_list[working_rank].end());
-            //        receive_col_ids_list[working_rank] =
-            //            vector<uint64_t>(unique_set.begin(), unique_set.end());
+            std::unordered_set<MKL_INT> unique_set(
+                receive_col_ids_list[working_rank].begin(),
+                receive_col_ids_list[working_rank].end());
+            receive_col_ids_list[working_rank] =
+                vector<uint64_t>(unique_set.begin(), unique_set.end());
 
             receivecounts[working_rank] =
                 receive_col_ids_list[working_rank].size();
           }
         }
-        }
-
+      }
 
       // calculating sending data cols
       int working_rank = 0;
@@ -215,18 +201,18 @@ public:
         }
         vector<uint64_t> col_ids;
         this->sp_local_trans->fill_col_ids(j, batch_id, col_ids, true, true);
-        cout << " rank " << grid->global_rank << " trans  (" << j << "," << batch_id
-             << ")"
+        cout << " rank " << grid->global_rank << " trans  (" << j << ","
+             << batch_id << ")"
              << " size " << col_ids.size() << endl;
         send_col_ids_list[working_rank].insert(
             send_col_ids_list[working_rank].end(), col_ids.begin(),
             col_ids.end());
-//        std::unordered_set<MKL_INT> unique_set(
-//            send_col_ids_list[working_rank].begin(),
-//            send_col_ids_list[working_rank].end());
-//        send_col_ids_list[working_rank] =
-//            vector<uint64_t>(unique_set.begin(), unique_set.end());
-        //
+        std::unordered_set<MKL_INT> unique_set(
+            send_col_ids_list[working_rank].begin(),
+            send_col_ids_list[working_rank].end());
+        send_col_ids_list[working_rank] =
+            vector<uint64_t>(unique_set.begin(), unique_set.end());
+
         sendcounts[working_rank] = send_col_ids_list[working_rank].size();
       }
 
@@ -262,9 +248,30 @@ public:
         sendbuf[index].col = sending_vec[j];
       }
 
-      for (int j = 0; j < receiving_vec.size(); j++) {
-        int index = rdispls[i] + j;
-        receivebuf[index].col = receiving_vec[j];
+//      for (int j = 0; j < receiving_vec.size(); j++) {
+//        int index = rdispls[i] + j;
+//        receivebuf[index].col = receiving_vec[j];
+//      }
+    }
+
+    MPI_Request request;
+    MPI_Ialltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE,
+                   receivebuf, receivecounts, rdispls, DENSETUPLE,
+                   MPI_COMM_WORLD, &request);
+
+    MPI_Status status;
+    MPI_Wait(&request, &status);
+
+    for(int i=0;i<grid->world_size;i++){
+      int base_index = rdispls[i];
+      int size = receivecounts[i];
+      for(int k=0;k<size;k++){
+        int index = rdispls[i] + k;
+        vector<uint64_t> receiving_vec = receive_col_ids_list[i];
+        if (receiving_vec[k] !=receivebuf[index].col) {
+          cout<<" error in rank "<<grid->global_rank <<" for rank"<<i<<" index "
+               <<index <<endl;
+        }
       }
     }
   }
