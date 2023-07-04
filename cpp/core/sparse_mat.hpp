@@ -209,21 +209,20 @@ public:
       int block_row_width = this->block_row_width;
       int block_col_width = this->block_col_width;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-//      std::unordered_set<MKL_INT> unique_set(handle->col_idx.begin(),
-//                                             handle->col_idx.end());
-//      col_ids = vector<uint64_t>(unique_set.size());
       col_ids = vector<uint64_t>((handle->col_idx).size());
       std::transform(
-          std::begin((handle->col_idx)), std::end((handle->col_idx)), std::begin(col_ids),
-          [&return_global_ids, &rank, &transpose,&batch_id, &block_col_id,&block_row_width, &block_col_width](MKL_INT value) {
+          std::begin((handle->col_idx)), std::end((handle->col_idx)),
+          std::begin(col_ids),
+          [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
+           &block_row_width, &block_col_width](MKL_INT value) {
             if (!return_global_ids) {
               return static_cast<uint64_t>(value);
             } else {
               uint64_t base_id = 0;
               if (transpose) {
-                 base_id = static_cast<uint64_t>(batch_id*block_row_width);
-              }else {
-                base_id = static_cast<uint64_t>(batch_id*block_col_width);
+                base_id = static_cast<uint64_t>(batch_id * block_row_width);
+              } else {
+                base_id = static_cast<uint64_t>(batch_id * block_col_width);
               }
               uint64_t g_index = static_cast<uint64_t>(value) + base_id;
               return g_index;

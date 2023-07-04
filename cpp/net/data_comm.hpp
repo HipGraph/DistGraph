@@ -89,6 +89,7 @@ public:
           }
           vector<uint64_t> col_ids;
           this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+          cout<<" rank "<<grid->global_rank << "   ("<<i<<","<<j<<")"<<" size "<<col_ids.size()<<endl;
           //          if (receive_col_ids_list[working_rank].size() == 0) {
           //            receive_col_ids_list[working_rank] = col_ids;
           //          } else {
@@ -117,6 +118,7 @@ public:
           }
           vector<uint64_t> col_ids;
           this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
+          cout<<" rank "<<grid->global_rank << " trans  ("<<j<<","<<i<<")"<<" size "<<col_ids.size()<<endl;
           //          if (send_col_ids_list[working_rank].size() == 0) {
           //            send_col_ids_list[working_rank] = col_ids;
           //          } else {
