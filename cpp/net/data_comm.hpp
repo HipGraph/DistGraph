@@ -134,6 +134,7 @@ public:
       }
 
       // calculating sending data cols
+
       for (int i = 0; i < no_of_lists_trans; i++) {
         int working_rank = 0;
 
@@ -175,31 +176,39 @@ public:
     } else {
       // processing chunks
       // calculating receiving data cols
-      int working_rank = 0;
 
-      for (int j = 0; j < total_nodes; j++) {
-        if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
-          ++working_rank;
+      int offset = batch_id;
+      for (int i = 0; i < no_of_lists; i++) {
+        int working_rank = 0;
+        for (int j = 0; j < total_nodes; j++) {
+          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
+            ++working_rank;
+          }
+
+          if (j == working_rank * no_of_nodes_per_proc_list + offset) {
+            vector<uint64_t> col_ids;
+            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+            cout << " rank " << grid->global_rank << "   (" << batch_id << ","
+                 << j << ")"
+                 << " size " << col_ids.size() << endl;
+            receive_col_ids_list[working_rank].insert(
+                receive_col_ids_list[working_rank].end(), col_ids.begin(),
+                col_ids.end());
+            //        std::unordered_set<MKL_INT> unique_set(
+            //            receive_col_ids_list[working_rank].begin(),
+            //            receive_col_ids_list[working_rank].end());
+            //        receive_col_ids_list[working_rank] =
+            //            vector<uint64_t>(unique_set.begin(), unique_set.end());
+
+            receivecounts[working_rank] =
+                receive_col_ids_list[working_rank].size();
+          }
         }
-        vector<uint64_t> col_ids;
-        this->sp_local->fill_col_ids(batch_id, j, col_ids, false, true);
-        cout << " rank " << grid->global_rank << "   (" << batch_id << "," << j << ")"
-             << " size " << col_ids.size() << endl;
-        receive_col_ids_list[working_rank].insert(
-            receive_col_ids_list[working_rank].end(), col_ids.begin(),
-            col_ids.end());
-//        std::unordered_set<MKL_INT> unique_set(
-//            receive_col_ids_list[working_rank].begin(),
-//            receive_col_ids_list[working_rank].end());
-//        receive_col_ids_list[working_rank] =
-//            vector<uint64_t>(unique_set.begin(), unique_set.end());
-
-        receivecounts[working_rank] = receive_col_ids_list[working_rank].size();
-      }
+        }
 
 
       // calculating sending data cols
-      working_rank = 0;
+      int working_rank = 0;
       for (int j = 0; j < total_nodes_trans; j++) {
         if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
           ++working_rank;
