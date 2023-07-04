@@ -267,7 +267,7 @@ public:
       int size = receivecounts[i];
       for(int k=0;k<size;k++){
         int index = rdispls[i] + k;
-         int col_index = receivebuf[index].col
+         int col_index = receivebuf[index].col;
         vector<uint64_t> receiving_vec = receive_col_ids_list[i];
          bool check = false;
          for(int m=0;m<receiving_vec.size();m++){
