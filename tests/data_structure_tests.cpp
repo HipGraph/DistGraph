@@ -98,36 +98,21 @@ int main(int argc, char **argv) {
   //  shared_sparseMat.get()->print_blocks_and_cols(false);
   //  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
-//  vector<uint64_t> id_list_trans;
-//  vector<uint64_t> id_list;
-//  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
-//  shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
+  vector<uint64_t> id_list_trans;
+  vector<uint64_t> id_list;
+  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
+  shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
     cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
-//    auto dense_mat = shared_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));
+    auto dense_mat = shared_ptr<DenseMat>(new DenseMat(4,4,0.0,1.0));
 //    dense_mat.get()->print_matrix();
     cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
-//  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),
-//                                                                                    shared_sparseMat_Trans.get(),
-//                                                                                    dense_mat.get(),
-//                                                                                    grid.get()));
-//  communicator.get()->invoke(0,true);
-
-
-//  if (rank == 0) {
-//    cout << " vector size " << id_list.size() << endl;
-//    for (int i = 0; i < id_list.size(); i++) {
-//        cout << id_list[i] << " ";
-//    }
-//    cout << endl;
-//    cout << " ######### vector size trans ###########" << id_list_trans.size() << endl;
-//    for (int i = 0; i < id_list_trans.size(); i++) {
-//        cout << id_list_trans[i] << " ";
-//    }
-//    cout << endl;
-//  }
-
+  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),
+                                                                                    shared_sparseMat_Trans.get(),
+                                                                                    dense_mat.get(),
+                                                                                    grid.get()));
+  communicator.get()->invoke(0,true);
 
 
   cout << " rank " << rank << " processing completed  " << endl;
