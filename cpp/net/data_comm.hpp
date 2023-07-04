@@ -258,7 +258,7 @@ public:
     }
 
     MPI_Request request;
-    MPI_alltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE, receivebuf,
+    MPI_Alltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE, receivebuf,
                    receivecounts, rdispls, DENSETUPLE, MPI_COMM_WORLD);
 
 //    MPI_Status status;
