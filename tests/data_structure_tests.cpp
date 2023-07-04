@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
                                                                                     shared_sparseMat_Trans.get(),
                                                                                     dense_mat.get(),
                                                                                     grid.get()));
-  communicator.get()->invoke(0,true);
+//  communicator.get()->invoke(0,true);
 
 
 //  if (rank == 0) {
