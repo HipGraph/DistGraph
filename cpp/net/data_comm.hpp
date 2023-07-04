@@ -40,11 +40,6 @@ public:
     this->sendcounts = new int[grid->world_size];
     this->rdispls = new int[grid->world_size];
     this->receivecounts = new int[grid->world_size];
-    std::fill_n(sdispls, grid->world_size, 0);
-    std::fill_n(rdispls, grid->world_size, 0);
-    std::fill_n(sendcounts, grid->world_size, 0);
-    std::fill_n(receivecounts, grid->world_size, 0);
-
   }
 
   ~DataComm(){
@@ -58,6 +53,13 @@ public:
   }
 
   void invoke(int batch_id, bool fetch_all) {
+
+    std::fill_n(sdispls, grid->world_size, 0);
+    std::fill_n(rdispls, grid->world_size, 0);
+    std::fill_n(sendcounts, grid->world_size, 0);
+    std::fill_n(receivecounts, grid->world_size, 0);
+    sendbuf  = nullptr;
+    receivebuf = nullptr;
 
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
