@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
                                                                                     shared_sparseMat_Trans.get(),
                                                                                     dense_mat.get(),
                                                                                     grid.get()));
-  communicator.get()->invoke(0,true);
+  communicator.get()->invoke(0,false);
 
 
   cout << " rank " << rank << " processing completed  " << endl;
