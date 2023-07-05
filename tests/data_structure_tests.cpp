@@ -55,11 +55,11 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
 
-  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
-      copiedVector, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
-      batch_size, localARows, localBRows);
+//  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+//  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
+//      copiedVector, shared_sparseMat.get()->gRows,
+//      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
+//      batch_size, localARows, localBRows);
 
 
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " partitioning data started  " << endl;
 
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
-  partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
+//  partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
 
   shared_sparseMat.get()->divide_block_cols(
       15000, localBRows, grid.get()->world_size, true, false);
