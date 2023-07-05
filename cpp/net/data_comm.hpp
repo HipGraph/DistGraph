@@ -214,11 +214,13 @@ public:
 
     }
 
-    DataTuple<DENT> *sendbuf = new DataTuple<DENT>[total_send_count];
-    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
-    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
+//    DataTuple<DENT> *sendbuf = new DataTuple<DENT>[total_send_count];
+//    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
+//    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
 
-
+    std::unique_ptr<DataTuple<DENT>[]> sendbufptr(new DataType[size]);
+    std::unique_ptr<DataTuple<DENT>[]> receivebufptr(new DataType[size]);
+    std::unique_ptr<DataTuple<DENT>[]> receivebufverifyptr(new DataType[size]);
     cout << " rank " << grid->global_rank << " send count " << total_send_count
          << endl;
     cout << " rank " << grid->global_rank << " receive count "
@@ -244,7 +246,7 @@ public:
     }
 
     MPI_Request request;
-    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE, receivebuf,
+    MPI_Ialltoallv(sendbuf.get(), sendcounts.data(), sdispls.data(), DENSETUPLE, receivebuf.get(),
                   receivecounts.data(), rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
 
     MPI_Status status;
@@ -301,9 +303,9 @@ public:
 //        }
       }
     }
-    delete[] sendbuf;
-    delete[] receivebuf;
-    delete[] receivebufverify;
+//    delete[] sendbuf;
+//    delete[] receivebuf;
+//    delete[] receivebufverify;
   }
 };
 } // namespace distblas::net
