@@ -36,7 +36,7 @@ template <typename T> struct CSR {
 template <typename T> struct DataTuple {
   uint64_t col;
   Eigen::Matrix<T, 2, 1> value;
-
+  DataTuple() : col(0), value(Eigen::Matrix<T, 2, 1>::Zero()) {}
 };
 
 struct CSRHandle {
@@ -104,7 +104,6 @@ void initialize_mpi_datatype_DENSETUPLE() {
   MPI_Aint offsets[2];
 
   DataTuple<T> dummyTuple; // Dummy struct to get displacements
-  dummyTuple.value.zetZero();
 
   MPI_Get_address(&dummyTuple.col, &offsets[0]);
   MPI_Get_address(&dummyTuple.value, &offsets[1]);
