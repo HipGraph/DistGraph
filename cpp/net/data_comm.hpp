@@ -249,10 +249,10 @@ public:
       cout << " rank " << grid->global_rank << " receving  from src " << i
            << " count " << receivecounts[i] << endl;
       for (int j = 0; j < sending_vec.size(); j++) {
-        int index = sdispls[i] + j;
-        DataTuple<DENT> tuple(dense_local->cols);
-        tuple.col = sending_vec[j];
-        sendbuf[index] = tuple;
+//        int index = sdispls[i] + j;
+//        DataTuple<DENT> tuple(dense_local->cols);
+//        tuple.col = sending_vec[j];
+        sendbuf[index].col = sending_vec[j];
       }
 
       for (int j = 0; j < receiving_vec.size(); j++) {
