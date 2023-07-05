@@ -25,9 +25,6 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-  DataTuple<DENT> *sendbuf;
-  DataTuple<DENT> *receivebuf;
-  DataTuple<DENT> *receivebufverify;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
@@ -44,19 +41,13 @@ public:
   }
 
   ~DataComm() {
-//    if (sendbuf != nullptr){
-//      free(sendbuf);
-//    }
-//    if(receivebuf != nullptr){
-//      free(receivebuf);
-//    }
-    cout<<" receivebuf deletion completed"<<endl;
   }
 
   void invoke(int batch_id, bool fetch_all) {
 
-    sendbuf = nullptr;
-    receivebuf = nullptr;
+    DataTuple<DENT> *sendbuf;
+    DataTuple<DENT> *receivebuf;
+    DataTuple<DENT> *receivebufverify;
 
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
@@ -314,6 +305,9 @@ public:
 //        }
       }
     }
+    delete[] sendbuf;
+    delete[] receivebuf;
+    delete[] receivebufverify;
   }
 };
 } // namespace distblas::net
