@@ -206,8 +206,9 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
-      cout<<" rank  "<<rank <<" inside fill_col_ids coords ( "<<block_row_id<<" ,"<<block_col_id<<")"
-           <<(csr_data.get())->num_coords <<endl;
+      cout << " rank  " << rank << " inside fill_col_ids coords ( "
+           << block_row_id << " ," << block_col_id << ")"
+           << (csr_data.get())->num_coords << endl;
       if ((csr_data.get())->num_coords > 0) {
         int block_row_width = this->block_row_width;
         int block_col_width = this->block_col_width;
@@ -217,12 +218,15 @@ public:
             std::begin((handle->col_idx)), std::end((handle->col_idx)),
             std::begin(col_ids),
             [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-             &block_row_width, &block_col_width](MKL_INT value) {
+             &block_row_width, &block_col_width & transpose](MKL_INT value) {
               if (!return_global_ids) {
                 return static_cast<uint64_t>(value);
               } else {
-                uint64_t base_id = static_cast<uint64_t>(batch_id * block_col_width);
-                uint64_t g_index = static_cast<uint64_t>(value) + base_id;
+                int length = (transpose) ? proc_col_width : proc_row_width;
+                uint64_t starting_index = static_cast<uint64_t>(rank * length);
+                uint64_t base_id =
+                    static_cast<uint64_t>(batch_id * block_col_width);
+                uint64_t g_index = static_cast<uint64_t>(value) + base_id +length;
                 return g_index;
               }
             });
