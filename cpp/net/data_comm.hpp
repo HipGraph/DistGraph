@@ -45,10 +45,6 @@ public:
 
   void invoke(int batch_id, bool fetch_all) {
 
-    DataTuple<DENT> *sendbuf;
-    DataTuple<DENT> *receivebuf;
-    DataTuple<DENT> *receivebufverify;
-
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
         this->sp_local_trans->gRows / this->sp_local_trans->block_row_width;
@@ -146,9 +142,6 @@ public:
         total_receive_count = total_receive_count + receivecounts[i];
       }
 
-      sendbuf = new DataTuple<DENT>[total_send_count];
-      receivebuf = new DataTuple<DENT>[total_receive_count];
-      receivebufverify = new DataTuple<DENT>[total_receive_count];
     } else {
       // processing chunks
       // calculating receiving data cols
@@ -218,10 +211,12 @@ public:
         total_receive_count = total_receive_count + receivecounts[i];
       }
 
-      sendbuf = new DataTuple<DENT>[total_send_count];
-      receivebuf = new DataTuple<DENT>[total_receive_count];
-      receivebufverify = new DataTuple<DENT>[total_receive_count];
+
     }
+
+    DataTuple<DENT> *sendbuf = new DataTuple<DENT>[total_send_count];
+    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
+    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
 
     cout << " rank " << grid->global_rank << " send count " << total_send_count
          << endl;
@@ -305,9 +300,9 @@ public:
 //        }
       }
     }
-//    delete[] sendbuf;
-//    delete[] receivebuf;
-//    delete[] receivebufverify;
+    delete[] sendbuf;
+    delete[] receivebuf;
+    delete[] receivebufverify;
   }
 };
 } // namespace distblas::net
