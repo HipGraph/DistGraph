@@ -218,6 +218,7 @@ public:
     DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
     DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
 
+
     cout << " rank " << grid->global_rank << " send count " << total_send_count
          << endl;
     cout << " rank " << grid->global_rank << " receive count "
@@ -300,9 +301,9 @@ public:
 //        }
       }
     }
-    delete[] sendbuf;
-    delete[] receivebuf;
-    delete[] receivebufverify;
+//    delete[] sendbuf;
+//    delete[] receivebuf;
+//    delete[] receivebufverify;
   }
 };
 } // namespace distblas::net
