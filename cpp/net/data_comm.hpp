@@ -271,17 +271,17 @@ public:
       int base_index_send = sdispls[i];
       int size = receivecounts[i];
       int size_send = sendcounts[i];
-      string output_path = "recived_" + to_string(grid->global_rank) +
-                           "from_rank_" + to_string(i) + ".txt";
-      string output_path_send = "send_to_" + to_string(i) + "from_rank_" +
-                                to_string(grid->global_rank) + ".txt";
-      char stats[500];
-      strcpy(stats, output_path.c_str());
-      ofstream fout(stats, std::ios_base::app);
-
-      char stats_send[500];
-      strcpy(stats_send, output_path_send.c_str());
-      ofstream fout1(stats_send, std::ios_base::app);
+//      string output_path = "recived_" + to_string(grid->global_rank) +
+//                           "from_rank_" + to_string(i) + ".txt";
+//      string output_path_send = "send_to_" + to_string(i) + "from_rank_" +
+//                                to_string(grid->global_rank) + ".txt";
+//      char stats[500];
+//      strcpy(stats, output_path.c_str());
+//      ofstream fout(stats, std::ios_base::app);
+//
+//      char stats_send[500];
+//      strcpy(stats_send, output_path_send.c_str());
+//      ofstream fout1(stats_send, std::ios_base::app);
 
       for (int k = 0; k < size; k++) {
         int index = rdispls[i] + k;

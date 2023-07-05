@@ -118,6 +118,7 @@ int main(int argc, char **argv) {
                                                                                     dense_mat.get(),
                                                                                     grid.get()));
   communicator.get()->invoke(0,false);
+  communicator.get()->invoke(1,false);
 
 
   cout << " rank " << rank << " processing completed  " << endl;
