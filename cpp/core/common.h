@@ -102,8 +102,8 @@ void initialize_mpi_datatype_DENSETUPLE() {
   MPI_Aint offsets[2];
   if (std::is_same<T, int>::value) {
     types[1] = MPI_INT;
-    offsets[0] = offsetof(DataTuple<int>, row);
-    offsets[1] = offsetof(DataTuple<int>, col);
+    offsets[0] = offsetof(DataTuple<int>, col);
+    offsets[1] = offsetof(DataTuple<int>, value);
   } else {
     // TODO:Need to support all datatypes
     types[1] = MPI_DOUBLE;
