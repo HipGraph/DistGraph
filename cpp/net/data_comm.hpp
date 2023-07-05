@@ -44,21 +44,17 @@ public:
   }
 
   ~DataComm() {
-    if (sendbuf != nullptr){
-      free(sendbuf);
-    }
-    if(receivebuf != nullptr){
-      free(receivebuf);
-    }
+//    if (sendbuf != nullptr){
+//      free(sendbuf);
+//    }
+//    if(receivebuf != nullptr){
+//      free(receivebuf);
+//    }
     cout<<" receivebuf deletion completed"<<endl;
   }
 
   void invoke(int batch_id, bool fetch_all) {
 
-//    std::fill_n(sdispls, grid->world_size, 0);
-//    std::fill_n(rdispls, grid->world_size, 0);
-//    std::fill_n(sendcounts, grid->world_size, 0);
-//    std::fill_n(receivecounts, grid->world_size, 0);
     sendbuf = nullptr;
     receivebuf = nullptr;
 
