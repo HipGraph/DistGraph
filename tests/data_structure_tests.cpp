@@ -55,11 +55,11 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
 
-//  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-//  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
-//      copiedVector, shared_sparseMat.get()->gRows,
-//      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
-//      batch_size, localARows, localBRows);
+  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
+      copiedVector, shared_sparseMat.get()->gRows,
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
+      batch_size, localARows, localBRows);
 
 
 
