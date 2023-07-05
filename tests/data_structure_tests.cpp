@@ -36,13 +36,15 @@ int main(int argc, char **argv) {
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
+  auto shared_sparseMat_Trans =
+      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
 
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << endl;
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
-
+  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat_Trans.get());
 //  shared_sparseMat.get()->print_coords(false);
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
@@ -55,11 +57,16 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
 
-  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
-      copiedVector, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
-      batch_size, localARows, localBRows);
+//  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+//  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
+//      copiedVector, shared_sparseMat.get()->gRows,
+//      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
+//      batch_size, localARows, localBRows);
+
+  shared_sparseMat_Trans.get()->block_row_width = localARows;
+  shared_sparseMat_Trans.get()->block_col_width = batch_size;
+  shared_sparseMat_Trans.get()->proc_row_width = localARows;
+  shared_sparseMat_Trans.get()->proc_col_width = localBRows;
 
 
 
