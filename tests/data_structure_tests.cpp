@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 
   vector<uint64_t> id_list_trans;
   vector<uint64_t> id_list;
-//  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
+  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
   shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
     cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
