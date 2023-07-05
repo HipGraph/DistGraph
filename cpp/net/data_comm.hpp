@@ -41,6 +41,7 @@ public:
   }
 
   ~DataComm() {
+    cout<<"successfully executed"<<endl;
   }
 
   void invoke(int batch_id, bool fetch_all) {
