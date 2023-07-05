@@ -102,13 +102,13 @@ void initialize_mpi_datatype_DENSETUPLE() {
   MPI_Aint offsets[2];
   if (std::is_same<T, int>::value) {
     types[1] = MPI_INT;
-    offsets[0] = offsetof(Tuple<int>, row);
-    offsets[1] = offsetof(Tuple<int>, col);
+    offsets[0] = offsetof(DataTuple<int>, row);
+    offsets[1] = offsetof(DataTuple<int>, col);
   } else {
     // TODO:Need to support all datatypes
     types[1] = MPI_DOUBLE;
-    offsets[0] = offsetof(Tuple<double>, col);
-    offsets[1] = offsetof(Tuple<double>, value);
+    offsets[0] = offsetof(DataTuple<double>, col);
+    offsets[1] = offsetof(DataTuple<double>, value);
     cout << "offsets[0]  " << offsets[0] << " offsets[1] " << offsets[1]
          << endl;
   }
