@@ -63,12 +63,10 @@ int main(int argc, char **argv) {
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
       batch_size, localARows, localBRows);
 
-  shared_sparseMat_Trans.get()->block_row_width = localARows;
-  shared_sparseMat_Trans.get()->block_col_width = batch_size;
-  shared_sparseMat_Trans.get()->proc_row_width = localARows;
-  shared_sparseMat_Trans.get()->proc_col_width = localBRows;
-
-
+//  shared_sparseMat_Trans.get()->block_row_width = localARows;
+//  shared_sparseMat_Trans.get()->block_col_width = batch_size;
+//  shared_sparseMat_Trans.get()->proc_row_width = localARows;
+//  shared_sparseMat_Trans.get()->proc_col_width = localBRows;
 
   auto partitioner =
       unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(
