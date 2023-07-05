@@ -37,10 +37,10 @@ public:
     this->sp_local_trans = sp_local_trans;
     this->dense_local = dense_local;
     this->grid = grid;
-    this->sdispls = vector<int>(grid->world_size);
-    this->sendcounts = vector<int>(grid->world_size);
-    this->rdispls = vector<int>(grid->world_size);
-    this->receivecounts = vector<int>(grid->world_size);
+    this->sdispls = vector<int>(grid->world_size,0);
+    this->sendcounts = vector<int>(grid->world_size,0);
+    this->rdispls = vector<int>(grid->world_size,0);
+    this->receivecounts = vector<int>(grid->world_size,0);
   }
 
   ~DataComm() {
@@ -52,10 +52,10 @@ public:
 
   void invoke(int batch_id, bool fetch_all) {
 
-    std::fill_n(sdispls, grid->world_size, 0);
-    std::fill_n(rdispls, grid->world_size, 0);
-    std::fill_n(sendcounts, grid->world_size, 0);
-    std::fill_n(receivecounts, grid->world_size, 0);
+//    std::fill_n(sdispls, grid->world_size, 0);
+//    std::fill_n(rdispls, grid->world_size, 0);
+//    std::fill_n(sendcounts, grid->world_size, 0);
+//    std::fill_n(receivecounts, grid->world_size, 0);
     sendbuf = nullptr;
     receivebuf = nullptr;
 
