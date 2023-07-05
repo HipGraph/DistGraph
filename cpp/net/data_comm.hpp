@@ -275,7 +275,7 @@ public:
       ofstream fout(stats, std::ios_base::app);
       for (int k = 0; k < size; k++) {
         int index = rdispls[i] + k;
-        fout  << receivebufverify[index].col;
+        fout  << receivebufverify[index].col <<" ";
         //        bool matched = false;
         //        for(int m=rdispls[i];m<rdispls[i]+receivecounts[i];m++){
         //          if (receivebufverify[m].col==receivebuf[index].col) {
