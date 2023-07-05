@@ -296,22 +296,22 @@ public:
         //      }
         //      fout << endl;
 
-        for (int k = 0; k < size_send; k++) {
-          int index = sdispls[i] + k;
-          //        fout1 << sendbuf[index].col << " ";
-          bool matched = false;
-          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-            if (receivebufverify[m].col == receivebuf[index].col) {
-              matched = true;
-            }
-          }
-          if (!matched) {
-            cout << " rank " << grid->global_rank << "cannot verify value "
-                 << receivebuf[index].col << endl;
-          }
-          //        }
-          //        fout1 << endl;
-        }
+//        for (int k = 0; k < size_send; k++) {
+//          int index = sdispls[i] + k;
+//          //        fout1 << sendbuf[index].col << " ";
+//          bool matched = false;
+//          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
+//            if (receivebufverify[m].col == receivebuf[index].col) {
+//              matched = true;
+//            }
+//          }
+//          if (!matched) {
+//            cout << " rank " << grid->global_rank << "cannot verify value "
+//                 << receivebuf[index].col << endl;
+//          }
+//          //        }
+//          //        fout1 << endl;
+//        }
       }
     }
   }
