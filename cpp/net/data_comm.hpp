@@ -182,12 +182,11 @@ public:
             receive_col_ids_list[working_rank].insert(
                 receive_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
-            //            std::unordered_set<MKL_INT> unique_set(
-            //                receive_col_ids_list[working_rank].begin(),
-            //                receive_col_ids_list[working_rank].end());
-            //            receive_col_ids_list[working_rank] =
-            //                vector<uint64_t>(unique_set.begin(),
-            //                unique_set.end());
+            std::unordered_set<MKL_INT> unique_set(
+                receive_col_ids_list[working_rank].begin(),
+                receive_col_ids_list[working_rank].end());
+            receive_col_ids_list[working_rank] =
+                vector<uint64_t>(unique_set.begin(), unique_set.end());
 
             receivecounts[working_rank] =
                 receive_col_ids_list[working_rank].size();
@@ -209,11 +208,11 @@ public:
         send_col_ids_list[working_rank].insert(
             send_col_ids_list[working_rank].end(), col_ids.begin(),
             col_ids.end());
-        //        std::unordered_set<MKL_INT> unique_set(
-        //            send_col_ids_list[working_rank].begin(),
-        //            send_col_ids_list[working_rank].end());
-        //        send_col_ids_list[working_rank] =
-        //            vector<uint64_t>(unique_set.begin(), unique_set.end());
+        std::unordered_set<MKL_INT> unique_set(
+            send_col_ids_list[working_rank].begin(),
+            send_col_ids_list[working_rank].end());
+        send_col_ids_list[working_rank] =
+            vector<uint64_t>(unique_set.begin(), unique_set.end());
 
         sendcounts[working_rank] = send_col_ids_list[working_rank].size();
       }
@@ -291,7 +290,7 @@ public:
           }
         }
         if (!matched) {
-          cout << " rank " << grid->global_rank<< "cannot verify value "
+          cout << " rank " << grid->global_rank << "cannot verify value "
                << receivebuf[index].col << endl;
         }
         //      }
@@ -307,7 +306,8 @@ public:
             }
           }
           if (!matched) {
-            cout << " rank " << grid->global_rank << "cannot verify value "<<receivebuf[index].col<<endl;
+            cout << " rank " << grid->global_rank << "cannot verify value "
+                 << receivebuf[index].col << endl;
           }
           //        }
           //        fout1 << endl;
