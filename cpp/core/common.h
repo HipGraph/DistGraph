@@ -98,11 +98,15 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
 
 template <typename T>
 void initialize_mpi_datatype_DENSETUPLE() {
+  MPI_Datatype vectorType;
+  MPI_Type_contiguous(10, MPI_DOUBLE, &vectorType);
+  MPI_Type_commit(&vectorType);
+
   const int nitems = 2;
   int blocklengths[2] = {1, 1};
   MPI_Datatype *types = new MPI_Datatype[2];
   types[0] = MPI_UINT64_T;
-  types[1] = MPI_DOUBLE;
+  types[1] = vectorType;
 
   MPI_Aint offsets[2];
 
