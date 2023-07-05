@@ -99,7 +99,7 @@ void initialize_mpi_datatype_DENSETUPLE() {
   int blocklengths[2] = {1, 1};
   MPI_Datatype *types = new MPI_Datatype[2];
   types[0] = MPI_UINT64_T;
-  //  types[1] = MPI_UINT64_T;
+  types[1] = MPI_DOUBLE;
 
   MPI_Aint offsets[2];
 
