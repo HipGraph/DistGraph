@@ -138,7 +138,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 template <typename SPT, typename DENT>
 void initialize_mpi_datatypes(int size) {
   initialize_mpi_datatype_SPTUPLE<SPT>();
-  initialize_mpi_datatype_DENSETUPLE<DENT>(size);
+//  initialize_mpi_datatype_DENSETUPLE<DENT>(size);
 }
 
 }; // namespace distblas::core
