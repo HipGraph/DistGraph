@@ -35,7 +35,8 @@ template <typename T> struct CSR {
 
 template <typename T> struct DataTuple {
   uint64_t col;
-  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
+//  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
+  vector<double> value;
 };
 
 struct CSRHandle {
@@ -99,19 +100,28 @@ void initialize_mpi_datatype_DENSETUPLE() {
   MPI_Datatype *types = new MPI_Datatype[2];
   types[0] = MPI_UINT64_T;
   //  types[1] = MPI_UINT64_T;
+
   MPI_Aint offsets[2];
-  if (std::is_same<T, int>::value) {
-    types[1] = MPI_INT;
-    offsets[0] = offsetof(DataTuple<int>, col);
-    offsets[1] = offsetof(DataTuple<int>, value);
-  } else {
-    // TODO:Need to support all datatypes
-    types[1] = MPI_DOUBLE;
-    offsets[0] = offsetof(DataTuple<double>, col);
-    offsets[1] = offsetof(DataTuple<double>, value);
-    cout << "offsets[0]  " << offsets[0] << " offsets[1] " << offsets[1]
-         << endl;
-  }
+
+  DataTuple<T> dummyTuple; // Dummy struct to get displacements
+
+  MPI_Get_address(&dummyTuple.col, &offsets[0]);
+  MPI_Get_address(&dummyTuple.value, &offsets[1]);
+  offsets[1] -= offsets[0];
+  offsets[0] = 0;
+//  if (std::is_same<T, int>::value) {
+//    types[1] = MPI_INT;
+//    offsets[0] = offsetof(DataTuple<int>, col);
+//    offsets[1] = offsetof(DataTuple<int>, value);
+//  } else {
+//    // TODO:Need to support all datatypes
+//    types[1] = MPI_DOUBLE;
+//    offsets[0] = offsetof(DataTuple<double>, col);
+//    offsets[1] = offsetof(DataTuple<double>, value);
+//
+//  }
+  cout << "offsets[0]  " << offsets[0] << " offsets[1] " << offsets[1]
+       << endl;
 
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &DENSETUPLE);
   MPI_Type_commit(&DENSETUPLE);
