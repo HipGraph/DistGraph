@@ -50,6 +50,7 @@ public:
     delete[] receivecounts;
     delete[] sendbuf;
     delete[] receivebuf;
+    cout<<" datacomm deletion completed"<<endl;
   }
 
   void invoke(int batch_id, bool fetch_all) {
