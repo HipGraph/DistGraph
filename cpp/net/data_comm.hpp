@@ -247,7 +247,7 @@ public:
     }
 
     MPI_Request request;
-    MPI_Ialltoallv(sendbuf.get(), sendcounts.data(), sdispls.data(), DENSETUPLE, receivebuf.get(),
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE, receivebuf,
                   receivecounts.data(), rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
 
     MPI_Status status;
