@@ -18,10 +18,11 @@ class DenseMat : DistributedMat {
 
 private:
   unique_ptr<MatrixXd> matrixPtr;
-  uint64_t rows;
-  uint64_t cols;
+
 
 public:
+  uint64_t rows;
+  uint64_t cols;
   /**
    * create matrix with random initialization
    * @param rows Number of rows of the matrix
