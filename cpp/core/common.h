@@ -109,8 +109,8 @@ void initialize_mpi_datatype_DENSETUPLE() {
   DataTuple<T> dummyStruct; // Dummy struct to get displacements
 
   // Calculate the displacements of struct members
-  MPI_Get_address(&dummyStruct.index, &displacements[0]);
-  MPI_Get_address(&dummyStruct.data, &displacements[1]);
+  MPI_Get_address(&dummyStruct.col, &displacements[0]);
+  MPI_Get_address(&dummyStruct.value, &displacements[1]);
   displacements[1] -= displacements[0];
   displacements[0] = 0;
 
