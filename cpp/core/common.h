@@ -37,7 +37,10 @@ template <typename T> struct DataTuple {
   uint64_t col;
 //  Eigen::Matrix<T, 2, 1> value;
 //  DataTuple() : col(0), value(Eigen::Matrix<T, 2, 1>::Zero()) {}
-  vector<T> value(10);
+  vector<T> value;
+  DataTuple() : col(0), value(std::vector<T>(10)) {}
+};
+
 };
 
 struct CSRHandle {
