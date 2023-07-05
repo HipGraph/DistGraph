@@ -1,14 +1,14 @@
 #ifndef COMMON_HEADER
 #define COMMON_HEADER
 
+#include <Eigen/Dense>
 #include <cstddef>
 #include <cstdint> // int64_t
-#include <mpi.h>
-#include <vector>
-#include <mkl_spblas.h>
 #include <iostream>
+#include <mkl_spblas.h>
+#include <mpi.h>
 #include <random>
-#include <Eigen/Dense>
+#include <vector>
 
 using namespace std;
 
@@ -21,8 +21,7 @@ vector<int> generate_random_numbers(int lower_bound, int upper_bound, int seed,
 
 void prefix_sum(vector<int> &values, vector<int> &offsets);
 
-template <typename T>
-struct Tuple {
+template <typename T> struct Tuple {
   int64_t row;
   int64_t col;
   T value;
@@ -34,14 +33,10 @@ template <typename T> struct CSR {
   T value;
 };
 
-template <typename T>
-struct DataTuple {
+template <typename T> struct DataTuple {
   uint64_t col;
-//  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
+  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 };
-
-
-
 
 struct CSRHandle {
   vector<double> values;
@@ -51,9 +46,8 @@ struct CSRHandle {
   sparse_matrix_t mkl_handle;
 };
 
-//TODO: removed reference type due to binding issue
-template <typename T>
-bool column_major(Tuple<T> a, Tuple<T> b) {
+// TODO: removed reference type due to binding issue
+template <typename T> bool column_major(Tuple<T> a, Tuple<T> b) {
   if (a.col == b.col) {
     return a.row < b.row;
   } else {
@@ -73,11 +67,10 @@ extern MPI_Datatype SPTUPLE;
 
 extern MPI_Datatype DENSETUPLE;
 
-template <typename T>
-void initialize_mpi_datatype_SPTUPLE() {
+template <typename T> void initialize_mpi_datatype_SPTUPLE() {
   const int nitems = 3;
   int blocklengths[3] = {1, 1, 1};
-  MPI_Datatype*  types = new MPI_Datatype[3];
+  MPI_Datatype *types = new MPI_Datatype[3];
   types[0] = MPI_UINT64_T;
   types[1] = MPI_UINT64_T;
   MPI_Aint offsets[3];
@@ -97,28 +90,27 @@ void initialize_mpi_datatype_SPTUPLE() {
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &SPTUPLE);
   MPI_Type_commit(&SPTUPLE);
   delete[] types;
-
 }
 
 template <typename T>
 void initialize_mpi_datatype_DENSETUPLE() {
-  const int nitems = 1;
-  int blocklengths[1] = {1, };
-  MPI_Datatype*  types = new MPI_Datatype[1];
+  const int nitems = 2;
+  int blocklengths[2] = {1, 1};
+  MPI_Datatype *types = new MPI_Datatype[2];
   types[0] = MPI_UINT64_T;
-//  types[1] = MPI_UINT64_T;
-  MPI_Aint offsets[1];
+  //  types[1] = MPI_UINT64_T;
+  MPI_Aint offsets[2];
   if (std::is_same<T, int>::value) {
-    types[2] = MPI_INT;
+    types[1] = MPI_INT;
     offsets[0] = offsetof(Tuple<int>, row);
     offsets[1] = offsetof(Tuple<int>, col);
-    offsets[2] = offsetof(Tuple<int>, value);
   } else {
     // TODO:Need to support all datatypes
-//    types[2] = MPI_DOUBLE;
-    offsets[0] = offsetof(Tuple<double>, row);
-//    offsets[1] = offsetof(Tuple<double>, col);
-//    offsets[2] = offsetof(Tuple<double>, value);
+    types[1] = MPI_DOUBLE;
+    offsets[0] = offsetof(Tuple<double>, col);
+    offsets[1] = offsetof(Tuple<double>, value);
+    cout << "offsets[0]  " << offsets[0] << " offsets[1] " << offsets[1]
+         << endl;
   }
 
   MPI_Type_create_struct(nitems, blocklengths, offsets, types, &DENSETUPLE);
@@ -131,8 +123,6 @@ void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<SPT>();
   initialize_mpi_datatype_DENSETUPLE<DENT>();
 }
-
-
 
 }; // namespace distblas::core
 
