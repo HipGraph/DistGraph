@@ -103,7 +103,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 //  MPI_Type_commit(&vectorType);
 
   const int nitems = 1;
-  int blocklengths[1] = {1, 1};
+  int blocklengths[1] = {1 };
   MPI_Datatype *types = new MPI_Datatype[1];
   types[0] = MPI_UINT64_T;
 //  types[1] = vectorType;
