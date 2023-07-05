@@ -291,9 +291,7 @@ public:
           }
         }
         if (!matched) {
-          cout << " rank " << grid->global_rank
-               << "cannot verify
-              value "
+          cout << " rank " << grid->global_rank<< "cannot verify value "
                << receivebuf[index].col << endl;
         }
         //      }
@@ -309,9 +307,7 @@ public:
             }
           }
           if (!matched) {
-            cout << " rank " << grid->global_rank
-                 << "cannot verify
-                value "<<receivebuf[index].col<<endl;
+            cout << " rank " << grid->global_rank << "cannot verify value "<<receivebuf[index].col<<endl;
           }
           //        }
           //        fout1 << endl;
