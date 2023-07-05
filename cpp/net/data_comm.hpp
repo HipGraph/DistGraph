@@ -264,54 +264,56 @@ public:
     //    MPI_Status status;
     //    MPI_Wait(&request, &status);
 
-
-
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdispls[i];
       int base_index_send = sdispls[i];
       int size = receivecounts[i];
       int size_send = sendcounts[i];
-      string output_path = "recived_" + to_string(grid->global_rank) +"from_rank_"+to_string(i)+".txt";
-      string output_path_send = "send_to_" + to_string(i) +"from_rank_"+to_string(grid->global_rank)+".txt";
-      char stats[500];
-      strcpy(stats, output_path.c_str());
-      ofstream fout(stats, std::ios_base::app);
-
-      char stats_send[500];
-      strcpy(stats_send, output_path_send.c_str());
-      ofstream fout1(stats_send, std::ios_base::app);
+      //      string output_path = "recived_" + to_string(grid->global_rank)
+      //      +"from_rank_"+to_string(i)+".txt"; string output_path_send =
+      //      "send_to_" + to_string(i)
+      //      +"from_rank_"+to_string(grid->global_rank)+".txt"; char
+      //      stats[500]; strcpy(stats, output_path.c_str()); ofstream
+      //      fout(stats, std::ios_base::app);
+      //
+      //      char stats_send[500];
+      //      strcpy(stats_send, output_path_send.c_str());
+      //      ofstream fout1(stats_send, std::ios_base::app);
 
       for (int k = 0; k < size; k++) {
         int index = rdispls[i] + k;
-        fout  << receivebufverify[index].col <<" ";
-        //        bool matched = false;
-        //        for(int m=rdispls[i];m<rdispls[i]+receivecounts[i];m++){
-        //          if (receivebufverify[m].col==receivebuf[index].col) {
-        //            matched = true;
-        //          }
-        //        }
-        //        if (!matched) {
-        //          cout<<" rank "<<grid->global_rank<<"cannot verify value
-        //          "<<receivebuf[index].col<<endl;
-        //        }
+        //        fout  << receivebufverify[index].col <<" ";
+        bool matched = false;
+        for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
+          if (receivebufverify[m].col == receivebuf[index].col) {
+            matched = true;
+          }
+        }
+        if (!matched) {
+          cout << " rank " << grid->global_rank << "cannot verify value"
+               << receivebuf[index].col << endl;
+        }
       }
-      fout << endl;
+      //      fout << endl;
 
-      for (int k = 0; k < size; k++) {
-        int index = sdispls[i] + k;
-        fout1  << sendbuf[index].col <<" ";
-        //        bool matched = false;
-        //        for(int m=rdispls[i];m<rdispls[i]+receivecounts[i];m++){
-        //          if (receivebufverify[m].col==receivebuf[index].col) {
-        //            matched = true;
-        //          }
-        //        }
-        //        if (!matched) {
-        //          cout<<" rank "<<grid->global_rank<<"cannot verify value
-        //          "<<receivebuf[index].col<<endl;
-        //        }
-      }
-      fout1 << endl;
+      //      for (int k = 0; k < size; k++) {
+      //        int index = sdispls[i] + k;
+      //        fout1  << sendbuf[index].col <<" ";
+      //        //        bool matched = false;
+      //        //        for(int
+      //        m=rdispls[i];m<rdispls[i]+receivecounts[i];m++){
+      //        //          if (receivebufverify[m].col==receivebuf[index].col)
+      //        {
+      //        //            matched = true;
+      //        //          }
+      //        //        }
+      //        //        if (!matched) {
+      //        //          cout<<" rank "<<grid->global_rank<<"cannot verify
+      //        value
+      //        //          "<<receivebuf[index].col<<endl;
+      //        //        }
+      //      }
+      //      fout1 << endl;
     }
   }
 };
