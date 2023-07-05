@@ -113,10 +113,10 @@ int main(int argc, char **argv) {
 //    dense_mat.get()->print_matrix();
     cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
-  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),
-                                                                                    shared_sparseMat_Trans.get(),
-                                                                                    dense_mat.get(),
-                                                                                    grid.get()));
+//  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),
+//                                                                                    shared_sparseMat_Trans.get(),
+//                                                                                    dense_mat.get(),
+//                                                                                    grid.get()));
 //  communicator.get()->invoke(0,false);
 //  communicator.get()->invoke(1,false);
 
