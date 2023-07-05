@@ -104,7 +104,7 @@ template <typename T>
 void initialize_mpi_datatype_DENSETUPLE() {
   int blocklengths[2] = {1, 0};
   MPI_Aint displacements[2];
-  MPI_Datatype types[2] = {MPI_INT, MPI_DOUBLE};
+  MPI_Datatype types[2] = {MPI_UINT64_T, MPI_DOUBLE};
 
   DataTuple<T> dummyStruct; // Dummy struct to get displacements
 
