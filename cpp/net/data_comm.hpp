@@ -21,10 +21,10 @@ private:
   distblas::core::SpMat<SPT> *sp_local_trans;
   distblas::core::DenseMat *dense_local;
   Process3DGrid *grid;
-  int *sdispls;
-  int *sendcounts;
-  int *rdispls;
-  int *receivecounts;
+  vector<int> sdispls;
+  vector<int> sendcounts;
+  vector<int> rdispls;
+  vector<int> receivecounts;
   DataTuple<DENT> *sendbuf;
   DataTuple<DENT> *receivebuf;
   DataTuple<DENT> *receivebufverify;
@@ -37,22 +37,13 @@ public:
     this->sp_local_trans = sp_local_trans;
     this->dense_local = dense_local;
     this->grid = grid;
-    this->sdispls = new int[grid->world_size];
-    this->sendcounts = new int[grid->world_size];
-    this->rdispls = new int[grid->world_size];
-    this->receivecounts = new int[grid->world_size];
+    this->sdispls = vector<int>(grid->world_size);
+    this->sendcounts = vector<int>(grid->world_size);
+    this->rdispls = vector<int>(grid->world_size);
+    this->receivecounts = vector<int>(grid->world_size);
   }
 
   ~DataComm() {
-    cout<<" starting deletion"<<endl;
-    delete[] sdispls;
-    cout<<" sdisps deletion started "<<endl;
-    delete[] sendcounts;
-    cout<<" sendcounts deletion started "<<endl;
-    delete[] rdispls;
-    cout<<" rdispls deletion started "<<endl;
-    delete[] receivecounts;
-    cout<<" receivecounts deletion started "<<endl;
     delete[] sendbuf;
     cout<<" sendbuf deletion started "<<endl;
     delete[] receivebuf;
@@ -267,8 +258,8 @@ public:
     }
 
     MPI_Request request;
-    MPI_Ialltoallv(sendbuf, sendcounts, sdispls, DENSETUPLE, receivebuf,
-                  receivecounts, rdispls, DENSETUPLE, MPI_COMM_WORLD, &request);
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE, receivebuf,
+                  receivecounts.data(), rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
 
     MPI_Status status;
     MPI_Wait(&request, &status);
