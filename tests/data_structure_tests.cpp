@@ -75,8 +75,9 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data started  " << endl;
 
+  partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
-//  partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
+//
 
   shared_sparseMat.get()->divide_block_cols(
       15000, localBRows, grid.get()->world_size, true, false);
