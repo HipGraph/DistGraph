@@ -43,6 +43,8 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
 
+  shared_sparseMat.get()->print_coords(false);
+
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                        grid.get()->world_size);
   int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
