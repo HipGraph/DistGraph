@@ -37,7 +37,7 @@ template <typename T> struct CSR {
 template <typename T>
 struct DataTuple {
   uint64_t col;
-  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
+//  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 };
 
 
@@ -102,21 +102,28 @@ void initialize_mpi_datatype_SPTUPLE() {
 
 template <typename T>
 void initialize_mpi_datatype_DENSETUPLE() {
-  int blocklengths[2] = {1, 0};
-  MPI_Aint displacements[2];
-  MPI_Datatype types[2] = {MPI_UINT64_T, MPI_DOUBLE};
+  const int nitems = 1;
+  int blocklengths[1] = {1, };
+  MPI_Datatype*  types = new MPI_Datatype[1];
+  types[0] = MPI_UINT64_T;
+//  types[1] = MPI_UINT64_T;
+  MPI_Aint offsets[1];
+  if (std::is_same<T, int>::value) {
+    types[2] = MPI_INT;
+    offsets[0] = offsetof(Tuple<int>, row);
+    offsets[1] = offsetof(Tuple<int>, col);
+    offsets[2] = offsetof(Tuple<int>, value);
+  } else {
+    // TODO:Need to support all datatypes
+//    types[2] = MPI_DOUBLE;
+    offsets[0] = offsetof(Tuple<double>, row);
+//    offsets[1] = offsetof(Tuple<double>, col);
+//    offsets[2] = offsetof(Tuple<double>, value);
+  }
 
-  DataTuple<T> dummyStruct; // Dummy struct to get displacements
-
-  // Calculate the displacements of struct members
-  MPI_Get_address(&dummyStruct.col, &displacements[0]);
-  MPI_Get_address(&dummyStruct.value, &displacements[1]);
-  displacements[1] -= displacements[0];
-  displacements[0] = 0;
-
-  // Create the struct data type
-  MPI_Type_create_struct(2, blocklengths, displacements, types, &DENSETUPLE);
+  MPI_Type_create_struct(nitems, blocklengths, offsets, types, &DENSETUPLE);
   MPI_Type_commit(&DENSETUPLE);
+  delete[] types;
 }
 
 template <typename SPT, typename DENT>
