@@ -218,9 +218,9 @@ public:
 //    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
 //    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
 
-    std::unique_ptr<DataTuple<DENT>[]> sendbufptr(new DataType[size]);
-    std::unique_ptr<DataTuple<DENT>[]> receivebufptr(new DataType[size]);
-    std::unique_ptr<DataTuple<DENT>[]> receivebufverifyptr(new DataType[size]);
+    std::unique_ptr<DataTuple<DENT>[]> sendbuf(new DataType[size]);
+    std::unique_ptr<DataTuple<DENT>[]> receivebuf(new DataType[size]);
+    std::unique_ptr<DataTuple<DENT>[]> receivebufverify(new DataType[size]);
     cout << " rank " << grid->global_rank << " send count " << total_send_count
          << endl;
     cout << " rank " << grid->global_rank << " receive count "
