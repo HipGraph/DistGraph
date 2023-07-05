@@ -41,7 +41,6 @@ template <typename T> struct DataTuple {
   DataTuple() : col(0), value(std::vector<T>(10)) {}
 };
 
-};
 
 struct CSRHandle {
   vector<double> values;
