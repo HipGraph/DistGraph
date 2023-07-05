@@ -35,10 +35,10 @@ template <typename T> struct CSR {
 
 template <typename T> struct DataTuple {
   uint64_t col;
-//  Eigen::Matrix<T, 2, 1> value;
-//  DataTuple() : col(0), value(Eigen::Matrix<T, 2, 1>::Zero()) {}
-  vector<T> value;
-  DataTuple() : col(0), value(std::vector<T>(10)) {}
+  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
+  DataTuple(std::size_t size) : col(0), value(Eigen::Matrix<T, size, 1>::Zero()) {}
+//  vector<T> value;
+//  DataTuple(std::size_t size) : col(0), value(std::vector<T>(size)) {}
 };
 
 
@@ -97,9 +97,9 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
 }
 
 template <typename T>
-void initialize_mpi_datatype_DENSETUPLE() {
+void initialize_mpi_datatype_DENSETUPLE(int size) {
   MPI_Datatype vectorType;
-  MPI_Type_contiguous(10, MPI_DOUBLE, &vectorType);
+  MPI_Type_contiguous(size, MPI_DOUBLE, &vectorType);
   MPI_Type_commit(&vectorType);
 
   const int nitems = 2;
@@ -110,7 +110,7 @@ void initialize_mpi_datatype_DENSETUPLE() {
 
   MPI_Aint offsets[2];
 
-  DataTuple<T> dummyTuple; // Dummy struct to get displacements
+  DataTuple<T> dummyTuple(size); // Dummy struct to get displacements
 
   MPI_Get_address(&dummyTuple.col, &offsets[0]);
   MPI_Get_address(&dummyTuple.value, &offsets[1]);
@@ -136,9 +136,9 @@ void initialize_mpi_datatype_DENSETUPLE() {
 }
 
 template <typename SPT, typename DENT>
-void initialize_mpi_datatypes() {
+void initialize_mpi_datatypes(int size) {
   initialize_mpi_datatype_SPTUPLE<SPT>();
-  initialize_mpi_datatype_DENSETUPLE<DENT>();
+  initialize_mpi_datatype_DENSETUPLE<DENT>(size);
 }
 
 }; // namespace distblas::core
