@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
        << " completed " << endl;
 //  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat_Trans.get());
 //  shared_sparseMat.get()->print_coords(false);
+  shared_sparseMat.get()->print_coords(false);
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                        grid.get()->world_size);
@@ -89,7 +90,7 @@ int main(int argc, char **argv) {
   shared_sparseMat_Trans.get()->sort_by_rows();
   shared_sparseMat_Trans.get()->divide_block_rows(localARows, 15000, true,
                                                   true);
-  shared_sparseMat.get()->print_coords(false);
+
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
