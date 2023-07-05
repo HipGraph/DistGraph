@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
 
-  shared_sparseMat.get()->print_coords(false);
+//  shared_sparseMat.get()->print_coords(false);
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                        grid.get()->world_size);
@@ -78,11 +78,11 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(15000, localBRows, true, false);
 
-  shared_sparseMat_Trans.get()->divide_block_cols(15000, localBRows, 2, true,
-                                                  true);
-  shared_sparseMat_Trans.get()->sort_by_rows();
-  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 15000, true,
-                                                  true);
+//  shared_sparseMat_Trans.get()->divide_block_cols(15000, localBRows, 2, true,
+//                                                  true);
+//  shared_sparseMat_Trans.get()->sort_by_rows();
+//  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 15000, true,
+//                                                  true);
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
