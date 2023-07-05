@@ -44,9 +44,12 @@ public:
   }
 
   ~DataComm() {
-    delete[] sendbuf;
-    cout<<" sendbuf deletion started "<<endl;
-    delete[] receivebuf;
+    if (sendbuf != nullptr){
+      free(sendbuf);
+    }
+    if(receivebuf != nullptr){
+      free(receivebuf);
+    }
     cout<<" receivebuf deletion completed"<<endl;
   }
 
