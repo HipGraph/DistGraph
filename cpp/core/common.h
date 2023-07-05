@@ -102,11 +102,20 @@ void initialize_mpi_datatype_SPTUPLE() {
 
 template <typename T>
 void initialize_mpi_datatype_DENSETUPLE() {
-  int blockcounts[] = {1, 1};
-  MPI_Aint offsets[] = {offsetof(DataTuple<T>, col), offsetof(DataTuple<T>, value)};
-  MPI_Datatype types[] = {MPI_UINT64_T, MPI_DOUBLE};
-  MPI_Datatype mpi_data_tuple_type;
-  MPI_Type_create_struct(2, blockcounts, offsets, types, &DENSETUPLE);
+  int blocklengths[2] = {1, 0};
+  MPI_Aint displacements[2];
+  MPI_Datatype types[2] = {MPI_INT, MPI_DOUBLE};
+
+  DataStruct<T> dummyStruct; // Dummy struct to get displacements
+
+  // Calculate the displacements of struct members
+  MPI_Get_address(&dummyStruct.index, &displacements[0]);
+  MPI_Get_address(&dummyStruct.data, &displacements[1]);
+  displacements[1] -= displacements[0];
+  displacements[0] = 0;
+
+  // Create the struct data type
+  MPI_Type_create_struct(2, blocklengths, displacements, types, &DENSETUPLE);
   MPI_Type_commit(&DENSETUPLE);
 }
 

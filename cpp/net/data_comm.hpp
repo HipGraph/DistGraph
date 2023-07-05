@@ -299,7 +299,7 @@ public:
       }
       fout << endl;
 
-      for (int k = 0; k < size; k++) {
+      for (int k = 0; k < size_send; k++) {
         int index = sdispls[i] + k;
         fout1 << sendbuf[index].col << " ";
         //        bool matched = false;
