@@ -44,13 +44,19 @@ public:
   }
 
   ~DataComm() {
+    cout<<" starting deletion"<<endl;
     delete[] sdispls;
+    cout<<" sdisps deletion started "<<endl;
     delete[] sendcounts;
+    cout<<" sendcounts deletion started "<<endl;
     delete[] rdispls;
+    cout<<" rdispls deletion started "<<endl;
     delete[] receivecounts;
+    cout<<" receivecounts deletion started "<<endl;
     delete[] sendbuf;
+    cout<<" sendbuf deletion started "<<endl;
     delete[] receivebuf;
-    cout<<" datacomm deletion completed"<<endl;
+    cout<<" receivebuf deletion completed"<<endl;
   }
 
   void invoke(int batch_id, bool fetch_all) {
