@@ -305,9 +305,9 @@ public:
 //        }
       }
     }
-    delete[] sendbuf;
-    delete[] receivebuf;
-    delete[] receivebufverify;
+//    delete[] sendbuf;
+//    delete[] receivebuf;
+//    delete[] receivebufverify;
   }
 };
 } // namespace distblas::net
