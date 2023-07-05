@@ -37,9 +37,8 @@ template <typename T> struct DataTuple {
   uint64_t col;
 //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 //  DataTuple(int size) : col(0), value(size){}
-  DataTuple() : col(0) {}
   vector<T> value;
-  DataTuple(std::size_t size) : col(0), value(std::vector<T>(size)) {}
+  DataTuple() : col(0), value(std::vector<T>(10)) {}
 };
 
 
@@ -111,7 +110,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 
   MPI_Aint offsets[2];
 
-  DataTuple<T> dummyTuple(size); // Dummy struct to get displacements
+  DataTuple<T> dummyTuple; // Dummy struct to get displacements
 
   MPI_Get_address(&dummyTuple.col, &offsets[0]);
   MPI_Get_address(&dummyTuple.value, &offsets[1]);
