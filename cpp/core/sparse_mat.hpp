@@ -220,15 +220,16 @@ public:
             std::begin((handle->col_idx)), std::end((handle->col_idx)),
             std::begin(col_ids),
             [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-             &block_row_width, &block_col_width, &proc_col_width, &proc_row_width](MKL_INT value) {
+             &block_row_width, &block_col_width, &proc_col_width,
+             &proc_row_width](MKL_INT value) {
               if (!return_global_ids) {
                 return static_cast<uint64_t>(value);
               } else {
-                int length = (transpose) ? proc_col_width : proc_row_width;
-                uint64_t starting_index = static_cast<uint64_t>(rank * length);
+                int starting_index = (transpose) ? rank * proc_col_width : 0;
                 uint64_t base_id =
-                    static_cast<uint64_t>(batch_id * block_col_width);
-                uint64_t g_index = static_cast<uint64_t>(value) + base_id +length;
+                    static_cast<uint64_t>(block_col_id * block_col_width);
+                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
+                                   static_cast<uint64_t>(starting_index);
                 return g_index;
               }
             });
