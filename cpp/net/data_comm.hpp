@@ -14,7 +14,7 @@ namespace distblas::net {
  * This class represents the data transfer related operations across processes
  * based on internal data connectivity patterns.
  */
-template <typename SPT, typename DENT> class DataComm {
+template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 
 private:
   distblas::core::SpMat<SPT> *sp_local;
@@ -218,12 +218,12 @@ public:
 
     }
 
-//    DataTuple<DENT> *sendbuf = new DataTuple<DENT>[total_send_count];
-//    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
-//    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
-    std::vector<DataTuple<DENT>> sendbuf(total_send_count, { 10});
-    std::vector<DataTuple<DENT>> receivebuf(total_receive_count, { 10});
-    std::vector<DataTuple<DENT>> receivebufverify(total_receive_count, {10});
+    DataTuple<DENT,embedding_dim> *sendbuf = new DataTuple<DENT,embedding_dim>[total_send_count];
+    DataTuple<DENT,embedding_dim> *receivebuf = new DataTuple<DENT,embedding_dim>[total_receive_count];
+    DataTuple<DENT,embedding_dim> *receivebufverify = new DataTuple<DENT,embedding_dim>[total_receive_count];
+//    std::vector<DataTuple<DENT>> sendbuf(total_send_count, { 10});
+//    std::vector<DataTuple<DENT>> receivebuf(total_receive_count, { 10});
+//    std::vector<DataTuple<DENT>> receivebufverify(total_receive_count, {10});
 
 //    std::unique_ptr<DataTuple<DENT>[]> sendbuf(new DataTuple<DENT>[total_send_count]);
 //    std::unique_ptr<DataTuple<DENT>[]> receivebuf(new DataTuple<DENT>[total_receive_count]);

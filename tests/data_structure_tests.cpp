@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-  initialize_mpi_datatypes<int,double>(10);
+  initialize_mpi_datatypes<int,double,10>();
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
 //    dense_mat.get()->print_matrix();
     cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
-  auto communicator = unique_ptr<DataComm<int,double>>(new DataComm<int,double>(shared_sparseMat.get(),
+  auto communicator = unique_ptr<DataComm<int,double,10>>(new DataComm<int,double,10>(shared_sparseMat.get(),
                                                                                     shared_sparseMat_Trans.get(),
                                                                                     dense_mat.get(),
                                                                                     grid.get()));

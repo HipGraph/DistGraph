@@ -34,13 +34,9 @@ template <typename T> struct CSR {
   T value;
 };
 
-template <typename T> struct DataTuple {
+template <typename T, size_t size> struct DataTuple {
   uint64_t col;
-  //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
-  //  DataTuple(int size) : col(0), value(size){}
-  //  std::array<T, size> value;
-  vector<T> value;
-  DataTuple(int size) : col(0), value(size) {}
+  std::array<T, size> value;
 };
 
 struct CSRHandle {
@@ -97,16 +93,16 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
   delete[] types;
 }
 
-template <typename T>
-void initialize_mpi_datatype_DENSETUPLE(int embedding_dim) {
-  DataTuple<T> p(embedding_dim);
+template <typename T,size_t embedding_dim>
+void initialize_mpi_datatype_DENSETUPLE() {
+  DataTuple<T,embedding_dim> p;
   DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
-template <typename SPT, typename DENT>
-void initialize_mpi_datatypes(int embedding_dim) {
+template <typename SPT, typename DENT, size_t embedding_dim>
+void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<SPT>();
-  initialize_mpi_datatype_DENSETUPLE<DENT>(embedding_dim);
+  initialize_mpi_datatype_DENSETUPLE<DENT,embedding_dim>();
 }
 
 }; // namespace distblas::core
