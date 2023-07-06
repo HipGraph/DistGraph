@@ -124,7 +124,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 //  delete[] types;
 
 DataTuple<T> p;
-MPI_Datatype DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
+ DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
 template <typename SPT, typename DENT>
