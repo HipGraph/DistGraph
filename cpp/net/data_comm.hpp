@@ -19,7 +19,7 @@ template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 private:
   distblas::core::SpMat<SPT> *sp_local;
   distblas::core::SpMat<SPT> *sp_local_trans;
-  distblas::core::DenseMat *dense_local;
+  distblas::core::DenseMat<DENT> *dense_local;
   Process3DGrid *grid;
   vector<int> sdispls;
   vector<int> sendcounts;
@@ -28,7 +28,7 @@ private:
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
-           distblas::core::SpMat<SPT> *sp_local_trans, DenseMat *dense_local,
+           distblas::core::SpMat<SPT> *sp_local_trans, DenseMat<DENT> *dense_local,
            Process3DGrid *grid) {
     this->sp_local = sp_local;
     this->sp_local_trans = sp_local_trans;
