@@ -217,10 +217,10 @@ public:
 
 
     }
-
-    DataTuple<DENT,dense_local->cols> *sendbuf = new DataTuple<DENT,dense_local->cols>[total_send_count];
-    DataTuple<DENT,dense_local->cols> *receivebuf = new DataTuple<DENT,dense_local->cols>[total_receive_count];
-    DataTuple<DENT,dense_local->cols> *receivebufverify = new DataTuple<DENT,dense_local->cols>[total_receive_count];
+    size_t dim = dense_local->cols;
+    DataTuple<DENT,dim> *sendbuf = new DataTuple<DENT,dim>[total_send_count];
+    DataTuple<DENT,dim> *receivebuf = new DataTuple<DENT,dim>[total_receive_count];
+    DataTuple<DENT,dim> *receivebufverify = new DataTuple<DENT,dim>[total_receive_count];
 
 //    std::unique_ptr<DataTuple<DENT>[]> sendbuf(new DataTuple<DENT>[total_send_count]);
 //    std::unique_ptr<DataTuple<DENT>[]> receivebuf(new DataTuple<DENT>[total_receive_count]);
