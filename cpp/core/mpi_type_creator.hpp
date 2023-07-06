@@ -50,7 +50,7 @@ size_t GetCArraySize(T (&)[size])
 template <class T>
 auto GetMpiType(const T &x)
 {
-  using U = GetInnerType<T>::type;
+  using U = typename GetInnerType<T>::type;
 
   static_assert(!std::is_pointer_v<U>, "T must NOT be a pointer.");
 
@@ -126,7 +126,7 @@ template <class Ttup, int counter>
 auto processTupleMember(CustomTypeInfo &typeInfo, Ttup &obj)
 {
   auto &member = std::get<counter>(obj);
-  using Tm = std::remove_reference_t<decltype(get<counter>(obj))>;
+  using Tm = std::remove_reference_t<decltype(std::get<counter>(obj))>;
 
   if constexpr (is_std_array<Tm>::value)
     typeInfo.blocklengths[counter] = member.size();
