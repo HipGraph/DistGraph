@@ -218,9 +218,9 @@ public:
 
     }
 
-    DataTuple<DENT> *sendbuf = new DataTuple<DENT>[total_send_count];
-    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
-    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
+    DataTuple<DENT> *sendbuf = new DataTuple<DENT,dense_local->cols>[total_send_count];
+    DataTuple<DENT> *receivebuf = new DataTuple<DENT,dense_local->cols>[total_receive_count];
+    DataTuple<DENT> *receivebufverify = new DataTuple<DENT,dense_local->cols>[total_receive_count];
 
 //    std::unique_ptr<DataTuple<DENT>[]> sendbuf(new DataTuple<DENT>[total_send_count]);
 //    std::unique_ptr<DataTuple<DENT>[]> receivebuf(new DataTuple<DENT>[total_receive_count]);
