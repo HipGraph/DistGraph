@@ -6,7 +6,7 @@
 #include <tuple>
 #include <iostream>
 
-using namespace std;
+using namespace std:
 
 namespace distblas::core
 {
@@ -112,9 +112,7 @@ constexpr void processStructMember(CustomTypeInfo &typeInfo,
   else
     typeInfo.blocklengths[counter] = 1;
 
-  MPI_Aint memberOffset = reinterpret_cast<MPI_Aint>(&member);
-  MPI_Aint objOffset = reinterpret_cast<MPI_Aint>(&obj);
-  typeInfo.displacements[counter] = objOffset - memberOffset;
+  typeInfo.displacements[counter] =  reinterpret_cast<MPI_Aint>(MPI_Aint_diff(&member, &obj));
 
 
   typeInfo.types[counter] = GetMpiType(member);
