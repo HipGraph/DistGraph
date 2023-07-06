@@ -123,7 +123,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 //  MPI_Type_commit(&DENSETUPLE);
 //  delete[] types;
 
-DataTuple p;
+DataTuple<T> p;
 MPI_Datatype DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
