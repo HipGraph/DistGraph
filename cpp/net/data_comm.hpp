@@ -252,8 +252,7 @@ public:
         }
       }
     }
-    return &request
+    return request
   }
-}
 };
 } // namespace distblas::net
