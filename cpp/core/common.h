@@ -34,11 +34,11 @@ template <typename T> struct CSR {
   T value;
 };
 
-template <typename T> struct DataTuple {
+template <typename T, size_t size> struct DataTuple {
   uint64_t col;
 //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 //  DataTuple(int size) : col(0), value(size){}
-  std::array<double, 2> value;
+  std::array<T, size> value;
 };
 
 
@@ -98,32 +98,7 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
 
 template <typename T>
 void initialize_mpi_datatype_DENSETUPLE(int size) {
-//  MPI_Datatype vectorType;
-//  MPI_Type_contiguous(size, MPI_DOUBLE, &vectorType);
-//  MPI_Type_commit(&vectorType);
-
-//  const int nitems = 2;
-//  int blocklengths[2] = {1,1 };
-//  MPI_Datatype *types = new MPI_Datatype[2];
-//  types[0] = MPI_UINT64_T;
-//  types[1] = MPI_DOUBLE;
-//
-//  MPI_Aint offsets[2];
-//
-//  DataTuple<T> dummyTuple; // Dummy struct to get displacements
-//
-//  MPI_Get_address(&dummyTuple.col, &offsets[0]);
-//  MPI_Get_address(&dummyTuple.value, &offsets[1]);
-//  offsets[1] -= offsets[0];
-//  offsets[0] = 0;
-//  cout << "offsets[0]  " << offsets[0] << " offsets[1] " << offsets[1]
-//       << endl;
-//
-//  MPI_Type_create_struct(nitems, blocklengths, offsets, types, &DENSETUPLE);
-//  MPI_Type_commit(&DENSETUPLE);
-//  delete[] types;
-
-DataTuple<T> p;
+DataTuple<T,size> p;
  DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
