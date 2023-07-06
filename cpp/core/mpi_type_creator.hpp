@@ -4,6 +4,9 @@
 #include <array>
 #include <vector>
 #include <tuple>
+#include <iostream>
+
+using namespace std;
 
 namespace distblas::core
 {
