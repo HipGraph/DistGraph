@@ -96,16 +96,16 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
   delete[] types;
 }
 
-template <typename T>
-void initialize_mpi_datatype_DENSETUPLE(int size) {
-DataTuple<T,size> p;
+template <typename T,size_t embedding_dim>
+void initialize_mpi_datatype_DENSETUPLE() {
+DataTuple<T,embedding_dim> p;
  DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
-template <typename SPT, typename DENT>
-void initialize_mpi_datatypes(int size) {
+template <typename SPT, typename DENT, size_t embedding_dim>
+void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<SPT>();
-  initialize_mpi_datatype_DENSETUPLE<DENT>(size);
+  initialize_mpi_datatype_DENSETUPLE<DENT,embedding_dim>();
 }
 
 }; // namespace distblas::core
