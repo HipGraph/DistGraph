@@ -217,7 +217,7 @@ public:
 
 
     }
-    size_t dim = dense_local->cols;
+    const size_t dim = dense_local->cols;
     DataTuple<DENT,dim> *sendbuf = new DataTuple<DENT,dim>[total_send_count];
     DataTuple<DENT,dim> *receivebuf = new DataTuple<DENT,dim>[total_receive_count];
     DataTuple<DENT,dim> *receivebufverify = new DataTuple<DENT,dim>[total_receive_count];
