@@ -33,12 +33,12 @@ template <typename T> struct CSR {
   T value;
 };
 
-template <typename T, std::size_t size> struct DataTuple {
+template <typename T> struct DataTuple {
   uint64_t col;
 //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 //  DataTuple(int size) : col(0), value(size){}
-  std::array<T,size> value;
-  DataTuple() : col(0), value(std::array<T,size>{}) {}
+  vector<T> value;
+  DataTuple() : col(0), value(std::vector<T>(1,0.0)) {}
 };
 
 
@@ -110,7 +110,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 
   MPI_Aint offsets[2];
 
-  DataTuple<T,1> dummyTuple; // Dummy struct to get displacements
+  DataTuple<T> dummyTuple; // Dummy struct to get displacements
 
   MPI_Get_address(&dummyTuple.col, &offsets[0]);
   MPI_Get_address(&dummyTuple.value, &offsets[1]);

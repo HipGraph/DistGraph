@@ -39,11 +39,13 @@ add_library(disblas_lib SHARED
         cpp/core/common.cpp
         cpp/core/distributed_mat.hpp
         cpp/core/sparse_mat.hpp
+        cpp/core/mpi_type_creator.hpp
         cpp/io/parrallel_IO.cpp
         cpp/io/parrallel_IO.hpp
         cpp/net/process_3D_grid.cpp
         cpp/net/process_3D_grid.hpp
         cpp/net/data_comm.hpp
+
         cpp/partition/partitioner.cpp
         cpp/core/csr_linked_list.hpp
         cpp/partition/partitioner.hpp)
