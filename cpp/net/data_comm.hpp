@@ -221,9 +221,9 @@ public:
 //    DataTuple<DENT> *sendbuf = new DataTuple<DENT>[total_send_count];
 //    DataTuple<DENT> *receivebuf = new DataTuple<DENT>[total_receive_count];
 //    DataTuple<DENT> *receivebufverify = new DataTuple<DENT>[total_receive_count];
-    std::vector<DataTuple<DENT>> sendbuf(total_send_count, {0, std::vector<DENT>(10)});
-    std::vector<DataTuple<DENT>> receivebuf(total_receive_count, {0, std::vector<DENT>(10)});
-    std::vector<DataTuple<DENT>> receivebufverify(total_receive_count, {0, std::vector<DENT>(10)});
+    std::vector<DataTuple<DENT>> sendbuf(total_send_count, { 10});
+    std::vector<DataTuple<DENT>> receivebuf(total_receive_count, { 10});
+    std::vector<DataTuple<DENT>> receivebufverify(total_receive_count, {10});
 
 //    std::unique_ptr<DataTuple<DENT>[]> sendbuf(new DataTuple<DENT>[total_send_count]);
 //    std::unique_ptr<DataTuple<DENT>[]> receivebuf(new DataTuple<DENT>[total_receive_count]);
