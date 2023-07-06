@@ -35,7 +35,7 @@ template <typename T> struct CSR {
 };
 
 template <typename T> struct DataTuple {
-  int64_t col;
+  uint64_t col;
 //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 //  DataTuple(int size) : col(0), value(size){}
   std::array<double, 2> value;

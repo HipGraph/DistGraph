@@ -65,6 +65,8 @@ auto GetMpiType(const T &x)
     return MPI_FLOAT;
   else if (std::is_same_v<U, double>)
     return MPI_DOUBLE;
+  else if (std::is_same_v<U, uint64_t>)
+    return MPI_UINT64_T;
   else if (std::is_same_v<U, char>)
     return MPI_CHAR;
 }
