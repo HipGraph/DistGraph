@@ -42,7 +42,7 @@ public:
 
   ~DataComm() { cout << "successfully executed" << endl; }
 
-  voclass DataComm {
+  class DataComm {
 
   private:
     distblas::core::SpMat<SPT> *sp_local;
