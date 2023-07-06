@@ -109,7 +109,10 @@ constexpr void processStructMember(CustomTypeInfo &typeInfo,
   else
     typeInfo.blocklengths[counter] = 1;
 
-  typeInfo.displacements[counter] = MPI_Aint_diff(&member, &obj);
+  MPI_Aint  = reinterpret_cast<MPI_Aint>(&member);
+  MPI_Aint objOffset = reinterpret_cast<MPI_Aint>(&obj);
+  typeInfo.displacements[counter] = objOffset - memberOffset;
+
 
   typeInfo.types[counter] = GetMpiType(member);
 
