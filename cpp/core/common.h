@@ -37,8 +37,8 @@ template <typename T> struct DataTuple {
   uint64_t col;
 //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
 //  DataTuple(int size) : col(0), value(size){}
-//  vector<T> value;
-//  DataTuple() : col(0), value(std::vector<T>(10)) {}
+  vector<T> value;
+  DataTuple() : col(0), value(std::vector<T>(1,0.0)) {}
 };
 
 
@@ -102,19 +102,19 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
 //  MPI_Type_contiguous(size, MPI_DOUBLE, &vectorType);
 //  MPI_Type_commit(&vectorType);
 
-  const int nitems = 1;
-  int blocklengths[1] = {1 };
-  MPI_Datatype *types = new MPI_Datatype[1];
+  const int nitems = 2;
+  int blocklengths[1] = {1,1 };
+  MPI_Datatype *types = new MPI_Datatype[2];
   types[0] = MPI_UINT64_T;
-//  types[1] = vectorType;
+  types[1] = MPI_DOUBLE;
 
   MPI_Aint offsets[1];
 
   DataTuple<T> dummyTuple; // Dummy struct to get displacements
 
   MPI_Get_address(&dummyTuple.col, &offsets[0]);
-//  MPI_Get_address(&dummyTuple.value, &offsets[1]);
-//  offsets[1] -= offsets[0];
+  MPI_Get_address(&dummyTuple.value[0], &offsets[1]);
+  offsets[1] -= offsets[0];
   offsets[0] = 0;
   cout << "offsets[0]  " << offsets[0] << " offsets[1] " << offsets[1]
        << endl;
