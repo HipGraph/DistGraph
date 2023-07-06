@@ -4,9 +4,10 @@
 #include <Eigen/Dense>
 #include <memory>
 #include <random>
+#include <unordered_map>
 
 using namespace std;
-using Eigen::MatrixXd;
+using namespace Eigen;
 
 namespace distblas::core {
 
@@ -14,11 +15,10 @@ namespace distblas::core {
  * This class wraps the Eigen/Dense matrix and represents
  * local dense matrix.
  */
-class DenseMat : DistributedMat {
+template <typename DENT> class DenseMat : DistributedMat {
 
 private:
-  unique_ptr<MatrixXd> matrixPtr;
-
+  unique_ptr<Matrix<DENT, Dynamic, Dynamic>> matrixPtr;
 
 public:
   uint64_t rows;
@@ -30,7 +30,7 @@ public:
    */
   DenseMat(uint64_t rows, uint64_t cols) {
 
-    this->matrixPtr = std::make_unique<MatrixXd>(MatrixXd::Random(rows, cols));
+    this->matrixPtr = make_unique<Matrix<DENT, Dynamic, Dynamic>>(rows, cols);
     this->rows = rows;
     this->cols = cols;
   }
@@ -49,30 +49,28 @@ public:
     random_device rd;
     mt19937 gen(rd());
     normal_distribution<> distribution(init_mean, std);
-    Eigen::MatrixXd matrixL(rows, cols);
-    matrixL.setRandom();
-    if (init_mean != 0.0 or std != 1.0 ) {
+    this->matrixPtr = make_unique<Matrix<DENT, Dynamic, Dynamic>>(rows, cols);
+    (*this->matrixPtr).setRandom();
+    if (init_mean != 0.0 or std != 1.0) {
 #pragma omp parallel
-      for (int i = 0; i < matrixL.rows(); ++i) {
-        for (int j = 0; j < matrixL.cols(); ++j) {
-          matrixL(i, j) = distribution(gen); // Generate random value with custom distribution
+      for (int i = 0; i < (*this->matrixPtr)->rows(); ++i) {
+        for (int j = 0; j < (*this->matrixPtr)->cols(); ++j) {
+          (*this->matrixPtr)(i, j) = distribution(
+              gen); // Generate random value with custom distribution
         }
       }
     }
-    this->matrixPtr = std::make_unique<MatrixXd>(move(matrixL));
   }
 
   ~DenseMat() {}
 
   void print_matrix() {
-    MatrixXd& matrix = *this->matrixPtr;
-    for (int i = 0; i < matrix.rows(); ++i) {
-      for (int j = 0; j < matrix.cols(); ++j) {
-        cout << matrix(i, j) << " ";
+    for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
+      for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
+        cout << (*this->matrixPtr)(i, j) << " ";
       }
       cout << endl;
     }
-
   }
 };
 
