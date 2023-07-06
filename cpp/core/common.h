@@ -108,7 +108,7 @@ void initialize_mpi_datatype_DENSETUPLE(int size) {
   types[0] = MPI_UINT64_T;
   types[1] = MPI_DOUBLE;
 
-  MPI_Aint offsets[1];
+  MPI_Aint offsets[2];
 
   DataTuple<T> dummyTuple; // Dummy struct to get displacements
 
