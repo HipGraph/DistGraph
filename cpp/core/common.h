@@ -1,6 +1,7 @@
 #ifndef COMMON_HEADER
 #define COMMON_HEADER
 
+#include "mpi_type_creator.hpp"
 #include <Eigen/Dense>
 #include <cstddef>
 #include <cstdint> // int64_t
@@ -9,7 +10,6 @@
 #include <mpi.h>
 #include <random>
 #include <vector>
-#include "mpi_type_creator.hpp"
 
 using namespace std;
 
@@ -34,13 +34,14 @@ template <typename T> struct CSR {
   T value;
 };
 
-template <typename T, size_t size> struct DataTuple {
+template <typename T> struct DataTuple {
   uint64_t col;
-//  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
-//  DataTuple(int size) : col(0), value(size){}
-  std::array<T, size> value;
+  //  Eigen::Matrix<T, Eigen::Dynamic, 1> value;
+  //  DataTuple(int size) : col(0), value(size){}
+  //  std::array<T, size> value;
+  vector<T> value;
+  DataTuple(int size) : col(0), value(size) {}
 };
-
 
 struct CSRHandle {
   vector<double> values;
@@ -97,9 +98,9 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
 }
 
 template <typename T>
-void initialize_mpi_datatype_DENSETUPLE(int size) {
-DataTuple<T,size> p(size);
- DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
+void initialize_mpi_datatype_DENSETUPLE(int embedding_dim) {
+  DataTuple<T> p(embedding_dim);
+  DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
 template <typename SPT, typename DENT>
