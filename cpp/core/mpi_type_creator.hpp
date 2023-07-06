@@ -1,3 +1,4 @@
+#pragma once
 #include <mpi.h>
 #include <type_traits>
 #include <array>

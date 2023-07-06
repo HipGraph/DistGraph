@@ -9,6 +9,7 @@
 #include <mpi.h>
 #include <random>
 #include <vector>
+#include "mpi_type_creator.hpp"
 
 using namespace std;
 
