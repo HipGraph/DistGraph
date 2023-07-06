@@ -118,9 +118,9 @@ int main(int argc, char **argv) {
                                                                                     dense_mat.get(),
                                                                                     grid.get()));
 
-  communicator.get()->invoke(0,true);
-  communicator.get()->invoke(0,false);
-  communicator.get()->invoke(1,false);
+  communicator.get()->async_transfer(0,true,true);
+  communicator.get()->async_transfer(0,false,true);
+  communicator.get()->async_transfer(1,false,true);
 
 
   cout << " rank " << rank << " processing completed  " << endl;
