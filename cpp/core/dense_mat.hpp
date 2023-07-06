@@ -53,8 +53,8 @@ public:
     (*this->matrixPtr).setRandom();
     if (init_mean != 0.0 or std != 1.0) {
 #pragma omp parallel
-      for (int i = 0; i < (*this->matrixPtr)->rows(); ++i) {
-        for (int j = 0; j < (*this->matrixPtr)->cols(); ++j) {
+      for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
+        for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
           (*this->matrixPtr)(i, j) = distribution(
               gen); // Generate random value with custom distribution
         }
