@@ -354,13 +354,13 @@ public:
            int index = rdispls[i] + k;
            bool matched = false;
            for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-             if (receivebufverify[m].col == receivebuf[index].col) {
+             if (receivebufverify[m].col == (*receivebuf[index]).col) {
                matched = true;
              }
            }
            if (!matched) {
              cout << " rank " << grid->global_rank << "cannot verify value "
-                  << receivebuf[index].col << endl;
+                  <<(*receivebuf[index]).col << endl;
            }
          }
        }
@@ -384,7 +384,7 @@ public:
         cout<<" rank "<<grid->global_rank<<" baseindex "<<base_index<<" working rank "
              <<i<<" count "<<count<<endl;
         for (int j = base_index; j < base_index + count; j++) {
-          DataTuple<DENT, embedding_dim> t = receivebuf[j];
+          DataTuple<DENT, embedding_dim> t = (*receivebuf[j]);
           (this->dense_local)->insert_cache(i, t.col, t.value);
         }
       }
