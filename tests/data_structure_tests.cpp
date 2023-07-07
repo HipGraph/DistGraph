@@ -119,8 +119,11 @@ int main(int argc, char **argv) {
                                                                                     grid.get()));
 
 //  communicator.get()->async_transfer(0,true,true);
+  cout << " rank " << rank << " async completed  " << endl;
   MPI_Request request =  communicator.get()->async_transfer(0,false,true);
+  cout << " rank " << rank << " async completed  " << endl;
  communicator.get()->populate_cache(request);
+ cout << " rank " << rank << " cache completed  " << endl;
 //  communicator.get()->async_transfer(1,false,true);
 
 
