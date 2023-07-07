@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
                                                                                     grid.get()));
 
 //  communicator.get()->async_transfer(0,true,true);
- MPI_request request =  communicator.get()->async_transfer(0,false,true);
+  MPI_Request request =  communicator.get()->async_transfer(0,false,true);
  communicator.get()->populate_cache(request);
 //  communicator.get()->async_transfer(1,false,true);
 
