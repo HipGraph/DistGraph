@@ -266,7 +266,7 @@ public:
   void populate_cache(MPI_Request &request) {
     MPI_Status status;
     MPI_Wait(&request, &status);
-    if (status.MPI_ERROR == MPI_SUCCESS) {
+//    if (status.MPI_ERROR == MPI_SUCCESS) {
 
       // TODO parallaize
       for (int i = 0; i < this->grid->world_size; i++) {
@@ -280,7 +280,7 @@ public:
           (this->dense_local)->insert_cache(i, t.col, t.value);
         }
       }
-    }
+//    }
   }
 };
 } // namespace distblas::net
