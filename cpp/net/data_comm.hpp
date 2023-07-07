@@ -383,7 +383,7 @@ public:
         }
       }
 //    }
-      delete[] receivebuf;
+//      delete[] receivebuf;
   }
 };
 } // namespace distblas::net
