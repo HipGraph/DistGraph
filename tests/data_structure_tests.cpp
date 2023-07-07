@@ -118,16 +118,19 @@ int main(int argc, char **argv) {
                                                                                     dense_mat.get(),
                                                                                     grid.get()));
 
-//  communicator.get()->async_transfer(0,true,true);
+
   cout << " rank " << rank << " async started  " << endl;
   MPI_Request request;
-  communicator.get()->async_transfer(0,false,true,request);
+  communicator.get()->async_transfer(0,true,true,request);
+  communicator.get()->populate_cache(request);
+  for(int i=0; i<(localARows/batch_size);i++){
+    MPI_Request request;
+    communicator.get()->async_transfer(i,true,true,request);
+    communicator.get()->populate_cache(request);
+  }
   cout << " rank " << rank << " async completed  " << endl;
- communicator.get()->populate_cache(request);
- cout << " rank " << rank << " cache completed  " << endl;
- dense_mat.get()->print_cache();
-//  communicator.get()->async_transfer(1,false,true);
 
+ dense_mat.get()->print_cache();
 
   cout << " rank " << rank << " processing completed  " << endl;
 
