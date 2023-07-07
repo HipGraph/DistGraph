@@ -261,7 +261,6 @@ public:
       delete[] receivebufverify;
     }
     delete[] sendbuf;
-    return request;
   }
 
   void populate_cache(MPI_Request &request) {
