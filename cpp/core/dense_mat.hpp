@@ -7,6 +7,7 @@
 #include <random>
 #include <unordered_map>
 #include <fstream>
+#include <mpi.h>
 
 using namespace std;
 using namespace Eigen;
@@ -103,11 +104,13 @@ public:
 
 
   void print_cache() {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     for(int i=0;i<(*this->cachePtr).size();i++){
       unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>> map = (*this->cachePtr)[i];
 
-      string output_path = "cache_rank_" + to_string(i) +  ".txt";
+      string output_path = "rank_"+to_string(rank)+"remote_rank_" + to_string(i) +  ".txt";
       char stats[500];
       strcpy(stats, output_path.c_str());
       ofstream fout(stats, std::ios_base::app);
