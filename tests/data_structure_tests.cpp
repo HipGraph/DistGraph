@@ -121,16 +121,16 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " async started  " << endl;
   MPI_Request request;
-  communicator.get()->async_transfer(0,true,true,request);
-  communicator.get()->populate_cache(request);
+//  communicator.get()->async_transfer(0,true,true,request);
+//  communicator.get()->populate_cache(request);
   for(int i=0; i<(localARows/batch_size);i++){
-    MPI_Request request;
-    communicator.get()->async_transfer(i,true,true,request);
-    communicator.get()->populate_cache(request);
+//    MPI_Request request;
+//    communicator.get()->async_transfer(i,true,true,request);
+//    communicator.get()->populate_cache(request);
     MPI_Request request_two;
     vector<uint64_t> random_number_vec = generate_random_numbers(0,60000,i,10);
     communicator.get()->async_transfer(random_number_vec,true,request_two);
-//    communicator.get()->populate_cache(request_two);
+    communicator.get()->populate_cache(request_two);
   }
   cout << " rank " << rank << " async completed  " << endl;
 
