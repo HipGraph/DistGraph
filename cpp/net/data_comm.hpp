@@ -25,7 +25,7 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-  DataTuple<DENT, embedding_dim> *receivebuf;
+//  DataTuple<DENT, embedding_dim> *receivebuf;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
@@ -49,9 +49,7 @@ public:
   }
 
 
-  // if you call this function please call populate cache for populate the cache and clean the
-  // memory pointer otherwise it could lead to memory leak
-   void async_transfer(int batch_id, bool fetch_all, bool verify, MPI_Request& request) {
+   void async_transfer(int batch_id, bool fetch_all, bool verify, std::vector<DataTuple<DENT, embedding_dim>> *results,MPI_Request& request) {
 
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
@@ -206,7 +204,7 @@ public:
 
     DataTuple<DENT, embedding_dim> *sendbuf =
         new DataTuple<DENT, embedding_dim>[total_send_count];
-    receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
+    DataTuple<DENT, embedding_dim> * receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
     DataTuple<DENT, embedding_dim> *receivebufverify;
     if (verify) {
       receivebufverify =
@@ -237,6 +235,7 @@ public:
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    receivebuf, receivecounts.data(), rdispls.data(), DENSETUPLE,
                    MPI_COMM_WORLD, &request);
+    results->assign(receivebuf, receivebuf + total_receive_count);
 
     if (verify) {
       MPI_Status status;
@@ -262,6 +261,7 @@ public:
       delete[] receivebufverify;
     }
     delete[] sendbuf;
+    delete[] receivebuf;
   }
 
 
@@ -304,7 +304,8 @@ public:
 
      DataTuple<DENT, embedding_dim> *sendbuf =
          new DataTuple<DENT, embedding_dim>[total_send_count];
-     receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
+     DataTuple<DENT, embedding_dim> *receivebuf =
+         new DataTuple<DENT, embedding_dim>[total_receive_count];
      DataTuple<DENT, embedding_dim> *receivebufverify;
 
      if (verify) {
@@ -361,11 +362,11 @@ public:
        delete[] receivebufverify;
      }
      delete[] sendbuf;
-
+     delete[] receivebuf;
   }
 
 
-  void populate_cache(MPI_Request &request) {
+  void populate_cache(MPI_Request &request, std::vector<DataTuple<DENT, embedding_dim>> *receivebuf) {
     MPI_Status status;
     MPI_Wait(&request, &status);
 //    if (status.MPI_ERROR == MPI_SUCCESS) {
@@ -382,8 +383,6 @@ public:
           (this->dense_local)->insert_cache(i, t.col, t.value);
         }
       }
-//    }
-//      delete[] receivebuf;
   }
 };
 } // namespace distblas::net
