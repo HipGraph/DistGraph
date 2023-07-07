@@ -249,13 +249,13 @@ public:
           int index = rdispls[i] + k;
           bool matched = false;
           for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-            if (receivebufverify[m].col == receivebuf[index].col) {
+            if (receivebufverify[m].col == ((*receivebuf)[index].col) {
               matched = true;
             }
           }
           if (!matched) {
             cout << " rank " << grid->global_rank << "cannot verify value "
-                 << receivebuf[index].col << endl;
+                 << (*receivebuf)[index].col << endl;
           }
         }
       }
@@ -354,13 +354,13 @@ public:
            int index = rdispls[i] + k;
            bool matched = false;
            for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-             if (receivebufverify[m].col == (*receivebuf[index]).col) {
+             if (receivebufverify[m].col == ((*receivebuf)[index].col) {
                matched = true;
              }
            }
            if (!matched) {
              cout << " rank " << grid->global_rank << "cannot verify value "
-                  <<(*receivebuf[index]).col << endl;
+                  <<(*receivebuf)[index].col << endl;
            }
          }
        }
