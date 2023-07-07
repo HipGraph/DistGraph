@@ -95,8 +95,8 @@ public:
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
     cout << " fetch local data " << local_key << " " << endl;
     std::array<DENT, embedding_dim> stdArray;
-    Eigen::Map<Eigen::Matrix<DENT, Dynamic, embedding_dim>>(stdArray.data()) =
-        (*this->matrixPtr).row(local_key);
+    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
+    stdArray = matrix.row(local_key).transpose().array();
     cout << " fetch local data successfully completed"  << endl;
     return stdArray;
   }
