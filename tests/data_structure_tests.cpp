@@ -118,9 +118,10 @@ int main(int argc, char **argv) {
                                                                                     dense_mat.get(),
                                                                                     grid.get()));
 
-  communicator.get()->async_transfer(0,true,true);
-  communicator.get()->async_transfer(0,false,true);
-  communicator.get()->async_transfer(1,false,true);
+//  communicator.get()->async_transfer(0,true,true);
+ MPI_request request =  communicator.get()->async_transfer(0,false,true);
+ communicator.get()->populate_cache(request);
+//  communicator.get()->async_transfer(1,false,true);
 
 
   cout << " rank " << rank << " processing completed  " << endl;
