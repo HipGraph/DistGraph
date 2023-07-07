@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " async completed  " << endl;
  communicator.get()->populate_cache(request);
  cout << " rank " << rank << " cache completed  " << endl;
- communicator.get()->populate_cache(request);
+ dense_mat.get()->print_matrix();
 //  communicator.get()->async_transfer(1,false,true);
 
 
