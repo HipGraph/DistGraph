@@ -249,7 +249,7 @@ public:
           int index = rdispls[i] + k;
           bool matched = false;
           for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-            if (receivebufverify[m].col == ((*receivebuf)[index].col) {
+            if (receivebufverify[m].col == (*receivebuf)[index].col) {
               matched = true;
             }
           }
@@ -354,7 +354,7 @@ public:
            int index = rdispls[i] + k;
            bool matched = false;
            for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-             if (receivebufverify[m].col == ((*receivebuf)[index].col) {
+             if (receivebufverify[m].col == (*receivebuf)[index].col) {
                matched = true;
              }
            }
@@ -371,7 +371,7 @@ public:
   }
 
 
-  void populate_cache(MPI_Request &request, std::vector<DataTuple<DENT, embedding_dim>> *receivebuf) {
+  void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,MPI_Request &request) {
     MPI_Status status;
     MPI_Wait(&request, &status);
 //    if (status.MPI_ERROR == MPI_SUCCESS) {

@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
     vector<uint64_t> random_number_vec = generate_random_numbers(0,60000,i,10);
 
     communicator.get()->async_transfer(random_number_vec,true,results,request_two);
-    communicator.get()->populate_cache(request_two,&results);
+    communicator.get()->populate_cache(results,request_two);
   }
   cout << " rank " << rank << " async completed  " << endl;
 
