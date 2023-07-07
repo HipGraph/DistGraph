@@ -23,19 +23,19 @@ void distblas::core::prefix_sum(vector<int> &values, vector<int> &offsets) {
   }
 }
 
-vector<int> distblas::core::generate_random_numbers(int lower_bound, int upper_bound, int seed,
+vector<uint64_t> distblas::core::generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                                     int ns) {
-  vector<int> vec(ns);
+  vector<uint64_t> vec(ns);
   std::minstd_rand generator(seed);
 
   // Define the range of the uniform distribution
   std::uniform_int_distribution<int> distribution(lower_bound, upper_bound);
 
   // Generate and print random numbers
-//#pragma omp parallel
+#pragma omp parallel
   for (int i = 0; i < ns; ++i) {
     int random_number = distribution(generator);
-    vec[i]=random_number;
+    vec[i]=static_cast<uint64_t>(random_number);
   }
   return vec;
 }
