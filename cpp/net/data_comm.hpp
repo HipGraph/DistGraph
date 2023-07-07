@@ -276,7 +276,7 @@ public:
      for(int i=0;i<col_ids.size();i++){
        int owner_rank = col_ids[i]/(this->sp_local)->proc_row_width;
        if (owner_rank == grid->global_rank){
-         send_col_ids_list.push_bak(col_ids[i]);
+         send_col_ids_list.push_back(col_ids[i]);
        }else {
          receive_col_ids_list[owner_rank].push_back(col_ids[i]);
        }
