@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include <vector>
 
+
 using namespace distblas::core;
 
 namespace distblas::net {
@@ -25,6 +26,7 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
+  DataTuple<DENT, embedding_dim> *receivebuf
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
@@ -40,7 +42,12 @@ public:
     this->receivecounts = vector<int>(grid->world_size, 0);
   }
 
-  ~DataComm() { cout << "successfully executed" << endl; }
+  ~DataComm() {
+    if (receivebuf != nullptr){
+      delete[] receivebuf;
+    }
+    cout << "successfully executed" << endl;
+  }
 
   MPI_Request &async_transfer(int batch_id, bool fetch_all, bool verify) {
 
@@ -197,7 +204,7 @@ public:
 
     DataTuple<DENT, embedding_dim> *sendbuf =
         new DataTuple<DENT, embedding_dim>[total_send_count];
-    DataTuple<DENT, embedding_dim> *receivebuf =
+    receivebuf =
         new DataTuple<DENT, embedding_dim>[total_receive_count];
     DataTuple<DENT, embedding_dim> *receivebufverify;
     if (verify) {
@@ -213,6 +220,9 @@ public:
       for (int j = 0; j < sending_vec.size(); j++) {
         int index = sdispls[i] + j;
         sendbuf[index].col = sending_vec[j];
+        int local_key = sendbuf[index].col - (grid->global_rank)*(this->sp_local)->proc_row_width;
+        sendbuf[index].value= (this->dense_local)->fetch_local_data(local_key);
+
       }
 
       if (verify) {
@@ -251,8 +261,31 @@ public:
           }
         }
       }
+      delete[] receivebufverify;
     }
+    delete[] sendbuf;
     return request;
   }
+
+  void populate_cache(MPI_Request& request) {
+    MPI_Status status;
+    MPI_Wait(request, &status);
+    if (status == MPI_SUCCESS) {
+
+      //TODO parallaize
+      for (int i=0;i<this->grid->world_size;i++){
+        int base_index = this->rdispls[i];
+        int count = this-receivecounts[i];
+        for(int j=base_index;j<base_index+count;j++){
+          DataTuple<DENT, embedding_dim> t = receivebuf[j];
+          (this->dense_local)->insert_cache(i,t.col,t.value);
+        }
+
+      }
+
+    }
+
+  }
+
 };
 } // namespace distblas::net
