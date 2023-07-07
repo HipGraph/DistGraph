@@ -6,6 +6,7 @@
 #include <memory>
 #include <random>
 #include <unordered_map>
+#include <fstream>
 
 using namespace std;
 using namespace Eigen;
@@ -105,15 +106,21 @@ public:
 
     for(int i=0;i<(*this->cachePtr).size();i++){
       unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>> map = (*this->cachePtr)[i];
+
+      string output_path = "cache_rank_" + to_string(i) +  ".txt";
+      char stats[500];
+      strcpy(stats, output_path.c_str());
+      ofstream fout(stats, std::ios_base::app);
+
+
       for (const auto& kvp : map) {
         uint64_t key = kvp.first;
         const Eigen::Matrix<DENT, embedding_dim, 1>& value = kvp.second;
-
-        std::cout << "Key: " << key << ", Value: ";
+        fout<<key<<" ";
         for (int i = 0; i < embedding_dim; ++i) {
-          std::cout << value(i) << " ";
+          fout << value(i) << " ";
         }
-        std::cout << std::endl;
+        fout<< std::endl;
       }
     }
   }
