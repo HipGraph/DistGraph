@@ -50,7 +50,7 @@ public:
     random_device rd;
     mt19937 gen(rd());
     normal_distribution<> distribution(init_mean, std);
-    this->matrixPtr = make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows);
+    this->matrixPtr = make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows,embedding_dim);
     this->cachePtr =
         std::make_unique<std::vector<std::unordered_map<uint64_t,
                                                         Eigen::Matrix<DENT,
