@@ -42,10 +42,10 @@ public:
   }
 
   ~DataComm() {
-    if (receivebuf != nullptr) {
-      delete[] receivebuf;
-    }
-    cout << "successfully executed" << endl;
+//    if (receivebuf != nullptr) {
+//      delete[] receivebuf;
+//    }
+//    cout << "successfully executed" << endl;
   }
 
 
