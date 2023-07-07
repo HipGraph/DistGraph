@@ -119,13 +119,13 @@ int main(int argc, char **argv) {
                                                                                     grid.get()));
 
 //  communicator.get()->async_transfer(0,true,true);
-  cout << " rank " << rank << " async completed  " << endl;
+  cout << " rank " << rank << " async started  " << endl;
   MPI_Request request;
   communicator.get()->async_transfer(0,false,true,request);
   cout << " rank " << rank << " async completed  " << endl;
  communicator.get()->populate_cache(request);
  cout << " rank " << rank << " cache completed  " << endl;
- dense_mat.get()->print_matrix();
+// dense_mat.get()->print_matrix();
 //  communicator.get()->async_transfer(1,false,true);
 
 
