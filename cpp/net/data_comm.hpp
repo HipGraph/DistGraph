@@ -48,7 +48,7 @@ public:
     cout << "successfully executed" << endl;
   }
 
-  MPI_Request &async_transfer(int batch_id, bool fetch_all, bool verify) {
+   void async_transfer(int batch_id, bool fetch_all, bool verify, MPI_Request& request) {
 
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
@@ -231,14 +231,13 @@ public:
       }
     }
 
-    MPI_Request request;
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    receivebuf, receivecounts.data(), rdispls.data(), DENSETUPLE,
-                   MPI_COMM_WORLD, &request);
+                   MPI_COMM_WORLD, request);
 
     if (verify) {
       MPI_Status status;
-      MPI_Wait(&request, &status);
+      MPI_Wait(request, &status);
 
       for (int i = 0; i < grid->world_size; i++) {
         int base_index = rdispls[i];
