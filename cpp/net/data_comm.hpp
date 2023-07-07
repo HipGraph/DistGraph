@@ -49,7 +49,7 @@ public:
   }
 
 
-   void async_transfer(int batch_id, bool fetch_all, bool verify, std::vector<DataTuple<DENT, embedding_dim>> *results,MPI_Request& request) {
+   void async_transfer(int batch_id, bool fetch_all, bool verify, std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,MPI_Request& request) {
 
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
@@ -204,7 +204,8 @@ public:
 
     DataTuple<DENT, embedding_dim> *sendbuf =
         new DataTuple<DENT, embedding_dim>[total_send_count];
-    DataTuple<DENT, embedding_dim> * receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
+//    DataTuple<DENT, embedding_dim> * receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
+    receivebuf->resize(total_receive_count);
     DataTuple<DENT, embedding_dim> *receivebufverify;
     if (verify) {
       receivebufverify =
@@ -235,7 +236,7 @@ public:
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    receivebuf, receivecounts.data(), rdispls.data(), DENSETUPLE,
                    MPI_COMM_WORLD, &request);
-    results->assign(receivebuf, receivebuf + total_receive_count);
+//    results->assign(receivebuf, receivebuf + total_receive_count);
 
     if (verify) {
       MPI_Status status;
@@ -261,7 +262,7 @@ public:
       delete[] receivebufverify;
     }
     delete[] sendbuf;
-    delete[] receivebuf;
+//    delete[] receivebuf;
   }
 
 
@@ -304,8 +305,12 @@ public:
 
      DataTuple<DENT, embedding_dim> *sendbuf =
          new DataTuple<DENT, embedding_dim>[total_send_count];
-     DataTuple<DENT, embedding_dim> *receivebuf =
-         new DataTuple<DENT, embedding_dim>[total_receive_count];
+
+//     DataTuple<DENT, embedding_dim> *receivebuf =
+//         new DataTuple<DENT, embedding_dim>[total_receive_count];
+
+     receivebuf->resize(total_receive_count);
+
      DataTuple<DENT, embedding_dim> *receivebufverify;
 
      if (verify) {
@@ -362,7 +367,7 @@ public:
        delete[] receivebufverify;
      }
      delete[] sendbuf;
-     delete[] receivebuf;
+//     delete[] receivebuf;
   }
 
 
