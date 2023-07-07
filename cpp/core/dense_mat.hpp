@@ -2,6 +2,7 @@
 #include "common.h"
 #include "distributed_mat.hpp"
 #include <Eigen/Dense>
+#include <iostream>
 #include <memory>
 #include <random>
 #include <unordered_map>
@@ -19,7 +20,8 @@ template <typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
 
 private:
   unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
-  unique_ptr<vector<unordered_map<uint64_t,Matrix<DENT, embedding_dim, 1>>>> cachePtr;
+  unique_ptr<vector<unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>>>>
+      cachePtr;
 
 public:
   uint64_t rows;
@@ -30,9 +32,11 @@ public:
    */
   DenseMat(uint64_t rows, int world_size) {
 
-    this->matrixPtr = make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
-    this->cachePtr =
-        std::make_unique<std::vector<std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(world_size);
+    this->matrixPtr =
+        make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
+    this->cachePtr = std::make_unique<std::vector<
+        std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
+        world_size);
 
     this->rows = rows;
   }
@@ -50,12 +54,11 @@ public:
     random_device rd;
     mt19937 gen(rd());
     normal_distribution<> distribution(init_mean, std);
-    this->matrixPtr = make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows,embedding_dim);
-    this->cachePtr =
-        std::make_unique<std::vector<std::unordered_map<uint64_t,
-                                                        Eigen::Matrix<DENT,
-                                                                      embedding_dim,
-                                                                      1>>>>(world_size);
+    this->matrixPtr =
+        make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
+    this->cachePtr = std::make_unique<std::vector<
+        std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
+        world_size);
     (*this->matrixPtr).setRandom();
     if (init_mean != 0.0 or std != 1.0) {
 #pragma omp parallel
@@ -81,18 +84,21 @@ public:
 
   void insert_cache(int rank, int key, std::array<DENT, embedding_dim> &arr) {
     Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(), embedding_dim);
-    (*this->cachePtr)[rank].insert_or_assign(key,eigenVector);
+    (*this->cachePtr)[rank].insert_or_assign(key, eigenVector);
   }
 
-  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank, int key) {
-    return  (*this->cachePtr)[rank][key];
+  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank,
+                                                              int key) {
+    return (*this->cachePtr)[rank][key];
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
-  std::array<DENT, embedding_dim> stdArray;
-  Eigen::Map<Eigen::Matrix<DENT, 1, embedding_dim>>(stdArray.data()) = (*this->matrixPtr).row(local_key);
-  return stdArray;
-
+    cout << " fetch local data " << local_key << " " << endl;
+    std::array<DENT, embedding_dim> stdArray;
+    Eigen::Map<Eigen::Matrix<DENT, Dynamic, embedding_dim>>(stdArray.data()) =
+        (*this->matrixPtr).row(local_key);
+    cout << " fetch local data successfully completed"  << endl;
+    return stdArray;
   }
 };
 
