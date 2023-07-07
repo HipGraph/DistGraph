@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
     cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
-    auto dense_mat = shared_ptr<DenseMat<double,10>>(new DenseMat<double,10>(localARows,10,0.0,grid.get()->world_size));
+    auto dense_mat = shared_ptr<DenseMat<double,10>>(new DenseMat<double,10>(localARows,0,1.0,grid.get()->world_size));
 //    dense_mat.get()->print_matrix();
     cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
 
