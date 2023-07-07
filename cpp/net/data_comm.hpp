@@ -6,7 +6,6 @@
 #include <mpi.h>
 #include <vector>
 
-
 using namespace distblas::core;
 
 namespace distblas::net {
@@ -20,7 +19,7 @@ template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 private:
   distblas::core::SpMat<SPT> *sp_local;
   distblas::core::SpMat<SPT> *sp_local_trans;
-  distblas::core::DenseMat<DENT,embedding_dim> *dense_local;
+  distblas::core::DenseMat<DENT, embedding_dim> *dense_local;
   Process3DGrid *grid;
   vector<int> sdispls;
   vector<int> sendcounts;
@@ -30,8 +29,8 @@ private:
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local,
-           distblas::core::SpMat<SPT> *sp_local_trans, DenseMat<DENT,embedding_dim> *dense_local,
-           Process3DGrid *grid) {
+           distblas::core::SpMat<SPT> *sp_local_trans,
+           DenseMat<DENT, embedding_dim> *dense_local, Process3DGrid *grid) {
     this->sp_local = sp_local;
     this->sp_local_trans = sp_local_trans;
     this->dense_local = dense_local;
@@ -43,7 +42,7 @@ public:
   }
 
   ~DataComm() {
-    if (receivebuf != nullptr){
+    if (receivebuf != nullptr) {
       delete[] receivebuf;
     }
     cout << "successfully executed" << endl;
@@ -204,8 +203,7 @@ public:
 
     DataTuple<DENT, embedding_dim> *sendbuf =
         new DataTuple<DENT, embedding_dim>[total_send_count];
-    receivebuf =
-        new DataTuple<DENT, embedding_dim>[total_receive_count];
+    receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
     DataTuple<DENT, embedding_dim> *receivebufverify;
     if (verify) {
       receivebufverify =
@@ -220,9 +218,9 @@ public:
       for (int j = 0; j < sending_vec.size(); j++) {
         int index = sdispls[i] + j;
         sendbuf[index].col = sending_vec[j];
-        int local_key = sendbuf[index].col - (grid->global_rank)*(this->sp_local)->proc_row_width;
-        sendbuf[index].value= (this->dense_local)->fetch_local_data(local_key);
-
+        int local_key = sendbuf[index].col -
+                        (grid->global_rank) * (this->sp_local)->proc_row_width;
+        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
 
       if (verify) {
@@ -267,25 +265,24 @@ public:
     return request;
   }
 
-  void populate_cache(MPI_Request& request) {
+  void populate_cache(MPI_Request &request) {
     MPI_Status status;
     MPI_Wait(&request, &status);
     if (status.MPI_ERROR == MPI_SUCCESS) {
 
-      //TODO parallaize
-      for (int i=0;i<this->grid->world_size;i++){
+      // TODO parallaize
+      for (int i = 0; i < this->grid->world_size; i++) {
         int base_index = this->rdispls[i];
+
         int count = this->receivecounts[i];
-        for(int j=base_index;j<base_index+count;j++){
+        cout<<" rank "<<grid->global_rank<<" baseindex "<<base_index<<" working rank "
+             <<i<<" count "<<count<<endl;
+        for (int j = base_index; j < base_index + count; j++) {
           DataTuple<DENT, embedding_dim> t = receivebuf[j];
-          (this->dense_local)->insert_cache(i,t.col,t.value);
+          (this->dense_local)->insert_cache(i, t.col, t.value);
         }
-
       }
-
     }
-
   }
-
 };
 } // namespace distblas::net
