@@ -309,7 +309,9 @@ public:
 //     DataTuple<DENT, embedding_dim> *receivebuf =
 //         new DataTuple<DENT, embedding_dim>[total_receive_count];
 
+     cout<<" calling resize "<<endl;
      receivebuf->resize(total_receive_count);
+     cout<<"  resize  success"<<endl;
 
      DataTuple<DENT, embedding_dim> *receivebufverify;
 
