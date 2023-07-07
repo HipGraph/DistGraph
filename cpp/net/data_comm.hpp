@@ -269,7 +269,7 @@ public:
 
   void populate_cache(MPI_Request& request) {
     MPI_Status status;
-    MPI_Wait(request, &status);
+    MPI_Wait(&request, &status);
     if (status.MPI_ERROR == MPI_SUCCESS) {
 
       //TODO parallaize
