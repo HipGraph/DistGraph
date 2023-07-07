@@ -99,6 +99,26 @@ public:
     std::copy(eigenArray.data(), eigenArray.data() + embedding_dim, stdArray.data());
     return stdArray;
   }
+
+
+  void print_cache() {
+
+    for(i=0;i<(*this->cachePtr).size();i++){
+      unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1> map = (*this->cachePtr)[i];
+      for (const auto& kvp : map) {
+        uint64_t key = kvp.first;
+        const Eigen::Matrix<DENT, embedding_dim, 1>& value = kvp.second;
+
+        std::cout << "Key: " << key << ", Value: ";
+        for (int i = 0; i < embedding_dim; ++i) {
+          std::cout << value(i) << " ";
+        }
+        std::cout << std::endl;
+      }
+    }
+  }
+
+
 };
 
 } // namespace distblas::core
