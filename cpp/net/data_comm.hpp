@@ -233,11 +233,11 @@ public:
 
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    receivebuf, receivecounts.data(), rdispls.data(), DENSETUPLE,
-                   MPI_COMM_WORLD, request);
+                   MPI_COMM_WORLD, &request);
 
     if (verify) {
       MPI_Status status;
-      MPI_Wait(request, &status);
+      MPI_Wait(&request, &status);
 
       for (int i = 0; i < grid->world_size; i++) {
         int base_index = rdispls[i];
