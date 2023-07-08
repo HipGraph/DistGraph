@@ -304,13 +304,13 @@ public:
        total_receive_count = total_receive_count + receivecounts[i];
      }
 
-//     DataTuple<DENT, embedding_dim> *sendbuf =
-//         new DataTuple<DENT, embedding_dim>[total_send_count];
-     vector<DataTuple<DENT, embedding_dim>>  *sendbuf =
-         new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
+     DataTuple<DENT, embedding_dim> *sendbuf =
+         new DataTuple<DENT, embedding_dim>[total_send_count];
+//     vector<DataTuple<DENT, embedding_dim>>  *sendbuf =
+//         new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
 
-//     DataTuple<DENT, embedding_dim> *receivebuf =
-//         new DataTuple<DENT, embedding_dim>[total_receive_count];
+     DataTuple<DENT, embedding_dim> *receivebuf =
+         new DataTuple<DENT, embedding_dim>[total_receive_count];
 
      cout<<" calling resize "<<endl;
      receivebuf->resize(total_receive_count);
@@ -331,50 +331,50 @@ public:
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
          cout<<"rank "<<grid->global_rank<<"sending rank "<<i<<" index"<<index<<"value"<<sending_vec[j]<<endl;
-         ((*sendbuf)[index]).col = sending_vec[j];
-//         int local_key = ((*sendbuf)[index]).col -
-//                         (grid->global_rank) * (this->sp_local)->proc_row_width;
-//         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
+         ((sendbuf)[index]).col = sending_vec[j];
+         int local_key = ((sendbuf)[index]).col -
+                         (grid->global_rank) * (this->sp_local)->proc_row_width;
+         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
        }
 
-//       if (verify) {
-//         for (int j = 0; j < receiving_vec.size(); j++) {
-//           int index = rdispls[i] + j;
-//           receivebufverify[index].col = receiving_vec[j];
-//         }
-//       }
+       if (verify) {
+         for (int j = 0; j < receiving_vec.size(); j++) {
+           int index = rdispls[i] + j;
+           receivebufverify[index].col = receiving_vec[j];
+         }
+       }
      }
-//
-//     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-//                    (*receivebuf).data(), receivecounts.data(), rdispls.data(), DENSETUPLE,
-//                    MPI_COMM_WORLD, &request);
-//     cout<<"  MPI executed  success"<<endl;
-//     if (verify) {
-//       MPI_Status status;
-//       MPI_Wait(&request, &status);
-//
-//       for (int i = 0; i < grid->world_size; i++) {
-//         int base_index = rdispls[i];
-//         int size = receivecounts[i];
-//         for (int k = 0; k < size; k++) {
-//           int index = rdispls[i] + k;
-//           bool matched = false;
-//           for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-//             if (receivebufverify[m].col == (*receivebuf)[index].col) {
-//               matched = true;
-//             }
-//           }
-//           if (!matched) {
-//             cout << " rank " << grid->global_rank << "cannot verify value "
-//                  <<(*receivebuf)[index].col << endl;
-//           }
-//         }
-//       }
-//       delete[] receivebufverify;
-//     }
-//     cout<<"  verification success"<<endl;
+
+     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+                    (*receivebuf).data(), receivecounts.data(), rdispls.data(), DENSETUPLE,
+                    MPI_COMM_WORLD, &request);
+     cout<<"  MPI executed  success"<<endl;
+     if (verify) {
+       MPI_Status status;
+       MPI_Wait(&request, &status);
+
+       for (int i = 0; i < grid->world_size; i++) {
+         int base_index = rdispls[i];
+         int size = receivecounts[i];
+         for (int k = 0; k < size; k++) {
+           int index = rdispls[i] + k;
+           bool matched = false;
+           for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
+             if (receivebufverify[m].col == (*receivebuf)[index].col) {
+               matched = true;
+             }
+           }
+           if (!matched) {
+             cout << " rank " << grid->global_rank << "cannot verify value "
+                  <<(*receivebuf)[index].col << endl;
+           }
+         }
+       }
+       delete[] receivebufverify;
+     }
+     cout<<"  verification success"<<endl;
 //     delete[] receivebufverify;
-//     delete[] sendbuf;
+     delete[] sendbuf;
 //     delete[] receivebuf;
   }
 
