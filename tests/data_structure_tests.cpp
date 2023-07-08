@@ -144,7 +144,6 @@ int main(int argc, char **argv) {
     communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
 
   }
-  delete results_init;
   cout << " rank " << rank << " async completed  " << endl;
 
   dense_mat.get()->print_cache();
