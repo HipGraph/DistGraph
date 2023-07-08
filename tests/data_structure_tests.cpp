@@ -134,13 +134,13 @@ int main(int argc, char **argv) {
 //    communicator.get()->async_transfer(i, true, true, results_postive_ptr.get(), request);
 //    communicator.get()->populate_cache(results_postive_ptr.get(),request);
 
-    MPI_Request request_two;
-    unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
-        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
-    vector<uint64_t> random_number_vec =
-        generate_random_numbers(0, 60000, 0, 10);
-    communicator.get()->async_transfer(random_number_vec, true,
-                                       results_negative_ptr.get(), request_two);
+//    MPI_Request request_two;
+//    unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
+//        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
+//    vector<uint64_t> random_number_vec =
+//        generate_random_numbers(0, 60000, 0, 10);
+//    communicator.get()->async_transfer(random_number_vec, true,
+//                                       results_negative_ptr.get(), request_two);
 //    communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
 
 //  }
