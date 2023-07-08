@@ -3,8 +3,8 @@
 #include "../cpp/core/dense_mat.hpp"
 #include "../cpp/core/sparse_mat.hpp"
 #include "../cpp/io/parrallel_IO.hpp"
-#include "../cpp/partition/partitioner.hpp"
 #include "../cpp/net/data_comm.hpp"
+#include "../cpp/partition/partitioner.hpp"
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -29,24 +29,26 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-  initialize_mpi_datatypes<int,double,10>();
+  initialize_mpi_datatypes<int, double, 10>();
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
-//  auto shared_sparseMat_Trans =
-//      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
+  //  auto shared_sparseMat_Trans =
+  //      shared_ptr<distblas::core::SpMat<int>>(new
+  //      distblas::core::SpMat<int>());
 
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << endl;
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
-//  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat_Trans.get());
-//  shared_sparseMat.get()->print_coords(false);
-//  shared_sparseMat.get()->print_coords(false);
+  //  reader.get()->parallel_read_MM<int>(file_path,
+  //  shared_sparseMat_Trans.get());
+  //  shared_sparseMat.get()->print_coords(false);
+  //  shared_sparseMat.get()->print_coords(false);
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                        grid.get()->world_size);
@@ -64,7 +66,6 @@ int main(int argc, char **argv) {
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
       batch_size, localARows, localBRows);
 
-
   auto partitioner =
       unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(
           shared_sparseMat.get()->gRows, shared_sparseMat.get()->gCols,
@@ -74,7 +75,7 @@ int main(int argc, char **argv) {
 
   partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
-//
+  //
 
   shared_sparseMat.get()->divide_block_cols(
       15000, localBRows, grid.get()->world_size, true, false);
@@ -108,35 +109,44 @@ int main(int argc, char **argv) {
   shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
   shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
-    cout<<" rank "<< rank << " creation of dense matrices started  "<<endl;
-    auto dense_mat = shared_ptr<DenseMat<double,10>>(new DenseMat<double,10>(localARows,0,1.0,grid.get()->world_size));
-//    dense_mat.get()->print_matrix();
-    cout<<" rank "<< rank << " creation of dense matrices completed  "<<endl;
+  cout << " rank " << rank << " creation of dense matrices started  " << endl;
+  auto dense_mat = shared_ptr<DenseMat<double, 10>>(
+      new DenseMat<double, 10>(localARows, 0, 1.0, grid.get()->world_size));
+  //    dense_mat.get()->print_matrix();
+  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
-  auto communicator = unique_ptr<DataComm<int,double,10>>(new DataComm<int,double,10>(shared_sparseMat.get(),
-                                                                                    shared_sparseMat_Trans.get(),
-                                                                                    dense_mat.get(),
-                                                                                    grid.get()));
-
+  auto communicator =
+      unique_ptr<DataComm<int, double, 10>>(new DataComm<int, double, 10>(
+          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
+          grid.get()));
 
   cout << " rank " << rank << " async started  " << endl;
   MPI_Request request;
-//  communicator.get()->async_transfer(0,true,true,request);
-//  communicator.get()->populate_cache(request);
-  for(int i=0; i<(localARows/batch_size);i++){
-//    MPI_Request request;
-      std::vector<DataTuple<double, 10>> *results = new vector<DataTuple<double, 10>>();
-//    communicator.get()->async_transfer(i,true,true,request);
-//    communicator.get()->populate_cache(request);
+  std::vector<DataTuple<double, 10>> *results_init =
+      new vector<DataTuple<double, 10>>();
+  communicator.get()->async_transfer(0, true, true, results_init, request);
+  communicator.get()->populate_cache(request);
+  for (int i = 0; i < (localARows / batch_size); i++) {
+    MPI_Request request;
+    std::vector<DataTuple<double, 10>> *results_postive =
+        new vector<DataTuple<double, 10>>();
+    communicator.get()->async_transfer(i, true, true, results_postive, request);
+    communicator.get()->populate_cache(request);
     MPI_Request request_two;
-    vector<uint64_t> random_number_vec = generate_random_numbers(0,60000,i,10);
-
-    communicator.get()->async_transfer(random_number_vec,true,results,request_two);
-//    communicator.get()->populate_cache(results,request_two);
+    std::vector<DataTuple<double, 10>> *results_negative =
+        new vector<DataTuple<double, 10>>();
+    vector<uint64_t> random_number_vec =
+        generate_random_numbers(0, 60000, i, 10);
+    communicator.get()->async_transfer(random_number_vec, true,
+                                       results_negative, request_two);
+    communicator.get()->populate_cache(results, request_two);
+    delete[] results_postive;
+    delete[] results_negative;
   }
+  delete[] results_init;
   cout << " rank " << rank << " async completed  " << endl;
 
- dense_mat.get()->print_cache();
+  dense_mat.get()->print_cache();
 
   cout << " rank " << rank << " processing completed  " << endl;
 
