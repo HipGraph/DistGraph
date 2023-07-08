@@ -329,7 +329,7 @@ public:
 //       #pragma omp parallel
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
-         cout<<" index"<<index<<endl;
+         cout<<"rank "<<grid->global_rank<<" index"<<index<<endl;
          ((*sendbuf)[index]).col = sending_vec[j];
 //         int local_key = ((*sendbuf)[index]).col -
 //                         (grid->global_rank) * (this->sp_local)->proc_row_width;
