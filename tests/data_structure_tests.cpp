@@ -140,10 +140,10 @@ int main(int argc, char **argv) {
     communicator.get()->async_transfer(random_number_vec, true,
                                        results_negative, request_two);
     communicator.get()->populate_cache(results_negative, request_two);
-    delete[] results_postive;
-    delete[] results_negative;
+    delete results_postive;
+    delete results_negative;
   }
-  delete[] results_init;
+  delete results_init;
   cout << " rank " << rank << " async completed  " << endl;
 
   dense_mat.get()->print_cache();
