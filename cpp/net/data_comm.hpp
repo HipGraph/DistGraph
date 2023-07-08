@@ -328,6 +328,7 @@ public:
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
 //         sendbuf[index].col = sending_vec[j];
+          sending_vec[j];
          int local_key = sendbuf[index].col -
                          (grid->global_rank) * (this->sp_local)->proc_row_width;
 //         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
