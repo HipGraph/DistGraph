@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
     unique_ptr<std::vector<DataTuple<double, 10>>> results_postive_ptr =
         unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
     communicator.get()->async_transfer(i, true, true, results_postive_ptr.get(), request);
-//    communicator.get()->populate_cache(results_postive_ptr.get(),request);
+    communicator.get()->populate_cache(results_postive_ptr.get(),request);
 
     MPI_Request request_two;
     unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
