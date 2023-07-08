@@ -131,8 +131,8 @@ int main(int argc, char **argv) {
     MPI_Request request;
     unique_ptr<std::vector<DataTuple<double, 10>>> results_postive_ptr =
         unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
-    communicator.get()->async_transfer(i, true, true, results_postive_ptr, request);
-    communicator.get()->populate_cache(results_postive.get(),request);
+    communicator.get()->async_transfer(i, true, true, results_postive_ptr.get(), request);
+    communicator.get()->populate_cache(results_postive_ptr.get(),request);
 
     MPI_Request request_two;
     unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
@@ -140,8 +140,8 @@ int main(int argc, char **argv) {
     vector<uint64_t> random_number_vec =
         generate_random_numbers(0, 60000, i, 10);
     communicator.get()->async_transfer(random_number_vec, true,
-                                       results_negative_ptr, request_two);
-    communicator.get()->populate_cache(results_negative_ptr, request_two);
+                                       results_negative_ptr.get(), request_two);
+    communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
 
   }
 //  delete results_init;
