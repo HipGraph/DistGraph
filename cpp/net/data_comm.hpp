@@ -305,7 +305,8 @@ public:
 
 //     DataTuple<DENT, embedding_dim> *sendbuf =
 //         new DataTuple<DENT, embedding_dim>[total_send_count];
-     vector<DataTuple<DENT, embedding_dim>>  *sendbuf = new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
+     vector<DataTuple<DENT, embedding_dim>>  *sendbuf =
+         new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
 
 //     DataTuple<DENT, embedding_dim> *receivebuf =
 //         new DataTuple<DENT, embedding_dim>[total_receive_count];
@@ -328,9 +329,9 @@ public:
        #pragma omp parallel
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
-         ((*sendbuf)[index]).col = sending_vec[j];
-         int local_key = ((*sendbuf)[index]).col -
-                         (grid->global_rank) * (this->sp_local)->proc_row_width;
+//         ((*sendbuf)[index]).col = sending_vec[j];
+//         int local_key = ((*sendbuf)[index]).col -
+//                         (grid->global_rank) * (this->sp_local)->proc_row_width;
 //         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
        }
 
