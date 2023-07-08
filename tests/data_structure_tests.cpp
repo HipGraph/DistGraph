@@ -128,11 +128,11 @@ int main(int argc, char **argv) {
   communicator.get()->populate_cache(results_init,request);
 
   for (int i = 0; i < (localARows / batch_size); i++) {
-    MPI_Request request;
-    unique_ptr<std::vector<DataTuple<double, 10>>> results_postive_ptr =
-        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
-    communicator.get()->async_transfer(i, true, true, results_postive_ptr.get(), request);
-    communicator.get()->populate_cache(results_postive_ptr.get(),request);
+//    MPI_Request request;
+//    unique_ptr<std::vector<DataTuple<double, 10>>> results_postive_ptr =
+//        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
+//    communicator.get()->async_transfer(i, true, true, results_postive_ptr.get(), request);
+//    communicator.get()->populate_cache(results_postive_ptr.get(),request);
 
     MPI_Request request_two;
     unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
