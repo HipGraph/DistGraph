@@ -122,10 +122,10 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " async started  " << endl;
   MPI_Request request;
-  std::vector<DataTuple<double, 10>> *results_init =
-      new vector<DataTuple<double, 10>>();
-  communicator.get()->async_transfer(0, true, true, results_init, request);
-  communicator.get()->populate_cache(results_init,request);
+//  std::vector<DataTuple<double, 10>> *results_init =
+//      new vector<DataTuple<double, 10>>();
+//  communicator.get()->async_transfer(0, true, true, results_init, request);
+//  communicator.get()->populate_cache(results_init,request);
 
 //  for (int i = 0; i < (localARows / batch_size); i++) {
 //    MPI_Request request;
