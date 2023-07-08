@@ -323,8 +323,9 @@ public:
      for (int i = 0; i < grid->world_size; i++) {
        vector<uint64_t> sending_vec = send_col_ids_list;
        vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-
-##pragma omp parallel
+/*
+#pragma omp parallel
+ */
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
          sendbuf[index].col = sending_vec[j];
