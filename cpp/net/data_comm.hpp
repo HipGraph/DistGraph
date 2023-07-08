@@ -309,8 +309,6 @@ public:
 //     vector<DataTuple<DENT, embedding_dim>>  *sendbuf =
 //         new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
 
-     DataTuple<DENT, embedding_dim> *receivebuf =
-         new DataTuple<DENT, embedding_dim>[total_receive_count];
 
      cout<<" calling resize "<<endl;
      receivebuf->resize(total_receive_count);
