@@ -296,7 +296,7 @@ public:
      rdispls[0]=0;
      for (int i = 0; i < grid->world_size; i++) {
 
-       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
+       sdispls[i] = 0;
        rdispls[i] =
            (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
 
