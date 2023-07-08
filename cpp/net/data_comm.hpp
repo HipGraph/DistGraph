@@ -292,7 +292,8 @@ public:
        }
        receivecounts[i] = receive_col_ids_list[i].size();
      }
-
+     sdispls[0]=0;
+     rdispls[0]=0;
      for (int i = 0; i < grid->world_size; i++) {
 
        sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
@@ -329,7 +330,7 @@ public:
 //       #pragma omp parallel
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
-         cout<<"rank "<<grid->global_rank<<" index"<<index<<endl;
+         cout<<"rank "<<grid->global_rank<<"sending rank "<<i<<" index"<<index<<endl;
          ((*sendbuf)[index]).col = sending_vec[j];
 //         int local_key = ((*sendbuf)[index]).col -
 //                         (grid->global_rank) * (this->sp_local)->proc_row_width;
