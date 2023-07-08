@@ -303,72 +303,72 @@ public:
        total_receive_count = total_receive_count + receivecounts[i];
      }
 
-     DataTuple<DENT, embedding_dim> *sendbuf =
-         new DataTuple<DENT, embedding_dim>[total_send_count];
-
-//     DataTuple<DENT, embedding_dim> *receivebuf =
-//         new DataTuple<DENT, embedding_dim>[total_receive_count];
-
-     cout<<" calling resize "<<endl;
-     receivebuf->resize(total_receive_count);
-     cout<<"  resize  success"<<endl;
-
-     DataTuple<DENT, embedding_dim> *receivebufverify;
-
-     if (verify) {
-       receivebufverify =
-           new DataTuple<DENT, embedding_dim>[total_receive_count];
-     }
-
-     for (int i = 0; i < grid->world_size; i++) {
-       vector<uint64_t> sending_vec = send_col_ids_list;
-       vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-
-#pragma omp parallel
-       for (int j = 0; j < sending_vec.size(); j++) {
-         int index = sdispls[i] + j;
-         sendbuf[index].col = sending_vec[j];
-         int local_key = sendbuf[index].col -
-                         (grid->global_rank) * (this->sp_local)->proc_row_width;
-         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-       }
-
-       if (verify) {
-         for (int j = 0; j < receiving_vec.size(); j++) {
-           int index = rdispls[i] + j;
-           receivebufverify[index].col = receiving_vec[j];
-         }
-       }
-     }
-
-     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                    (*receivebuf).data(), receivecounts.data(), rdispls.data(), DENSETUPLE,
-                    MPI_COMM_WORLD, &request);
-     cout<<"  MPI executed  success"<<endl;
-     if (verify) {
-       MPI_Status status;
-       MPI_Wait(&request, &status);
-
-       for (int i = 0; i < grid->world_size; i++) {
-         int base_index = rdispls[i];
-         int size = receivecounts[i];
-         for (int k = 0; k < size; k++) {
-           int index = rdispls[i] + k;
-           bool matched = false;
-           for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-             if (receivebufverify[m].col == (*receivebuf)[index].col) {
-               matched = true;
-             }
-           }
-           if (!matched) {
-             cout << " rank " << grid->global_rank << "cannot verify value "
-                  <<(*receivebuf)[index].col << endl;
-           }
-         }
-       }
+//     DataTuple<DENT, embedding_dim> *sendbuf =
+//         new DataTuple<DENT, embedding_dim>[total_send_count];
+//
+////     DataTuple<DENT, embedding_dim> *receivebuf =
+////         new DataTuple<DENT, embedding_dim>[total_receive_count];
+//
+//     cout<<" calling resize "<<endl;
+//     receivebuf->resize(total_receive_count);
+//     cout<<"  resize  success"<<endl;
+//
+//     DataTuple<DENT, embedding_dim> *receivebufverify;
+//
+//     if (verify) {
+//       receivebufverify =
+//           new DataTuple<DENT, embedding_dim>[total_receive_count];
+//     }
+//
+//     for (int i = 0; i < grid->world_size; i++) {
+//       vector<uint64_t> sending_vec = send_col_ids_list;
+//       vector<uint64_t> receiving_vec = receive_col_ids_list[i];
+//
+//#pragma omp parallel
+//       for (int j = 0; j < sending_vec.size(); j++) {
+//         int index = sdispls[i] + j;
+//         sendbuf[index].col = sending_vec[j];
+//         int local_key = sendbuf[index].col -
+//                         (grid->global_rank) * (this->sp_local)->proc_row_width;
+//         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
+//       }
+//
+//       if (verify) {
+//         for (int j = 0; j < receiving_vec.size(); j++) {
+//           int index = rdispls[i] + j;
+//           receivebufverify[index].col = receiving_vec[j];
+//         }
+//       }
+//     }
+//
+//     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+//                    (*receivebuf).data(), receivecounts.data(), rdispls.data(), DENSETUPLE,
+//                    MPI_COMM_WORLD, &request);
+//     cout<<"  MPI executed  success"<<endl;
+//     if (verify) {
+//       MPI_Status status;
+//       MPI_Wait(&request, &status);
+//
+//       for (int i = 0; i < grid->world_size; i++) {
+//         int base_index = rdispls[i];
+//         int size = receivecounts[i];
+//         for (int k = 0; k < size; k++) {
+//           int index = rdispls[i] + k;
+//           bool matched = false;
+//           for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
+//             if (receivebufverify[m].col == (*receivebuf)[index].col) {
+//               matched = true;
+//             }
+//           }
+//           if (!matched) {
+//             cout << " rank " << grid->global_rank << "cannot verify value "
+//                  <<(*receivebuf)[index].col << endl;
+//           }
+//         }
+//       }
 //       delete[] receivebufverify;
-     }
-     cout<<"  verification success"<<endl;
+//     }
+//     cout<<"  verification success"<<endl;
 //     delete[] sendbuf;
 //     delete[] receivebuf;
   }
