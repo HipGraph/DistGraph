@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
   communicator.get()->async_transfer(0, true, true, results_init, request);
   communicator.get()->populate_cache(results_init,request);
 
-  for (int i = 0; i < (localARows / batch_size); i++) {
+//  for (int i = 0; i < (localARows / batch_size); i++) {
 //    MPI_Request request;
 //    unique_ptr<std::vector<DataTuple<double, 10>>> results_postive_ptr =
 //        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
@@ -138,12 +138,12 @@ int main(int argc, char **argv) {
     unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
         unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
     vector<uint64_t> random_number_vec =
-        generate_random_numbers(0, 60000, i, 10);
+        generate_random_numbers(0, 60000, 0, 10);
     communicator.get()->async_transfer(random_number_vec, true,
                                        results_negative_ptr.get(), request_two);
 //    communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
 
-  }
+//  }
 //  delete results_init;
   cout << " rank " << rank << " async completed  " << endl;
 
