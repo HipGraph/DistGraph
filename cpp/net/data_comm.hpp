@@ -369,7 +369,8 @@ public:
 //       delete[] receivebufverify;
 //     }
 //     cout<<"  verification success"<<endl;
-     delete[] sendbuf;
+//     delete[] receivebufverify;
+//     delete[] sendbuf;
 //     delete[] receivebuf;
   }
 
