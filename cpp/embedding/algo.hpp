@@ -170,7 +170,7 @@ public:
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(owner_rank, global_col_id);
-          col_vec = col_vec.transpose();
+          col_vec = col_vec_trans.transpose();
         } else {
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
