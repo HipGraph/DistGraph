@@ -16,20 +16,20 @@ using namespace Eigen;
 
 namespace distblas::embedding {
 template <typename SPT, typename DENT, size_t embedding_dim,
-          typename DENT MIN_BOUND, typename DENT MAX_BOUND>
+          typename  MIN_BOUND, typename  MAX_BOUND>
 
 class EmbeddingAlgo {
 
 private:
   DenseMat<DENT, embedding_dim> *dense_local;
-  SpMat<SPT> *sp_local;
+  distblas::core::SpMat<SPT> *sp_local;
   Process3DGrid *grid;
-  DataComm<DENT, embedding_dim> *data_comm;
+  DataComm<SPT,DENT, embedding_dim> *data_comm;
 
 public:
   EmbeddingAlgo(SpMat<SPT> *sp_local,
                 DenseMat<DENT, embedding_dim> *dense_local,
-                DataComm<DENT, embedding_dim> *data_comm, Process3DGrid *grid) {
+                DataComm<SPT,DENT, embedding_dim> *data_comm, Process3DGrid *grid) {
     this->data_comm = data_comm;
     this->grid = grid;
     this->dense_local = dense_local;
