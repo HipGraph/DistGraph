@@ -124,8 +124,8 @@ public:
         } else {
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
-        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-            (this->dense_local)->fetch_local_eigen_vector(row_id);
+//        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+//            (this->dense_local)->fetch_local_eigen_vector(row_id);
 
 
 //        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
