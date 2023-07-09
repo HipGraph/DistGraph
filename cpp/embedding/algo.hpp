@@ -82,7 +82,7 @@ public:
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
         cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive started for batch "<<j<<endl;
-        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size,working_rank);
+        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
         cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive stopped for batch "<<j<<endl;
         this->update_data_matrix(values,j,batch_size);
         cout<<" rank "<< this->grid->global_rank<<" update_data_matrix stopped "<<endl;
@@ -146,8 +146,7 @@ public:
 
   void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
                                   vector<uint64_t> &col_ids, DENT lr,int batch_id,
-                                  int batch_size,
-                                  int target_rank) {
+                                  int batch_size) {
 
     int row_base_index = batch_id * batch_size;
 
@@ -170,7 +169,7 @@ public:
         if (fetch_from_cache) {
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
-                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
+                  ->fetch_data_vector_from_cache(owner_rank, global_col_id);
           col_vec = col_vec.transpose();
         } else {
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
