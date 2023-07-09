@@ -103,7 +103,7 @@ public:
     int global_col_base_id =
         (this->grid)->global_rank * (this->sp_local)->proc_col_width +
         col_base_id;
-    CSRHandle *csr_handle = (csr_block->get())->handler;
+    CSRHandle *csr_handle = csr_block->handler;
     // TODO: parallalize
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
