@@ -118,10 +118,10 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
         if (fetch_from_cache) {
-          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-              (this->dense_local)
-                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
-          col_vec = col_vec_trans.transpose();
+//          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+//              (this->dense_local)
+//                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
+//          col_vec = col_vec_trans.transpose();
         } else {
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
