@@ -64,7 +64,7 @@ public:
             (working_rank == ((this->grid)->global_rank)) ? false : true;
         while (head != nullptr) {
 
-          CSRLocal<SPT> *csr_block = (head.get())->data;
+          CSRLocal<SPT> *csr_block = (head.get())->data.get();
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
 
@@ -76,7 +76,7 @@ public:
         int seed = j + i;
 
         vector<uint64_t> random_number_vec =
-            generate_random_numbers(0, (this - sp_local)->gRows, seed, ns);
+            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
 
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size,working_rank);
         this->update_data_matrix(values,j,batch_size);

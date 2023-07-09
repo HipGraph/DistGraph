@@ -240,7 +240,7 @@ public:
   }
 
   CSRLinkedList<T>* get_batch_list(int batch_id) {
-    return csr_linked_lists[batch_id];
+    return csr_linked_lists[batch_id].get();
   }
 
   void print_blocks_and_cols(bool trans) {
