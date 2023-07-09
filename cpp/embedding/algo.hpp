@@ -65,10 +65,10 @@ public:
         while (head != nullptr) {
 
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
-          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac started "<<endl;
+          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac started for batch "<<j<<" col "<<col_batch_id<<endl;
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
-          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac stoped "<<endl;
+          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac stoped "<<j<<" col "<<col_batch_id<<<<endl;
 
            working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
            head = (head.get())->next;
@@ -79,9 +79,9 @@ public:
 
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
-        cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive started "<<endl;
+        cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive started for batch "<<j<<endl;
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size,working_rank);
-        cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive stopped "<<endl;
+        cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive stopped for batch "<<j<<endl;
         this->update_data_matrix(values,j,batch_size);
         cout<<" rank "<< this->grid->global_rank<<" update_data_matrix stopped "<<endl;
         MPI_Request request_two;
