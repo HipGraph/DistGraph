@@ -137,7 +137,7 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
             scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
-        values.row(i) = values.row(i).array() + learned.array();
+//        values.row(i) = values.row(i).array() + learned.array();
       }
     }
   }
