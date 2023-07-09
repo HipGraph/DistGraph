@@ -31,6 +31,7 @@ public:
   vector<Tuple<T>> coords;
   int block_row_width, block_col_width;
   int proc_col_width, proc_row_width;
+  int number_of_local_csr_nodes;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -147,9 +148,10 @@ public:
 
     int col_block = 0;
 
-    int no_of_nodes = (transpose) ? (gRows / block_rows) : (gCols / block_cols);
+    int no_of_nodes = (transpose) ? (gRows / block_rows) : (gCols / block_cols);//This assumes 1D partitioning, we need to generalized this
+    this->number_of_local_csr_nodes = no_of_nodes;
 
-    int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
+        int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
                                   : (local_max_row_width / block_rows);
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
@@ -235,6 +237,10 @@ public:
             });
       }
     }
+  }
+
+  CSRLinkedList<T>* get_batch_list(int batch_id) {
+    return csr_linked_lists[batch_id];
   }
 
   void print_blocks_and_cols(bool trans) {

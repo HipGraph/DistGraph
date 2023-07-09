@@ -21,12 +21,13 @@ namespace distblas::core {
 template <typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
 
 private:
-  unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
+
   unique_ptr<vector<unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>>>>
       cachePtr;
 
 public:
   uint64_t rows;
+  unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
   /**
    * create matrix with random initialization
    * @param rows Number of rows of the matrix
@@ -100,6 +101,12 @@ public:
     Eigen::Array<DENT, 1, embedding_dim> eigenArray = matrix.row(local_key).transpose().array();
     std::copy(eigenArray.data(), eigenArray.data() + embedding_dim, stdArray.data());
     return stdArray;
+  }
+
+  Eigen::Array<DENT, 1, embedding_dim> fetch_local_eigen_vector(int local_key) {
+    std::array<DENT, embedding_dim> stdArray;
+    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
+    return matrix.row(local_key);
   }
 
 

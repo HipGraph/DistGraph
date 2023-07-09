@@ -105,6 +105,13 @@ void initialize_mpi_datatypes() {
   initialize_mpi_datatype_DENSETUPLE<DENT,embedding_dim>();
 }
 
+template <typename DENT, size_t MAXBOUND>
+DENT  scale(DENT v){
+  if(v > MAXBOUND) return MAXBOUND;
+  else if(v < -MAXBOUND) return -MAXBOUND;
+  else return v;
+}
+
 }; // namespace distblas::core
 
 #endif

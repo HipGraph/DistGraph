@@ -1,0 +1,197 @@
+#pragma once
+#include "../core/common.h"
+#include "../core/csr_local.hpp"
+#include "../core/dense_mat.hpp"
+#include "../core/sparse_mat.hpp"
+#include "../net/data_comm.hpp"
+#include "../net/process_3D_grid.hpp"
+#include <Eigen/Dense>
+#include <memory>
+#include <mpi.h>
+
+using namespace std;
+using namespace distblas::core;
+using namespace distblas::net;
+using namespace Eigen;
+
+namespace distblas::embedding {
+template <typename SPT, typename DENT, size_t embedding_dim,
+          typename DENT MIN_BOUND, typename DENT MAX_BOUND>
+
+class EmbeddingAlgo {
+
+private:
+  DenseMat<DENT, embedding_dim> *dense_local;
+  SpMat<SPT> *sp_local;
+  Process3DGrid *grid;
+  DataComm<DENT, embedding_dim> *data_comm;
+
+public:
+  EmbeddingAlgo(SpMat<SPT> *sp_local,
+                DenseMat<DENT, embedding_dim> *dense_local,
+                DataComm<DENT, embedding_dim> *data_comm, Process3DGrid *grid) {
+    this->data_comm = data_comm;
+    this->grid = grid;
+    this->dense_local = dense_local;
+    this->sp_local = sp_local;
+  }
+
+  void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
+    int batches = ((this->dense_local)->rows / batch_size);
+
+    MPI_Request request;
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
+        unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
+
+    communicator.get()->async_transfer(0, true, false, results_init_ptr.get(),
+                                       request);
+    communicator.get()->populate_cache(results_init_ptr.get(), request);
+
+    for (int i = 0; i < iterations; i++) {
+
+      for (int j = 0; j < batches; j++) {
+        Matrix<DENT, Dynamic, embedding_dim> values(batch_size);
+        values.setZero();
+
+        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
+        auto head = batch_list->getHeadNode();
+        int col_batch_id = 0;
+        int working_rank = 0;
+        bool fetch_remote =
+            (working_rank == ((this->grid)->global_rank)) ? false : true;
+        while (head != nullptr) {
+
+          CSRLocal<T> *csr_block = (head.get())->data;
+          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
+                                  batch_size, working_rank, fetch_remote);
+
+           working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
+           head = (head.get())->next;
+          ++col_batch_id
+        }
+
+        int seed = j + i;
+
+        vector<uint64_t> random_number_vec =
+            generate_random_numbers(0, (this - sp_local)->gRows, seed, ns);
+
+        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,csr_block,j,batch_size,working_rank);
+        this->update_data_matrix(values,j,batch_size);
+
+        MPI_Request request_two;
+        unique_ptr<std::vector<DataTuple<DENT,embedding_dim >>> results_negative_ptr =
+            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
+        communicator.get()->async_transfer(random_number_vec, false,
+                                           results_negative_ptr.get(), request_two);
+        //TODO do some work here
+        communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
+
+      }
+    }
+  }
+
+  void calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values,
+                               DENT lr, CSRLocal<SPT> *csr_block, int batch_id,
+                               int col_batch_id, int batch_size,
+                               int target_rank, bool fetch_from_cache) {
+
+    int row_base_index = batch_id * batch_size;
+    int col_base_id = col_batch_id * ((this->sp_local)->block_col_width);
+    int global_col_base_id =
+        (this->grid)->global_rank * (this->sp_local)->proc_col_width +
+        col_base_id;
+    CSRHandle *csr_handle = (csr_block.get())->handler;
+    // TODO: parallalize
+    for (int i = 0; i < values.rows(); i++) {
+      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+      for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]); j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]);
+           j++) {
+        uint64_t local_col =  static_cast<uint64_t>(csr_handle->col_idx[j]);
+        uint64_t global_col_id =  static_cast<uint64_t>(local_col + global_col_base_id);
+        uint64_t local_col_id =  static_cast<uint64_t>(local_col + col_base_id);
+        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+
+        if (fetch_from_cache) {
+          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+              (this->dense_local)
+                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
+          col_vec = col_vec.transpose();
+        } else {
+          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+        }
+        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+            (this->dense_local)->fetch_local_eigen_vector(row_id);
+
+        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
+        DENT t_squared_sum = t_squared.sum();
+        DENT d1 = -2.0 / (1.0 + t_squared_sum);
+        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
+        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+            scaled_vector.array().cwiseMax(MIN_BOUND).cwiseMin(MAX_BOUND);
+        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
+        values.row(i) += learned.array();
+      }
+    }
+  }
+
+  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
+                                  vector<uint64_t> &col_ids, DENT lr,
+                                  CSRLocal<SPT> *csr_block, int batch_id,
+                                  int batch_size,
+                                  int target_rank) {
+
+    int row_base_index = batch_id * batch_size;
+
+    CSRHandle *csr_handle = (csr_block.get())->handler;
+    // TODO: parallalize
+    for (int i = 0; i < values.rows(); i++) {
+      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+      for (int j = 0; j < col_ids.size(); j++) {
+        uint64_t global_col_id = col_ids[j];
+        uint64_t local_col_id =
+            global_col_id -
+            static_cast<uint64_t>(
+                ((this->grid)->global_rank * (this->grid)->proc_row_width));
+        bool fetch_from_cache = false;
+
+        int owner_rank = global_col_id / ((this->grid)->world_size);
+        if (owner_rank != (this->grid)->global_rank) {
+          fetch_from_cache = true;
+        }
+
+        if (fetch_from_cache) {
+          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+              (this->dense_local)
+                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
+          col_vec = col_vec.transpose();
+        } else {
+          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+        }
+        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+            (this->dense_local)->fetch_local_eigen_vector(row_id);
+
+        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
+        DENT t_squared_sum = t_squared.sum();
+        DENT d1 = 2.0 / (t_squared_sum * (1.0 + t_squared_sum));
+        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
+        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+            scaled_vector.array().cwiseMax(MIN_BOUND).cwiseMin(MAX_BOUND);
+        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
+        values.row(i) += learned.array();
+      }
+    }
+  }
+
+  void update_data_matrix(Matrix<DENT, Dynamic, embedding_dim> &values,int batch_id,int batch_size){
+
+    int row_base_index = batch_id * batch_size;
+    int end_row = std::min((batch_id+1) * batch_size, (this->sp_local)->proc_row_width);
+    ((this->dense_local)->matrixPtr.get()).block(row_base_index, 0, end_row - row_base_index, embedding_dim) += values;
+
+  }
+
+};
+} // namespace distblas::embedding
