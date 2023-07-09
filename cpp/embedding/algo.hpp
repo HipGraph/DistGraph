@@ -103,7 +103,7 @@ public:
     int global_col_base_id =
         (this->grid)->global_rank * (this->sp_local)->proc_col_width +
         col_base_id;
-    CSRHandle *csr_handle = (csr_block.get())->handler;
+    CSRHandle *csr_handle = (csr_block)->handler;
     // TODO: parallalize
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
@@ -133,7 +133,7 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
             scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
-        values.row(i) += learned.array();
+        values.row(i) = values.row(i).array() + learned.array();
       }
     }
   }
@@ -180,7 +180,7 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
             scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
-        values.row(i) += learned.array();
+        values.row(i) = values.row(i).array() + learned.array();
       }
     }
   }
@@ -189,7 +189,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id+1) * batch_size, (this->sp_local)->proc_row_width);
-    ((this->dense_local)->matrixPtr.get()).block(row_base_index, 0, end_row - row_base_index, embedding_dim) += values;
+    ((this->dense_local)->matrixPtr.get())->block(row_base_index, 0, end_row - row_base_index, embedding_dim) += values;
 
   }
 
