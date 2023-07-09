@@ -27,7 +27,7 @@ private:
   DataComm<SPT,DENT, embedding_dim> *data_comm;
 
 public:
-  EmbeddingAlgo(SpMat<SPT> *sp_local,
+  EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
                 DenseMat<DENT, embedding_dim> *dense_local,
                 DataComm<SPT,DENT, embedding_dim> *data_comm, Process3DGrid *grid) {
     this->data_comm = data_comm;
@@ -44,9 +44,9 @@ public:
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    communicator.get()->async_transfer(0, true, false, results_init_ptr.get(),
+    this->data_comm->async_transfer(0, true, false, results_init_ptr.get(),
                                        request);
-    communicator.get()->populate_cache(results_init_ptr.get(), request);
+    this->data_comm->populate_cache(results_init_ptr.get(), request);
 
     for (int i = 0; i < iterations; i++) {
 
@@ -62,13 +62,13 @@ public:
             (working_rank == ((this->grid)->global_rank)) ? false : true;
         while (head != nullptr) {
 
-          CSRLocal<T> *csr_block = (head.get())->data;
+          CSRLocal<SPT> *csr_block = (head.get())->data;
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
 
            working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
            head = (head.get())->next;
-          ++col_batch_id
+          ++col_batch_id;
         }
 
         int seed = j + i;
@@ -76,16 +76,16 @@ public:
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this - sp_local)->gRows, seed, ns);
 
-        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,csr_block,j,batch_size,working_rank);
+        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size,working_rank);
         this->update_data_matrix(values,j,batch_size);
 
         MPI_Request request_two;
         unique_ptr<std::vector<DataTuple<DENT,embedding_dim >>> results_negative_ptr =
             unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
-        communicator.get()->async_transfer(random_number_vec, false,
+        this->data_comm->async_transfer(random_number_vec, false,
                                            results_negative_ptr.get(), request_two);
         //TODO do some work here
-        communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
+        this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
 
       }
     }
@@ -137,14 +137,12 @@ public:
   }
 
   void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
-                                  vector<uint64_t> &col_ids, DENT lr,
-                                  CSRLocal<SPT> *csr_block, int batch_id,
+                                  vector<uint64_t> &col_ids, DENT lr,int batch_id,
                                   int batch_size,
                                   int target_rank) {
 
     int row_base_index = batch_id * batch_size;
 
-    CSRHandle *csr_handle = (csr_block.get())->handler;
     // TODO: parallalize
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
@@ -153,14 +151,14 @@ public:
         uint64_t local_col_id =
             global_col_id -
             static_cast<uint64_t>(
-                ((this->grid)->global_rank * (this->grid)->proc_row_width));
+                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
         bool fetch_from_cache = false;
 
         int owner_rank = global_col_id / ((this->grid)->world_size);
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
-
+        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
         if (fetch_from_cache) {
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
