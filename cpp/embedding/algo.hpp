@@ -68,7 +68,7 @@ public:
           cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac started for batch "<<j<<" col "<<col_batch_id<<endl;
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
-          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac stoped "<<j<<" col "<<col_batch_id<<<<endl;
+          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac stoped "<<j<<" col "<<col_batch_id<<endl;
 
            working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
            head = (head.get())->next;
