@@ -74,6 +74,7 @@ public:
           working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
           fetch_remote =
               (working_rank == ((this->grid)->global_rank)) ? false : true;
+          cout<<" rank "<< this->grid->global_rank<<" working rank updated "<<working_rank<<" fetch remote updated  "<<fetch_remote<<endl
         }
 
         int seed = j + i;
