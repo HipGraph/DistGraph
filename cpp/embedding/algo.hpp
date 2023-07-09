@@ -24,7 +24,7 @@ private:
   distblas::core::SpMat<SPT> *sp_local;
   Process3DGrid *grid;
   DataComm<SPT,DENT, embedding_dim> *data_comm;
-  DENT MAX_BOUND,MIN_BOUND
+  DENT MAX_BOUND,MIN_BOUND;
 
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,

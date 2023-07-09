@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 //
 //  }
 
-  distblas::embedding::EmbeddingAlgo<int,double,10> embedding_algo =
+  distblas::embedding::EmbeddingAlgo<int,double,10> *embedding_algo =
       new distblas::embedding::EmbeddingAlgo<int,double,10>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5)
   cout << " rank " << rank << " async completed  " << endl;
 
