@@ -72,6 +72,8 @@ public:
            head = (head.get())->next;
           ++col_batch_id;
           working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
+          fetch_remote =
+              (working_rank == ((this->grid)->global_rank)) ? false : true;
         }
 
         int seed = j + i;
@@ -117,26 +119,25 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
         if (fetch_from_cache) {
-//          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-//              (this->dense_local)
-//                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
-//          col_vec = col_vec_trans.transpose();
+          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+              (this->dense_local)
+                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
+          col_vec = col_vec_trans.transpose();
         } else {
-//          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
-//        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-//            (this->dense_local)->fetch_local_eigen_vector(row_id);
+        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+            (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-
-//        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
-//        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
-//        DENT t_squared_sum = t_squared.sum();
-//        DENT d1 = -2.0 / (1.0 + t_squared_sum);
-//        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
-//        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-//            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
-//        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
-//        values.row(i) = values.row(i).array() + learned.array();
+        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
+        DENT t_squared_sum = t_squared.sum();
+        DENT d1 = -2.0 / (1.0 + t_squared_sum);
+        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
+        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
+        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
+        values.row(i) = values.row(i).array() + learned.array();
       }
     }
   }
