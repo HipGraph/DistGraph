@@ -53,7 +53,7 @@ public:
     for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
-        Matrix<DENT, Dynamic, embedding_dim> values(batch_size);
+        Matrix<DENT, Dynamic, embedding_dim> values(batch_size,embedding_dim);
         values.setZero();
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
