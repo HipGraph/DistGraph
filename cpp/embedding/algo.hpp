@@ -15,8 +15,7 @@ using namespace distblas::net;
 using namespace Eigen;
 
 namespace distblas::embedding {
-template <typename SPT, typename DENT, size_t embedding_dim,
-          DENT  MIN_BOUND, DENT  MAX_BOUND>
+template <typename SPT, typename DENT, size_t embedding_dim>
 
 class EmbeddingAlgo {
 
@@ -25,15 +24,18 @@ private:
   distblas::core::SpMat<SPT> *sp_local;
   Process3DGrid *grid;
   DataComm<SPT,DENT, embedding_dim> *data_comm;
+  DENT MAX_BOUND,MIN_BOUND
 
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
                 DenseMat<DENT, embedding_dim> *dense_local,
-                DataComm<SPT,DENT, embedding_dim> *data_comm, Process3DGrid *grid) {
+                DataComm<SPT,DENT, embedding_dim> *data_comm, Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
     this->data_comm = data_comm;
     this->grid = grid;
     this->dense_local = dense_local;
     this->sp_local = sp_local;
+    this->MAX_BOUND=MAX_BOUND;
+    this->MIN_BOUND=MIN_BOUND;
   }
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
@@ -129,7 +131,7 @@ public:
         DENT d1 = -2.0 / (1.0 + t_squared_sum);
         Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-            scaled_vector.array().cwiseMax(MIN_BOUND).cwiseMin(MAX_BOUND);
+            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
         values.row(i) += learned.array();
       }
@@ -176,7 +178,7 @@ public:
         DENT d1 = 2.0 / (t_squared_sum * (1.0 + t_squared_sum));
         Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-            scaled_vector.array().cwiseMax(MIN_BOUND).cwiseMin(MAX_BOUND);
+            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
         values.row(i) += learned.array();
       }
