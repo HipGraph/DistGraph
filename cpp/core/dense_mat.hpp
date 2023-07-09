@@ -104,7 +104,6 @@ public:
   }
 
   Eigen::Array<DENT, 1, embedding_dim> fetch_local_eigen_vector(int local_key) {
-    std::array<DENT, embedding_dim> stdArray;
     Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
     return matrix.row(local_key);
   }

@@ -121,12 +121,13 @@ public:
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(target_rank, global_col_id);
-          col_vec = col_vec.transpose();
+          col_vec = col_vec_trans.transpose();
         } else {
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
+
 
         Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
         Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
