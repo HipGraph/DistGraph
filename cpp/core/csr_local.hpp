@@ -26,7 +26,7 @@ public:
 
   bool transpose;
 
-  unique_ptr<CSRHandle> handler;
+  shared_ptr<CSRHandle> handler;
 
   CSRLocal() {}
 
