@@ -169,7 +169,7 @@ public:
                 ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
         bool fetch_from_cache = false;
 
-        int owner_rank = static_cast<int>(global_col_id / ((this->grid)->world_size));
+        int owner_rank = static_cast<int>(global_col_id /(this->sp_local)->proc_row_width);
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
