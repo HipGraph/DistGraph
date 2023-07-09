@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
   distblas::embedding::EmbeddingAlgo<int,double,10> *embedding_algo =
       new distblas::embedding::EmbeddingAlgo<int,double,10>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
 
-  embedding_algo->algo_force2_vec_ns(1,15000,5,0.01);
+  embedding_algo->algo_force2_vec_ns(1200,15000,5,0.01);
   cout << " rank " << rank << " async completed  " << endl;
 
 //  dense_mat.get()->print_cache();
