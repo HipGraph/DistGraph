@@ -16,7 +16,7 @@ using namespace Eigen;
 
 namespace distblas::embedding {
 template <typename SPT, typename DENT, size_t embedding_dim,
-          size_t  MIN_BOUND, size_t  MAX_BOUND>
+          DENT  MIN_BOUND, DENT  MAX_BOUND>
 
 class EmbeddingAlgo {
 
