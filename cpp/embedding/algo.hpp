@@ -50,6 +50,15 @@ public:
                                        request);
     this->data_comm->populate_cache(results_init_ptr.get(), request);
 
+    vector<uint64_t> random_number_vec =
+        generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+    MPI_Request request_two;
+    unique_ptr<std::vector<DataTuple<DENT,embedding_dim >>> results_negative_ptr =
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
+    this->data_comm->async_transfer(random_number_vec, false,
+                                    results_negative_ptr.get(), request_two);
+    this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
+
     for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
@@ -79,20 +88,15 @@ public:
 
         int seed = j + i;
 
-        vector<uint64_t> random_number_vec =
-            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+
         cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive started for batch "<<j<<endl;
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
         cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive stopped for batch "<<j<<endl;
         this->update_data_matrix(values,j,batch_size);
         cout<<" rank "<< this->grid->global_rank<<" update_data_matrix stopped "<<endl;
-        MPI_Request request_two;
-        unique_ptr<std::vector<DataTuple<DENT,embedding_dim >>> results_negative_ptr =
-            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
-        this->data_comm->async_transfer(random_number_vec, false,
-                                           results_negative_ptr.get(), request_two);
+
         //TODO do some work here
-        this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
+
 
       }
     }
