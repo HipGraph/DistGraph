@@ -184,9 +184,9 @@ public:
 //    if (transpose) {
 //      cout << "initializing csr list  completed" << endl;
 //    }
-//    if (!transpose) {
-//      cout << "block_row_starts size " << block_row_starts.size() << endl;
-//    }
+    if (!transpose) {
+      cout << "block_row_starts size " << block_row_starts.size() << endl;
+    }
 
 //    if (transpose) {
 //      cout << "starting insertion " << endl;
@@ -198,14 +198,16 @@ public:
         current_vector_pos = j % no_of_lists;
         if (j > 0 and current_vector_pos == 0) {
           ++col_block;
+          node_index=0;
         }
       } else {
         current_vector_pos = j / no_of_nodes;
         col_block = current_vector_pos;
+        if (node_index >= no_of_nodes) {
+          node_index = 0;
+        }
       }
-      if (node_index >= no_of_nodes) {
-        node_index = 0;
-      }
+
 
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
       int rank;
