@@ -88,7 +88,7 @@ public:
     }
 
     block_col_starts.push_back(coords.size());
-    if(trans){
+    if(!trans){
       cout<<"block_col_width"<<block_col_starts.size()<<endl;
     }
 
