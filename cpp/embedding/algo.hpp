@@ -156,7 +156,7 @@ public:
     #pragma omp parallel for
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-//      for (int j = 0; j < col_ids.size(); j++) {
+      for (int j = 0; j < col_ids.size(); j++) {
 //        uint64_t global_col_id = col_ids[j];
 //        uint64_t local_col_id =
 //            global_col_id -
@@ -189,7 +189,7 @@ public:
 //            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
 //        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
 //        values.row(i) = values.row(i).array() + learned.array();
-//      }
+      }
     }
   }
 
