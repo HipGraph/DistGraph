@@ -68,15 +68,15 @@ public:
       current_start = col_block_with * rank;
     }
 
-    cout << "rank " << rank << " trans" << trans << " current_start "
-         << current_start << endl;
+//    cout << "rank " << rank << " trans" << trans << " current_start "
+//         << current_start << endl;
 
     // TODO: introduce atomic capture
     for (uint64_t i = 0; i < coords.size(); i++) {
       while (coords[i].col >= current_start) {
         block_col_starts.push_back(i);
-        cout << "rank " << rank << " trans" << trans << " col adding i " << i
-             << endl;
+//        cout << "rank " << rank << " trans" << trans << " col adding i " << i
+//             << endl;
         current_start += batch_size;
       }
 
@@ -116,12 +116,12 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          cout << "rank " << rank << " trans" << trans << "  current start "
-               << current_start << " row adding j " << j << endl;
+//          cout << "rank " << rank << " trans" << trans << "  current start "
+//               << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
-          cout << "rank " << rank << " trans" << trans
-               << " updated current start " << current_start << " row adding j "
-               << j << endl;
+//          cout << "rank " << rank << " trans" << trans
+//               << " updated current start " << current_start << " row adding j "
+//               << j << endl;
           ++matched_count;
         }
 
@@ -133,9 +133,9 @@ public:
       int expected_matched_count =
           std::max(1, (block_width_col / block_width_row));
       if (matched_count < expected_matched_count) {
-        cout << "rank " << rank << " trans" << trans << " current start "
-             << current_start << " not matching adding row adding j "
-             << block_col_starts[i + 1] << endl;
+//        cout << "rank " << rank << " trans" << trans << " current start "
+//             << current_start << " not matching adding row adding j "
+//             << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
     }
@@ -177,10 +177,10 @@ public:
       int rank;
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-      cout << " rank " << rank << "_" << transpose
-           << " csr_block_initating_index" << block_row_starts[j]
-           << " current vec pos" << current_vector_pos << " col_block"
-           << col_block << endl;
+//      cout << " rank " << rank << "_" << transpose
+//           << " csr_block_initating_index" << block_row_starts[j]
+//           << " current vec pos" << current_vector_pos << " col_block"
+//           << col_block << endl;
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())
@@ -208,9 +208,9 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
-      cout << " rank  " << rank << " inside fill_col_ids coords ( "
-           << block_row_id << " ," << block_col_id << ")"
-           << (csr_data.get())->num_coords << endl;
+//      cout << " rank  " << rank << " inside fill_col_ids coords ( "
+//           << block_row_id << " ," << block_col_id << ")"
+//           << (csr_data.get())->num_coords << endl;
       if ((csr_data.get())->num_coords > 0) {
         int block_row_width = this->block_row_width;
         int block_col_width = this->block_col_width;
@@ -247,8 +247,8 @@ public:
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    cout << " rank " << rank << "_" << trans
-         << " printing print_blocks_and_cols" << endl;
+//    cout << " rank " << rank << "_" << trans
+//         << " printing print_blocks_and_cols" << endl;
     int current_col_block = 0;
     for (int j = 0; j < csr_linked_lists.size(); j++) {
       cout << " rank " << rank << " j " << j << endl;
