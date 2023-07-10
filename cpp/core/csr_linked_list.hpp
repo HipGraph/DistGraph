@@ -26,7 +26,7 @@ private:
 
 
 public:
-  vector<CSRLocal<T>*>  direct_ref;
+  vector<shared_ptr<CSRLocal<T>>>  direct_ref;
   CSRLinkedList() {
     head = nullptr;
 
