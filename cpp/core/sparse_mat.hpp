@@ -177,10 +177,10 @@ public:
       int rank;
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-//      cout << " rank " << rank << "_" << transpose
-//           << " csr_block_initating_index" << block_row_starts[j]
-//           << " current vec pos" << current_vector_pos << " col_block"
-//           << col_block << endl;
+      cout << " rank " << rank << "_" << transpose
+           << " csr_block_initating_index" << block_row_starts[j]
+           << " current vec pos" << current_vector_pos << " col_block"
+           << col_block << endl;
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())

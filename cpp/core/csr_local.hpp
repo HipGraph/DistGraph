@@ -58,7 +58,7 @@ public:
 //      vArray.push_back(0.0);
 //    }
 
-    cout << " number of coordinates " << num_coords << endl;
+//    cout << " number of coordinates " << num_coords << endl;
 #pragma omp parallel for
     for (int i = 0; i < num_coords; i++) {
       rArray[i] = coords[i].row;
