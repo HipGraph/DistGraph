@@ -43,7 +43,7 @@ public:
     newNode.get()->id=id;
     newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
-    direct_ref.push_back(newNode.get()->data)
+    direct_ref.push_back(newNode.get()->data);
     if (this->head == nullptr) {
       head = newNode;
     }else {
