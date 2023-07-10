@@ -198,7 +198,7 @@ public:
         current_vector_pos = j % no_of_lists;
         if (j > 0 and current_vector_pos == 0) {
           ++col_block;
-          node_index=0;
+          ++node_index;
         }
       } else {
         current_vector_pos = j / no_of_nodes;
@@ -206,6 +206,7 @@ public:
         if (node_index >= no_of_nodes) {
           node_index = 0;
         }
+        ++node_index;
       }
 
 
@@ -232,7 +233,7 @@ public:
         cout << "node index " << node_index << " current vec pos completed"
              << current_vector_pos << endl;
       }
-      ++node_index;
+
     }
     if (!transpose) {
       cout << "final col blocks size " << col_block << endl;
