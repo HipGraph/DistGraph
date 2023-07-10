@@ -229,10 +229,10 @@ public:
       (csr_linked_lists[current_vector_pos].get())
           ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                    false, node_index);
-//      if (!transpose) {
-//        cout << "node index " << node_index << " current vec pos completed"
-//             << current_vector_pos << endl;
-//      }
+      if (!transpose) {
+        cout << "node index " << node_index << " current vec pos completed"
+             << current_vector_pos <<"number of coords"<<num_coords<< endl;
+      }
 
     }
     if (!transpose) {
