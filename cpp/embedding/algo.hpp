@@ -78,7 +78,6 @@ public:
         while (head != nullptr) {
 
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
-          #pragma forceinline
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
            head = (head.get())->next;
@@ -87,14 +86,16 @@ public:
           fetch_remote =
               (working_rank == ((this->grid)->global_rank)) ? false : true;
         }
-        #pragma forceinline
+
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
+
         this->update_data_matrix(values,j,batch_size);
         //TODO do some work here
       }
     }
   }
 
+#pragma forceinline
   void calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values,
                                DENT lr, CSRLocal<SPT> *csr_block, int batch_id,
                                int col_batch_id, int batch_size,
@@ -141,6 +142,7 @@ public:
     }
   }
 
+#pragma forceinline
   void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
                                   vector<uint64_t> &col_ids, DENT lr,int batch_id,
                                   int batch_size) {
@@ -187,6 +189,7 @@ public:
     }
   }
 
+  #pragma forceinline
   void update_data_matrix(Matrix<DENT, Dynamic, embedding_dim> &values,int batch_id,int batch_size){
 
     int row_base_index = batch_id * batch_size;
