@@ -78,6 +78,7 @@ public:
         while (head != nullptr) {
 
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
+          #pragma forceinline
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
            head = (head.get())->next;
@@ -86,6 +87,7 @@ public:
           fetch_remote =
               (working_rank == ((this->grid)->global_rank)) ? false : true;
         }
+        #pragma forceinline
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
         this->update_data_matrix(values,j,batch_size);
         //TODO do some work here
