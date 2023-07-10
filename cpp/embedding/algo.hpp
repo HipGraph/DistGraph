@@ -56,11 +56,11 @@ public:
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
-//        vector<uint64_t> random_number_vec =
-//            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
-//        MPI_Request request_two;
-//        unique_ptr<std::vector<DataTuple<DENT,embedding_dim >>> results_negative_ptr =
-//            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
+        vector<uint64_t> random_number_vec =
+            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+        MPI_Request request_two;
+        unique_ptr<std::vector<DataTuple<DENT,embedding_dim >>> results_negative_ptr =
+            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 //        this->data_comm->async_transfer(random_number_vec, false,
 //                                        results_negative_ptr.get(), request_two);
 //        this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
@@ -87,7 +87,7 @@ public:
               (working_rank == ((this->grid)->global_rank)) ? false : true;
         }
 
-//        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
+        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
 //
 //        this->update_data_matrix(values,j,batch_size);
         //TODO do some work here
