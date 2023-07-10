@@ -88,6 +88,10 @@ public:
     }
 
     block_col_starts.push_back(coords.size());
+    if(trans){
+      cout<<"block_col_width"<<block_col_starts.size()<<endl;
+    }
+
   }
 
   void sort_by_rows() {
@@ -99,14 +103,14 @@ public:
   }
 
   void divide_block_rows(int block_width_row, int block_col_width,
-                         int proc_col_width, bool mod_ind, bool trans) {
+                         int proc_width_row, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
 
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
-      int current_start = proc_col_width * rank;
+      int current_start = proc_width_row * rank;
 
       if (trans) {
         current_start = 0;
