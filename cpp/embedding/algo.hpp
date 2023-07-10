@@ -80,13 +80,13 @@ public:
        #pragma omp parallel for schedule(static)
         for(int k=0;k<batch_list->direct_ref.size();k++) {
 //          CSRLocal<SPT> *csr_block = (head.get())->data.get();
-           cout<<" accessing  k  local node "<<k<<endl;
+//           cout<<" accessing  k  local node "<<k<<endl;
           CSRLocal<SPT> *csr_block = batch_list->direct_ref[k].get();
 //          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
 //                                        batch_size, working_rank, fetch_remote);
 //          head = (head.get())->next;
 //          ++col_batch_id;
-          cout<<" accessing  k  local node success "<<k<<endl;
+//          cout<<" accessing  k  local node success "<<k<<endl;
 //          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, k,
 //                                        batch_size, working_rank, fetch_remote);
 //          working_rank =
