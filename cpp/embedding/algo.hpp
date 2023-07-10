@@ -78,30 +78,17 @@ public:
         while (head != nullptr) {
 
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
-          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac started for batch "<<j<<" col "<<col_batch_id<<endl;
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                   batch_size, working_rank, fetch_remote);
-          cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_attrac stoped "<<j<<" col "<<col_batch_id<<endl;
            head = (head.get())->next;
           ++col_batch_id;
           working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
           fetch_remote =
               (working_rank == ((this->grid)->global_rank)) ? false : true;
-          cout<<" rank "<< this->grid->global_rank<<" working rank updated "<<working_rank<<" fetch remote updated  "<<fetch_remote<<endl;
         }
-
-
-
-
-        cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive started for batch "<<j<<endl;
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
-        cout<<" rank "<< this->grid->global_rank<<" calc_t_dist_grad_repulsive stopped for batch "<<j<<endl;
         this->update_data_matrix(values,j,batch_size);
-        cout<<" rank "<< this->grid->global_rank<<" update_data_matrix stopped "<<endl;
-
         //TODO do some work here
-
-
       }
     }
   }
@@ -117,7 +104,7 @@ public:
 //        (this->grid)->global_rank * (this->sp_local)->proc_col_width +
 //        col_base_id;
     CSRHandle *csr_handle = csr_block->handler.get();
-    // TODO: parallalize
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]); j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]);
@@ -158,7 +145,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-    // TODO: parallalize
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
