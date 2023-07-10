@@ -87,18 +87,18 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->divide_block_cols(
       300, localBRows, grid.get()->world_size, true, false);
   shared_sparseMat.get()->sort_by_rows();
-  shared_sparseMat.get()->divide_block_rows(300, localBRows, true, false);
+  shared_sparseMat.get()->divide_block_rows(300,300, localBRows, true, false);
 
   shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 1, true,
                                                   true);
   shared_sparseMat_Trans.get()->sort_by_rows();
-  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 300, true,
+  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 300,localBRows, true,
                                                   true);
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
-  shared_sparseMat.get()->initialize_CSR_blocks(300, localBRows, localARows,
+  shared_sparseMat.get()->initialize_CSR_blocks(300, 300, localARows,
                                                 localBRows, -1, false);
   cout << " rank " << rank << " initialization of  CSR completed  " << endl;
   cout << " rank " << rank << " initialization of transpose CSR started  "

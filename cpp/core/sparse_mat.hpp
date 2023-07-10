@@ -55,7 +55,7 @@ public:
 
   SpMat() {}
 
-  void divide_block_cols(int batch_size, int col_block_with,
+  void divide_block_cols(int batch_size, int proc_col_width,
                          int target_divisions, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -65,7 +65,7 @@ public:
     // block row into subtiles)
     int current_start = 0;
     if (trans) {
-      current_start = col_block_with * rank;
+      current_start = proc_col_width * rank;
     }
 
 //    cout << "rank " << rank << " trans" << trans << " current_start "
@@ -97,7 +97,7 @@ public:
     }
   }
 
-  void divide_block_rows(int block_width_row, int block_width_col, bool mod_ind,
+  void divide_block_rows(int block_width_row,int block_col_width, int proc_col_width, bool mod_ind,
                          bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -105,7 +105,7 @@ public:
 
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
-      int current_start = block_width_col * rank;
+      int current_start = proc_col_width * rank;
 
       if (trans) {
         current_start = 0;
@@ -131,7 +131,7 @@ public:
         }
       }
       int expected_matched_count =
-          std::max(1, (block_width_col / block_width_row));
+          std::max(1, (block_col_width / block_width_row));
       if (matched_count < expected_matched_count) {
 //        cout << "rank " << rank << " trans" << trans << " current start "
 //             << current_start << " not matching adding row adding j "
