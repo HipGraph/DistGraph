@@ -150,7 +150,7 @@ public:
 
     int no_of_nodes = (transpose) ? (gRows/block_rows) : (gCols/block_cols);//This assumes 1D partitioning, we need to generalized this
     if (!transpose) {
-      cout << "no_of_nodes ori" << no_of_nodes << endl;
+      cout << "gCols" << gCols<<" block_cols"<<block_cols <<"value "<<(gCols/block_cols)<<endl;
     }
 
     this->number_of_local_csr_nodes = no_of_nodes;
