@@ -76,7 +76,7 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 //        while (head != nullptr) {
-       #pragma omp parallel for schedule(static)
+//       #pragma omp parallel for schedule(static)
         for(int k=0;k<batch_list->direct_ref.size();k++) {
 //          CSRLocal<SPT> *csr_block = (head.get())->data.get();
           CSRLocal<SPT> *csr_block = batch_list->direct_ref[k].get();
