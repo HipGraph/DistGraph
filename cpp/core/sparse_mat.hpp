@@ -156,41 +156,41 @@ public:
         (transpose) ? (gRows / block_rows)
                     : (gCols / block_cols); // This assumes 1D partitioning, we
                                             // need to generalized this
-    if (transpose) {
-      cout << "gCols" << gCols << " block_cols" << block_cols << "value "
-           << (gCols / block_cols) << endl;
-    }
+//    if (transpose) {
+//      cout << "gCols" << gCols << " block_cols" << block_cols << "value "
+//           << (gCols / block_cols) << endl;
+//    }
 
     this->number_of_local_csr_nodes = no_of_nodes;
 
     int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
                                   : (local_max_row_width / block_rows);
 
-    if (transpose) {
-      cout << "no_of_nodes " << this->number_of_local_csr_nodes
-           << " number of lists " << no_of_lists << endl;
-    }
+//    if (transpose) {
+//      cout << "no_of_nodes " << this->number_of_local_csr_nodes
+//           << " number of lists " << no_of_lists << endl;
+//    }
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
-    if (transpose) {
-      cout << "initializing csr list  " << endl;
-    }
+//    if (transpose) {
+//      cout << "initializing csr list  " << endl;
+//    }
 
 #pragma omp parallel
     for (int i = 0; i < no_of_lists; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(no_of_nodes);
     }
-    if (transpose) {
-      cout << "initializing csr list  completed" << endl;
-    }
-    if (!transpose) {
-      cout << "block_row_starts size " << block_row_starts.size() << endl;
-    }
+//    if (transpose) {
+//      cout << "initializing csr list  completed" << endl;
+//    }
+//    if (!transpose) {
+//      cout << "block_row_starts size " << block_row_starts.size() << endl;
+//    }
 
-    if (transpose) {
-      cout << "starting insertion " << endl;
-    }
+//    if (transpose) {
+//      cout << "starting insertion " << endl;
+//    }
     int node_index = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
@@ -226,10 +226,10 @@ public:
       (csr_linked_lists[current_vector_pos].get())
           ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                    false, node_index);
-      if (transpose) {
-        cout << "node index " << node_index << " current vec pos completed"
-             << current_vector_pos << endl;
-      }
+//      if (transpose) {
+//        cout << "node index " << node_index << " current vec pos completed"
+//             << current_vector_pos << endl;
+//      }
       ++node_index;
     }
     if (!transpose) {
