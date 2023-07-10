@@ -26,7 +26,7 @@ public:
 
   bool transpose;
 
-  unique_ptr<CSRHandle> handler;
+  unique_ptr<CSRHandle> handler = nullptr;
 
   CSRLocal() {}
 
