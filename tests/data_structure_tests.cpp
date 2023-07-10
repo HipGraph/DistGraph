@@ -112,51 +112,28 @@ int main(int argc, char **argv) {
   //  shared_sparseMat.get()->print_blocks_and_cols(false);
   //  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
-//  vector<uint64_t> id_list_trans;
-//  vector<uint64_t> id_list;
-//  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
-//  shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
-//
-//  cout << " rank " << rank << " creation of dense matrices started  " << endl;
-//  auto dense_mat = shared_ptr<DenseMat<double, 2>>(
-//      new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
-//  //    dense_mat.get()->print_matrix();
-//  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
-//
-//  auto communicator =
-//      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
-//          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
-//          grid.get()));
+  vector<uint64_t> id_list_trans;
+  vector<uint64_t> id_list;
+  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
+  shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
+
+  cout << " rank " << rank << " creation of dense matrices started  " << endl;
+  auto dense_mat = shared_ptr<DenseMat<double, 2>>(
+      new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
+  //    dense_mat.get()->print_matrix();
+  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
+
+  auto communicator =
+      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
+          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
+          grid.get()));
 
   cout << " rank " << rank << " async started  " << endl;
-//  MPI_Request request;
-//  unique_ptr<std::vector<DataTuple<double, 10>>> results_init_ptr =
-//      unique_ptr<vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
-//  communicator.get()->async_transfer(0, true, true, results_init_ptr.get(), request);
-//  communicator.get()->populate_cache(results_init_ptr.get(),request);
-//
-//  for (int i = 0; i < (localARows / batch_size); i++) {
-//    MPI_Request request;
-//    unique_ptr<std::vector<DataTuple<double, 10>>> results_postive_ptr =
-//        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
-//    communicator.get()->async_transfer(i, true, true, results_postive_ptr.get(), request);
-//    communicator.get()->populate_cache(results_postive_ptr.get(),request);
-//
-//    MPI_Request request_two;
-//    unique_ptr<std::vector<DataTuple<double, 10>>> results_negative_ptr =
-//        unique_ptr<std::vector<DataTuple<double, 10>>>(new vector<DataTuple<double, 10>>());
-//    vector<uint64_t> random_number_vec =
-//        generate_random_numbers(0, 60000, 0, 10);
-//    communicator.get()->async_transfer(random_number_vec, true,
-//                                       results_negative_ptr.get(), request_two);
-//    communicator.get()->populate_cache(results_negative_ptr.get(), request_two);
-//
-//  }
 
-//  distblas::embedding::EmbeddingAlgo<int,double,2> *embedding_algo =
-//      new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
-//
-//  embedding_algo->algo_force2_vec_ns(1200,300,5,0.02);
+  distblas::embedding::EmbeddingAlgo<int,double,2> *embedding_algo =
+      new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
+
+  embedding_algo->algo_force2_vec_ns(1200,300,5,0.02);
   cout << " rank " << rank << " async completed  " << endl;
 
 //  dense_mat.get()->print_cache();
