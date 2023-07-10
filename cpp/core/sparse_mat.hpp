@@ -187,7 +187,7 @@ public:
         current_vector_pos = j / no_of_nodes;
         col_block = current_vector_pos;
       }
-      if (node_index == no_of_nodes -1){
+      if (node_index >= no_of_nodes ){
         node_index = 0;
       }
 
