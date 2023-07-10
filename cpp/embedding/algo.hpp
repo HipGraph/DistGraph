@@ -66,27 +66,27 @@ public:
 //        this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
 
 
-//        Matrix<DENT, Dynamic, embedding_dim> values(batch_size,embedding_dim);
-//        values.setZero();
-//
-//        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
-//        auto head = batch_list->getHeadNode();
-//        int col_batch_id = 0;
-//        int working_rank = 0;
-//        bool fetch_remote =
-//            (working_rank == ((this->grid)->global_rank)) ? false : true;
-//        while (head != nullptr) {
-//
+        Matrix<DENT, Dynamic, embedding_dim> values(batch_size,embedding_dim);
+        values.setZero();
+
+        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
+        auto head = batch_list->getHeadNode();
+        int col_batch_id = 0;
+        int working_rank = 0;
+        bool fetch_remote =
+            (working_rank == ((this->grid)->global_rank)) ? false : true;
+        while (head != nullptr) {
+
 //          CSRLocal<SPT> *csr_block = (head.get())->data.get();
 //          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
 //                                  batch_size, working_rank, fetch_remote);
-//           head = (head.get())->next;
-//          ++col_batch_id;
-//          working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
-//          fetch_remote =
-//              (working_rank == ((this->grid)->global_rank)) ? false : true;
-//        }
-//
+           head = (head.get())->next;
+          ++col_batch_id;
+          working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
+          fetch_remote =
+              (working_rank == ((this->grid)->global_rank)) ? false : true;
+        }
+
 //        this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
 //
 //        this->update_data_matrix(values,j,batch_size);
