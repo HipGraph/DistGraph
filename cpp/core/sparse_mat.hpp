@@ -177,7 +177,7 @@ public:
 //      cout << "initializing csr list  " << endl;
 //    }
 
-#pragma omp parallel
+#pragma omp parallel for
     for (int i = 0; i < no_of_lists; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(no_of_nodes);
     }

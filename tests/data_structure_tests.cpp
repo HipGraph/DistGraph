@@ -102,8 +102,8 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->initialize_CSR_blocks(300, 300, localARows,
                                                 localBRows, -1, false);
   cout << " rank " << rank << " initialization of  CSR completed  " << endl;
-//  cout << " rank " << rank << " initialization of transpose CSR started  "
-//       << endl;
+  cout << " rank " << rank << " initialization of transpose CSR started  "
+       << endl;
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(
       localARows, 300, localARows, localBRows, -1, true);
   cout << " rank " << rank << " initialization of transpose CSR completed  "
