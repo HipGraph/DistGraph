@@ -104,10 +104,10 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " initialization of  CSR completed  " << endl;
 //  cout << " rank " << rank << " initialization of transpose CSR started  "
 //       << endl;
-//  shared_sparseMat_Trans.get()->initialize_CSR_blocks(
-//      localARows, 300, localARows, localBRows, -1, true);
-//  cout << " rank " << rank << " initialization of transpose CSR completed  "
-//       << endl;
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(
+      localARows, 300, localARows, localBRows, -1, true);
+  cout << " rank " << rank << " initialization of transpose CSR completed  "
+       << endl;
 
   //  shared_sparseMat.get()->print_blocks_and_cols(false);
   //  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);

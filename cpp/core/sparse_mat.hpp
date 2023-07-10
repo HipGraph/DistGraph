@@ -173,11 +173,17 @@ public:
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
+    if (transpose) {
+      cout << "initializing csr list  " << endl;
+    }
+
 #pragma omp parallel
     for (int i = 0; i < no_of_lists; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(no_of_nodes);
     }
-
+    if (transpose) {
+      cout << "initializing csr list  completed" << endl;
+    }
     if (!transpose) {
       cout << "block_row_starts size " << block_row_starts.size() << endl;
     }
@@ -204,11 +210,13 @@ public:
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
       int rank;
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-      //
-      //      cout << " rank " << rank << "_" << transpose
-      //           << " csr_block_initating_index" << block_row_starts[j]
-      //           << " current vec pos" << current_vector_pos << " col_block"
-      //           << col_block << endl;
+      if (transpose) {
+
+        cout << " rank " << rank << "_" << transpose
+             << " csr_block_initating_index" << block_row_starts[j]
+             << " current vec pos" << current_vector_pos << " col_block"
+             << col_block << endl;
+      }
       if (transpose) {
         cout << "node index " << node_index << " current vec pos"
              << current_vector_pos << endl;
