@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 
   cout << " file_path " << file_path << endl;
 
-  int batch_size = 15000;
+  int batch_size = 300;
 
   MPI_Init(&argc, &argv);
   int rank;
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-  initialize_mpi_datatypes<int, double, 10>();
+  initialize_mpi_datatypes<int, double, 2>();
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
@@ -79,26 +79,26 @@ int main(int argc, char **argv) {
   //
 
   shared_sparseMat.get()->divide_block_cols(
-      15000, localBRows, grid.get()->world_size, true, false);
+      300, localBRows, grid.get()->world_size, true, false);
   shared_sparseMat.get()->sort_by_rows();
-  shared_sparseMat.get()->divide_block_rows(15000, localBRows, true, false);
+  shared_sparseMat.get()->divide_block_rows(300, localBRows, true, false);
 
-  shared_sparseMat_Trans.get()->divide_block_cols(15000, localBRows, 2, true,
+  shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 2, true,
                                                   true);
   shared_sparseMat_Trans.get()->sort_by_rows();
-  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 15000, true,
+  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 300, true,
                                                   true);
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
   cout << " rank " << rank << " initialization of CSR started  " << endl;
-  shared_sparseMat.get()->initialize_CSR_blocks(15000, localBRows, localARows,
+  shared_sparseMat.get()->initialize_CSR_blocks(300, localBRows, localARows,
                                                 localBRows, -1, false);
   cout << " rank " << rank << " initialization of  CSR completed  " << endl;
   cout << " rank " << rank << " initialization of transpose CSR started  "
        << endl;
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(
-      localARows, 15000, localARows, localBRows, -1, true);
+      localARows, 300, localARows, localBRows, -1, true);
   cout << " rank " << rank << " initialization of transpose CSR completed  "
        << endl;
 
@@ -111,13 +111,13 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
   cout << " rank " << rank << " creation of dense matrices started  " << endl;
-  auto dense_mat = shared_ptr<DenseMat<double, 10>>(
-      new DenseMat<double, 10>(localARows, 0, 1.0, grid.get()->world_size));
+  auto dense_mat = shared_ptr<DenseMat<double, 2>>(
+      new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
   //    dense_mat.get()->print_matrix();
   cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
   auto communicator =
-      unique_ptr<DataComm<int, double, 10>>(new DataComm<int, double, 10>(
+      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
           shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
           grid.get()));
 
@@ -146,10 +146,10 @@ int main(int argc, char **argv) {
 //
 //  }
 
-  distblas::embedding::EmbeddingAlgo<int,double,10> *embedding_algo =
-      new distblas::embedding::EmbeddingAlgo<int,double,10>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
+  distblas::embedding::EmbeddingAlgo<int,double,2> *embedding_algo =
+      new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
 
-  embedding_algo->algo_force2_vec_ns(1200,15000,5,0.01);
+  embedding_algo->algo_force2_vec_ns(1200,300,5,0.02);
   cout << " rank " << rank << " async completed  " << endl;
 
 //  dense_mat.get()->print_cache();
