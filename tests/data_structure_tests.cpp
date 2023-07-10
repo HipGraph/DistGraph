@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   initialize_mpi_datatypes<int, double, 2>();
 
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
-  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(2, 1, 1, 1));
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(1, 1, 1, 1));
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->sort_by_rows();
   shared_sparseMat.get()->divide_block_rows(300, localBRows, true, false);
 
-  shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 2, true,
+  shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 1, true,
                                                   true);
   shared_sparseMat_Trans.get()->sort_by_rows();
   shared_sparseMat_Trans.get()->divide_block_rows(localARows, 300, true,
