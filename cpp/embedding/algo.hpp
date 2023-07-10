@@ -77,9 +77,9 @@ public:
             (working_rank == ((this->grid)->global_rank)) ? false : true;
         while (head != nullptr) {
 
-//          CSRLocal<SPT> *csr_block = (head.get())->data.get();
-//          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
-//                                  batch_size, working_rank, fetch_remote);
+          CSRLocal<SPT> *csr_block = (head.get())->data.get();
+          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
+                                  batch_size, working_rank, fetch_remote);
            head = (head.get())->next;
           ++col_batch_id;
           working_rank =  col_batch_id/(this->sp_local)->number_of_local_csr_nodes;
@@ -130,18 +130,18 @@ public:
           }
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
-        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-            (this->dense_local)->fetch_local_eigen_vector(row_id);
-
-        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
-        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
-        DENT t_squared_sum = t_squared.sum();
-        DENT d1 = -2.0 / (1.0 + t_squared_sum);
-        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
-        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
-        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
-        values.row(i) = values.row(i).array() + learned.array();
+//        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+//            (this->dense_local)->fetch_local_eigen_vector(row_id);
+//
+//        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+//        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
+//        DENT t_squared_sum = t_squared.sum();
+//        DENT d1 = -2.0 / (1.0 + t_squared_sum);
+//        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
+//        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+//            scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
+//        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
+//        values.row(i) = values.row(i).array() + learned.array();
       }
     }
   }
@@ -153,7 +153,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
