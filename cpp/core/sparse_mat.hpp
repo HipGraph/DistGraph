@@ -175,9 +175,9 @@ public:
     if (transpose) {
       cout << "starting insertion "  << endl;
     }
+    int node_index=0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
-      int node_index=0;
       if (!transpose) {
         current_vector_pos = j % no_of_lists;
         if (j > 0 and current_vector_pos == 0) {
