@@ -43,7 +43,7 @@ public:
     newNode.get()->id=id;
     newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
-    int index = static_cast<int>(id) %total_nodes;
+    int index = static_cast<int>(id);
     cout<<" index "<<index<<endl;
     direct_ref[index]= (newNode.get()->data);
     if (this->head == nullptr) {

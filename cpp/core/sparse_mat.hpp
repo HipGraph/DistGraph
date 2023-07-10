@@ -149,12 +149,12 @@ public:
     int col_block = 0;
 
     int no_of_nodes = (transpose) ? (gRows/block_rows) : (gCols/block_cols);//This assumes 1D partitioning, we need to generalized this
-    if (!transpose) {
+    if (transpose) {
       cout << "gCols" << gCols<<" block_cols"<<block_cols <<"value "<<(gCols/block_cols)<<endl;
     }
 
     this->number_of_local_csr_nodes = no_of_nodes;
-    if (!transpose) {
+    if (transpose) {
       cout << "no_of_nodes " << this->number_of_local_csr_nodes << endl;
     }
 
@@ -172,8 +172,12 @@ public:
       cout << "block_row_starts size "<<block_row_starts.size()<<endl;
     }
 
+    if (transpose) {
+      cout << "starting insertion "  << endl;
+    }
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
+      int node_index=0;
       if (!transpose) {
         current_vector_pos = j % no_of_lists;
         if (j > 0 and current_vector_pos == 0) {
@@ -182,6 +186,9 @@ public:
       } else {
         current_vector_pos = j / no_of_nodes;
         col_block = current_vector_pos;
+      }
+      if (node_index == no_of_nodes -1){
+        node_index = 0;
       }
 
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
@@ -197,7 +204,8 @@ public:
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())
           ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
-                   false, j);
+                   false, node_index);
+      ++node_index;
     }
     if (!transpose) {
       cout << "final col blocks size "<<col_block<<endl;
