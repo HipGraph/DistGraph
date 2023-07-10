@@ -56,10 +56,16 @@ int main(int argc, char **argv) {
   int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
                                        grid.get()->world_size);
 
+  cout << " rank " << rank << " localBRows  " << localBRows
+       << " localARows "<<localARows << endl;
+
   shared_sparseMat.get()->block_row_width = batch_size;
   shared_sparseMat.get()->block_col_width = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
+
+  cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
+       <<  "gCols" << shared_sparseMat.get()->gCols << endl;
 
   vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
   auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
