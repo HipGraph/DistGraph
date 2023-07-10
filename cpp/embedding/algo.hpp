@@ -90,6 +90,9 @@ public:
 //          cout<<" accessing  k  local node success "<<k<<endl;
 
 //          cout<<" csr_block "<<csr_block<<endl;
+          if (csr_block == 0 || csr_block == nullptr){
+            cout<<" csr_block 0 or null"<<k<<endl;
+          }
 
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, k,
                                         batch_size, working_rank, fetch_remote);
