@@ -70,6 +70,7 @@ public:
         values.setZero();
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
+        cout<<" fetch j batch list"<<j<<endl;
         auto head = batch_list->getHeadNode();
         int col_batch_id = 0;
         int working_rank = 0;
@@ -79,6 +80,7 @@ public:
 //       #pragma omp parallel for schedule(static)
         for(int k=0;k<batch_list->direct_ref.size();k++) {
 //          CSRLocal<SPT> *csr_block = (head.get())->data.get();
+           cout<<" accessing  k  local node "<<k<<endl;
           CSRLocal<SPT> *csr_block = batch_list->direct_ref[k].get();
 //          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
 //                                        batch_size, working_rank, fetch_remote);
