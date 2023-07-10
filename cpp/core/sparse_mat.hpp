@@ -168,6 +168,10 @@ public:
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>();
     }
 
+    if (!transpose) {
+      cout << "block_row_starts size "<<block_row_starts.size()<<endl;
+    }
+
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
       if (!transpose) {

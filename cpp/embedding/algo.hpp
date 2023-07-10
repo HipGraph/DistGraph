@@ -119,7 +119,7 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
         if (fetch_from_cache) {
-          cout<<" global_col_id: "<<global_col_id<<endl;
+          cout<<" global_col_id: "<<global_col_id<<" batch _id"<<col_batch_id<<endl;
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(target_rank, global_col_id);
