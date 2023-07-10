@@ -107,7 +107,7 @@ public:
 //        (this->grid)->global_rank * (this->sp_local)->proc_col_width +
 //        col_base_id;
     CSRHandle *csr_handle = csr_block->handler.get();
-    #pragma omp parallel for schedule(static)
+//    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]); j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]);
@@ -124,6 +124,9 @@ public:
                   ->fetch_data_vector_from_cache(target_rank, global_col_id);
           col_vec = col_vec_trans.transpose();
         } else {
+          if (this->grid->global_rank == 0){
+            cout<<" local_id: "<<local_col_id<<endl;
+          }
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
@@ -149,7 +152,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-    #pragma omp parallel for schedule(static)
+//    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
