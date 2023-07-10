@@ -199,7 +199,9 @@ public:
 //           << " csr_block_initating_index" << block_row_starts[j]
 //           << " current vec pos" << current_vector_pos << " col_block"
 //           << col_block << endl;
-
+      if (transpose) {
+        cout << "node index "<<node_index << endl;
+      }
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())
