@@ -309,10 +309,7 @@ public:
 //     vector<DataTuple<DENT, embedding_dim>>  *sendbuf =
 //         new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
 
-
-     cout<<" calling resize "<<endl;
      receivebuf->resize(total_receive_count);
-     cout<<"  resize  success"<<endl;
 
      DataTuple<DENT, embedding_dim> *receivebufverify;
 
@@ -325,10 +322,9 @@ public:
        vector<uint64_t> sending_vec = send_col_ids_list;
        vector<uint64_t> receiving_vec = receive_col_ids_list[i];
 
-//       #pragma omp parallel
+       #pragma omp parallel
        for (int j = 0; j < sending_vec.size(); j++) {
          int index = sdispls[i] + j;
-         cout<<"rank "<<grid->global_rank<<"sending rank "<<i<<" index"<<index<<"value"<<sending_vec[j]<<endl;
          ((sendbuf)[index]).col = sending_vec[j];
          int local_key = ((sendbuf)[index]).col -
                          (grid->global_rank) * (this->sp_local)->proc_row_width;
@@ -346,7 +342,7 @@ public:
      MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(), DENSETUPLE,
                     MPI_COMM_WORLD, &request);
-     cout<<"  MPI executed  success"<<endl;
+//     cout<<"  MPI executed  success"<<endl;
      if (verify) {
        MPI_Status status;
        MPI_Wait(&request, &status);
@@ -370,7 +366,7 @@ public:
        }
        delete[] receivebufverify;
      }
-     cout<<"  verification success"<<endl;
+//     cout<<"  verification success"<<endl;
 //     delete[] receivebufverify;
      delete[] sendbuf;
 //     delete[] receivebuf;
@@ -387,8 +383,8 @@ public:
         int base_index = this->rdispls[i];
 
         int count = this->receivecounts[i];
-        cout<<" rank "<<grid->global_rank<<" baseindex "<<base_index<<" working rank "
-             <<i<<" count "<<count<<endl;
+//        cout<<" rank "<<grid->global_rank<<" baseindex "<<base_index<<" working rank "
+//             <<i<<" count "<<count<<endl;
         for (int j = base_index; j < base_index + count; j++) {
           DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
           (this->dense_local)->insert_cache(i, t.col, t.value);
