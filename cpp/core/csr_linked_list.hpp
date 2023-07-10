@@ -37,13 +37,13 @@ public:
   }
 
   void insert(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
-              int num_coords, bool transpose, int id) {
+              int num_coords, bool transpose, uint64_t id) {
 
     auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
     newNode.get()->id=id;
     newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
-    int index = id %total_nodes;
+    int index = static_cast<int>(id) %total_nodes;
     direct_ref[index]= (newNode.get()->data);
     if (this->head == nullptr) {
       head = newNode;
