@@ -87,8 +87,8 @@ public:
 //          head = (head.get())->next;
 //          ++col_batch_id;
           cout<<" accessing  k  local node success "<<k<<endl;
-          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, k,
-                                        batch_size, working_rank, fetch_remote);
+//          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, k,
+//                                        batch_size, working_rank, fetch_remote);
 //          working_rank =
 //              col_batch_id / (this->sp_local)->number_of_local_csr_nodes;
           working_rank =
