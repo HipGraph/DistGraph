@@ -24,7 +24,7 @@ public:
   vector<CSRLocal<T> *> direct_ref;
   CSRLinkedList(int num_of_nodes) {
     head = nullptr;
-    direct_ref = vector<shared_ptr<CSRLocal<T>>>(num_of_nodes);
+    direct_ref = vector<CSRLocal<T>*>(num_of_nodes);
     total_nodes = num_of_nodes;
   }
 
