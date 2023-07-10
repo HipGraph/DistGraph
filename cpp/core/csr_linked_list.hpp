@@ -21,7 +21,7 @@ private:
   int total_nodes;
 
 public:
-  vector<shared_ptr<CSRLocal<T>>> direct_ref;
+  vector<CSRLocal<T> *> direct_ref;
   CSRLinkedList(int num_of_nodes) {
     head = nullptr;
     direct_ref = vector<shared_ptr<CSRLocal<T>>>(num_of_nodes);
@@ -40,7 +40,7 @@ public:
     newNode.get()->data = data_ptr;
     int index = static_cast<int>(id);
     //    cout<<" index "<<index<<endl;
-    direct_ref[index] = data_ptr;
+    direct_ref[index] = data_ptr.get();
     if (this->head == nullptr) {
       head = newNode;
     } else {
