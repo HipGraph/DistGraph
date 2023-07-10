@@ -13,6 +13,7 @@ template <typename T>
 struct CSRLocalNode {
   shared_ptr<CSRLocal<T>> data = nullptr;
   shared_ptr<CSRLocalNode<T>> next = nullptr;
+
   uint64_t id;
 };
 
@@ -25,7 +26,7 @@ private:
 
 
 public:
-
+  vector<CSRLocal<T>>  direct_ref;
   CSRLinkedList() {
     head = nullptr;
 
@@ -42,6 +43,7 @@ public:
     newNode.get()->id=id;
     newNode.get()->data = make_shared<CSRLocal<T>>( rows,  cols,  max_nnz,  coords,
                                                    num_coords,  transpose);
+    direct_ref.push_back(newNode.get()->data)
     if (this->head == nullptr) {
       head = newNode;
     }else {
