@@ -76,6 +76,7 @@ public:
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
+        cout<<" batch_list->direct_ref size "<<batch_list->direct_ref.size()<<endl;
 //        while (head != nullptr) {
 //       #pragma omp parallel for schedule(static)
         for(int k=0;k<batch_list->direct_ref.size();k++) {
