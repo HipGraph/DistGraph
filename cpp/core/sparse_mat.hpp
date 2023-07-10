@@ -68,15 +68,16 @@ public:
       current_start = proc_col_width * rank;
     }
 
-//    cout << "rank " << rank << " trans" << trans << " current_start "
-//         << current_start << endl;
+    //    cout << "rank " << rank << " trans" << trans << " current_start "
+    //         << current_start << endl;
 
     // TODO: introduce atomic capture
     for (uint64_t i = 0; i < coords.size(); i++) {
       while (coords[i].col >= current_start) {
         block_col_starts.push_back(i);
-//        cout << "rank " << rank << " trans" << trans << " col adding i " << i
-//             << endl;
+        //        cout << "rank " << rank << " trans" << trans << " col adding i
+        //        " << i
+        //             << endl;
         current_start += batch_size;
       }
 
@@ -97,8 +98,8 @@ public:
     }
   }
 
-  void divide_block_rows(int block_width_row,int block_col_width, int proc_col_width, bool mod_ind,
-                         bool trans) {
+  void divide_block_rows(int block_width_row, int block_col_width,
+                         int proc_col_width, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
@@ -116,12 +117,14 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-//          cout << "rank " << rank << " trans" << trans << "  current start "
-//               << current_start << " row adding j " << j << endl;
+          //          cout << "rank " << rank << " trans" << trans << "  current
+          //          start "
+          //               << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
-//          cout << "rank " << rank << " trans" << trans
-//               << " updated current start " << current_start << " row adding j "
-//               << j << endl;
+          //          cout << "rank " << rank << " trans" << trans
+          //               << " updated current start " << current_start << "
+          //               row adding j "
+          //               << j << endl;
           ++matched_count;
         }
 
@@ -133,9 +136,10 @@ public:
       int expected_matched_count =
           std::max(1, (block_col_width / block_width_row));
       if (matched_count < expected_matched_count) {
-//        cout << "rank " << rank << " trans" << trans << " current start "
-//             << current_start << " not matching adding row adding j "
-//             << block_col_starts[i + 1] << endl;
+        //        cout << "rank " << rank << " trans" << trans << " current
+        //        start "
+        //             << current_start << " not matching adding row adding j "
+        //             << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
     }
@@ -148,18 +152,24 @@ public:
 
     int col_block = 0;
 
-    int no_of_nodes = (transpose) ? (gRows/block_rows) : (gCols/block_cols);//This assumes 1D partitioning, we need to generalized this
+    int no_of_nodes =
+        (transpose) ? (gRows / block_rows)
+                    : (gCols / block_cols); // This assumes 1D partitioning, we
+                                            // need to generalized this
     if (transpose) {
-      cout << "gCols" << gCols<<" block_cols"<<block_cols <<"value "<<(gCols/block_cols)<<endl;
+      cout << "gCols" << gCols << " block_cols" << block_cols << "value "
+           << (gCols / block_cols) << endl;
     }
 
     this->number_of_local_csr_nodes = no_of_nodes;
-    if (transpose) {
-      cout << "no_of_nodes " << this->number_of_local_csr_nodes << endl;
-    }
 
-        int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
+    int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
                                   : (local_max_row_width / block_rows);
+
+    if (transpose) {
+      cout << "no_of_nodes " << this->number_of_local_csr_nodes
+           << " number of lists " << no_of_lists << endl;
+    }
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
@@ -169,13 +179,13 @@ public:
     }
 
     if (!transpose) {
-      cout << "block_row_starts size "<<block_row_starts.size()<<endl;
+      cout << "block_row_starts size " << block_row_starts.size() << endl;
     }
 
     if (transpose) {
-      cout << "starting insertion "  << endl;
+      cout << "starting insertion " << endl;
     }
-    int node_index=0;
+    int node_index = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
       if (!transpose) {
@@ -187,21 +197,21 @@ public:
         current_vector_pos = j / no_of_nodes;
         col_block = current_vector_pos;
       }
-      if (node_index >= no_of_nodes ){
+      if (node_index >= no_of_nodes) {
         node_index = 0;
       }
-
 
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
       int rank;
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//
-//      cout << " rank " << rank << "_" << transpose
-//           << " csr_block_initating_index" << block_row_starts[j]
-//           << " current vec pos" << current_vector_pos << " col_block"
-//           << col_block << endl;
+      //
+      //      cout << " rank " << rank << "_" << transpose
+      //           << " csr_block_initating_index" << block_row_starts[j]
+      //           << " current vec pos" << current_vector_pos << " col_block"
+      //           << col_block << endl;
       if (transpose) {
-        cout << "node index "<<node_index<<" current vec pos"<<current_vector_pos << endl;
+        cout << "node index " << node_index << " current vec pos"
+             << current_vector_pos << endl;
       }
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
@@ -211,9 +221,8 @@ public:
       ++node_index;
     }
     if (!transpose) {
-      cout << "final col blocks size "<<col_block<<endl;
+      cout << "final col blocks size " << col_block << endl;
     }
-
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
@@ -235,9 +244,9 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
-//      cout << " rank  " << rank << " inside fill_col_ids coords ( "
-//           << block_row_id << " ," << block_col_id << ")"
-//           << (csr_data.get())->num_coords << endl;
+      //      cout << " rank  " << rank << " inside fill_col_ids coords ( "
+      //           << block_row_id << " ," << block_col_id << ")"
+      //           << (csr_data.get())->num_coords << endl;
       if ((csr_data.get())->num_coords > 0) {
         int block_row_width = this->block_row_width;
         int block_col_width = this->block_col_width;
@@ -266,7 +275,7 @@ public:
     }
   }
 
-  CSRLinkedList<T>* get_batch_list(int batch_id) {
+  CSRLinkedList<T> *get_batch_list(int batch_id) {
     return csr_linked_lists[batch_id].get();
   }
 
@@ -274,8 +283,8 @@ public:
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-//    cout << " rank " << rank << "_" << trans
-//         << " printing print_blocks_and_cols" << endl;
+    //    cout << " rank " << rank << "_" << trans
+    //         << " printing print_blocks_and_cols" << endl;
     int current_col_block = 0;
     for (int j = 0; j < csr_linked_lists.size(); j++) {
       cout << " rank " << rank << " j " << j << endl;
