@@ -149,7 +149,12 @@ public:
     int col_block = 0;
 
     int no_of_nodes = (transpose) ? (gRows / block_rows) : (gCols / block_cols);//This assumes 1D partitioning, we need to generalized this
+
+
     this->number_of_local_csr_nodes = no_of_nodes;
+    if (!transpose) {
+      cout << "no_of_nodes " << this->number_of_local_csr_nodes << endl;
+    }
 
         int no_of_lists = (transpose) ? (local_max_col_width / block_cols)
                                   : (local_max_row_width / block_rows);
