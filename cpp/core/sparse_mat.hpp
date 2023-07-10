@@ -193,11 +193,16 @@ public:
 //           << " current vec pos" << current_vector_pos << " col_block"
 //           << col_block << endl;
 
+
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())
           ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
                    false, j);
     }
+    if (!transpose) {
+      cout << "final col blocks size "<<col_block<<endl;
+    }
+
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
