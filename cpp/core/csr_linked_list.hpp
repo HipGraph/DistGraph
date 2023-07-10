@@ -13,7 +13,7 @@ template <typename T>
 struct CSRLocalNode {
   shared_ptr<CSRLocal<T>> data = nullptr;
   shared_ptr<CSRLocalNode<T>> next = nullptr;
-
+  uint64_t id;
 };
 
 template <typename T>
