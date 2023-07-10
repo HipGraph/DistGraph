@@ -14,7 +14,6 @@ struct CSRLocalNode {
   shared_ptr<CSRLocal<T>> data = nullptr;
   shared_ptr<CSRLocalNode<T>> next = nullptr;
 
-  int total_nodes;
 };
 
 template <typename T>
@@ -22,7 +21,7 @@ class CSRLinkedList {
 
 private:
   shared_ptr<CSRLocalNode<T>> head;
-
+  int total_nodes;
 
 
 public:
