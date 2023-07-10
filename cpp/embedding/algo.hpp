@@ -115,8 +115,7 @@ public:
     int row_base_index = batch_id * batch_size;
     int col_base_id = col_batch_id * ((this->sp_local)->block_col_width);
     int global_col_base_id = col_base_id;
-    //        (this->grid)->global_rank * (this->sp_local)->proc_col_width +
-    //        col_base_id;
+
     CSRHandle *csr_handle = csr_block->handler.get();
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
