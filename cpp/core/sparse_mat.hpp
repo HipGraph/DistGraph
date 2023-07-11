@@ -103,11 +103,11 @@ public:
         return tuple.col == checking_end_index;
       });
 
-//      std::rotate(coords.begin(), startIt, std::next(endIt).base());
-//      uint64_t startIndex = std::distance(coords.begin(), startIt);
-//      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
-//      uint64_t first_batch_len = (endIndex+1)-startIndex;
-//      uint64_t second_batch_len = coords.size()-first_batch_len;
+      std::rotate(coords.begin(), startIt, std::next(endIt).base());
+      uint64_t startIndex = std::distance(coords.begin(), startIt);
+      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
+      uint64_t first_batch_len = (endIndex+1)-startIndex;
+      uint64_t second_batch_len = coords.size()-first_batch_len;
 //      if (mod_ind) {
 //        std::transform(coords.begin(), coords.begin() + first_batch_len,
 //                       coords.begin(),
