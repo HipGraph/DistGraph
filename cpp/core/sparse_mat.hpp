@@ -104,7 +104,8 @@ public:
       });
 
       cout<<"checking_index"<<checking_index<<"checking_end_index"<<checking_end_index<<endl;
-      cout<<"startIt "<<(*startIt)<<" end it "<<(*endIt)<<endl;
+      std::cout << "Start value: (" << std::get<0>(*startIt) << ", " << std::get<1>(*startIt) << ")" << std::endl;
+      std::cout << "End value: (" << std::get<0>(*endIt) << ", " << std::get<1>(*endIt) << ")" << std::endl;
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
 //      uint64_t startIndex = std::distance(coords.begin(), startIt);
 //      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
