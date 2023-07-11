@@ -91,8 +91,8 @@ public:
     } else {
       int start_index = 0;
       int end_index = 0;
-      int checking_index = rank * proc_col_width;
-      int checking_end_index =
+      uint64_t checking_index = rank * proc_col_width;
+      uint64_t checking_end_index =
           std::min(((rank + 1) * proc_col_width)-1,gCols-1);
 
       auto startIt = std::find_if(coords.begin(), coords.end(), [&checking_index](const auto& tuple) {
