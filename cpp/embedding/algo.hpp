@@ -125,7 +125,7 @@ public:
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
           uint64_t local_col = static_cast<uint64_t>(csr_handle->col_idx[j]);
-          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->value[j]);
+          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
           local_col = local_col - (this->grid)->global_rank *
                                       (this->sp_local)->proc_row_width;
           Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
