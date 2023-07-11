@@ -108,7 +108,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
 
-    for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
+    for (uint64_t i = 0; i < block_col_starts.size() ; i++) {
 
       int current_start = proc_width_row * rank;
 
