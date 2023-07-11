@@ -73,6 +73,12 @@ int main(int argc, char **argv) {
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
       batch_size, localARows, localBRows,false);
 
+  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
+      copiedVectorTwo, shared_sparseMat.get()->gRows,
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
+      batch_size, localARows, localBRows,true);
+
   auto partitioner =
       unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(
           shared_sparseMat.get()->gRows, shared_sparseMat.get()->gCols,
@@ -82,19 +88,29 @@ int main(int argc, char **argv) {
 
   partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
+  partitioner.get()->partition_data(shared_sparseMat_combined.get(), false);
   //
 
   shared_sparseMat.get()->divide_block_cols(
       300, localBRows, grid.get()->world_size, true, false);
   shared_sparseMat.get()->sort_by_rows();
-  shared_sparseMat.get()->divide_block_rows(300,300, localBRows, true, false);
+  shared_sparseMat.get()->divide_block_rows(300, localBRows, true, false);
 
 
   shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 1, true,
                                                   true);
   shared_sparseMat_Trans.get()->sort_by_rows();
-  shared_sparseMat_Trans.get()->divide_block_rows(localARows, 300,localBRows, true,
+  shared_sparseMat_Trans.get()->divide_block_rows(localARows,localBRows, true,
                                                   true);
+
+
+  shared_sparseMat_combined.get()->divide_block_cols(
+      localBRows, localBRows, grid.get()->world_size, true, false);
+  shared_sparseMat_combined.get()->sort_by_rows();
+  shared_sparseMat_combined.get()->divide_block_rows(300, localBRows, true, false);
+
+
+
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
@@ -109,13 +125,11 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " initialization of transpose CSR completed  "
        << endl;
 
+
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, localARows,
+                                                localBRows, -1, false);
   //  shared_sparseMat.get()->print_blocks_and_cols(false);
   //  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
-
-  vector<uint64_t> id_list_trans;
-  vector<uint64_t> id_list;
-  shared_sparseMat_Trans.get()->fill_col_ids(0, 0, id_list_trans, true, true);
-  shared_sparseMat.get()->fill_col_ids(0, 0, id_list, false, true);
 
   cout << " rank " << rank << " creation of dense matrices started  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
@@ -131,7 +145,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " async started  " << endl;
 
   distblas::embedding::EmbeddingAlgo<int,double,2> *embedding_algo =
-      new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
+      new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat_combined.get(),dense_mat.get(),communicator.get(),grid.get(),5,-5);
 
   embedding_algo->algo_force2_vec_ns(1200,300,5,0.02);
   cout << " rank " << rank << " async completed  " << endl;

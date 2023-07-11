@@ -77,32 +77,22 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 //        cout<<" batch_list->direct_ref size "<<batch_list->direct_ref.size()<<endl;
-//        while (head != nullptr) {
-//       #pragma omp parallel for schedule(static)
-        for(int k=0;k<batch_list->direct_ref.size();k++) {
-//          CSRLocal<SPT> *csr_block = (head.get())->data.get();
+        while (head != nullptr) {
+
+          CSRLocal<SPT> *csr_block = (head.get())->data.get();
 //           cout<<" accessing  k  local node "<<k<<endl;
-          CSRLocal<SPT> *csr_block = batch_list->direct_ref[k];
-//          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
-//                                        batch_size, working_rank, fetch_remote);
-//          head = (head.get())->next;
-//          ++col_batch_id;
-//          cout<<" accessing  k  local node success "<<k<<endl;
+
+          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
+                                        batch_size);
+          head = (head.get())->next;
+          ++col_batch_id;
+          cout<<" accessing batch id"<<j<<" col_batch_id "<<col_batch_id<<endl;
 
 //          cout<<" csr_block "<<csr_block<<endl;
           if (csr_block == 0  ){
             cout<<" csr_block 0 or null"<<k<<endl;
           }
 
-          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, k,
-                                        batch_size, working_rank, fetch_remote);
-//          working_rank =
-//              col_batch_id / (this->sp_local)->number_of_local_csr_nodes;
-          working_rank =
-              k / (this->sp_local)->number_of_local_csr_nodes;
-          fetch_remote =
-              (working_rank == ((this->grid)->global_rank)) ? false : true;
-          //        }
         }
 
         this->calc_t_dist_grad_repulsive(values, random_number_vec,lr,j,batch_size);
@@ -116,8 +106,7 @@ public:
 #pragma forceinline
   void calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values,
                                DENT lr, CSRLocal<SPT> *csr_block, int batch_id,
-                               int col_batch_id, int batch_size,
-                               int target_rank, bool fetch_from_cache) {
+                               int col_batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
     int col_base_id = col_batch_id * ((this->sp_local)->block_col_width);

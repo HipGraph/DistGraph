@@ -121,8 +121,7 @@ public:
     }
   }
 
-  void divide_block_rows(int block_width_row, int block_col_width,
-                         int proc_width_row, bool mod_ind, bool trans) {
+  void divide_block_rows(int block_width_row, int proc_width_row, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
