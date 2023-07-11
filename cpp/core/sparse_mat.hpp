@@ -75,9 +75,8 @@ public:
     for (uint64_t i = 0; i < coords.size(); i++) {
       while (coords[i].col >= current_start) {
         block_col_starts.push_back(i);
-        //        cout << "rank " << rank << " trans" << trans << " col adding i
-        //        " << i
-        //             << endl;
+                cout << "rank " << rank << " trans" << trans << " col adding i" << i
+                     << endl;
         current_start += batch_size;
       }
 
