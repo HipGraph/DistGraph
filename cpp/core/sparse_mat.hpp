@@ -148,6 +148,10 @@ public:
       }
     }
     block_row_starts.push_back(coords.size());
+    if(!trans){
+      cout<<"block_rows size"<<block_row_starts.size()<<endl;
+    }
+
   }
 
   void initialize_CSR_blocks(int block_rows, int block_cols,
