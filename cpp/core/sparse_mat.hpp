@@ -103,6 +103,8 @@ public:
         return tuple.col == checking_end_index;
       });
 
+      cout<<"checking_index"<<checking_index<<"checking_end_index"<<checking_end_index<<"startIt"<<
+          startIt<<" end it"endIt<<endl;
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
 //      uint64_t startIndex = std::distance(coords.begin(), startIt);
 //      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
