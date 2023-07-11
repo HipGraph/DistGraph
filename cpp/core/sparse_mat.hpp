@@ -97,11 +97,11 @@ public:
           std::min(((rank + 1) * proc_col_width)-1,gCols-1);
 
       auto startIt = std::find_if(coords.begin(), coords.end(), [&checking_index](const auto& tuple) {
-        return tuple.col == checking_index;
+        return tuple.col >= checking_index;
       });
 
       auto endIt = std::find_if(coords.rbegin(), coords.rend(), [&checking_end_index](const auto& tuple) {
-        return tuple.col == checking_end_index;
+        return tuple.col <= checking_end_index;
       });
 
       cout<<"checking_index"<<checking_index<<"checking_end_index"<<checking_end_index<<endl;
