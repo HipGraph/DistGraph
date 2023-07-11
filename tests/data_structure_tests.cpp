@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " async started  " << endl;
 
-  unique_ptr<distblas::embedding::EmbeddingAlgo<int,double,2>> *embedding_algo =
+  unique_ptr<distblas::embedding::EmbeddingAlgo<int,double,2>> embedding_algo =
       unique_ptr<distblas::embedding::EmbeddingAlgo<int,double,2>>(new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat_combined.get(),
                                                                                                                             dense_mat.get(),
                                                                                                                             communicator.get(),
