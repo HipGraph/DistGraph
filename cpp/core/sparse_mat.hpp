@@ -182,8 +182,6 @@ public:
 #pragma omp parallel for
     for (int i = 0; i < no_of_lists; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(no_of_nodes);
-      csr_linked_lists_combined[i] =
-          std::make_shared<CSRLinkedList<T>>(no_of_combined_nodes);
     }
 
     if (!transpose) {
