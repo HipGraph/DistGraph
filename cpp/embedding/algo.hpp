@@ -86,12 +86,12 @@ public:
                                         batch_size);
           head = (head.get())->next;
           ++col_batch_id;
-          cout<<" accessing batch id"<<j<<" col_batch_id "<<col_batch_id<<endl;
+//          cout<<" accessing batch id"<<j<<" col_batch_id "<<col_batch_id<<endl;
 
 //          cout<<" csr_block "<<csr_block<<endl;
-          if (csr_block == 0  ){
-            cout<<" csr_block 0 or null"<<endl;
-          }
+//          if (csr_block == 0  ){
+//            cout<<" csr_block 0 or null"<<endl;
+//          }
 
         }
 
@@ -117,37 +117,37 @@ public:
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-      //      for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-      //           j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-      //        //        uint64_t local_col =  static_cast<uint64_t>(csr_handle->col_idx[j]); uint64_t global_col_id =  static_cast<uint64_t>(local_col + global_col_base_id); uint64_t local_col_id =  static_cast<uint64_t>(local_col + col_base_id); local_col_id  = local_col_id - (this->grid)->global_rank*(this->sp_local)->proc_row_width;
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
-      //        //
-      //        //        if (fetch_from_cache) {
-      //        ////          cout<<" global_col_id: "<<global_col_id<<" batch _id"<<col_batch_id<<endl;
-      //        //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-      //        //              (this->dense_local)
-      //        //                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
-      //        //          col_vec = col_vec_trans.transpose();
-      //        //        } else {
-      //        //          if (this->grid->global_rank == 0){
-      //        ////            cout<<" local_id: "<<local_col_id<<endl;
-      //        //          }
-      //        //          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
-      //        //        }
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-      //        // (this->dense_local)->fetch_local_eigen_vector(row_id);
-      //        //
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
-      //        //        DENT t_squared_sum = t_squared.sum();
-      //        //        DENT d1 = -2.0 / (1.0 + t_squared_sum);
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-      //        //        scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
-      //        //        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
-      //        //        values.row(i) = values.row(i).array() + learned.array();
-      //        //      }
-      //      }
+            for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
+                 j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+              //        uint64_t local_col =  static_cast<uint64_t>(csr_handle->col_idx[j]); uint64_t global_col_id =  static_cast<uint64_t>(local_col + global_col_base_id); uint64_t local_col_id =  static_cast<uint64_t>(local_col + col_base_id); local_col_id  = local_col_id - (this->grid)->global_rank*(this->sp_local)->proc_row_width;
+              //        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+              //
+              //        if (fetch_from_cache) {
+              ////          cout<<" global_col_id: "<<global_col_id<<" batch _id"<<col_batch_id<<endl;
+              //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+              //              (this->dense_local)
+              //                  ->fetch_data_vector_from_cache(target_rank, global_col_id);
+              //          col_vec = col_vec_trans.transpose();
+              //        } else {
+              //          if (this->grid->global_rank == 0){
+              ////            cout<<" local_id: "<<local_col_id<<endl;
+              //          }
+              //          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+              //        }
+              //        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+              // (this->dense_local)->fetch_local_eigen_vector(row_id);
+              //
+              //        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+              //        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
+              //        DENT t_squared_sum = t_squared.sum();
+              //        DENT d1 = -2.0 / (1.0 + t_squared_sum);
+              //        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
+              //        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+              //        scaled_vector.array().cwiseMax(this->MIN_BOUND).cwiseMin(this->MAX_BOUND);
+              //        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
+              //        values.row(i) = values.row(i).array() + learned.array();
+              //      }
+            }
     }
     }
   }
