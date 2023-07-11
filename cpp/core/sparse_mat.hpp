@@ -120,8 +120,8 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-                    cout << "rank " << rank << " trans" << trans << "  current start "
-                         << current_start << " row adding j " << j << endl;
+//                    cout << "rank " << rank << " trans" << trans << "  current start "
+//                         << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
           //          cout << "rank " << rank << " trans" << trans
           //               << " updated current start " << current_start << "
@@ -135,12 +135,15 @@ public:
           coords[j].row %= block_width_row;
         }
       }
+      if(!trans){
+        cout<<"i"<<i<<"matched count "<<matched_count<<endl;
+      }
       int expected_matched_count =
           std::max(1, (block_col_width / block_width_row));
       if (matched_count < expected_matched_count) {
-                cout << "rank " << rank << " trans" << trans << " i "<<i<<" current start "
-                     << current_start << " not matching adding row adding j "
-                     << block_col_starts[i + 1] << endl;
+//                cout << "rank " << rank << " trans" << trans << " i "<<i<<" current start "
+//                     << current_start << " not matching adding row adding j "
+//                     << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
     }
