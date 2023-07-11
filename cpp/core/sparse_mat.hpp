@@ -139,7 +139,7 @@ public:
         cout<<"i"<<i<<"matched count "<<matched_count<<endl;
       }
       int expected_matched_count =
-          std::max(1, (block_col_width / block_width_row));
+          std::max(1, (proc_width_row / block_width_row));
       if (matched_count < expected_matched_count) {
 //                cout << "rank " << rank << " trans" << trans << " i "<<i<<" current start "
 //                     << current_start << " not matching adding row adding j "
