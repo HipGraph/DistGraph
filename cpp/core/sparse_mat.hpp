@@ -104,8 +104,10 @@ public:
       });
 
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
-      block_col_starts.push_back(startIt);
-      block_col_starts.push_back(endIt);
+      uint64_t startIndex = std::distance(coords.begin(), startIt);
+      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
+      block_col_starts.push_back(startIndex);
+      block_col_starts.push_back(endIndex);
 
     }
     block_col_starts.push_back(coords.size());
