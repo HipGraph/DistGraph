@@ -112,14 +112,14 @@ public:
         std::transform(coords.begin(), coords.begin() + first_batch_len,
                        coords.begin(),
                        [&](const auto &tuple) {
-                         tuple.col %= first_batch_len;
-                         return tuple;
+                         T col = std::get<1>(tuple) % first_batch_len;
+                         return std::make_tuple(std::get<0>(tuple), col,std::get<2>(tuple));
                        });
         std::transform(coords.begin() + first_batch_len, coords.end() ,
                        coords.begin() + first_batch_len,
                        [&](const auto &tuple) {
-                         tuple.col %= second_batch_len;
-                         return tuple;
+                         T col = std::get<1>(tuple) % second_batch_len;
+                         return std::make_tuple(std::get<0>(tuple), col,std::get<2>(tuple));
                        });
       }
 
