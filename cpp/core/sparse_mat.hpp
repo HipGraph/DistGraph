@@ -106,9 +106,25 @@ public:
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
       uint64_t startIndex = std::distance(coords.begin(), startIt);
       uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
+      uint64_t first_batch_len = (endIndex+1)-startIndex;
+      uint64_t second_batch_len = coords.size()-first_batch_len;
+      if (mod_ind) {
+        std::transform(coords.begin(), coords.begin() + first_batch_len,
+                       coords.begin(),
+                       [&](const auto &tuple) {
+                         tuple.col %= first_batch_len;
+                         return tuple;
+                       });
+        std::transform(coords.begin() + first_batch_len, coords.end() ,
+                       coords.begin() + first_batch_len,
+                       [&](const auto &tuple) {
+                         tuple.col %= second_batch_len;
+                         return tuple;
+                       });
+      }
+
       block_col_starts.push_back(startIndex);
       block_col_starts.push_back(endIndex);
-
     }
     block_col_starts.push_back(coords.size());
   }
