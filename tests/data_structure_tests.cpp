@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
        << " completed " << endl;
   //  reader.get()->parallel_read_MM<int>(file_path,
   //  shared_sparseMat_Trans.get());
-  //  shared_sparseMat.get()->print_coords(false);
+      shared_sparseMat.get()->print_coords(false);
   //  shared_sparseMat.get()->print_coords(false);
 
   int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
