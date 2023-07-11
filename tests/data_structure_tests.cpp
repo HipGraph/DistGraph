@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
-      batch_size, localARows, localBRows);
+      batch_size, localARows, localBRows,false);
 
   auto partitioner =
       unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(
