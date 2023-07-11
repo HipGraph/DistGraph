@@ -90,7 +90,7 @@ public:
 
 //          cout<<" csr_block "<<csr_block<<endl;
           if (csr_block == 0  ){
-            cout<<" csr_block 0 or null"<<k<<endl;
+            cout<<" csr_block 0 or null"<<endl;
           }
 
         }
