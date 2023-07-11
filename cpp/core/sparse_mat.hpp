@@ -108,7 +108,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
 
-    for (uint64_t i = 0; i <= block_col_starts.size()-1 ; i++) {
+    for (uint64_t i = 0; i < block_col_starts.size()-1 ; i++) {
 
       int current_start = proc_width_row * rank;
 
@@ -139,7 +139,7 @@ public:
       int expected_matched_count =
           std::max(1, (block_col_width / block_width_row));
       if (matched_count < expected_matched_count) {
-                cout << "rank " << rank << " trans" << trans << " current start "
+                cout << "rank " << rank << " trans" << trans << " i "<<i<<" current start "
                      << current_start << " not matching adding row adding j "
                      << block_col_starts[i + 1] << endl;
         block_row_starts.push_back(block_col_starts[i + 1]);
