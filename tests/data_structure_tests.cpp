@@ -97,11 +97,11 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->divide_block_rows(300, localBRows, true, false);
 //
 //
-//  shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 1, true,
-//                                                  true);
-//  shared_sparseMat_Trans.get()->sort_by_rows();
-//  shared_sparseMat_Trans.get()->divide_block_rows(localARows,localBRows, true,
-//                                                  true);
+  shared_sparseMat_Trans.get()->divide_block_cols(300, localBRows, 1, true,
+                                                  true);
+  shared_sparseMat_Trans.get()->sort_by_rows();
+  shared_sparseMat_Trans.get()->divide_block_rows(localARows,localBRows, true,
+                                                  true);
 //
 //
 //  shared_sparseMat_combined.get()->divide_block_cols(
