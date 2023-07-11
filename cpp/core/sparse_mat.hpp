@@ -103,7 +103,7 @@ public:
         return tuple.col == checking_end_index;
       });
 
-//      std::rotate(coords.begin(), startIt, std::next(endIt).base());
+      std::rotate(coords.begin(), startIt, std::next(endIt).base());
 //      uint64_t startIndex = std::distance(coords.begin(), startIt);
 //      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
 //      uint64_t first_batch_len = (endIndex+1)-startIndex;
