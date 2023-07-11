@@ -94,7 +94,7 @@ public:
   }
 
   void sort_by_rows() {
-    for (int i = 0; i < block_col_starts.size() - 1; i++) {
+    for (int i = 0; i < block_col_starts.size()-1; i++) {
       __gnu_parallel::sort(coords.begin() + block_col_starts[i],
                            coords.begin() + block_col_starts[i + 1],
                            row_major<T>);
@@ -107,7 +107,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
 
-    for (uint64_t i = 0; i <= block_col_starts.size()-1 ; i++) {
+    for (uint64_t i = 0; i < block_col_starts.size()-1 ; i++) {
 
       int current_start = proc_width_row * rank;
 
@@ -197,7 +197,7 @@ public:
 //      cout << "starting insertion " << endl;
 //    }
     int node_index = 0;
-    for (int j = 0; j < block_row_starts.size() - 1; j++) {
+    for (int j = 0; j < block_row_starts.size() -1; j++) {
       int current_vector_pos = 0;
       if (!transpose) {
         current_vector_pos = j % no_of_lists;
