@@ -54,7 +54,7 @@ public:
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
     if (col_merged) {
-#prama omp parallel for
+#pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         coords[i].value = static_cast<int64_t>(coords[i].col);
       }
@@ -177,9 +177,6 @@ public:
                                   : (local_max_row_width / block_rows);
 
     csr_linked_lists =
-        std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
-
-    csr_linked_lists_combined =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
 #pragma omp parallel for
