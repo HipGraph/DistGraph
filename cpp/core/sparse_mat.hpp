@@ -56,7 +56,7 @@ public:
     if (col_merged) {
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
-        coords[i].value = static_cast<int64_t>(coords[i].col);
+        coords[i].value = static_cast<T>(coords[i].col);
       }
     }
   }
