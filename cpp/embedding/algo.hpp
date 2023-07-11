@@ -109,8 +109,6 @@ public:
                                int col_batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-    int col_base_id = col_batch_id * ((this->sp_local)->block_col_width);
-    int global_col_base_id = col_base_id;
 
     if (csr_block->handler != nullptr){
     CSRHandle *csr_handle = csr_block->handler.get();
@@ -119,8 +117,15 @@ public:
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
             for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
                  j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-                      uint64_t local_col =  static_cast<uint64_t>(csr_handle->col_idx[j]); uint64_t global_col_id =  static_cast<uint64_t>(local_col + global_col_base_id); uint64_t local_col_id =  static_cast<uint64_t>(local_col + col_base_id); local_col_id  = local_col_id - (this->grid)->global_rank*(this->sp_local)->proc_row_width;
+
+                      uint64_t local_col =  static_cast<uint64_t>(csr_handle->col_idx[j]);
+                      uint64_t global_col_id =  static_cast<uint64_t>(csr_handle->vaule[j]);
+                      local_col  = local_col - (this->grid)->global_rank*(this->sp_local)->proc_row_width;
                       Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+
+
+                      int target_rank = (int)global_col_id/(this->sp_local)->proc_row_width;
+                      bool fetch_from_cache =  target_rank==(this->grid)->global_rank?false:true;
 
                       if (fetch_from_cache) {
               //          cout<<" global_col_id: "<<global_col_id<<" batch _id"<<col_batch_id<<endl;
@@ -132,7 +137,7 @@ public:
                         if (this->grid->global_rank == 0){
               //            cout<<" local_id: "<<local_col_id<<endl;
                         }
-                        col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+                        col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
                       }
                       Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
                (this->dense_local)->fetch_local_eigen_vector(row_id);
