@@ -108,7 +108,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
 
-    for (uint64_t i = 0; i < block_col_starts.size() ; i++) {
+    for (uint64_t i = 0; i < block_col_starts.size()-1 ; i++) {
 
       int current_start = proc_width_row * rank;
 
@@ -121,9 +121,9 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          //          cout << "rank " << rank << " trans" << trans << "  current
-          //          start "
-          //               << current_start << " row adding j " << j << endl;
+                    cout << "rank " << rank << " trans" << trans << "  current
+                    start "
+                         << current_start << " row adding j " << j << endl;
           current_start += block_width_row;
           //          cout << "rank " << rank << " trans" << trans
           //               << " updated current start " << current_start << "
