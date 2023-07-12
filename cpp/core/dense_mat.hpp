@@ -83,7 +83,7 @@ public:
     ofstream fout(stats, std::ios_base::app);
     fout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
     for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
-      fout <<i<<" ";
+      fout <<i+1<<" ";
       for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
         fout<<(*this->matrixPtr)(i, j)<<" ";
       }
