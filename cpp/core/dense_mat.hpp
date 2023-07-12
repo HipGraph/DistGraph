@@ -77,9 +77,11 @@ public:
   ~DenseMat() {}
 
   void print_matrix() {
+    cout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
     for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
+      cout <<i<<" ";
       for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
-        cout << (*this->matrixPtr)(i, j) << " ";
+        cout<<(*this->matrixPtr)(i, j)<<" "
       }
       cout << endl;
     }
