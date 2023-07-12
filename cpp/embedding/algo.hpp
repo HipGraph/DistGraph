@@ -126,7 +126,7 @@ public:
               (int)global_col_id / (this->sp_local)->proc_row_width;
           bool fetch_from_cache =
               target_rank == (this->grid)->global_rank ? false : true;
-          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
+//          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
           if (fetch_from_cache) {
             Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
                 (this->dense_local)
@@ -134,7 +134,7 @@ public:
             col_vec = col_vec_trans.transpose();
           } else {
             col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
-            cout<<"("<<i<<","<<local_col<<")"<<endl;
+//            cout<<"("<<i<<","<<local_col<<")"<<endl;
           }
           Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
               (this->dense_local)->fetch_local_eigen_vector(row_id);
