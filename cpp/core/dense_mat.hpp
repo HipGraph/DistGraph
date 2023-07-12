@@ -77,13 +77,17 @@ public:
   ~DenseMat() {}
 
   void print_matrix() {
-    cout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
+    string output_path = "embedding.txt";
+    char stats[500];
+    strcpy(stats, output_path.c_str());
+    ofstream fout(stats, std::ios_base::app);
+    fout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
     for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
-      cout <<i<<" ";
+      fout <<i<<" ";
       for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
-        cout<<(*this->matrixPtr)(i, j)<<" "
+        fout<<(*this->matrixPtr)(i, j)<<" "
       }
-      cout << endl;
+      fout << endl;
     }
   }
 
