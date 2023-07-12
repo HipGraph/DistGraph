@@ -223,7 +223,7 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
         DENT t_squared_sum = t_squared.sum();
         cout<<" t_squared_sum:"<<t_squared_sum<<endl;
-        DENT d1 = 2.0 / (t_squared_sum * (1.0 + t_squared_sum));
+        DENT d1 = 2.0 / ((t_squared_sum+0.000001) * (1.0 + t_squared_sum));
         Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
             scaled_vector.array()
