@@ -67,8 +67,8 @@ public:
         //        this->data_comm->async_transfer(random_number_vec, false,
         //                                        results_negative_ptr.get(),
         //                                        request_two);
-        //        this->data_comm->populate_cache(results_negative_ptr.get(),
-        //        request_two);
+                this->data_comm->populate_cache(results_negative_ptr.get(),
+                request_two);
 
         Matrix<DENT, Dynamic, embedding_dim> values(batch_size, embedding_dim);
         values.setZero();
@@ -103,7 +103,7 @@ public:
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
                                          batch_size);
         //
-//        this->update_data_matrix(values, j, batch_size);
+        this->update_data_matrix(values, j, batch_size);
         // TODO do some work here
       }
     }
