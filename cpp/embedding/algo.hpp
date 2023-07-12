@@ -115,9 +115,8 @@ public:
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
-          uint64_t local_col = static_cast<uint64_t>(csr_handle->col_idx[j]);
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
-          local_col = local_col - (this->grid)->global_rank *
+          local_col = global_col_id - (this->grid)->global_rank *
                                       (this->sp_local)->proc_row_width;
           Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
@@ -125,7 +124,7 @@ public:
               (int)global_col_id / (this->sp_local)->proc_row_width;
           bool fetch_from_cache =
               target_rank == (this->grid)->global_rank ? false : true;
-
+          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
           if (fetch_from_cache) {
             Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
                 (this->dense_local)
