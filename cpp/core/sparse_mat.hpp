@@ -108,29 +108,29 @@ public:
       std::cout << "Start value: (" << (*startIt).row << ", " << (*startIt).col << ")" << std::endl;
       std::cout << "End value: (" << (*endIt).row << ", " << (*endIt).col << ")" << std::endl;
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
-//      uint64_t startIndex = std::distance(coords.begin(), startIt);
-//      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
-//      uint64_t first_batch_len = (endIndex+1)-startIndex;
-//      uint64_t second_batch_len = coords.size()-first_batch_len;
-//      if (mod_ind) {
-//        std::transform(coords.begin(), coords.begin() + first_batch_len,
-//                       coords.begin(),
-//                       [&](const auto &tuple) {
-//                         const auto& [row, col, value] = tuple;
-//                         int64_t modifiedCol = col % (first_batch_len);
-//                         return Tuple<T>{row, modifiedCol, value};
-//                       });
-//        std::transform(coords.begin() + first_batch_len, coords.end() ,
-//                       coords.begin() + first_batch_len,
-//                       [&](const auto &tuple) {
-//                         const auto& [row, col, value] = tuple;
-//                         int64_t modifiedCol = col % (second_batch_len);
-//                         return Tuple<T>{row, modifiedCol, value};
-//                       });
-//      }
-//
-//      block_col_starts.push_back(0);
-//      block_col_starts.push_back(first_batch_len);
+      uint64_t startIndex = std::distance(coords.begin(), startIt);
+      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
+      uint64_t first_batch_len = (endIndex+1)-startIndex;
+      uint64_t second_batch_len = coords.size()-first_batch_len;
+      if (mod_ind) {
+        std::transform(coords.begin(), coords.begin() + first_batch_len,
+                       coords.begin(),
+                       [&](const auto &tuple) {
+                         const auto& [row, col, value] = tuple;
+                         int64_t modifiedCol = col % (first_batch_len);
+                         return Tuple<T>{row, modifiedCol, value};
+                       });
+        std::transform(coords.begin() + first_batch_len, coords.end() ,
+                       coords.begin() + first_batch_len,
+                       [&](const auto &tuple) {
+                         const auto& [row, col, value] = tuple;
+                         int64_t modifiedCol = col % (second_batch_len);
+                         return Tuple<T>{row, modifiedCol, value};
+                       });
+      }
+
+      block_col_starts.push_back(0);
+      block_col_starts.push_back(first_batch_len);
     }
     block_col_starts.push_back(coords.size());
   }
