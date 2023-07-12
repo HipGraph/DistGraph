@@ -82,7 +82,7 @@ public:
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
         while (head != nullptr) {
-
+         cout<<"col_batch_id"<<col_batch_id<<endl;
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
@@ -106,11 +106,13 @@ public:
                                int col_batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-
+    cout<<"executing  calc_t_dist_grad_attrac"<<endl;
     if (csr_block->handler != nullptr) {
+      cout<<"inside   csr_block handler"<<endl;
       CSRHandle *csr_handle = csr_block->handler.get();
 //      #pragma omp parallel for schedule(static)
       for (int i = 0; i < values.rows(); i++) {
+        cout<<"i"<<i<<endl;
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
