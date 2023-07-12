@@ -74,30 +74,21 @@ public:
         values.setZero();
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
-        //        cout<<" fetch j batch list"<<j<<endl;
+        //
         auto head = batch_list->getHeadNode();
         int col_batch_id = 0;
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
-        //        cout<<" batch_list->direct_ref size
-        //        "<<batch_list->direct_ref.size()<<endl;
+
         while (head != nullptr) {
 
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
-          //           cout<<" accessing  k  local node "<<k<<endl;
 
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                         batch_size);
           head = (head.get())->next;
           ++col_batch_id;
-          //          cout<<" accessing batch id"<<j<<" col_batch_id
-          //          "<<col_batch_id<<endl;
-
-          //          cout<<" csr_block "<<csr_block<<endl;
-          //          if (csr_block == 0  ){
-          //            cout<<" csr_block 0 or null"<<endl;
-          //          }
         }
 
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
