@@ -87,8 +87,8 @@ public:
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
           //           cout<<" accessing  k  local node "<<k<<endl;
 
-          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
-                                        batch_size);
+//          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
+//                                        batch_size);
           head = (head.get())->next;
           ++col_batch_id;
           //          cout<<" accessing batch id"<<j<<" col_batch_id
