@@ -63,16 +63,16 @@ public:
         std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
         world_size);
     (*this->matrixPtr).setRandom();
-    if (init_mean != 0.0 or std != 1.0) {
-#pragma omp parallel
-      for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
-        for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
+//    if (init_mean != 0.0 or std != 1.0) {
+//#pragma omp parallel
+      for (int i = 0; i < (*this->matrixPtr).rows(); i++) {
+        for (int j = 0; j < (*this->matrixPtr).cols(); j++) {
 //          (*this->matrixPtr)(i, j) = distribution(
 //              gen); // Generate random value with custom distribution
                (*this->matrixPtr)(i, j) =   -1.0 + 2.0 * rand()/(RAND_MAX+1.0);
         }
       }
-    }
+//    }
   }
 
   ~DenseMat() {}
