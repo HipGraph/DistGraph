@@ -231,6 +231,12 @@ public:
                 .cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
         values.row(i) = values.row(i).array() + learned.array();
+        bool c = values.row(i).array().isNaN().any();
+
+        if (hasFinalized) {
+          std::cout << "The matrix row i has NaN values" << std::endl;
+        }
+
       }
     }
   }
