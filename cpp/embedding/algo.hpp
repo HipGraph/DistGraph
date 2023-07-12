@@ -103,7 +103,7 @@ public:
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
                                          batch_size);
         //
-        //        this->update_data_matrix(values,j,batch_size);
+        this->update_data_matrix(values,j,batch_size);
         // TODO do some work here
       }
     }
