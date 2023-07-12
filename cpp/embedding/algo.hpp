@@ -80,7 +80,7 @@ public:
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
-
+        cout<<"inside algo_force2_vec_ns"<<endl;
         while (head != nullptr) {
          cout<<"col_batch_id"<<col_batch_id<<endl;
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
@@ -90,7 +90,7 @@ public:
           head = (head.get())->next;
           ++col_batch_id;
         }
-
+        cout<<"exited while loop"<<endl;
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
                                          batch_size);
         //
