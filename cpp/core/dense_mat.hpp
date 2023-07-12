@@ -67,8 +67,9 @@ public:
 #pragma omp parallel
       for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
         for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
-          (*this->matrixPtr)(i, j) = distribution(
-              gen); // Generate random value with custom distribution
+//          (*this->matrixPtr)(i, j) = distribution(
+//              gen); // Generate random value with custom distribution
+               (*this->matrixPtr)(i, j) =   -1.0 + 2.0 * rand()/(RAND_MAX+1.0);
         }
       }
     }
