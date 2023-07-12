@@ -72,7 +72,7 @@ public:
                (*this->matrixPtr)(i, j) =   -1.0 + 2.0 * rand()/(RAND_MAX+1.0);
 
         }
-        bool hasNaNR = (*this->matrixPtr).row(i).array().isNaN().any();
+//        bool hasNaNR = (*this->matrixPtr).row(i).array().isNaN().any();
 
 //        if (hasNaNR) {
 //          std::cout << "The matrix initializarion  contains NaN values." << std::endl;
