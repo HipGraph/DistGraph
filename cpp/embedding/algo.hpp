@@ -192,6 +192,13 @@ public:
         }
         cout<<"lcoal_id"<<local_col_id<<endl;
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+        bool hasNaN = col_vec.array().isNaN().any();
+
+        if (hasNaN) {
+          std::cout << "The matrix t contains NaN values." << std::endl;
+        }
+
+
         if (fetch_from_cache) {
           cout<<"fetch from cache"<<endl;
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
@@ -204,6 +211,18 @@ public:
         }
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
+
+        bool hasNaN = col_vec.array().isNaN().any();
+
+        if (hasNaN) {
+          std::cout << "The matrix col contains NaN values." << std::endl;
+        }
+
+        bool hasNaNR = row_vec.array().isNaN().any();
+
+        if (hasNaNR) {
+          std::cout << "The matrix row contains NaN values." << std::endl;
+        }
 
 //        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec ;
          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
