@@ -190,13 +190,16 @@ public:
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
+        cout<<"lcoal_id"<<local_col_id<<endl;
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
         if (fetch_from_cache) {
+          cout<<"fetch from cache"<<endl;
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(owner_rank, global_col_id);
           col_vec = col_vec_trans.transpose();
         } else {
+
           col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
         }
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
