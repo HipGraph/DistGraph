@@ -85,7 +85,7 @@ public:
     for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
       fout <<i<<" ";
       for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
-        fout<<(*this->matrixPtr)(i, j)<<" "
+        fout<<(*this->matrixPtr)(i, j)<<" ";
       }
       fout << endl;
     }
