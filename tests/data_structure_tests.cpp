@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
   embedding_algo.get()->algo_force2_vec_ns(1200,300,5,0.02);
   cout << " rank " << rank << " async completed  " << endl;
 
-//  dense_mat.get()->print_cache();
+ dense_mat.get()->print_matrix();
 
   cout << " rank " << rank << " processing completed  " << endl;
 
