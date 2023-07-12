@@ -192,12 +192,6 @@ public:
         }
         cout<<"lcoal_id"<<local_col_id<<endl;
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
-        bool hasNaN = col_vec.array().isNaN().any();
-
-        if (hasNaN) {
-          std::cout << "The matrix t contains NaN values." << std::endl;
-        }
-
 
         if (fetch_from_cache) {
           cout<<"fetch from cache"<<endl;
