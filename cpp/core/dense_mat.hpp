@@ -74,9 +74,9 @@ public:
         }
         bool hasNaNR = (*this->matrixPtr).row(i).array().isNaN().any();
 
-        if (hasNaNR) {
-          std::cout << "The matrix initializarion  contains NaN values." << std::endl;
-        }
+//        if (hasNaNR) {
+//          std::cout << "The matrix initializarion  contains NaN values." << std::endl;
+//        }
 
       }
 //    }

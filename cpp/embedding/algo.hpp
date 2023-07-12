@@ -67,8 +67,8 @@ public:
         //        this->data_comm->async_transfer(random_number_vec, false,
         //                                        results_negative_ptr.get(),
         //                                        request_two);
-//                this->data_comm->populate_cache(results_negative_ptr.get(),
-//                request_two);
+        //                this->data_comm->populate_cache(results_negative_ptr.get(),
+        //                request_two);
 
         Matrix<DENT, Dynamic, embedding_dim> values(batch_size, embedding_dim);
         values.setZero();
@@ -165,7 +165,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-//#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -181,11 +181,11 @@ public:
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
-        cout<<"lcoal_id"<<local_col_id<<endl;
+//        cout << "lcoal_id" << local_col_id << endl;
         Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
         if (fetch_from_cache) {
-          cout<<"fetch from cache"<<endl;
+//          cout << "fetch from cache" << endl;
           Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(owner_rank, global_col_id);
@@ -197,24 +197,24 @@ public:
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-        bool hasNaN = col_vec.array().isNaN().any();
+//        bool hasNaN = col_vec.array().isNaN().any();
+//
+//        if (hasNaN) {
+//          std::cout << "The matrix col contains NaN values." << std::endl;
+//        }
+//
+//        bool hasNaNR = row_vec.array().isNaN().any();
+//
+//        if (hasNaNR) {
+//          std::cout << "The matrix row contains NaN values." << std::endl;
+//        }
 
-        if (hasNaN) {
-          std::cout << "The matrix col contains NaN values." << std::endl;
-        }
-
-        bool hasNaNR = row_vec.array().isNaN().any();
-
-        if (hasNaNR) {
-          std::cout << "The matrix row contains NaN values." << std::endl;
-        }
-
-//        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec ;
-         Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+        //        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec ;
+        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
         Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().pow(2);
         DENT t_squared_sum = t_squared.sum();
-        cout<<" t_squared_sum:"<<t_squared_sum<<endl;
-        DENT d1 = 2.0 / ((t_squared_sum+0.000001) * (1.0 + t_squared_sum));
+//        cout << " t_squared_sum:" << t_squared_sum << endl;
+        DENT d1 = 2.0 / ((t_squared_sum + 0.000001) * (1.0 + t_squared_sum));
         Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t * d1;
         Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
             scaled_vector.array()
@@ -222,12 +222,12 @@ public:
                 .cwiseMin(this->MAX_BOUND);
         Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector * lr;
         values.row(i) = values.row(i).array() + learned.array();
-        bool hasFinalized = values.row(i).array().isNaN().any();
 
-        if (hasFinalized) {
-          std::cout << "The matrix row i has NaN values" << std::endl;
-        }
-
+//        bool hasFinalized = values.row(i).array().isNaN().any();
+//
+//        if (hasFinalized) {
+//          std::cout << "The matrix row i has NaN values" << std::endl;
+//        }
       }
     }
   }
