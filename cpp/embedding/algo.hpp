@@ -6,9 +6,9 @@
 #include "../net/data_comm.hpp"
 #include "../net/process_3D_grid.hpp"
 #include <Eigen/Dense>
+#include <chrono>
 #include <memory>
 #include <mpi.h>
-#include <chrono>
 
 using namespace std;
 using namespace distblas::core;
@@ -48,7 +48,7 @@ public:
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
     auto total_attrac_time = 0;
-    auto total_end_time=0;
+    auto total_end_time = 0;
 
     //    this->data_comm->async_transfer(0, true, false,
     //    results_init_ptr.get(),
@@ -83,62 +83,70 @@ public:
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
-//        cout<<"inside algo_force2_vec_ns"<<endl;
+        //        cout<<"inside algo_force2_vec_ns"<<endl;
         while (head != nullptr) {
-//         cout<<"col_batch_id"<<col_batch_id<<endl;
+          //         cout<<"col_batch_id"<<col_batch_id<<endl;
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
-          auto  start_attrac = std::chrono::high_resolution_clock::now();
+          auto start_attrac = std::chrono::high_resolution_clock::now();
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                         batch_size);
           auto end_attrac = std::chrono::high_resolution_clock::now();
-          auto attrac_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_attrac - start_attrac).count();
-          total_attrac_time +=attrac_duration;
+          auto attrac_duration =
+              std::chrono::duration_cast<std::chrono::microseconds>(
+                  end_attrac - start_attrac)
+                  .count();
+          total_attrac_time += attrac_duration;
 
           head = (head.get())->next;
           ++col_batch_id;
         }
-//        cout<<"exited while loop"<<endl;
-        auto  start_rep = std::chrono::high_resolution_clock::now();
+        //        cout<<"exited while loop"<<endl;
+        auto start_rep = std::chrono::high_resolution_clock::now();
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
                                          batch_size);
         auto end_rep = std::chrono::high_resolution_clock::now();
-        auto rep_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_rep - start_rep).count();
-        total_end_time +=rep_duration;
+        auto rep_duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_rep -
+                                                                  start_rep)
+                .count();
+        total_end_time += rep_duration;
         //
         this->update_data_matrix(values, j, batch_size);
         // TODO do some work here
       }
     }
-    cout<<" total attrac time :"<<(total_attrac_time/1000) <<" total end time: "<<(total_end_time/1000)<<endl;
+    cout << " total attrac time :" << (total_attrac_time / 1000)
+         << " total end time: " << (total_end_time / 1000) << endl;
   }
 
-
- inline void calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values,
-                               DENT lr, CSRLocal<SPT> *csr_block, int batch_id,
-                               int col_batch_id, int batch_size) {
+  inline void
+  calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values, DENT lr,
+                          CSRLocal<SPT> *csr_block, int batch_id,
+                          int col_batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-//    cout<<"executing  calc_t_dist_grad_attrac"<<endl;
+    //    cout<<"executing  calc_t_dist_grad_attrac"<<endl;
     if (csr_block->handler != nullptr) {
-//      cout<<"inside   csr_block handler"<<endl;
+      //      cout<<"inside   csr_block handler"<<endl;
       CSRHandle *csr_handle = csr_block->handler.get();
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int i = 0; i < values.rows(); i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
-          uint64_t local_col = global_col_id - (this->grid)->global_rank *
-                                      (this->sp_local)->proc_row_width;
+          uint64_t local_col =
+              global_col_id -
+              (this->grid)->global_rank * (this->sp_local)->proc_row_width;
           Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
           int target_rank =
               (int)global_col_id / (this->sp_local)->proc_row_width;
           bool fetch_from_cache =
               target_rank == (this->grid)->global_rank ? false : true;
-//          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
+          //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
           if (fetch_from_cache) {
             Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
                 (this->dense_local)
@@ -146,48 +154,47 @@ public:
             col_vec = col_vec_trans.transpose();
           } else {
             col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
-//            cout<<"("<<i<<","<<local_col<<")"<<endl;
+            //            cout<<"("<<i<<","<<local_col<<")"<<endl;
           }
           Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
               (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-//          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() - col_vec.array();
-//          Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().square();
-//          DENT t_squared_sum = t_squared.array().sum();
-//          DENT d1 = -2.0 / (1.0 + t_squared_sum);
-//          Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t.array() * d1;
-//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-//              scaled_vector.array()
-//                  .cwiseMax(this->MIN_BOUND)
-//                  .cwiseMin(this->MAX_BOUND);
-//          Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector.array() * lr;
-//          values.row(i) = values.row(i).array() + learned.array();
+          //          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array()
+          //          - col_vec.array(); Eigen::Matrix<DENT, 1, embedding_dim>
+          //          t_squared = t.array().square(); DENT t_squared_sum =
+          //          t_squared.array().sum(); DENT d1 = -2.0 / (1.0 +
+          //          t_squared_sum); Eigen::Matrix<DENT, 1, embedding_dim>
+          //          scaled_vector = t.array() * d1; Eigen::Matrix<DENT, 1,
+          //          embedding_dim> clamped_vector =
+          //              scaled_vector.array()
+          //                  .cwiseMax(this->MIN_BOUND)
+          //                  .cwiseMin(this->MAX_BOUND);
+          //          Eigen::Matrix<DENT, 1, embedding_dim> learned =
+          //          clamped_vector.array() * lr; values.row(i) =
+          //          values.row(i).array() + learned.array();
 
-          Eigen::Matrix<DENT, 1, embedding_dim> t = (row_vec.array() - col_vec.array());
-//          DENT t_squared_sum = t.array().square().sum();
-//          DENT t_squared_sum = t_squared.array().sum();
+          Eigen::Matrix<DENT, 1, embedding_dim> t =
+              (row_vec.array() - col_vec.array());
           DENT d1 = -2.0 / (1.0 + t.array().square().sum());
-          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector = (t.array() * d1).cwiseMax(this->MIN_BOUND)
-                                                                    .cwiseMin(this->MAX_BOUND)*lr;
-//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-//              scaled_vector.array()
-//                  .cwiseMax(this->MIN_BOUND)
-//                  .cwiseMin(this->MAX_BOUND);
-//          Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector.array();
-          values.row(i) = values.row(i).array() + clamped_vector.array().array();
+          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+              (t.array() * d1)
+                  .cwiseMax(this->MIN_BOUND)
+                  .cwiseMin(this->MAX_BOUND) *
+              lr;
+          values.row(i) = values.row(i).array() + clamped_vector.array();
         }
       }
     }
   }
 
-
-inline  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
-                                  vector<uint64_t> &col_ids, DENT lr,
-                                  int batch_id, int batch_size) {
+  inline void
+  calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
+                             vector<uint64_t> &col_ids, DENT lr, int batch_id,
+                             int batch_size) {
 
     int row_base_index = batch_id * batch_size;
 
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -217,25 +224,41 @@ inline  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &va
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() - col_vec.array();
-        Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().square();
-        DENT t_squared_sum = t_squared.array().sum();
-        DENT d1 = 2.0 / ((t_squared_sum + 0.000001) * (1.0 + t_squared_sum));
-        Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t.array() * d1;
-        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-            scaled_vector.array()
-                .cwiseMax(this->MIN_BOUND)
-                .cwiseMin(this->MAX_BOUND);
-        Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector.array() * lr;
-        values.row(i) = values.row(i).array() + learned.array();
+        //        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() -
+        //        col_vec.array(); Eigen::Matrix<DENT, 1, embedding_dim>
+        //        t_squared = t.array().square(); DENT t_squared_sum =
+        //        t_squared.array().sum(); DENT d1 = 2.0 / ((t_squared_sum +
+        //        0.000001) * (1.0 + t_squared_sum)); Eigen::Matrix<DENT, 1,
+        //        embedding_dim> scaled_vector = t.array() * d1;
+        //        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+        //            scaled_vector.array()
+        //                .cwiseMax(this->MIN_BOUND)
+        //                .cwiseMin(this->MAX_BOUND);
+        //        Eigen::Matrix<DENT, 1, embedding_dim> learned =
+        //        clamped_vector.array() * lr; values.row(i) =
+        //        values.row(i).array() + learned.array();
 
+        Eigen::Matrix<DENT, 1, embedding_dim> t =
+            row_vec.array() - col_vec.array();
+        //                Eigen::Matrix<DENT, 1, embedding_dim> t_squared =
+        //                t.array().square(); DENT t_squared_sum =
+        //                t_squared.array().sum();
+        DENT d1 = 2.0 / ((t.array().square().sum() + 0.000001) *
+                         (1.0 + t.array().square().sum()));
+        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+            (t.array() * d1)
+                .cwiseMax(this->MIN_BOUND)
+                .cwiseMin(this->MAX_BOUND) *
+            lr;
+        values.row(i) = values.row(i).array() + clamped_vector.array();
+        //                values.row(i) = values.row(i).array() +
+        //                learned.array();
       }
     }
   }
 
-
- inline void update_data_matrix(Matrix<DENT, Dynamic, embedding_dim> &values,
-                          int batch_id, int batch_size) {
+  inline void update_data_matrix(Matrix<DENT, Dynamic, embedding_dim> &values,
+                                 int batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
     int end_row =
