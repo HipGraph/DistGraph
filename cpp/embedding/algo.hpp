@@ -371,8 +371,9 @@ public:
     int end_row =
         std::min((batch_id + 1) * batch_size, (this->sp_local)->proc_row_width);
     for(int i=0;i<(end_row-row_base_index);i++) {
-#pragma omp simd
-      for (DENT d = 0; d < embedding_dim; d++) {
+
+      #pragma omp simd
+      for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)->nCoordinates[row_base_index+i + d] +=
             prevCoordinates[i + d];
       }
