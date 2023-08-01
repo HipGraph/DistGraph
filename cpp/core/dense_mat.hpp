@@ -22,12 +22,13 @@ template <typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
 
 private:
 
-  unique_ptr<vector<unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>>>>
-      cachePtr;
+
 
 public:
   uint64_t rows;
   unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
+  unique_ptr<vector<unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>>>>
+      cachePtr;
   /**
    * create matrix with random initialization
    * @param rows Number of rows of the matrix

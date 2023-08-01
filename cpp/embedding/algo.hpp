@@ -156,6 +156,7 @@ public:
           } else {
 //            col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
+              col_vec =  (*((this->dense_local)->matrixPtr)).row(local_col);
           }
 //
 //          Eigen::Matrix<DENT, 1, embedding_dim> t =
