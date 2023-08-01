@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <memory>
 #include <mpi.h>
+#include <chrono>
 
 using namespace std;
 using namespace distblas::core;
@@ -46,6 +47,8 @@ public:
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
+    auto total_attrac_time = 0;
+    auto total_end_time=0;
 
     //    this->data_comm->async_transfer(0, true, false,
     //    results_init_ptr.get(),
@@ -85,19 +88,29 @@ public:
 //         cout<<"col_batch_id"<<col_batch_id<<endl;
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
+          auto  start_attrac = std::chrono::high_resolution_clock::now();
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
                                         batch_size);
+          auto end_attrac = std::chrono::high_resolution_clock::now();
+          auto attrac_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_attrac - start_attrac).count();
+          total_attrac_time +=attrac_duration;
+
           head = (head.get())->next;
           ++col_batch_id;
         }
 //        cout<<"exited while loop"<<endl;
+        auto  start_rep = std::chrono::high_resolution_clock::now();
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
                                          batch_size);
+        auto end_rep = std::chrono::high_resolution_clock::now();
+        auto rep_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_rep - start_rep).count();
+        total_end_time +=rep_duration;
         //
         this->update_data_matrix(values, j, batch_size);
         // TODO do some work here
       }
     }
+    cout<<" total attrac time :"<<(total_attrac_time/1000) <<" total end time: "<<total_end_time<<endl;
   }
 
 #pragma forceinline
