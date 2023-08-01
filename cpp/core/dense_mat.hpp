@@ -94,6 +94,21 @@ public:
     }
   }
 
+  void print_matrix_rowptr() {
+    string output_path = "embedding.txt";
+    char stats[500];
+    strcpy(stats, output_path.c_str());
+    ofstream fout(stats, std::ios_base::app);
+    fout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
+    for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
+      fout <<i+1<<" ";
+      for (int j = 0; j < embedding_dim; ++j) {
+        fout<<this->nCoordinates[i*embedding_dim+j]<<" ";
+      }
+      fout << endl;
+    }
+  }
+
   void insert_cache(int rank, int key, std::array<DENT, embedding_dim> &arr) {
     Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(), embedding_dim);
     (*this->cachePtr)[rank].insert_or_assign(key, eigenVector);
