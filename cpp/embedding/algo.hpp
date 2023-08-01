@@ -41,6 +41,12 @@ public:
     this->MIN_BOUND = MIN_BOUND;
   }
 
+  DENT algorithms::scale(DENT v){
+    if(v > MAXBOUND) return MAXBOUND;
+    else if(v < -MAXBOUND) return -MAXBOUND;
+    else return v;
+  }
+
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
