@@ -83,8 +83,11 @@ public:
         //                this->data_comm->populate_cache(results_negative_ptr.get(),
         //                request_two);
 
-        Matrix<DENT, Dynamic, embedding_dim> values(batch_size, embedding_dim);
-        values.setZero();
+        //        Matrix<DENT, Dynamic, embedding_dim> values(batch_size,
+        //        embedding_dim); values.setZero();
+
+        DENT *prevCoordinates = static_cast<DENT *>(
+            ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
         //
@@ -99,7 +102,9 @@ public:
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
           auto start_attrac = std::chrono::high_resolution_clock::now();
-          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
+//          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
+//                                        batch_size);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
                                         batch_size);
           auto end_attrac = std::chrono::high_resolution_clock::now();
           auto attrac_duration =
@@ -113,8 +118,10 @@ public:
         }
         //        cout<<"exited while loop"<<endl;
         auto start_rep = std::chrono::high_resolution_clock::now();
-        this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
-                                         batch_size);
+//        this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
+//                                         batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr, j,
+                                         batch_size,batch_size);
         auto end_rep = std::chrono::high_resolution_clock::now();
         auto rep_duration =
             std::chrono::duration_cast<std::chrono::microseconds>(end_rep -
@@ -122,7 +129,8 @@ public:
                 .count();
         total_end_time += rep_duration;
         //
-        this->update_data_matrix(values, j, batch_size);
+//        this->update_data_matrix(values, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         // TODO do some work here
       }
     }
@@ -147,8 +155,8 @@ public:
 #pragma omp parallel for schedule(static)
       for (int i = 0; i < values.rows(); i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-        //        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-        //            (this->dense_local)->fetch_local_eigen_vector(row_id);
+        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+            (this->dense_local)->fetch_local_eigen_vector(row_id);
         DENT forceDiff[embedding_dim];
 #pragma forceinline
 #pragma omp simd
@@ -158,7 +166,7 @@ public:
           uint64_t local_col =
               global_col_id -
               (this->grid)->global_rank * (this->sp_local)->proc_row_width;
-          //          Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+          Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
           int target_rank =
               (int)(global_col_id / (this->sp_local)->proc_row_width);
@@ -169,40 +177,20 @@ public:
             Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
                 (this->dense_local)
                     ->fetch_data_vector_from_cache(target_rank, global_col_id);
-//            col_vec = col_vec_trans.transpose();
+            col_vec = col_vec_trans.transpose();
           } else {
-            //            col_vec =
-            //            (this->dense_local)->fetch_local_eigen_vector(local_col);
-            //            cout<<"("<<i<<","<<local_col<<")"<<endl;
-            //            col_vec =
-            //            ((this->dense_local)->matrixPtr.get())->row(local_col);
-            //            col_vec =
-            //            ((this->dense_local)->matrixPtr.get())->row(local_col);
-
-            DENT attrc = 0;
-            for (int d = 0; d < embedding_dim; d++) {
-//              (this->dense_local)->nCoordinates[local_col + d];
-              forceDiff[d] = (this->dense_local)->nCoordinates[local_col + d] -
-                             (this->dense_local)->nCoordinates[row_id + d];
-              attrc += forceDiff[d] * forceDiff[d];
-            }
-            DENT d1 = -2.0 / (1.0 + attrc);
-            for (int d = 0; d < embedding_dim; d++) {
-              forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[i] += (lr)*forceDiff[d];
-            }
+            col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
           }
-          //
-          //          Eigen::Matrix<DENT, 1, embedding_dim> t =
-          //              (row_vec.array() - col_vec.array());
-          //          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
-          //          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-          //              (t.array() * d1)
-          //                  .cwiseMax(this->MIN_BOUND)
-          //                  .cwiseMin(this->MAX_BOUND) *
-          //              lr;
-          //          values.row(i) = values.row(i).array() +
-          //          clamped_vector.array();
+
+          Eigen::Matrix<DENT, 1, embedding_dim> t =
+              (row_vec.array() - col_vec.array());
+          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
+          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+              (t.array() * d1)
+                  .cwiseMax(this->MIN_BOUND)
+                  .cwiseMin(this->MAX_BOUND) *
+              lr;
+          values.row(i) = values.row(i).array() + clamped_vector.array();
         }
       }
     }
@@ -217,49 +205,151 @@ public:
 
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
-      //      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-      //      for (int j = 0; j < col_ids.size(); j++) {
-      //        uint64_t global_col_id = col_ids[j];
-      //        uint64_t local_col_id =
-      //            global_col_id -
-      //            static_cast<uint64_t>(
-      //                ((this->grid)->global_rank *
-      //                (this->sp_local)->proc_row_width));
-      //        bool fetch_from_cache = false;
-      //
-      //        int owner_rank =
-      //            static_cast<int>(global_col_id /
-      //            (this->sp_local)->proc_row_width);
-      //        if (owner_rank != (this->grid)->global_rank) {
-      //          fetch_from_cache = true;
-      //        }
-      //        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
-      //
-      //        if (fetch_from_cache) {
-      //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-      //              (this->dense_local)
-      //                  ->fetch_data_vector_from_cache(owner_rank,
-      //                  global_col_id);
-      //          col_vec = col_vec_trans.transpose();
-      //        } else {
-      //
-      //          col_vec =
-      //          (this->dense_local)->fetch_local_eigen_vector(local_col_id);
-      //        }
-      //        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-      //            (this->dense_local)->fetch_local_eigen_vector(row_id);
-      //
-      //        Eigen::Matrix<DENT, 1, embedding_dim> t =
-      //            row_vec.array() - col_vec.array();
-      //
-      //        DENT d1 = 2.0 / ((t.array().square().sum() + 0.000001) *
-      //                         (1.0 + t.array().square().sum()));
-      //        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-      //            (t.array() * d1)
-      //                .cwiseMax(this->MIN_BOUND)
-      //                .cwiseMin(this->MAX_BOUND) * lr;
-      //        values.row(i) = values.row(i).array() + clamped_vector.array();
-      //      }
+      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+      for (int j = 0; j < col_ids.size(); j++) {
+        uint64_t global_col_id = col_ids[j];
+        uint64_t local_col_id =
+            global_col_id -
+            static_cast<uint64_t>(
+                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
+        bool fetch_from_cache = false;
+
+        int owner_rank =
+            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
+        if (owner_rank != (this->grid)->global_rank) {
+          fetch_from_cache = true;
+        }
+        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+
+        if (fetch_from_cache) {
+          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+              (this->dense_local)
+                  ->fetch_data_vector_from_cache(owner_rank, global_col_id);
+          col_vec = col_vec_trans.transpose();
+        } else {
+
+          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+        }
+        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+            (this->dense_local)->fetch_local_eigen_vector(row_id);
+
+        Eigen::Matrix<DENT, 1, embedding_dim> t =
+            row_vec.array() - col_vec.array();
+
+        DENT d1 = 2.0 / ((t.array().square().sum() + 0.000001) *
+                         (1.0 + t.array().square().sum()));
+        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+            (t.array() * d1)
+                .cwiseMax(this->MIN_BOUND)
+                .cwiseMin(this->MAX_BOUND) *
+            lr;
+        values.row(i) = values.row(i).array() + clamped_vector.array();
+      }
+    }
+  }
+
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
+                                      DENT *prevCoordinates, DENT lr,
+                                      int batch_id, int batch_size,
+                                      int block_size) {
+
+    int row_base_index = batch_id * batch_size;
+    if (csr_block->handler != nullptr) {
+      CSRHandle *csr_handle = csr_block->handler.get();
+
+#pragma omp parallel for schedule(static)
+      for (int i = 0; i < block_size; i++) {
+        uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+        DENT forceDiff[embedding_dim];
+#pragma forceinline
+#pragma omp simd
+        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
+             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
+          uint64_t local_col =
+              global_col_id -
+              (this->grid)->global_rank * (this->sp_local)->proc_row_width;
+          int target_rank =
+              (int)(global_col_id / (this->sp_local)->proc_row_width);
+          bool fetch_from_cache =
+              target_rank == (this->grid)->global_rank ? false : true;
+          //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
+          if (fetch_from_cache) {
+            //            Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+            //                (this->dense_local)
+            //                    ->fetch_data_vector_from_cache(target_rank,
+            //                    global_col_id);
+            //            //            col_vec = col_vec_trans.transpose();
+          } else {
+
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = (this->dense_local)->nCoordinates[local_col + d] -
+                             (this->dense_local)->nCoordinates[row_id + d];
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = scale(forceDiff[d] * d1);
+              prevCoordinates[i] += (lr)*forceDiff[d];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  inline void calc_t_dist_replus_rowptr(DENT *prevCoordinates,
+                                        vector<uint64_t> &col_ids, DENT lr,
+                                        int batch_id, int batch_size, int block_size) {
+
+    int row_base_index = batch_id * batch_size;
+
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < block_size; i++) {
+      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+      DENT forceDiff[embedding_dim];
+      for (int j = 0; j < col_ids.size(); j++) {
+        uint64_t global_col_id = col_ids[j];
+        uint64_t local_col_id =
+            global_col_id -
+            static_cast<uint64_t>(
+                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
+        bool fetch_from_cache = false;
+
+        int owner_rank =
+            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
+        if (owner_rank != (this->grid)->global_rank) {
+          fetch_from_cache = true;
+        }
+        //        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+
+        if (fetch_from_cache) {
+          //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+          //              (this->dense_local)
+          //                  ->fetch_data_vector_from_cache(owner_rank,
+          //                  global_col_id);
+          //          col_vec = col_vec_trans.transpose();
+        } else {
+
+          //          col_vec =
+          //          (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+          DENT repuls = 0;
+          for (int d = 0; d < embedding_dim; d++) {
+            forceDiff[d] = (this->dense_local)->nCoordinates[local_col_id + d] -
+                           (this->dense_local)->nCoordinates[row_id + d];
+            repuls += forceDiff[d] * forceDiff[d];
+          }
+          DENT d1 = 2.0 / ((repuls + 0.000001) *
+                           (1.0 + repuls));
+          for (int d = 0; d < embedding_dim; d++) {
+            forceDiff[d] = scale(forceDiff[d] * d1);
+            prevCoordinates[i] += (lr)*forceDiff[d];
+          }
+
+
+        }
+      }
     }
   }
 
@@ -272,6 +362,21 @@ public:
     ((this->dense_local)->matrixPtr.get())
         ->block(row_base_index, 0, end_row - row_base_index, embedding_dim) +=
         values;
+  }
+
+  inline void update_data_matrix_rowptr(DENT *prevCoordinates,
+                                 int batch_id, int batch_size) {
+
+    int row_base_index = batch_id * batch_size;
+    int end_row =
+        std::min((batch_id + 1) * batch_size, (this->sp_local)->proc_row_width);
+    for(int i=0;i<(end_row-row_base_index);i++) {
+#pragma omp simd
+      for (DENT d = 0; d < embedding_dim; d++) {
+        (this->dense_local)->nCoordinates[row_base_index+i + d] +=
+            prevCoordinates[i + d];
+      }
+    }
   }
 };
 } // namespace distblas::embedding
