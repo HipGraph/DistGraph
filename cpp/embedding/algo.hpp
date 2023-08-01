@@ -151,7 +151,7 @@ public:
           Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
               (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() - col_vec.array();
           Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().square();
           DENT t_squared_sum = t_squared.sum();
           DENT d1 = -2.0 / (1.0 + t_squared_sum);
@@ -204,7 +204,7 @@ inline  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &va
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec - col_vec;
+        Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() - col_vec.array();
         Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().square();
         DENT t_squared_sum = t_squared.sum();
         DENT d1 = 2.0 / ((t_squared_sum + 0.000001) * (1.0 + t_squared_sum));
