@@ -148,15 +148,15 @@ public:
           bool fetch_from_cache =
               target_rank == (this->grid)->global_rank ? false : true;
           //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
-//          if (fetch_from_cache) {
-//            Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-//                (this->dense_local)
-//                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
-//            col_vec = col_vec_trans.transpose();
-//          } else {
-            col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
+          if (fetch_from_cache) {
+            Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+                (this->dense_local)
+                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
+            col_vec = col_vec_trans.transpose();
+          } else {
+//            col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
-//          }
+          }
 //
 //          Eigen::Matrix<DENT, 1, embedding_dim> t =
 //              (row_vec.array() - col_vec.array());
