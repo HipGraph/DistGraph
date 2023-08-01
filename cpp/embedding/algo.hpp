@@ -18,7 +18,7 @@ using namespace Eigen;
 
 namespace distblas::embedding {
 template <typename SPT, typename DENT, size_t embedding_dim>
-
+#define MAXBOUND 5
 class EmbeddingAlgo {
 
 private:
@@ -26,7 +26,7 @@ private:
   distblas::core::SpMat<SPT> *sp_local;
   Process3DGrid *grid;
   DataComm<SPT, DENT, embedding_dim> *data_comm;
-  DENT MAX_BOUND, MIN_BOUND;
+//  DENT MAX_BOUND, MIN_BOUND;
 
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
@@ -169,7 +169,7 @@ public:
             Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
                 (this->dense_local)
                     ->fetch_data_vector_from_cache(target_rank, global_col_id);
-            col_vec = col_vec_trans.transpose();
+//            col_vec = col_vec_trans.transpose();
           } else {
             //            col_vec =
             //            (this->dense_local)->fetch_local_eigen_vector(local_col);
@@ -181,7 +181,7 @@ public:
 
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-              (this->dense_local)->nCoordinates[local_col + k];
+//              (this->dense_local)->nCoordinates[local_col + d];
               forceDiff[d] = (this->dense_local)->nCoordinates[local_col + d] -
                              (this->dense_local)->nCoordinates[row_id + d];
               attrc += forceDiff[d] * forceDiff[d];
