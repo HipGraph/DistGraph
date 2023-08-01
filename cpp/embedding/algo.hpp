@@ -154,21 +154,22 @@ public:
                     ->fetch_data_vector_from_cache(target_rank, global_col_id);
             col_vec = col_vec_trans.transpose();
           } else {
-//            col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col);
+            //            col_vec =
+            //            (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
-              col_vec =  (*((this->dense_local)->matrixPtr)).row(local_col);
+            col_vec = (*((this->dense_local)->matrixPtr)).row(local_col);
           }
-//
-//          Eigen::Matrix<DENT, 1, embedding_dim> t =
-//              (row_vec.array() - col_vec.array());
-//          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
-//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-//              (t.array() * d1)
-//                  .cwiseMax(this->MIN_BOUND)
-//                  .cwiseMin(this->MAX_BOUND) *
-//              lr;
-//          values.row(i) = values.row(i).array() + clamped_vector.array();
-                    }
+          //
+          Eigen::Matrix<DENT, 1, embedding_dim> t =
+              (row_vec.array() - col_vec.array());
+          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
+          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+              (t.array() * d1)
+                  .cwiseMax(this->MIN_BOUND)
+                  .cwiseMin(this->MAX_BOUND) *
+              lr;
+          values.row(i) = values.row(i).array() + clamped_vector.array();
+        }
       }
     }
   }
@@ -182,45 +183,49 @@ public:
 
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
-//      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-//      for (int j = 0; j < col_ids.size(); j++) {
-//        uint64_t global_col_id = col_ids[j];
-//        uint64_t local_col_id =
-//            global_col_id -
-//            static_cast<uint64_t>(
-//                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
-//        bool fetch_from_cache = false;
-//
-//        int owner_rank =
-//            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
-//        if (owner_rank != (this->grid)->global_rank) {
-//          fetch_from_cache = true;
-//        }
-//        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
-//
-//        if (fetch_from_cache) {
-//          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-//              (this->dense_local)
-//                  ->fetch_data_vector_from_cache(owner_rank, global_col_id);
-//          col_vec = col_vec_trans.transpose();
-//        } else {
-//
-//          col_vec = (this->dense_local)->fetch_local_eigen_vector(local_col_id);
-//        }
-//        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-//            (this->dense_local)->fetch_local_eigen_vector(row_id);
-//
-//        Eigen::Matrix<DENT, 1, embedding_dim> t =
-//            row_vec.array() - col_vec.array();
-//
-//        DENT d1 = 2.0 / ((t.array().square().sum() + 0.000001) *
-//                         (1.0 + t.array().square().sum()));
-//        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-//            (t.array() * d1)
-//                .cwiseMax(this->MIN_BOUND)
-//                .cwiseMin(this->MAX_BOUND) * lr;
-//        values.row(i) = values.row(i).array() + clamped_vector.array();
-//      }
+      //      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+      //      for (int j = 0; j < col_ids.size(); j++) {
+      //        uint64_t global_col_id = col_ids[j];
+      //        uint64_t local_col_id =
+      //            global_col_id -
+      //            static_cast<uint64_t>(
+      //                ((this->grid)->global_rank *
+      //                (this->sp_local)->proc_row_width));
+      //        bool fetch_from_cache = false;
+      //
+      //        int owner_rank =
+      //            static_cast<int>(global_col_id /
+      //            (this->sp_local)->proc_row_width);
+      //        if (owner_rank != (this->grid)->global_rank) {
+      //          fetch_from_cache = true;
+      //        }
+      //        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+      //
+      //        if (fetch_from_cache) {
+      //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
+      //              (this->dense_local)
+      //                  ->fetch_data_vector_from_cache(owner_rank,
+      //                  global_col_id);
+      //          col_vec = col_vec_trans.transpose();
+      //        } else {
+      //
+      //          col_vec =
+      //          (this->dense_local)->fetch_local_eigen_vector(local_col_id);
+      //        }
+      //        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+      //            (this->dense_local)->fetch_local_eigen_vector(row_id);
+      //
+      //        Eigen::Matrix<DENT, 1, embedding_dim> t =
+      //            row_vec.array() - col_vec.array();
+      //
+      //        DENT d1 = 2.0 / ((t.array().square().sum() + 0.000001) *
+      //                         (1.0 + t.array().square().sum()));
+      //        Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+      //            (t.array() * d1)
+      //                .cwiseMax(this->MIN_BOUND)
+      //                .cwiseMin(this->MAX_BOUND) * lr;
+      //        values.row(i) = values.row(i).array() + clamped_vector.array();
+      //      }
     }
   }
 
