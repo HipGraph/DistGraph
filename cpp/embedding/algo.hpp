@@ -90,7 +90,7 @@ public:
 
           auto start_attrac = std::chrono::high_resolution_clock::now();
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
-//                                        batch_size);
+                                        batch_size);
           auto end_attrac = std::chrono::high_resolution_clock::now();
           auto attrac_duration =
               std::chrono::duration_cast<std::chrono::microseconds>(
@@ -104,7 +104,7 @@ public:
         //        cout<<"exited while loop"<<endl;
         auto start_rep = std::chrono::high_resolution_clock::now();
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
-//                                         batch_size);
+                                         batch_size);
         auto end_rep = std::chrono::high_resolution_clock::now();
         auto rep_duration =
             std::chrono::duration_cast<std::chrono::microseconds>(end_rep -
