@@ -136,8 +136,8 @@ public:
         int row_id = i + row_base_index;
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
-//        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-//             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
+             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 //          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 //          uint64_t local_col =
 //              global_col_id -
@@ -168,7 +168,7 @@ public:
 //                  .cwiseMin(this->MAX_BOUND) *
 //              lr;
 //          values.row(i) = values.row(i).array() + clamped_vector.array();
-//        }
+                    }
       }
     }
   }
