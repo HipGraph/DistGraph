@@ -135,6 +135,8 @@ public:
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
             (this->dense_local)->fetch_local_eigen_vector(row_id);
+        #pragma forceinline
+        #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
@@ -157,7 +159,7 @@ public:
             //            col_vec =
             //            (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
-//            col_vec = ((this->dense_local)->matrixPtr.get())->row(local_col);
+            col_vec = ((this->dense_local)->matrixPtr.get())->row(local_col);
           }
           //
 //          Eigen::Matrix<DENT, 1, embedding_dim> t =
