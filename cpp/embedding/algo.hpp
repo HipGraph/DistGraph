@@ -18,7 +18,7 @@ using namespace Eigen;
 
 namespace distblas::embedding {
 template <typename SPT, typename DENT, size_t embedding_dim>
-#define MAXBOUND 5
+
 class EmbeddingAlgo {
 
 private:
@@ -26,7 +26,7 @@ private:
   distblas::core::SpMat<SPT> *sp_local;
   Process3DGrid *grid;
   DataComm<SPT, DENT, embedding_dim> *data_comm;
-//  DENT MAX_BOUND, MIN_BOUND;
+  DENT MAX_BOUND, MIN_BOUND;
 
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
@@ -42,10 +42,10 @@ public:
   }
 
   DENT scale(DENT v) {
-    if (v > MAXBOUND)
-      return MAXBOUND;
-    else if (v < -MAXBOUND)
-      return -MAXBOUND;
+    if (v > MAX_BOUND)
+      return MAX_BOUND;
+    else if (v < -MAX_BOUND)
+      return -MAX_BOUND;
     else
       return v;
   }
