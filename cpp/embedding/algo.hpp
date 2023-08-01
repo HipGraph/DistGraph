@@ -110,11 +110,11 @@ public:
         // TODO do some work here
       }
     }
-    cout<<" total attrac time :"<<(total_attrac_time/1000) <<" total end time: "<<total_end_time<<endl;
+    cout<<" total attrac time :"<<(total_attrac_time/1000) <<" total end time: "<<(total_end_time/1000)<<endl;
   }
 
-#pragma forceinline
-  void calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values,
+//#pragma forceinline
+ inline void calc_t_dist_grad_attrac(Matrix<DENT, Dynamic, embedding_dim> &values,
                                DENT lr, CSRLocal<SPT> *csr_block, int batch_id,
                                int col_batch_id, int batch_size) {
 
@@ -167,8 +167,8 @@ public:
     }
   }
 
-#pragma forceinline
-  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
+//#pragma forceinline
+inline  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &values,
                                   vector<uint64_t> &col_ids, DENT lr,
                                   int batch_id, int batch_size) {
 
