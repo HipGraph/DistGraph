@@ -123,7 +123,7 @@ public:
     if (csr_block->handler != nullptr) {
 //      cout<<"inside   csr_block handler"<<endl;
       CSRHandle *csr_handle = csr_block->handler.get();
-      #pragma omp parallel for schedule(static)
+//      #pragma omp parallel for schedule(static)
       for (int i = 0; i < values.rows(); i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
@@ -174,7 +174,7 @@ inline  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &va
 
     int row_base_index = batch_id * batch_size;
 
-    #pragma omp parallel for schedule(static)
+//    #pragma omp parallel for schedule(static)
     for (int i = 0; i < values.rows(); i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -220,8 +220,8 @@ inline  void calc_t_dist_grad_repulsive(Matrix<DENT, Dynamic, embedding_dim> &va
     }
   }
 
-#pragma forceinline
-  void update_data_matrix(Matrix<DENT, Dynamic, embedding_dim> &values,
+//#pragma forceinline
+ inline void update_data_matrix(Matrix<DENT, Dynamic, embedding_dim> &values,
                           int batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
