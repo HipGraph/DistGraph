@@ -157,18 +157,18 @@ public:
             //            col_vec =
             //            (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
-            col_vec = (*((this->dense_local)->matrixPtr)).row(local_col);
+            col_vec = (((this->dense_local)->matrixPtr).get()).row(local_col);
           }
           //
-          Eigen::Matrix<DENT, 1, embedding_dim> t =
-              (row_vec.array() - col_vec.array());
-          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
-          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-              (t.array() * d1)
-                  .cwiseMax(this->MIN_BOUND)
-                  .cwiseMin(this->MAX_BOUND) *
-              lr;
-          values.row(i) = values.row(i).array() + clamped_vector.array();
+//          Eigen::Matrix<DENT, 1, embedding_dim> t =
+//              (row_vec.array() - col_vec.array());
+//          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
+//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+//              (t.array() * d1)
+//                  .cwiseMax(this->MIN_BOUND)
+//                  .cwiseMin(this->MAX_BOUND) *
+//              lr;
+//          values.row(i) = values.row(i).array() + clamped_vector.array();
         }
       }
     }
