@@ -29,6 +29,7 @@ public:
   unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
   unique_ptr<vector<unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>>>>
       cachePtr;
+  DENT *nCoordinates;
   /**
    * create matrix with random initialization
    * @param rows Number of rows of the matrix
@@ -64,23 +65,16 @@ public:
         std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
         world_size);
     (*this->matrixPtr).setRandom();
-//    if (init_mean != 0.0 or std != 1.0) {
-//#pragma omp parallel
+    nCoordinates = static_cast<DENT *> (::operator new (sizeof(DENT[rows * embedding_dim])));
       for (int i = 0; i < (*this->matrixPtr).rows(); i++) {
         for (int j = 0; j < (*this->matrixPtr).cols(); j++) {
-//          (*this->matrixPtr)(i, j) = distribution(
-//              gen); // Generate random value with custom distribution
-               (*this->matrixPtr)(i, j) =   -1.0 + 2.0 * rand()/(RAND_MAX+1.0);
-
+            DENT val    =   -1.0 + 2.0 * rand()/(RAND_MAX+1.0);
+            nCoordinates[i*embedding_dim+j]= val;
+            (*this->matrixPtr)(i, j)  = val;
         }
-//        bool hasNaNR = (*this->matrixPtr).row(i).array().isNaN().any();
-
-//        if (hasNaNR) {
-//          std::cout << "The matrix initializarion  contains NaN values." << std::endl;
-//        }
 
       }
-//    }
+
   }
 
   ~DenseMat() {}

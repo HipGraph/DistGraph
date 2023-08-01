@@ -160,6 +160,10 @@ public:
             //            (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
             col_vec = ((this->dense_local)->matrixPtr.get())->row(local_col);
+//            col_vec = ((this->dense_local)->matrixPtr.get())->row(local_col);
+            for(int k=0;k<embedding_dim;k++){
+              (this->dense_local)->nCoordinates[local_col+k];
+            }
           }
           //
 //          Eigen::Matrix<DENT, 1, embedding_dim> t =
