@@ -11,6 +11,8 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <chrono>
+
 
 using namespace std;
 using namespace distblas::io;
@@ -41,11 +43,13 @@ int main(int argc, char **argv) {
   //      shared_ptr<distblas::core::SpMat<int>>(new
   //      distblas::core::SpMat<int>());
 
-  cout << " rank " << rank << " reading data from file path:  " << file_path
-       << endl;
+//  cout << " rank " << rank << " reading data from file path:  " << file_path
+//       << endl;
+  auto start_io = std::chrono::high_resolution_clock::now();
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
-  cout << " rank " << rank << " reading data from file path:  " << file_path
-       << " completed " << endl;
+  auto end_io = std::chrono::high_resolution_clock::now();
+//  cout << " rank " << rank << " reading data from file path:  " << file_path
+//       << " completed " << endl;
   //  reader.get()->parallel_read_MM<int>(file_path,
   //  shared_sparseMat_Trans.get());
 //      shared_sparseMat.get()->print_coords(false);
@@ -112,18 +116,18 @@ int main(int argc, char **argv) {
 
 
 
-  cout << " rank " << rank << " partitioning data completed  " << endl;
-
-  cout << " rank " << rank << " initialization of CSR started  " << endl;
+//  cout << " rank " << rank << " partitioning data completed  " << endl;
+//
+//  cout << " rank " << rank << " initialization of CSR started  " << endl;
   shared_sparseMat.get()->initialize_CSR_blocks(300, 300, localARows,
                                                 localBRows, -1, false);
-  cout << " rank " << rank << " initialization of  CSR completed  " << endl;
-  cout << " rank " << rank << " initialization of transpose CSR started  "
-       << endl;
+//  cout << " rank " << rank << " initialization of  CSR completed  " << endl;
+//  cout << " rank " << rank << " initialization of transpose CSR started  "
+//       << endl;
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(
       localARows, 300, localARows, localBRows, -1, true);
-  cout << " rank " << rank << " initialization of transpose CSR completed  "
-       << endl;
+//  cout << " rank " << rank << " initialization of transpose CSR completed  "
+//       << endl;
 
 
   shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, localARows,
@@ -131,18 +135,18 @@ int main(int argc, char **argv) {
 //    shared_sparseMat.get()->print_blocks_and_cols(false);
 //    shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
-  cout << " rank " << rank << " creation of dense matrices started  " << endl;
+//  cout << " rank " << rank << " creation of dense matrices started  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
       new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
   //    dense_mat.get()->print_matrix();
-  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
+//  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
   auto communicator =
       unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
           shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
           grid.get()));
 
-  cout << " rank " << rank << " async started  " << endl;
+//  cout << " rank " << rank << " async started  " << endl;
 
   unique_ptr<distblas::embedding::EmbeddingAlgo<int,double,2>> embedding_algo =
       unique_ptr<distblas::embedding::EmbeddingAlgo<int,double,2>>(new distblas::embedding::EmbeddingAlgo<int,double,2>(shared_sparseMat_combined.get(),
@@ -150,12 +154,20 @@ int main(int argc, char **argv) {
                                                                                                                             communicator.get(),
                                                                                                                             grid.get(),5,-5));
 
+  auto end_init = std::chrono::high_resolution_clock::now();
+
   embedding_algo.get()->algo_force2_vec_ns(1200,300,5,0.02);
-  cout << " rank " << rank << " async completed  " << endl;
 
- dense_mat.get()->print_matrix();
+  auto end_train = std::chrono::high_resolution_clock::now();
+//  cout << " rank " << rank << " async completed  " << endl;
 
-  cout << " rank " << rank << " processing completed  " << endl;
+// dense_mat.get()->print_matrix();
+
+  auto io_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io).count();
+  auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_init - end_io).count();
+  auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_train - end_init).count();
+
+  cout <<" io: "<<(io_duration/1000)<<" initialization: "<<(init_duration/1000)<<" training: "<<(train_duration/1000) <<endl;
 
   MPI_Finalize();
   return 0;

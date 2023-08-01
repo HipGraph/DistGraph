@@ -80,9 +80,9 @@ public:
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
-        cout<<"inside algo_force2_vec_ns"<<endl;
+//        cout<<"inside algo_force2_vec_ns"<<endl;
         while (head != nullptr) {
-         cout<<"col_batch_id"<<col_batch_id<<endl;
+//         cout<<"col_batch_id"<<col_batch_id<<endl;
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
           this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
@@ -90,7 +90,7 @@ public:
           head = (head.get())->next;
           ++col_batch_id;
         }
-        cout<<"exited while loop"<<endl;
+//        cout<<"exited while loop"<<endl;
         this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
                                          batch_size);
         //
@@ -106,9 +106,9 @@ public:
                                int col_batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-    cout<<"executing  calc_t_dist_grad_attrac"<<endl;
+//    cout<<"executing  calc_t_dist_grad_attrac"<<endl;
     if (csr_block->handler != nullptr) {
-      cout<<"inside   csr_block handler"<<endl;
+//      cout<<"inside   csr_block handler"<<endl;
       CSRHandle *csr_handle = csr_block->handler.get();
       #pragma omp parallel for schedule(static)
       for (int i = 0; i < values.rows(); i++) {
