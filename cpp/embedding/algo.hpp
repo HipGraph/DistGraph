@@ -174,7 +174,7 @@ public:
               attrc +=forceDiff[d]*forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
-            for(INDEXTYPE d = 0; d < this->DIM; d++){
+            for(int d = 0; d < embedding_dim; d++){
               forceDiff[d] = scale(forceDiff[d] * d1);
               prevCoordinates[i] += (lr) * forceDiff[d];
             }
