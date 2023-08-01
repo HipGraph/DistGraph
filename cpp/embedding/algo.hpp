@@ -7,9 +7,9 @@
 #include "../net/process_3D_grid.hpp"
 #include <Eigen/Dense>
 #include <chrono>
+#include <math.h>
 #include <memory>
 #include <mpi.h>
-#include <math.h>
 
 using namespace std;
 using namespace distblas::core;
@@ -41,10 +41,13 @@ public:
     this->MIN_BOUND = MIN_BOUND;
   }
 
-  DENT algorithms::scale(DENT v){
-    if(v > MAXBOUND) return MAXBOUND;
-    else if(v < -MAXBOUND) return -MAXBOUND;
-    else return v;
+  DENT scale(DENT v) {
+    if (v > MAXBOUND)
+      return MAXBOUND;
+    else if (v < -MAXBOUND)
+      return -MAXBOUND;
+    else
+      return v;
   }
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
@@ -135,7 +138,8 @@ public:
     int row_base_index = batch_id * batch_size;
     //    cout<<"executing  calc_t_dist_grad_attrac"<<endl;
     DENT *prevCoordinates;
-    prevCoordinates = static_cast<DENT *> (::operator new (sizeof(DENT[values.rows() * embedding_dim])));
+    prevCoordinates = static_cast<DENT *>(
+        ::operator new(sizeof(DENT[values.rows() * embedding_dim])));
     if (csr_block->handler != nullptr) {
       //      cout<<"inside   csr_block handler"<<endl;
       CSRHandle *csr_handle = csr_block->handler.get();
@@ -143,18 +147,18 @@ public:
 #pragma omp parallel for schedule(static)
       for (int i = 0; i < values.rows(); i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-//        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
-//            (this->dense_local)->fetch_local_eigen_vector(row_id);
+        //        Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
+        //            (this->dense_local)->fetch_local_eigen_vector(row_id);
         DENT forceDiff[embedding_dim];
-        #pragma forceinline
-        #pragma omp simd
+#pragma forceinline
+#pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
           uint64_t local_col =
               global_col_id -
               (this->grid)->global_rank * (this->sp_local)->proc_row_width;
-//          Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
+          //          Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
 
           int target_rank =
               (int)(global_col_id / (this->sp_local)->proc_row_width);
@@ -170,31 +174,35 @@ public:
             //            col_vec =
             //            (this->dense_local)->fetch_local_eigen_vector(local_col);
             //            cout<<"("<<i<<","<<local_col<<")"<<endl;
-//            col_vec = ((this->dense_local)->matrixPtr.get())->row(local_col);
-//            col_vec = ((this->dense_local)->matrixPtr.get())->row(local_col);
+            //            col_vec =
+            //            ((this->dense_local)->matrixPtr.get())->row(local_col);
+            //            col_vec =
+            //            ((this->dense_local)->matrixPtr.get())->row(local_col);
 
             DENT attrc = 0;
-            for(int d=0;d<embedding_dim;d++){
-              (this->dense_local)->nCoordinates[local_col+k];
-              forceDiff[d] = (this->dense_local)->nCoordinates[local_col+d]-(this->dense_local)->nCoordinates[row_id+d];
-              attrc +=forceDiff[d]*forceDiff[d];
+            for (int d = 0; d < embedding_dim; d++) {
+              (this->dense_local)->nCoordinates[local_col + k];
+              forceDiff[d] = (this->dense_local)->nCoordinates[local_col + d] -
+                             (this->dense_local)->nCoordinates[row_id + d];
+              attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
-            for(int d = 0; d < embedding_dim; d++){
+            for (int d = 0; d < embedding_dim; d++) {
               forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[i] += (lr) * forceDiff[d];
+              prevCoordinates[i] += (lr)*forceDiff[d];
             }
           }
           //
-//          Eigen::Matrix<DENT, 1, embedding_dim> t =
-//              (row_vec.array() - col_vec.array());
-//          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
-//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-//              (t.array() * d1)
-//                  .cwiseMax(this->MIN_BOUND)
-//                  .cwiseMin(this->MAX_BOUND) *
-//              lr;
-//          values.row(i) = values.row(i).array() + clamped_vector.array();
+          //          Eigen::Matrix<DENT, 1, embedding_dim> t =
+          //              (row_vec.array() - col_vec.array());
+          //          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
+          //          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+          //              (t.array() * d1)
+          //                  .cwiseMax(this->MIN_BOUND)
+          //                  .cwiseMin(this->MAX_BOUND) *
+          //              lr;
+          //          values.row(i) = values.row(i).array() +
+          //          clamped_vector.array();
         }
       }
     }
