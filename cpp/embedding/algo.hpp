@@ -151,17 +151,30 @@ public:
           Eigen::Matrix<DENT, 1, embedding_dim> row_vec =
               (this->dense_local)->fetch_local_eigen_vector(row_id);
 
-          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() - col_vec.array();
-          Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().square();
-          DENT t_squared_sum = t_squared.array().sum();
-          DENT d1 = -2.0 / (1.0 + t_squared_sum);
-          Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t.array() * d1;
-          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
-              scaled_vector.array()
-                  .cwiseMax(this->MIN_BOUND)
-                  .cwiseMin(this->MAX_BOUND);
-          Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector.array() * lr;
-          values.row(i) = values.row(i).array() + learned.array();
+//          Eigen::Matrix<DENT, 1, embedding_dim> t = row_vec.array() - col_vec.array();
+//          Eigen::Matrix<DENT, 1, embedding_dim> t_squared = t.array().square();
+//          DENT t_squared_sum = t_squared.array().sum();
+//          DENT d1 = -2.0 / (1.0 + t_squared_sum);
+//          Eigen::Matrix<DENT, 1, embedding_dim> scaled_vector = t.array() * d1;
+//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+//              scaled_vector.array()
+//                  .cwiseMax(this->MIN_BOUND)
+//                  .cwiseMin(this->MAX_BOUND);
+//          Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector.array() * lr;
+//          values.row(i) = values.row(i).array() + learned.array();
+
+          Eigen::Matrix<DENT, 1, embedding_dim> t = (row_vec.array() - col_vec.array());
+//          DENT t_squared_sum = t.array().square().sum();
+//          DENT t_squared_sum = t_squared.array().sum();
+          DENT d1 = -2.0 / (1.0 + t.array().square().sum());
+          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector = (t.array() * d1).cwiseMax(this->MIN_BOUND)
+                                                                    .cwiseMin(this->MAX_BOUND)*lr;
+//          Eigen::Matrix<DENT, 1, embedding_dim> clamped_vector =
+//              scaled_vector.array()
+//                  .cwiseMax(this->MIN_BOUND)
+//                  .cwiseMin(this->MAX_BOUND);
+//          Eigen::Matrix<DENT, 1, embedding_dim> learned = clamped_vector.array();
+          values.row(i) = values.row(i).array() + clamped_vector.array().array();
         }
       }
     }
