@@ -142,14 +142,14 @@ public:
     }
   }
 
-  void divide_block_rows(int block_width_row, int proc_width_row, bool mod_ind, bool trans) {
+  void divide_block_rows(int batch_size, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_row_starts.clear();
 
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
-      int current_start = proc_width_row * rank;
+      int current_start = proc_row_width * rank;
 
       if (trans) {
         current_start = 0;
@@ -161,18 +161,18 @@ public:
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
 
-          current_start += block_width_row;
+          current_start += batch_size;
           ++matched_count;
         }
 
         // This modding step helps indexing.
         if (mod_ind) {
-          coords[j].row %= block_width_row;
+          coords[j].row %= batch_size;
         }
       }
 
       int expected_matched_count =
-          std::max(1, (proc_width_row / block_width_row));
+          std::max(1, (proc_row_width / batch_size));
       if (matched_count < expected_matched_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
