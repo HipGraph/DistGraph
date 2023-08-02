@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
   //  shared_sparseMat_combined.get()->sort_by_rows();
   //  shared_sparseMat_combined.get()->divide_block_rows(300, true,
   //                                                     false);
-  auto ini_csr_duration =
+  auto ini_csr_start =
       std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
           .count();
   shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
           .count();
 
   auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(
-                            ini_csr_end - ini_csr_duration)
+                            ini_csr_end - ini_csr_start)
                             .count();
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
