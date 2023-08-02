@@ -118,11 +118,11 @@ int main(int argc, char **argv) {
   auto ini_csr_end1 =
       std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
+//  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
                                                       true);
   auto ini_csr_end2 =
       std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
+//  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
                                                          false);
 
   auto ini_csr_end =
@@ -145,19 +145,19 @@ int main(int argc, char **argv) {
   //    dense_mat.get()->print_matrix();
   cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
-  auto communicator =
-      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
-          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
-          grid.get()));
+//  auto communicator =
+//      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
+//          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
+//          grid.get()));
 
   //  cout << " rank " << rank << " async started  " << endl;
 
-  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
-      embedding_algo =
-          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
-              new distblas::embedding::EmbeddingAlgo<int, double, 2>(
-                  shared_sparseMat_combined.get(), dense_mat.get(),
-                  communicator.get(), grid.get(), 5, -5));
+//  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
+//      embedding_algo =
+//          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
+//              new distblas::embedding::EmbeddingAlgo<int, double, 2>(
+//                  shared_sparseMat_combined.get(), dense_mat.get(),
+//                  communicator.get(), grid.get(), 5, -5));
 
   auto end_init = std::chrono::high_resolution_clock::now();
 

@@ -10,6 +10,7 @@
 #include <parallel/algorithm>
 #include <unordered_set>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -181,11 +182,19 @@ public:
   }
 
   void initialize_CSR_blocks(int block_rows, int block_cols, bool mod_ind, bool transpose) {
-
+    auto ini_csr_start =
+        std::chrono::high_resolution_clock::now();
     this->divide_block_cols(
         block_cols, mod_ind, transpose);
     this->sort_by_rows();
     this->divide_block_rows(block_rows, mod_ind,transpose);
+    auto ini_csr_end =
+        std::chrono::high_resolution_clock::now();
+    auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                              ini_csr_end - ini_csr_start)
+                              .count();
+
+    cout<<" data preprocessing CSR "<<train_duration/1000<<endl;
 
     int col_block = 0;
 
