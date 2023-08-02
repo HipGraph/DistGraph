@@ -198,7 +198,7 @@ public:
 
 //#pragma omp parallel for
     for (int i = 0; i < no_of_lists; i++) {
-      csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(no_of_nodes);
+      csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(this->number_of_local_csr_nodes);
     }
 
 //    if (!transpose) {
@@ -217,7 +217,7 @@ public:
       } else {
         current_vector_pos = j / no_of_nodes;
         col_block = current_vector_pos;
-        if (node_index >= no_of_nodes) {
+        if (node_index >= this->number_of_local_csr_nodes) {
           node_index = 0;
         }
         ++node_index;
