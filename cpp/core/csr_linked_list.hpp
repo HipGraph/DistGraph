@@ -18,6 +18,7 @@ template <typename T> class CSRLinkedList {
 
 private:
   shared_ptr<CSRLocalNode<T>> head;
+  shared_ptr<CSRLocalNode<T>> tail;
   int total_nodes;
 
 public:
@@ -41,14 +42,20 @@ public:
     int index = static_cast<int>(id);
     //    cout<<" index "<<index<<endl;
     direct_ref[index] = data_ptr.get();
+
     if (this->head == nullptr) {
       head = newNode;
-    } else {
-      shared_ptr<CSRLocalNode<T>> temp = head;
-      while (temp.get()->next != nullptr) {
-        temp = temp.get()->next;
-      }
-      temp.get()->next = newNode;
+      tail = head;
+    }
+
+    else {
+//      shared_ptr<CSRLocalNode<T>> temp = head;
+//      while (temp.get()->next != nullptr) {
+//        temp = temp.get()->next;
+//      }
+//      temp.get()->next = newNode;
+       tail.get()->next = newNode;
+       tail = newNode;
     }
   }
 
