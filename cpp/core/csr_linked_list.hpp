@@ -18,7 +18,7 @@ template <typename T> class CSRLinkedList {
 
 private:
   shared_ptr<CSRLocalNode<T>> head;
-  shared_ptr<CSRLocalNode<T>> tail;
+//  shared_ptr<CSRLocalNode<T>> tail;
   int total_nodes;
 
 public:
@@ -45,15 +45,15 @@ public:
 
     if (this->head == nullptr) {
       head = newNode;
-      tail = head;
+//      tail = head;
     }
 
     else {
-//      shared_ptr<CSRLocalNode<T>> temp = head;
-//      while (temp.get()->next != nullptr) {
-//        temp = temp.get()->next;
-//      }
-//      temp.get()->next = newNode;
+      shared_ptr<CSRLocalNode<T>> temp = head;
+      while (temp.get()->next != nullptr) {
+        temp = temp.get()->next;
+      }
+      temp.get()->next = newNode;
 //       tail.get()->next = newNode;
 //       tail = newNode;
     }
