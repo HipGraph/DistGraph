@@ -36,8 +36,8 @@ public:
 
     auto newNode = shared_ptr<CSRLocalNode<T>>(new CSRLocalNode<T>());
     newNode.get()->id = id;
-    shared_ptr<CSRLocal<T>> data_ptr = shared_ptr<CSRLocal<T>>( new distblas::core::CSRLocal<T>(rows, cols, max_nnz, coords,
-                                                               num_coords, transpose));
+    shared_ptr<CSRLocal<T>> data_ptr = make_shared<CSRLocal<T>>(rows, cols, max_nnz, coords,
+                                                               num_coords, transpose);
 //    newNode.get()->data = data_ptr;
 //    int index = static_cast<int>(id);
 //    //    cout<<" index "<<index<<endl;
