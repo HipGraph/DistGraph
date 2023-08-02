@@ -23,8 +23,8 @@ public:
 class GlobalAdjacency1DPartitioner : public Partitioner {
 
 public:
-  int rows_per_block;
-  int cols_per_block;
+  int proc_row_width;
+  int proc_col_width;
   Process3DGrid *process_3D_grid;
 
   GlobalAdjacency1DPartitioner(int gRows, int gCols,
@@ -42,59 +42,62 @@ public:
     int world_size = process_3D_grid->world_size;
     int my_rank = process_3D_grid->global_rank;
 
-    vector<int> sendcounts(world_size, 0);
-    vector<int> recvcounts(world_size, 0);
+    if (world_size > 1) {
+      vector<int> sendcounts(world_size, 0);
+      vector<int> recvcounts(world_size, 0);
 
-    vector<int> offsets, bufindices;
+      vector<int> offsets, bufindices;
 
-    vector<Tuple<T>> coords = sp_mat->coords;
+      vector<Tuple<T>> coords = sp_mat->coords;
 
-    Tuple<T> *sendbuf = new Tuple<T>[coords.size()];
+      Tuple<T> *sendbuf = new Tuple<T>[coords.size()];
 
 #pragma omp parallel for
-    for (int i = 0; i < coords.size(); i++) {
-      int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
+      for (int i = 0; i < coords.size(); i++) {
+        int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
 #pragma omp atomic update
-      sendcounts[owner]++;
-    }
-    prefix_sum(sendcounts, offsets);
-    bufindices = offsets;
+        sendcounts[owner]++;
+      }
+      prefix_sum(sendcounts, offsets);
+      bufindices = offsets;
 
 #pragma omp parallel for
-    for (int i = 0; i < coords.size(); i++) {
-      int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
+      for (int i = 0; i < coords.size(); i++) {
+        int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
 
-      int idx;
+        int idx;
 #pragma omp atomic capture
-      idx = bufindices[owner]++;
+        idx = bufindices[owner]++;
 
-      //        sendbuf[idx].row = transpose ? coords[i].col : coords[i].row;
-      //        sendbuf[idx].col = transpose ? coords[i].row : coords[i].col;
-      sendbuf[idx].row = coords[i].row;
-      sendbuf[idx].col = coords[i].col;
-      sendbuf[idx].value = coords[i].value;
+        //        sendbuf[idx].row = transpose ? coords[i].col : coords[i].row;
+        //        sendbuf[idx].col = transpose ? coords[i].row : coords[i].col;
+        sendbuf[idx].row = coords[i].row;
+        sendbuf[idx].col = coords[i].col;
+        sendbuf[idx].value = coords[i].value;
+      }
+
+      // Broadcast the number of nonzeros that each processor is going to
+      // receive
+      MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
+                   process_3D_grid->global);
+
+      vector<int> recvoffsets;
+      prefix_sum(recvcounts, recvoffsets);
+
+      // Use the sizing information to execute an AlltoAll
+      int total_received_coords =
+          std::accumulate(recvcounts.begin(), recvcounts.end(), 0);
+
+      (sp_mat->coords).resize(total_received_coords);
+
+      MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(), SPTUPLE,
+                    (sp_mat->coords).data(), recvcounts.data(),
+                    recvoffsets.data(), SPTUPLE, process_3D_grid->global);
+
+      // TODO: Parallelize the sort routine?
+      //      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
+      //      column_major<T>);
     }
-
-    // Broadcast the number of nonzeros that each processor is going to receive
-    MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
-                 process_3D_grid->global);
-
-    vector<int> recvoffsets;
-    prefix_sum(recvcounts, recvoffsets);
-
-    // Use the sizing information to execute an AlltoAll
-    int total_received_coords =
-        std::accumulate(recvcounts.begin(), recvcounts.end(), 0);
-
-    (sp_mat->coords).resize(total_received_coords);
-
-    MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(), SPTUPLE,
-                  (sp_mat->coords).data(), recvcounts.data(),
-                  recvoffsets.data(), SPTUPLE, process_3D_grid->global);
-
-    // TODO: Parallelize the sort routine?
-    //      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
-    //      column_major<T>);
     __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
                          column_major<T>);
 
