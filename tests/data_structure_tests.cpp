@@ -88,48 +88,55 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data started  " << endl;
 
-
-    partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
-    partitioner.get()->partition_data(shared_sparseMat.get(), false);
-    partitioner.get()->partition_data(shared_sparseMat_combined.get(), false);
-
+  partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
+  partitioner.get()->partition_data(shared_sparseMat.get(), false);
+  partitioner.get()->partition_data(shared_sparseMat_combined.get(), false);
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
-//  shared_sparseMat.get()->divide_block_cols(
-//      300,  true, false);
-//  shared_sparseMat.get()->sort_by_rows();
-//  shared_sparseMat.get()->divide_block_rows(300, true, false);
-//  //
-//  //
-//  shared_sparseMat_Trans.get()->divide_block_cols(300,  true,
-//                                                  true);
-//  shared_sparseMat_Trans.get()->sort_by_rows();
-//  shared_sparseMat_Trans.get()->divide_block_rows(localARows, true,
-//                                                  true);
-//  //
-//  //
-//  shared_sparseMat_combined.get()->divide_block_cols(
-//      localBRows, true, false);
-//  shared_sparseMat_combined.get()->sort_by_rows();
-//  shared_sparseMat_combined.get()->divide_block_rows(300, true,
-//                                                     false);
-
+  //  shared_sparseMat.get()->divide_block_cols(
+  //      300,  true, false);
+  //  shared_sparseMat.get()->sort_by_rows();
+  //  shared_sparseMat.get()->divide_block_rows(300, true, false);
+  //  //
+  //  //
+  //  shared_sparseMat_Trans.get()->divide_block_cols(300,  true,
+  //                                                  true);
+  //  shared_sparseMat_Trans.get()->sort_by_rows();
+  //  shared_sparseMat_Trans.get()->divide_block_rows(localARows, true,
+  //                                                  true);
+  //  //
+  //  //
+  //  shared_sparseMat_combined.get()->divide_block_cols(
+  //      localBRows, true, false);
+  //  shared_sparseMat_combined.get()->sort_by_rows();
+  //  shared_sparseMat_combined.get()->divide_block_rows(300, true,
+  //                                                     false);
+  auto ini_csr_duration =
+      std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
+          .count();
   shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
 
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(
-      localARows, 300,true, true);
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
+                                                      true);
 
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(
-      300, localBRows, true, false);
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
+                                                         false);
 
-  cout << " rank " << rank << " CSR block initialization completed  " <<
-      endl;
+  auto ini_csr_end =
+      std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
+          .count();
+
+  auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                            ini_csr_end - ini_csr_duration)
+                            .count();
+
+  cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
       new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
+
   //    dense_mat.get()->print_matrix();
-    cout << " rank " << rank << " creation of dense matrices completed  " <<
-    endl;
+  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
   auto communicator =
       unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
@@ -166,7 +173,8 @@ int main(int argc, char **argv) {
 
   cout << " io: " << (io_duration / 1000)
        << " initialization: " << (init_duration / 1000)
-       << " training: " << (train_duration / 1000) << endl;
+       << " training: " << (train_duration / 1000)
+      << " ini CSR duration: "<<(ini_csr_duration/1000)<<endl;
 
   MPI_Finalize();
   return 0;

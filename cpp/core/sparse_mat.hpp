@@ -193,7 +193,6 @@ public:
         (transpose) ? (gRows / block_rows)
                     : (gCols / block_cols); // This assumes 1D partitioning, we
                                             // need to generalized this
-    int no_of_combined_nodes = 2;
 
     int no_of_lists = (transpose) ? (proc_col_width / block_cols)
                                   : (proc_row_width / block_rows);
@@ -201,14 +200,9 @@ public:
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
-//#pragma omp parallel for
     for (int i = 0; i < no_of_lists; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(this->number_of_local_csr_nodes);
     }
-
-//    if (!transpose) {
-//      cout << "block_row_starts size " << block_row_starts.size() << endl;
-//    }
 
     int node_index = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
@@ -229,8 +223,6 @@ public:
       }
 
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
-//      int rank;
-//      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
       (csr_linked_lists[current_vector_pos].get())
