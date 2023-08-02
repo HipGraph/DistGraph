@@ -94,35 +94,17 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
-  //  shared_sparseMat.get()->divide_block_cols(
-  //      300,  true, false);
-  //  shared_sparseMat.get()->sort_by_rows();
-  //  shared_sparseMat.get()->divide_block_rows(300, true, false);
-  //  //
-  //  //
-  //  shared_sparseMat_Trans.get()->divide_block_cols(300,  true,
-  //                                                  true);
-  //  shared_sparseMat_Trans.get()->sort_by_rows();
-  //  shared_sparseMat_Trans.get()->divide_block_rows(localARows, true,
-  //                                                  true);
-  //  //
-  //  //
-  //  shared_sparseMat_combined.get()->divide_block_cols(
-  //      localBRows, true, false);
-  //  shared_sparseMat_combined.get()->sort_by_rows();
-  //  shared_sparseMat_combined.get()->divide_block_rows(300, true,
-  //                                                     false);
   auto ini_csr_start =
       std::chrono::high_resolution_clock::now();
   shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
   auto ini_csr_end1 =
       std::chrono::high_resolution_clock::now();
 
-//  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
 //                                                      true);
   auto ini_csr_end2 =
       std::chrono::high_resolution_clock::now();
-//  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
 //                                                         false);
 
   auto ini_csr_end =
@@ -145,28 +127,28 @@ int main(int argc, char **argv) {
   //    dense_mat.get()->print_matrix();
   cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
-//  auto communicator =
-//      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
-//          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
-//          grid.get()));
+  auto communicator =
+      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
+          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
+          grid.get()));
 
-  //  cout << " rank " << rank << " async started  " << endl;
+    cout << " rank " << rank << " async started  " << endl;
 
-//  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
-//      embedding_algo =
-//          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
-//              new distblas::embedding::EmbeddingAlgo<int, double, 2>(
-//                  shared_sparseMat_combined.get(), dense_mat.get(),
-//                  communicator.get(), grid.get(), 5, -5));
+  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
+      embedding_algo =
+          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
+              new distblas::embedding::EmbeddingAlgo<int, double, 2>(
+                  shared_sparseMat_combined.get(), dense_mat.get(),
+                  communicator.get(), grid.get(), 5, -5));
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-//  embedding_algo.get()->algo_force2_vec_ns(1200, 300, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, 300, 5, 0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
 
-//  dense_mat.get()->print_matrix_rowptr();
+  dense_mat.get()->print_matrix_rowptr();
 
   auto io_duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
