@@ -63,8 +63,7 @@ public:
 
   SpMat() {}
 
-  void divide_block_cols(int batch_size, int proc_col_width,
-                         int target_divisions, bool mod_ind, bool trans) {
+  void divide_block_cols(int batch_size, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     block_col_starts.clear();
