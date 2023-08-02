@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
                               ini_csr_end1 - ini_csr_start)
                               .count();
   auto ini_csr_duration2 = std::chrono::duration_cast<std::chrono::microseconds>(
-                              ini_csr_end2 - ini_csr_start1)
+                              ini_csr_end2 - ini_csr_end1)
                               .count();
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
