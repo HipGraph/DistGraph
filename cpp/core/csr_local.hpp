@@ -72,59 +72,59 @@ public:
 
       sparse_status_t status_csr =
           mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
-//
-//      mkl_sparse_destroy(tempCOO);
-//
-//      vector<MKL_INT>().swap(rArray);
-//      vector<MKL_INT>().swap(cArray);
-//      vector<double>().swap(vArray);
-//
-//      sparse_index_base_t indexing;
-//      MKL_INT *rows_start, *rows_end, *col_idx;
-//      double *values;
-//
-//      mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
-//                              &rows_start, &rows_end, &col_idx, &values);
-//
-//      int rv = 0;
-//      for (int i = 0; i < num_coords; i++) {
-//        while (rv < this->rows && i >= rows_start[rv + 1]) {
-//          rv++;
-//        }
-//        coords[i].row = rv;
-//        coords[i].col = col_idx[i];
-//        coords[i].value = static_cast<T>(values[i]);
-//      }
-//
-////      assert(num_coords <= max_nnz);
-//
-//      (handler.get())->values.resize(max_nnz == 0 ? 1 : max_nnz);
-//      (handler.get())->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-//      (handler.get())->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
-//      (handler.get())->rowStart.resize(this->rows + 1);
-//
-//// Copy over row indices
-////#pragma omp parallel for
-//      for (int i = 0; i < num_coords; i++) {
-//        (handler.get())->row_idx[i] = coords[i].row;
-//      }
-//
-//      memcpy((handler.get())->values.data(), values,
-//             sizeof(double) * max(num_coords, 1));
-//      memcpy((handler.get())->col_idx.data(), col_idx,
-//             sizeof(MKL_INT) * max(num_coords, 1));
-//      memcpy((handler.get())->rowStart.data(), rows_start,
-//             sizeof(MKL_INT) * this->rows);
-//
-//      (handler.get())->rowStart[this->rows] = max(num_coords, 1);
-//
-//      mkl_sparse_d_create_csr(
-//          &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
-//          this->cols, (handler.get())->rowStart.data(),
-//          (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
-//          (handler.get())->values.data());
-//
-//      mkl_sparse_destroy(tempCSR);
+
+      mkl_sparse_destroy(tempCOO);
+
+      vector<MKL_INT>().swap(rArray);
+      vector<MKL_INT>().swap(cArray);
+      vector<double>().swap(vArray);
+
+      sparse_index_base_t indexing;
+      MKL_INT *rows_start, *rows_end, *col_idx;
+      double *values;
+
+      mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
+                              &rows_start, &rows_end, &col_idx, &values);
+
+      int rv = 0;
+      for (int i = 0; i < num_coords; i++) {
+        while (rv < this->rows && i >= rows_start[rv + 1]) {
+          rv++;
+        }
+        coords[i].row = rv;
+        coords[i].col = col_idx[i];
+        coords[i].value = static_cast<T>(values[i]);
+      }
+
+//      assert(num_coords <= max_nnz);
+
+      (handler.get())->values.resize(max_nnz == 0 ? 1 : max_nnz);
+      (handler.get())->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+      (handler.get())->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
+      (handler.get())->rowStart.resize(this->rows + 1);
+
+// Copy over row indices
+//#pragma omp parallel for
+      for (int i = 0; i < num_coords; i++) {
+        (handler.get())->row_idx[i] = coords[i].row;
+      }
+
+      memcpy((handler.get())->values.data(), values,
+             sizeof(double) * max(num_coords, 1));
+      memcpy((handler.get())->col_idx.data(), col_idx,
+             sizeof(MKL_INT) * max(num_coords, 1));
+      memcpy((handler.get())->rowStart.data(), rows_start,
+             sizeof(MKL_INT) * this->rows);
+
+      (handler.get())->rowStart[this->rows] = max(num_coords, 1);
+
+      mkl_sparse_d_create_csr(
+          &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
+          this->cols, (handler.get())->rowStart.data(),
+          (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
+          (handler.get())->values.data());
+
+      mkl_sparse_destroy(tempCSR);
     }
   }
 
