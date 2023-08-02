@@ -284,14 +284,14 @@ public:
 
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-              forceDiff[d] = (this->dense_local)->nCoordinates[local_col + d] -
-                             (this->dense_local)->nCoordinates[row_id + d];
+              forceDiff[d] = (this->dense_local)->nCoordinates[local_col*embedding_dim + d] -
+                             (this->dense_local)->nCoordinates[row_id*embedding_dim + d];
               attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
             for (int d = 0; d < embedding_dim; d++) {
               forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[i+d] += (lr)*forceDiff[d];
+              prevCoordinates[i*embedding_dim+d] += (lr)*forceDiff[d];
             }
           }
         }
@@ -336,15 +336,15 @@ public:
           //          (this->dense_local)->fetch_local_eigen_vector(local_col_id);
           DENT repuls = 0;
           for (int d = 0; d < embedding_dim; d++) {
-            forceDiff[d] = (this->dense_local)->nCoordinates[local_col_id + d] -
-                           (this->dense_local)->nCoordinates[row_id + d];
+            forceDiff[d] = (this->dense_local)->nCoordinates[local_col_id*embedding_dim + d] -
+                           (this->dense_local)->nCoordinates[row_id*embedding_dim + d];
             repuls += forceDiff[d] * forceDiff[d];
           }
           DENT d1 = 2.0 / ((repuls + 0.000001) *
                            (1.0 + repuls));
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = scale(forceDiff[d] * d1);
-            prevCoordinates[i+d] += (lr)*forceDiff[d];
+            prevCoordinates[i*embedding_dim+d] += (lr)*forceDiff[d];
           }
 
 
@@ -374,8 +374,8 @@ public:
 
       #pragma omp simd
       for (int d = 0; d < embedding_dim; d++) {
-        (this->dense_local)->nCoordinates[row_base_index+i + d] +=
-            prevCoordinates[i + d];
+        (this->dense_local)->nCoordinates[(row_base_index+i)*embedding_dim + d] +=
+            prevCoordinates[i*embedding_dim + d];
       }
     }
   }
