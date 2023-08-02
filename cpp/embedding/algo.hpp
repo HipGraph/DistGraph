@@ -130,7 +130,7 @@ public:
         total_end_time += rep_duration;
         //
 //        this->update_data_matrix(values, j, batch_size);
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         // TODO do some work here
       }
     }
@@ -346,8 +346,6 @@ public:
             forceDiff[d] = scale(forceDiff[d] * d1);
             prevCoordinates[i*embedding_dim+d] += (lr)*forceDiff[d];
           }
-
-
         }
       }
     }
