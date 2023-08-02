@@ -115,10 +115,13 @@ int main(int argc, char **argv) {
   auto ini_csr_start =
       std::chrono::high_resolution_clock::now();
   shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
+  auto ini_csr_end1 =
+      std::chrono::high_resolution_clock::now();
 
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
                                                       true);
-
+  auto ini_csr_end2 =
+      std::chrono::high_resolution_clock::now();
   shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
                                                          false);
 
@@ -128,6 +131,12 @@ int main(int argc, char **argv) {
   auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(
                             ini_csr_end - ini_csr_start)
                             .count();
+  auto ini_csr_duration1 = std::chrono::duration_cast<std::chrono::microseconds>(
+                              ini_csr_end1 - ini_csr_start)
+                              .count();
+  auto ini_csr_duration2 = std::chrono::duration_cast<std::chrono::microseconds>(
+                              ini_csr_end2 - ini_csr_start1)
+                              .count();
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
@@ -152,12 +161,12 @@ int main(int argc, char **argv) {
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-  embedding_algo.get()->algo_force2_vec_ns(1200, 300, 5, 0.02);
+//  embedding_algo.get()->algo_force2_vec_ns(1200, 300, 5, 0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
 
-  dense_mat.get()->print_matrix_rowptr();
+//  dense_mat.get()->print_matrix_rowptr();
 
   auto io_duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
@@ -172,7 +181,10 @@ int main(int argc, char **argv) {
   cout << " io: " << (io_duration / 1000)
        << " initialization: " << (init_duration / 1000)
        << " training: " << (train_duration / 1000)
-      << " ini CSR duration: "<<(ini_csr_duration/1000)<<endl;
+      << " ini CSR duration: "<<(ini_csr_duration/1000)
+       <<" ini_csr_duration1 "<<(ini_csr_duration1/1000)
+       <<" ini_csr_duration2 "<<(ini_csr_duration2/1000)
+       <<endl;
 
   MPI_Finalize();
   return 0;
