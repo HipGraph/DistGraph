@@ -70,8 +70,8 @@ public:
           &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
           rArray.data(), cArray.data(), vArray.data());
 
-//      sparse_status_t status_csr =
-//          mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
+      sparse_status_t status_csr =
+          mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 //
 //      mkl_sparse_destroy(tempCOO);
 //
