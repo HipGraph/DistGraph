@@ -130,7 +130,7 @@ public:
         total_end_time += rep_duration;
         //
 //        this->update_data_matrix(values, j, batch_size);
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         // TODO do some work here
       }
     }
@@ -372,7 +372,7 @@ public:
 
       #pragma omp simd
       for (int d = 0; d < embedding_dim; d++) {
-        (this->dense_local)->nCoordinates[(row_base_index+i)*embedding_dim + d] +=
+        (this->dense_local)->nCoordinates[(row_base_index+i)*embedding_dim + d] =
             prevCoordinates[i*embedding_dim + d];
       }
     }
