@@ -284,8 +284,8 @@ public:
 
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-              forceDiff[d] = (this->dense_local)->nCoordinates[local_col*embedding_dim + d] -
-                             (this->dense_local)->nCoordinates[row_id*embedding_dim + d];
+              forceDiff[d] = (this->dense_local)->nCoordinates[row_id*embedding_dim + d] -
+                             (this->dense_local)->nCoordinates[local_col*embedding_dim + d];
               attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
@@ -336,8 +336,8 @@ public:
           //          (this->dense_local)->fetch_local_eigen_vector(local_col_id);
           DENT repuls = 0;
           for (int d = 0; d < embedding_dim; d++) {
-            forceDiff[d] = (this->dense_local)->nCoordinates[local_col_id*embedding_dim + d] -
-                           (this->dense_local)->nCoordinates[row_id*embedding_dim + d];
+            forceDiff[d] = (this->dense_local)->nCoordinates[row_id*embedding_dim + d] -
+                           (this->dense_local)->nCoordinates[local_col_id*embedding_dim + d];
             repuls += forceDiff[d] * forceDiff[d];
           }
           DENT d1 = 2.0 / ((repuls + 0.000001) *
