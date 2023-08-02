@@ -66,7 +66,8 @@ public:
 
     int rowIncrement = G->getnrow() / num_procs;
 
- //TODO: parallalize this
+
+#pragma omp parallel for
     for(int i = 0; i < coords.size(); i++) {
       coords[i].row += rowIncrement * proc_rank;
     }

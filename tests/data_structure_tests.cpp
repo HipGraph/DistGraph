@@ -32,22 +32,26 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
+  //Initialize MPI DataTypes
   initialize_mpi_datatypes<int, double, 2>();
 
+  //Creating reader
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
+
+  //Creating ProcessorGrid
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(1, 1, 1, 1));
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
-  //  auto shared_sparseMat_Trans =
-  //      shared_ptr<distblas::core::SpMat<int>>(new
-  //      distblas::core::SpMat<int>());
 
-//  cout << " rank " << rank << " reading data from file path:  " << file_path
-//       << endl;
+  cout << " rank " << rank << " reading data from file path:  " << file_path
+       << endl;
+
   auto start_io = std::chrono::high_resolution_clock::now();
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
   auto end_io = std::chrono::high_resolution_clock::now();
+
+
 //  cout << " rank " << rank << " reading data from file path:  " << file_path
 //       << " completed " << endl;
   //  reader.get()->parallel_read_MM<int>(file_path,
@@ -156,7 +160,7 @@ int main(int argc, char **argv) {
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-  embedding_algo.get()->algo_force2_vec_ns(2400,300,10,0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200,300,5,0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
 //  cout << " rank " << rank << " async completed  " << endl;
