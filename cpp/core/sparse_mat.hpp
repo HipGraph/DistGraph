@@ -180,7 +180,12 @@ public:
     block_row_starts.push_back(coords.size());
   }
 
-  void initialize_CSR_blocks(int block_rows, int block_cols, bool transpose) {
+  void initialize_CSR_blocks(int block_rows, int block_cols, bool mod_ind, bool transpose) {
+
+    this->divide_block_cols(
+        block_cols, mod_ind, transpose);
+    this->sort_by_rows();
+    this->divide_block_rows(block_rows, mod_ind,transpose);
 
     int col_block = 0;
 

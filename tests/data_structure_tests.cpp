@@ -96,32 +96,32 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
-  shared_sparseMat.get()->divide_block_cols(
-      300,  true, false);
-  shared_sparseMat.get()->sort_by_rows();
-  shared_sparseMat.get()->divide_block_rows(300, true, false);
-  //
-  //
-  shared_sparseMat_Trans.get()->divide_block_cols(300,  true,
-                                                  true);
-  shared_sparseMat_Trans.get()->sort_by_rows();
-  shared_sparseMat_Trans.get()->divide_block_rows(localARows, true,
-                                                  true);
-  //
-  //
-  shared_sparseMat_combined.get()->divide_block_cols(
-      localBRows, true, false);
-  shared_sparseMat_combined.get()->sort_by_rows();
-  shared_sparseMat_combined.get()->divide_block_rows(300, true,
-                                                     false);
+//  shared_sparseMat.get()->divide_block_cols(
+//      300,  true, false);
+//  shared_sparseMat.get()->sort_by_rows();
+//  shared_sparseMat.get()->divide_block_rows(300, true, false);
+//  //
+//  //
+//  shared_sparseMat_Trans.get()->divide_block_cols(300,  true,
+//                                                  true);
+//  shared_sparseMat_Trans.get()->sort_by_rows();
+//  shared_sparseMat_Trans.get()->divide_block_rows(localARows, true,
+//                                                  true);
+//  //
+//  //
+//  shared_sparseMat_combined.get()->divide_block_cols(
+//      localBRows, true, false);
+//  shared_sparseMat_combined.get()->sort_by_rows();
+//  shared_sparseMat_combined.get()->divide_block_rows(300, true,
+//                                                     false);
 
-  shared_sparseMat.get()->initialize_CSR_blocks(300, 300,  false);
+  shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
 
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(
-      localARows, 300, true);
+      localARows, 300,true, true);
 
   shared_sparseMat_combined.get()->initialize_CSR_blocks(
-      300, localBRows,  false);
+      300, localBRows, true, false);
 
   cout << " rank " << rank << " CSR block initialization completed  " <<
       endl;
