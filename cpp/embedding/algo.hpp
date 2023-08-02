@@ -89,6 +89,14 @@ public:
         DENT *prevCoordinates = static_cast<DENT *>(
             ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
+
+        for(int i = 0; i < batch_size; i += 1){
+          int IDIM = i*embedding_dim;
+          for(int d = 0; d < embedding_dim; d++){
+            prevCoordinates[IDIM + d] = 0;
+          }
+        }
+
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
         //
         auto head = batch_list->getHeadNode();
