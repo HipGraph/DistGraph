@@ -38,24 +38,23 @@ public:
     newNode.get()->id = id;
     shared_ptr<CSRLocal<T>> data_ptr = make_shared<CSRLocal<T>>(rows, cols, max_nnz, coords,
                                                                num_coords, transpose);
-//    newNode.get()->data = data_ptr;
-//    int index = static_cast<int>(id);
-//    //    cout<<" index "<<index<<endl;
-//    direct_ref[index] = data_ptr.get();
-//
-//    if (this->head == nullptr) {
-//      head = newNode;
-//
-//    }
-//
-//    else {
-//      shared_ptr<CSRLocalNode<T>> temp = head;
-//      while (temp.get()->next != nullptr) {
-//        temp = temp.get()->next;
-//      }
-//      temp.get()->next = newNode;
-//
-//    }
+    newNode.get()->data = data_ptr;
+    int index = static_cast<int>(id);
+    //    cout<<" index "<<index<<endl;
+    direct_ref[index] = data_ptr.get();
+
+    if (this->head == nullptr) {
+      head = newNode;
+    }
+
+    else {
+      shared_ptr<CSRLocalNode<T>> temp = head;
+      while (temp.get()->next != nullptr) {
+        temp = temp.get()->next;
+      }
+      temp.get()->next = newNode;
+
+    }
   }
 
   shared_ptr<CSRLocalNode<T>> getHeadNode() { return head; }
