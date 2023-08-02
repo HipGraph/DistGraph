@@ -64,16 +64,16 @@ public:
         op = SPARSE_OPERATION_NON_TRANSPOSE;
       }
 
-//      sparse_matrix_t tempCOO, tempCSR;
-//
-//      sparse_status_t status_coo = mkl_sparse_d_create_coo(
-//          &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
-//          rArray.data(), cArray.data(), vArray.data());
-//
-//      sparse_status_t status_csr =
-//          mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
-//
-//      mkl_sparse_destroy(tempCOO);
+      sparse_matrix_t tempCOO, tempCSR;
+
+      sparse_status_t status_coo = mkl_sparse_d_create_coo(
+          &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
+          rArray.data(), cArray.data(), vArray.data());
+
+      sparse_status_t status_csr =
+          mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
+
+      mkl_sparse_destroy(tempCOO);
 //
 //      vector<MKL_INT>().swap(rArray);
 //      vector<MKL_INT>().swap(cArray);
