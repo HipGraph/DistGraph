@@ -42,6 +42,8 @@ public:
     int world_size = process_3D_grid->world_size;
     int my_rank = process_3D_grid->global_rank;
 
+    Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
+
     if (world_size > 1) {
       vector<int> sendcounts(world_size, 0);
       vector<int> recvcounts(world_size, 0);
@@ -50,7 +52,7 @@ public:
 
       vector<Tuple<T>> coords = sp_mat->coords;
 
-      Tuple<T> *sendbuf = new Tuple<T>[coords.size()];
+
 
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
