@@ -215,7 +215,7 @@ public:
           ++node_index;
         }
       } else {
-        current_vector_pos = j / no_of_nodes;
+        current_vector_pos = j / this->number_of_local_csr_nodes;
         col_block = current_vector_pos;
         if (node_index >= this->number_of_local_csr_nodes) {
           node_index = 0;
