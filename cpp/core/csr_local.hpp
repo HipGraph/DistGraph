@@ -47,14 +47,7 @@ public:
       vector<MKL_INT> rArray(num_coords, 0);
       vector<MKL_INT> cArray(num_coords, 0);
       vector<double> vArray(num_coords, 0.0);
-      //
-      //    // Put a dummy value in if the number of coordinates is 0, so that
-      //    // everything doesn't blow up
-//    if (num_coords == 0) {
-//      rArray.push_back(0);
-//      cArray.push_back(0);
-//      vArray.push_back(0.0);
-//    }
+
 
 //    cout << " number of coordinates " << num_coords << endl;
 //#pragma omp parallel for
@@ -103,7 +96,7 @@ public:
         coords[i].value = static_cast<T>(values[i]);
       }
 
-      assert(num_coords <= max_nnz);
+//      assert(num_coords <= max_nnz);
 
       (handler.get())->values.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
@@ -116,27 +109,22 @@ public:
         (handler.get())->row_idx[i] = coords[i].row;
       }
 
-      memcpy((handler.get())->values.data(), values,
-             sizeof(double) * max(num_coords, 1));
-      memcpy((handler.get())->col_idx.data(), col_idx,
-             sizeof(MKL_INT) * max(num_coords, 1));
-      memcpy((handler.get())->rowStart.data(), rows_start,
-             sizeof(MKL_INT) * this->rows);
-
-      (handler.get())->rowStart[this->rows] = max(num_coords, 1);
-
-      mkl_sparse_d_create_csr(
-          &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
-          this->cols, (handler.get())->rowStart.data(),
-          (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
-          (handler.get())->values.data());
-
-      // This madness is just trying to get around the inspector routine
-      if (num_coords == 0) {
-        (handler.get())->rowStart[this->rows] = 0;
-      }
-
-      mkl_sparse_destroy(tempCSR);
+//      memcpy((handler.get())->values.data(), values,
+//             sizeof(double) * max(num_coords, 1));
+//      memcpy((handler.get())->col_idx.data(), col_idx,
+//             sizeof(MKL_INT) * max(num_coords, 1));
+//      memcpy((handler.get())->rowStart.data(), rows_start,
+//             sizeof(MKL_INT) * this->rows);
+//
+//      (handler.get())->rowStart[this->rows] = max(num_coords, 1);
+//
+//      mkl_sparse_d_create_csr(
+//          &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
+//          this->cols, (handler.get())->rowStart.data(),
+//          (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
+//          (handler.get())->values.data());
+//
+//      mkl_sparse_destroy(tempCSR);
     }
   }
 
