@@ -246,9 +246,9 @@ public:
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
-      (csr_linked_lists[current_vector_pos].get())
-          ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
-                   false, node_index);
+//      (csr_linked_lists[current_vector_pos].get())
+//          ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
+//                   false, node_index);
     }
   }
 
