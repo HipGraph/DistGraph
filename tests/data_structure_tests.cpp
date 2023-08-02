@@ -119,11 +119,11 @@ int main(int argc, char **argv) {
       std::chrono::high_resolution_clock::now();
 
 //  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
-                                                      true);
+//                                                      true);
   auto ini_csr_end2 =
       std::chrono::high_resolution_clock::now();
 //  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
-                                                         false);
+//                                                         false);
 
   auto ini_csr_end =
       std::chrono::high_resolution_clock::now();
