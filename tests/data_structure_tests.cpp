@@ -115,31 +115,21 @@ int main(int argc, char **argv) {
   shared_sparseMat_combined.get()->divide_block_rows(300, true,
                                                      false);
 
-  //  cout << " rank " << rank << " partitioning data completed  " << endl;
-  //
-  //  cout << " rank " << rank << " initialization of CSR started  " << endl;
-  shared_sparseMat.get()->initialize_CSR_blocks(300, 300, localARows,
-                                                localBRows, -1, false);
-  //  cout << " rank " << rank << " initialization of  CSR completed  " << endl;
-  //  cout << " rank " << rank << " initialization of transpose CSR started  "
-  //       << endl;
+  shared_sparseMat.get()->initialize_CSR_blocks(300, 300,  false);
+
   shared_sparseMat_Trans.get()->initialize_CSR_blocks(
-      localARows, 300, localARows, localBRows, -1, true);
-  //  cout << " rank " << rank << " initialization of transpose CSR completed  "
-  //       << endl;
+      localARows, 300, true);
 
   shared_sparseMat_combined.get()->initialize_CSR_blocks(
-      300, localBRows, localARows, localBRows, -1, false);
-  //    shared_sparseMat.get()->print_blocks_and_cols(false);
-  //    shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
+      300, localBRows,  false);
 
-  //  cout << " rank " << rank << " creation of dense matrices started  " <<
-  //  endl;
+  cout << " rank " << rank << " CSR block initialization completed  " <<
+      endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
       new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
   //    dense_mat.get()->print_matrix();
-  //  cout << " rank " << rank << " creation of dense matrices completed  " <<
-  //  endl;
+    cout << " rank " << rank << " creation of dense matrices completed  " <<
+    endl;
 
   auto communicator =
       unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
