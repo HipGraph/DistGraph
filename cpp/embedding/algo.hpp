@@ -152,7 +152,7 @@ public:
           if (fetch_from_cache) {
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
-                    ->fetch_data_vector_from_cache(owner_rank, global_col_id);
+                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               forceDiff[d] = (this->dense_local)
@@ -217,7 +217,7 @@ public:
           DENT repuls = 0;
           std::array<DENT, embedding_dim> colvec =
               (this->dense_local)
-                  ->fetch_data_vector_from_cache(owner, global_col_id);
+                  ->fetch_data_vector_from_cache(owner_rank, global_col_id);
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] =
                 (this->dense_local)->nCoordinates[row_id * embedding_dim + d] - colvec[d];
