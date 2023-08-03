@@ -124,7 +124,7 @@ public:
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size>1){
-          MPI_request request_three
+          MPI_Request request_three;
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
               update_ptr =
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
