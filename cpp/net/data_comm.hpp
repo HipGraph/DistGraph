@@ -91,9 +91,9 @@ public:
             receive_col_ids_list[working_rank].insert(
                 receive_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
-//            std::unordered_set<MKL_INT> unique_set(
-//                receive_col_ids_list[working_rank].begin(),
-//                receive_col_ids_list[working_rank].end());
+            std::unordered_set<MKL_INT> unique_set(
+                receive_col_ids_list[working_rank].begin(),
+                receive_col_ids_list[working_rank].end());
 //            receive_col_ids_list[working_rank] =
 //                vector<uint64_t>(unique_set.begin(), unique_set.end());
           }
