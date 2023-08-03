@@ -4,13 +4,13 @@
 #include "csr_local.hpp"
 #include "distributed_mat.hpp"
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <mpi.h>
 #include <parallel/algorithm>
 #include <unordered_set>
 #include <vector>
-#include <chrono>
 
 using namespace std;
 
@@ -92,38 +92,43 @@ public:
       int start_index = 0;
       int end_index = 0;
       uint64_t checking_index = rank * proc_col_width;
-//      uint64_t checking_index = 1;
+      //      uint64_t checking_index = 1;
       uint64_t checking_end_index =
-          std::min(((rank + 1) * proc_col_width)-1,gCols-1);
+          std::min(((rank + 1) * proc_col_width) - 1, gCols - 1);
 
-      auto startIt = std::find_if(coords.begin(), coords.end(), [&checking_index](const auto& tuple) {
-        return tuple.col >= checking_index;
-      });
+      auto startIt = std::find_if(coords.begin(), coords.end(),
+                                  [&checking_index](const auto &tuple) {
+                                    return tuple.col >= checking_index;
+                                  });
 
-      auto endIt = std::find_if(coords.rbegin(), coords.rend(), [&checking_end_index](const auto& tuple) {
-        return tuple.col <= checking_end_index;
-      });
+      auto endIt = std::find_if(coords.rbegin(), coords.rend(),
+                                [&checking_end_index](const auto &tuple) {
+                                  return tuple.col <= checking_end_index;
+                                });
 
-      cout<<"checking_index"<<checking_index<<"checking_end_index"<<checking_end_index<<endl;
-      std::cout << "Start value: (" << (*startIt).row << ", " << (*startIt).col << ")" << std::endl;
-      std::cout << "End value: (" << (*endIt).row << ", " << (*endIt).col << ")" << std::endl;
+      cout << "checking_index" << checking_index << "checking_end_index"
+           << checking_end_index << endl;
+      std::cout << "Start value: (" << (*startIt).row << ", " << (*startIt).col
+                << ")" << std::endl;
+      std::cout << "End value: (" << (*endIt).row << ", " << (*endIt).col << ")"
+                << std::endl;
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
       uint64_t startIndex = std::distance(coords.begin(), startIt);
-      uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
-      uint64_t first_batch_len = (endIndex+1)-startIndex;
-      uint64_t second_batch_len = coords.size()-first_batch_len;
+      uint64_t endIndex =
+          std::distance(coords.begin(), std::next(endIt).base());
+      uint64_t first_batch_len = (endIndex + 1) - startIndex;
+      uint64_t second_batch_len = coords.size() - first_batch_len;
       if (mod_ind) {
         std::transform(coords.begin(), coords.begin() + first_batch_len,
-                       coords.begin(),
-                       [&](const auto &tuple) {
-                         const auto& [row, col, value] = tuple;
+                       coords.begin(), [&](const auto &tuple) {
+                         const auto &[row, col, value] = tuple;
                          int64_t modifiedCol = col % (first_batch_len);
                          return Tuple<T>{row, modifiedCol, value};
                        });
-        std::transform(coords.begin() + first_batch_len, coords.end() ,
+        std::transform(coords.begin() + first_batch_len, coords.end(),
                        coords.begin() + first_batch_len,
                        [&](const auto &tuple) {
-                         const auto& [row, col, value] = tuple;
+                         const auto &[row, col, value] = tuple;
                          int64_t modifiedCol = col % (second_batch_len);
                          return Tuple<T>{row, modifiedCol, value};
                        });
@@ -172,8 +177,7 @@ public:
         }
       }
 
-      int expected_matched_count =
-          std::max(1, (proc_row_width / batch_size));
+      int expected_matched_count = std::max(1, (proc_row_width / batch_size));
       if (matched_count < expected_matched_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
@@ -181,24 +185,20 @@ public:
     block_row_starts.push_back(coords.size());
   }
 
-  void initialize_CSR_blocks(int block_rows, int block_cols, bool mod_ind, bool transpose) {
-    auto ini_csr_start =
-        std::chrono::high_resolution_clock::now();
+  void initialize_CSR_blocks(int block_rows, int block_cols, bool mod_ind,
+                             bool transpose) {
+    auto ini_csr_start = std::chrono::high_resolution_clock::now();
 
-
-    this->divide_block_cols(
-        block_cols, mod_ind, transpose);
+    this->divide_block_cols(block_cols, mod_ind, transpose);
     this->sort_by_rows();
-    this->divide_block_rows(block_rows, mod_ind,transpose);
+    this->divide_block_rows(block_rows, mod_ind, transpose);
 
-
-    auto ini_csr_end =
-        std::chrono::high_resolution_clock::now();
+    auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
                               ini_csr_end - ini_csr_start)
                               .count();
 
-    cout<<" data preprocessing CSR "<<train_duration/1000<<endl;
+    cout << " data preprocessing CSR " << train_duration / 1000 << endl;
 
     int col_block = 0;
 
@@ -214,16 +214,16 @@ public:
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
     for (int i = 0; i < no_of_lists; i++) {
-      csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>(this->number_of_local_csr_nodes);
+      csr_linked_lists[i] =
+          std::make_shared<CSRLinkedList<T>>(this->number_of_local_csr_nodes);
     }
 
-    auto ini_csr_end_while =
-        std::chrono::high_resolution_clock::now();
-    auto train_duration_init = std::chrono::duration_cast<std::chrono::microseconds>(
-                              ini_csr_end_while - ini_csr_end)
-                              .count();
-    cout<<" train duration while "<<train_duration_init/1000<<endl;
-
+    auto ini_csr_end_while = std::chrono::high_resolution_clock::now();
+    auto train_duration_init =
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            ini_csr_end_while - ini_csr_end)
+            .count();
+    cout << " train duration while " << train_duration_init / 1000 << endl;
 
     int node_index = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
@@ -298,11 +298,9 @@ public:
                 return g_index;
               }
             });
-
-        }
-
       }
-//    }
+    }
+    //    }
   }
 
   CSRLinkedList<T> *get_batch_list(int batch_id) {

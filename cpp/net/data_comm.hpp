@@ -267,7 +267,9 @@ public:
   }
 
 
-  void async_transfer(vector<uint64_t> &col_ids, bool verify,std::vector<DataTuple<DENT, embedding_dim>> *receivebuf, MPI_Request& request) {
+  void async_transfer(vector<uint64_t> &col_ids, bool verify,
+                      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+                      MPI_Request& request) {
 
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<uint64_t> send_col_ids_list;
