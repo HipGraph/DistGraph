@@ -123,6 +123,17 @@ public:
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
+        if (this->grid->world_size>1){
+          MPI_request request_three
+          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+              update_ptr =
+                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+                      new vector<DataTuple<DENT, embedding_dim>>());
+          this->data_comm->async_transfer(j, false, false, update_ptr.get(),
+                                          request_three);
+          this->data_comm->populate_cache(update_ptr.get(), request_three);
+        }
+
       }
     }
   }
