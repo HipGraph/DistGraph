@@ -76,29 +76,29 @@ public:
     if (fetch_all and batch_id == 0) {
 
       // calculating receiving data cols
-      for (int i = 0; i < no_of_lists; i++) {
-        int working_rank = 0;
-
-        for (int j = 0; j < total_nodes; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
-            ++working_rank;
-          }
-          if (working_rank != grid->global_rank) {
-            vector<uint64_t> col_ids;
-            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-            receive_col_ids_list[working_rank].insert(
-                receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
-            std::unordered_set<MKL_INT> unique_set(
-                receive_col_ids_list[working_rank].begin(),
-                receive_col_ids_list[working_rank].end());
-            receive_col_ids_list[working_rank] =
-                vector<uint64_t>(unique_set.begin(), unique_set.end());
-          }
-          receivecounts[working_rank] =
-              receive_col_ids_list[working_rank].size();
-        }
-      }
+//      for (int i = 0; i < no_of_lists; i++) {
+//        int working_rank = 0;
+//
+//        for (int j = 0; j < total_nodes; j++) {
+//          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
+//            ++working_rank;
+//          }
+//          if (working_rank != grid->global_rank) {
+//            vector<uint64_t> col_ids;
+//            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+//            receive_col_ids_list[working_rank].insert(
+//                receive_col_ids_list[working_rank].end(), col_ids.begin(),
+//                col_ids.end());
+//            std::unordered_set<MKL_INT> unique_set(
+//                receive_col_ids_list[working_rank].begin(),
+//                receive_col_ids_list[working_rank].end());
+//            receive_col_ids_list[working_rank] =
+//                vector<uint64_t>(unique_set.begin(), unique_set.end());
+//          }
+//          receivecounts[working_rank] =
+//              receive_col_ids_list[working_rank].size();
+//        }
+//      }
 
       // calculating sending data cols
 
