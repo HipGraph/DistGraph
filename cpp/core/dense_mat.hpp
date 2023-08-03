@@ -2,12 +2,12 @@
 #include "common.h"
 #include "distributed_mat.hpp"
 #include <Eigen/Dense>
+#include <fstream>
 #include <iostream>
 #include <memory>
+#include <mpi.h>
 #include <random>
 #include <unordered_map>
-#include <fstream>
-#include <mpi.h>
 
 using namespace std;
 using namespace Eigen;
@@ -21,9 +21,6 @@ namespace distblas::core {
 template <typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
 
 private:
-
-
-
 public:
   uint64_t rows;
   unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
@@ -64,16 +61,15 @@ public:
         std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
         world_size);
     (*this->matrixPtr).setRandom();
-    nCoordinates = static_cast<DENT *> (::operator new (sizeof(DENT[rows * embedding_dim])));
-      for (int i = 0; i < (*this->matrixPtr).rows(); i++) {
-        for (int j = 0; j < (*this->matrixPtr).cols(); j++) {
-            DENT val    =   -1.0 + 2.0 * rand()/(RAND_MAX+1.0);
-            nCoordinates[i*embedding_dim+j]= val;
-            (*this->matrixPtr)(i, j)  = val;
-        }
-
+    nCoordinates =
+        static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
+    for (int i = 0; i < (*this->matrixPtr).rows(); i++) {
+      for (int j = 0; j < (*this->matrixPtr).cols(); j++) {
+        DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
+        nCoordinates[i * embedding_dim + j] = val;
+        (*this->matrixPtr)(i, j) = val;
       }
-
+    }
   }
 
   ~DenseMat() {}
@@ -83,11 +79,12 @@ public:
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
-    fout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
+    fout << (*this->matrixPtr).rows() << " " << (*this->matrixPtr).cols()
+         << endl;
     for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
-      fout <<i+1<<" ";
+      fout << i + 1 << " ";
       for (int j = 0; j < (*this->matrixPtr).cols(); ++j) {
-        fout<<(*this->matrixPtr)(i, j)<<" ";
+        fout << (*this->matrixPtr)(i, j) << " ";
       }
       fout << endl;
     }
@@ -98,74 +95,76 @@ public:
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
-    fout <<(*this->matrixPtr).rows()<<" "<<(*this->matrixPtr).cols()<<endl;
+    fout << (*this->matrixPtr).rows() << " " << (*this->matrixPtr).cols()
+         << endl;
     for (int i = 0; i < (*this->matrixPtr).rows(); ++i) {
-      fout <<i+1<<" ";
+      fout << i + 1 << " ";
       for (int j = 0; j < embedding_dim; ++j) {
-        fout<<this->nCoordinates[i*embedding_dim+j]<<" ";
+        fout << this->nCoordinates[i * embedding_dim + j] << " ";
       }
       fout << endl;
     }
   }
 
   void insert_cache(int rank, int key, std::array<DENT, embedding_dim> &arr) {
-//    Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(), embedding_dim);
+    //    Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(),
+    //    embedding_dim);
     (*this->cachePtr)[rank].insert_or_assign(key, arr);
   }
 
-//  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank,
-//                                                              int key) {
-//    return (*this->cachePtr)[rank][key];
-//  }
+  //  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank,
+  //                                                              int key) {
+  //    return (*this->cachePtr)[rank][key];
+  //  }
 
   std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
-                                                              int key) {
+                                                               int key) {
     return (*this->cachePtr)[rank][key];
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
     std::array<DENT, embedding_dim> stdArray;
 
-    int base_index =   local_key*embedding_dim;
+    int base_index = local_key * embedding_dim;
 
-//    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
-//    Eigen::Array<DENT, 1, embedding_dim> eigenArray = matrix.row(local_key).transpose().array();
-    std::copy(base_index, base_index + embedding_dim, stdArray.data());
+    //    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix =
+    //    *this->matrixPtr; Eigen::Array<DENT, 1, embedding_dim> eigenArray =
+    //    matrix.row(local_key).transpose().array();
+    std::copy(nCoordinates+base_index , nCoordinates+base_index + embedding_dim, stdArray.data());
     return stdArray;
   }
 
   Eigen::Array<DENT, 1, embedding_dim> fetch_local_eigen_vector(int local_key) {
-    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
+    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim> &matrix =
+        *this->matrixPtr;
     return matrix.row(local_key);
   }
-
 
   void print_cache() {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    for(int i=0;i<(*this->cachePtr).size();i++){
-      unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>> map = (*this->cachePtr)[i];
+    for (int i = 0; i < (*this->cachePtr).size(); i++) {
+      unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>> map =
+          (*this->cachePtr)[i];
 
-      string output_path = "rank_"+to_string(rank)+"remote_rank_" + to_string(i) +  ".txt";
+      string output_path =
+          "rank_" + to_string(rank) + "remote_rank_" + to_string(i) + ".txt";
       char stats[500];
       strcpy(stats, output_path.c_str());
       ofstream fout(stats, std::ios_base::app);
 
-
-      for (const auto& kvp : map) {
+      for (const auto &kvp : map) {
         uint64_t key = kvp.first;
-        const Eigen::Matrix<DENT, embedding_dim, 1>& value = kvp.second;
-        fout<<key<<" ";
+        const Eigen::Matrix<DENT, embedding_dim, 1> &value = kvp.second;
+        fout << key << " ";
         for (int i = 0; i < embedding_dim; ++i) {
           fout << value(i) << " ";
         }
-        fout<< std::endl;
+        fout << std::endl;
       }
     }
   }
-
-
 };
 
 } // namespace distblas::core
