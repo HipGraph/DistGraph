@@ -282,7 +282,7 @@ public:
         distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
 
         if (return_global_ids) {
-          col_ids = handle->value;
+          col_ids = handle->values;
         }else {
           col_ids = handle->col_idx;
         }
@@ -311,7 +311,7 @@ public:
         }
 
       }
-    }
+//    }
   }
 
   CSRLinkedList<T> *get_batch_list(int batch_id) {
