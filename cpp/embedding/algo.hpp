@@ -59,6 +59,7 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
     auto total_attrac_time = 0;
     auto total_end_time = 0;
+    auto total_update_time=0;
 
     //    this->data_comm->async_transfer(0, true, false,
     //    results_init_ptr.get(),
@@ -138,12 +139,20 @@ public:
         total_end_time += rep_duration;
         //
 //        this->update_data_matrix(values, j, batch_size);
+        auto start_update = std::chrono::high_resolution_clock::now();
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        auto end_update = std::chrono::high_resolution_clock::now();
+        auto update_duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_update -
+                                                                  start_update).count();
+        total_update_time +=update_duration;
         // TODO do some work here
       }
     }
     cout << " total attrac time :" << (total_attrac_time / 1000)
-         << " total end time: " << (total_end_time / 1000) << endl;
+         << " total end time: " << (total_end_time / 1000)
+         <<  " total update time: "<< (total_update_time/1000)
+         endl;
   }
 
   inline void
