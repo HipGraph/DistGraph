@@ -77,7 +77,7 @@ public:
            <<(cache_update_duration/1000)<<endl;
     }
 
-    auto negative_update=0
+    auto negative_update=0;
 
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
