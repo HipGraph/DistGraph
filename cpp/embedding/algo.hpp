@@ -54,15 +54,15 @@ public:
     int batches = ((this->dense_local)->rows / batch_size);
 
     if (this->grid->world_size > 1) {
+      MPI_Request update_req;
+      MPI_Request init_req;
 
-      MPI_Request request;
       unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
           unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
               new vector<DataTuple<DENT, embedding_dim>>());
 
       this->data_comm->async_transfer(0, true, false, results_init_ptr.get(),
-                                      request);
-      this->data_comm->populate_cache(results_init_ptr.get(), request);
+                                      init_req);
     }
 
     for (int i = 0; i < iterations; i++) {
@@ -93,8 +93,6 @@ public:
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request_two);
-          this->data_comm->populate_cache(results_negative_ptr.get(),
-                                          request_two);
         }
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
@@ -115,14 +113,35 @@ public:
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
 
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, batch_size);
         if (this->grid->world_size > 1) {
+
+
+          if (i=0 and j=0){
+            this->data_comm->populate_cache(results_init_ptr.get(), request);
+          }else {
+            this->data_comm->populate_cache(results_init_ptr.get(), update_req);
+          }
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, batch_size);
         }
 
+
+        //populate negative results cache
+        this->data_comm->populate_cache(results_negative_ptr.get(),
+                                        request_two);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, batch_size);
+
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
+        if (this->grid->world_size > 1) {
+          results_init_ptr.get()->clear();
+          results_init_ptr.get()->shrink_to_fit();
+          this->data_comm->async_transfer(j, false, false,
+                                          results_init_ptr.get(), update_req);
+        }
+
+
       }
     }
   }
