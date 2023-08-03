@@ -263,7 +263,7 @@ public:
 //      }
 //      delete[] receivebufverify;
 //    }
-    delete[] sendbuf;
+//    delete[] sendbuf;
   }
 
 
