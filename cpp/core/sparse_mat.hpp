@@ -280,13 +280,6 @@ public:
         int proc_row_width = this->proc_row_width;
         int proc_col_width = this->proc_col_width;
         distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-//
-//        if (return_global_ids) {
-//          col_ids = handle->values;
-//        }else {
-//          col_ids = handle->col_idx;
-//        }
-
         col_ids = vector<uint64_t>((handle->col_idx).size());
         std::transform(
             std::begin((handle->col_idx)), std::end((handle->col_idx)),
@@ -305,8 +298,6 @@ public:
                 return g_index;
               }
             });
-
-
 
         }
 
