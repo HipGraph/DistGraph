@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
 
   // Creating ProcessorGrid
-  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(1, 1, 1, 1));
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(world_size, 1, 1, 1));
 
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
