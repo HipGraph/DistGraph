@@ -131,7 +131,7 @@ public:
                       new vector<DataTuple<DENT, embedding_dim>>());
           this->data_comm->async_transfer(j, false, false, update_ptr.get(),
                                           request_three);
-          this->data_comm->populate_cache(update_ptr.get(), request_three);
+//          this->data_comm->populate_cache(update_ptr.get(), request_three);
         }
 
       }
