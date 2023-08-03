@@ -299,7 +299,7 @@ public:
 //              }
 //            });
 
-         #pragma omp simd
+         #pragma omp parallel for
         for(int i=0;i<handle->col_idx.size();i++){
           if (!return_global_ids) {
             col_ids[i] = static_cast<uint64_t>(handle->col_idx[i]);
