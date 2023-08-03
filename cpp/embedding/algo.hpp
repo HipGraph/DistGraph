@@ -108,7 +108,7 @@ public:
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request_two);
-          this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
+//          this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration = std::chrono::duration_cast<std::chrono::microseconds>(
                                        neg_cache_end - neg_cache)
