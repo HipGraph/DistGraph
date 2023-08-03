@@ -55,39 +55,48 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
-    MPI_Request request;
-    unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
-        unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
     auto total_attrac_time = 0;
     auto total_end_time = 0;
-    auto total_update_time=0;
+    auto total_update_time = 0;
 
-    //    this->data_comm->async_transfer(0, true, false,
-    //    results_init_ptr.get(),
-    //                                       request);
-    //    this->data_comm->populate_cache(results_init_ptr.get(), request);
+
+    if (this->grid->world_size>1) {
+
+      MPI_Request request;
+      unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
+          unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
+              new vector<DataTuple<DENT, embedding_dim>>());
+
+          this->data_comm->async_transfer(0, true, false,
+          results_init_ptr.get(),
+                                             request);
+          this->data_comm->populate_cache(results_init_ptr.get(), request);
+
+    }
 
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
+
+        // negative samples generation
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
 
-        MPI_Request request_two;
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-            results_negative_ptr =
-                unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                    new vector<DataTuple<DENT, embedding_dim>>());
-        //        this->data_comm->async_transfer(random_number_vec, false,
-        //                                        results_negative_ptr.get(),
-        //                                        request_two);
-        //                this->data_comm->populate_cache(results_negative_ptr.get(),
-        //                request_two);
 
-        //        Matrix<DENT, Dynamic, embedding_dim> values(batch_size,
-        //        embedding_dim); values.setZero();
+        if (this->grid->world_size>1) {
+          MPI_Request request_two;
+          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+              results_negative_ptr =
+                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+                      new vector<DataTuple<DENT, embedding_dim>>());
+                  this->data_comm->async_transfer(random_number_vec, false,
+                                                  results_negative_ptr.get(),
+                                                  request_two);
+                          this->data_comm->populate_cache(results_negative_ptr.get(),
+                          request_two);
+
+        }
 
         DENT *prevCoordinates = static_cast<DENT *>(
             ::operator new(sizeof(DENT[batch_size * embedding_dim])));
@@ -106,14 +115,13 @@ public:
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
-        //        cout<<"inside algo_force2_vec_ns"<<endl;
+
         while (head != nullptr) {
-          //         cout<<"col_batch_id"<<col_batch_id<<endl;
+
           CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
           auto start_attrac = std::chrono::high_resolution_clock::now();
-//          this->calc_t_dist_grad_attrac(values, lr, csr_block, j, col_batch_id,
-//                                        batch_size);
+
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
                                         batch_size);
           auto end_attrac = std::chrono::high_resolution_clock::now();
@@ -126,10 +134,9 @@ public:
           head = (head.get())->next;
           ++col_batch_id;
         }
-        //        cout<<"exited while loop"<<endl;
+
         auto start_rep = std::chrono::high_resolution_clock::now();
-//        this->calc_t_dist_grad_repulsive(values, random_number_vec, lr, j,
-//                                         batch_size);
+
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr, j,
                                          batch_size,batch_size);
         auto end_rep = std::chrono::high_resolution_clock::now();
@@ -138,8 +145,7 @@ public:
                                                                   start_rep)
                 .count();
         total_end_time += rep_duration;
-        //
-//        this->update_data_matrix(values, j, batch_size);
+
         auto start_update = std::chrono::high_resolution_clock::now();
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         auto end_update = std::chrono::high_resolution_clock::now();
