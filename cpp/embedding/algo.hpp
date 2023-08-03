@@ -151,8 +151,7 @@ public:
     }
     cout << " total attrac time :" << (total_attrac_time / 1000)
          << " total end time: " << (total_end_time / 1000)
-         <<  " total update time: "<< (total_update_time/1000)
-         endl;
+         <<  " total update time: "<< (total_update_time/1000)<< endl;
   }
 
   inline void
