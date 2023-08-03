@@ -91,14 +91,14 @@ public:
             receive_col_ids_list[working_rank].insert(
                 receive_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
-            std::unordered_set<uint64_t> unique_set(
-                receive_col_ids_list[working_rank].begin(),
-                receive_col_ids_list[working_rank].end());
-            receive_col_ids_list[working_rank] =
-                vector<uint64_t>(unique_set.begin(), unique_set.end());
+//            std::unordered_set<uint64_t> unique_set(
+//                receive_col_ids_list[working_rank].begin(),
+//                receive_col_ids_list[working_rank].end());
+//            receive_col_ids_list[working_rank] =
+//                vector<uint64_t>(unique_set.begin(), unique_set.end());
           }
-          receivecounts[working_rank] =
-              receive_col_ids_list[working_rank].size();
+//          receivecounts[working_rank] =
+//              receive_col_ids_list[working_rank].size();
         }
       }
 
@@ -117,18 +117,33 @@ public:
             send_col_ids_list[working_rank].insert(
                 send_col_ids_list[working_rank].end(), col_ids.begin(),
                 col_ids.end());
-            std::unordered_set<MKL_INT> unique_set(
-                send_col_ids_list[working_rank].begin(),
-                send_col_ids_list[working_rank].end());
-            send_col_ids_list[working_rank] =
-                vector<uint64_t>(unique_set.begin(), unique_set.end());
+//            std::unordered_set<MKL_INT> unique_set(
+//                send_col_ids_list[working_rank].begin(),
+//                send_col_ids_list[working_rank].end());
+//            send_col_ids_list[working_rank] =
+//                vector<uint64_t>(unique_set.begin(), unique_set.end());
             //
           }
-          sendcounts[working_rank] = send_col_ids_list[working_rank].size();
+//          sendcounts[working_rank] = send_col_ids_list[working_rank].size();
         }
       }
 
       for (int i = 0; i < grid->world_size; i++) {
+        std::unordered_set<uint64_t> unique_set(
+            receive_col_ids_list[i].begin(),
+            receive_col_ids_list[i].end());
+        receive_col_ids_list[i] =
+            vector<uint64_t>(unique_set.begin(), unique_set.end());
+        receivecounts[i] =
+            receive_col_ids_list[i].size();
+
+        std::unordered_set<uint64_t> unique_set(
+            send_col_ids_list[i].begin(),
+            send_col_ids_list[i].end());
+        send_col_ids_list[i] =
+            vector<uint64_t>(unique_set.begin(), unique_set.end());
+
+        sendcounts[i] = send_col_ids_list[working_rank].size();
 
         sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
         rdispls[i] =
