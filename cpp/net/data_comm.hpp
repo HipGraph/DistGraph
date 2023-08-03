@@ -260,7 +260,7 @@ public:
 //        }
 //      }
 //      delete[] receivebufverify;
-    }
+//    }
     delete[] sendbuf;
 //    delete[] receivebuf;
   }
