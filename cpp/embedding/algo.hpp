@@ -131,17 +131,17 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-                                      batch_size, batch_size);
+//        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+//                                      batch_size, batch_size);
 
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, batch_size);
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, batch_size);
         if (this->grid->world_size > 1) {
-          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-                                        j, batch_size, batch_size);
+//          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+//                                        j, batch_size, batch_size);
         }
 
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size>1){
           MPI_Request request_three;
@@ -151,7 +151,7 @@ public:
                       new vector<DataTuple<DENT, embedding_dim>>());
           this->data_comm->async_transfer(j, false, false, update_ptr.get(),
                                           request_three);
-          this->data_comm->populate_cache(update_ptr.get(), request_three);
+       //   this->data_comm->populate_cache(update_ptr.get(), request_three);
         }
 
       }
