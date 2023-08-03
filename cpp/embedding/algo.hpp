@@ -60,10 +60,24 @@ public:
           unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
               new vector<DataTuple<DENT, embedding_dim>>());
 
+      auto init_cache = std::chrono::high_resolution_clock::now();
       this->data_comm->async_transfer(0, true, false, results_init_ptr.get(),
                                       request);
+      auto transfer_cache = std::chrono::high_resolution_clock::now();
       this->data_comm->populate_cache(results_init_ptr.get(), request);
+      auto cache_update = std::chrono::high_resolution_clock::now();
+
+      auto cache_update_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                                cache_update - transfer_cache)
+                                .count();
+      auto transfer_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                                       transfer_cache - init_cache)
+                                       .count();
+      cout<<" init_cache_transfer "<<(transfer_duration/1000)<<" cache_update "
+           <<(cache_update_duration/1000)<<endl;
     }
+
+    auto negative_update=0
 
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
@@ -90,10 +104,16 @@ public:
               results_negative_ptr =
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
+          auto neg_cache = std::chrono::high_resolution_clock::now();
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request_two);
           this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
+          auto neg_cache_end = std::chrono::high_resolution_clock::now();
+          auto neg_cache_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                                       neg_cache_end - neg_cache)
+                                       .count();
+          negative_update +=neg_cache_duration;
         }
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
@@ -136,6 +156,8 @@ public:
 
       }
     }
+
+    cout<<"negative_update: "<<(negative_update/1000)<<endl;
   }
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
