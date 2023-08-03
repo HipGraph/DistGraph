@@ -24,7 +24,7 @@ private:
 public:
   uint64_t rows;
   unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
-  unique_ptr<vector<unordered_map<uint64_t, >>> cachePtr;
+  unique_ptr<vector<unordered_map<uint64_t, std::array<DENT, embedding_dim>>>> cachePtr;
   DENT *nCoordinates;
   /**
    * create matrix with random initialization
