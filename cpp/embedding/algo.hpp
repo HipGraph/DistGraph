@@ -115,7 +115,7 @@ public:
         CSRLocal<SPT> *csr_block_remote = nullptr;
         if (this->grid->world_size>1) {
          auto remote = (head.get())->next;
-          *csr_block_remote = (remote.get())->data.get();
+          csr_block_remote = (remote.get())->data.get();
         }
 
 
