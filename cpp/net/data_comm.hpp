@@ -126,15 +126,15 @@ public:
         }
       }
 
-      for (int i = 0; i < grid->world_size; i++) {
-
-        sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
-        rdispls[i] =
-            (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-
-        total_send_count = total_send_count + sendcounts[i];
-        total_receive_count = total_receive_count + receivecounts[i];
-      }
+//      for (int i = 0; i < grid->world_size; i++) {
+//
+//        sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
+//        rdispls[i] =
+//            (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
+//
+//        total_send_count = total_send_count + sendcounts[i];
+//        total_receive_count = total_receive_count + receivecounts[i];
+//      }
 
     } else {
       // processing chunks
@@ -202,16 +202,16 @@ public:
       }
     }
 
-    DataTuple<DENT, embedding_dim> *sendbuf =
-        new DataTuple<DENT, embedding_dim>[total_send_count];
-//    DataTuple<DENT, embedding_dim> * receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
-    receivebuf->resize(total_receive_count);
-    DataTuple<DENT, embedding_dim> *receivebufverify;
-    if (verify) {
-      receivebufverify =
-          new DataTuple<DENT, embedding_dim>[total_receive_count];
-    }
-
+//    DataTuple<DENT, embedding_dim> *sendbuf =
+//        new DataTuple<DENT, embedding_dim>[total_send_count];
+////    DataTuple<DENT, embedding_dim> * receivebuf = new DataTuple<DENT, embedding_dim>[total_receive_count];
+//    receivebuf->resize(total_receive_count);
+//    DataTuple<DENT, embedding_dim> *receivebufverify;
+//    if (verify) {
+//      receivebufverify =
+//          new DataTuple<DENT, embedding_dim>[total_receive_count];
+//    }
+//
 //    for (int i = 0; i < grid->world_size; i++) {
 //      vector<uint64_t> sending_vec = send_col_ids_list[i];
 //      vector<uint64_t> receiving_vec = receive_col_ids_list[i];
@@ -232,7 +232,7 @@ public:
 //        }
 //      }
 //    }
-
+//
 //    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
 //                   (*receivebuf).data(), receivecounts.data(), rdispls.data(), DENSETUPLE,
 //                   MPI_COMM_WORLD, &request);
