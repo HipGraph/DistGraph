@@ -111,18 +111,25 @@ public:
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
         //
         auto head = batch_list->getHeadNode();
-        int col_batch_id = 0;
+        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
+        CSRLocal<SPT> *csr_block_remote = nullptr;
+        if (this->grid->world_size>1) {
+         auto remote = (head.get())->next;
+          *csr_block_remote = (remote.get())->data.get();
+        }
+
+
         int working_rank = 0;
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-        while (head != nullptr) {
+//        while (head != nullptr) {
 
-          CSRLocal<SPT> *csr_block = (head.get())->data.get();
+//          CSRLocal<SPT> *csr_block = (head.get())->data.get();
 
           auto start_attrac = std::chrono::high_resolution_clock::now();
 
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
+          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j, batch_size,
                                         batch_size);
           auto end_attrac = std::chrono::high_resolution_clock::now();
           auto attrac_duration =
@@ -132,8 +139,8 @@ public:
           total_attrac_time += attrac_duration;
 
           head = (head.get())->next;
-          ++col_batch_id;
-        }
+
+//        }
 
         auto start_rep = std::chrono::high_resolution_clock::now();
 
