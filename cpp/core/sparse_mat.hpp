@@ -298,6 +298,22 @@ public:
 //                return g_index;
 //              }
 //            });
+
+         #pragma omp simd
+        for(int i=0;i<handle->col_idx).size();i++){
+          if (!return_global_ids) {
+            col_ids[i] = static_cast<uint64_t>(handle->col_idx[i]);
+          }else {
+            int starting_index = (transpose) ? rank * proc_col_width : 0;
+            uint64_t base_id =
+                static_cast<uint64_t>(block_col_id * block_col_width);
+            uint64_t g_index = static_cast<uint64_t>(handle->col_idx[i]) + base_id +
+                               static_cast<uint64_t>(starting_index);
+            col_ids[i] = g_index;
+          }
+
+        }
+
       }
     }
   }
