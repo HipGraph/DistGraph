@@ -102,6 +102,7 @@ public:
         auto head = batch_list->getHeadNode();
         CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
         CSRLocal<SPT> *csr_block_remote = nullptr;
+
         if (this->grid->world_size > 1) {
           auto remote = (head.get())->next;
           csr_block_remote = (remote.get())->data.get();
@@ -149,11 +150,22 @@ public:
               target_rank == (this->grid)->global_rank ? false : true;
           //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
           if (fetch_from_cache) {
-            //            Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-            //                (this->dense_local)
-            //                    ->fetch_data_vector_from_cache(target_rank,
-            //                    global_col_id);
-            //            //            col_vec = col_vec_trans.transpose();
+            std::array<DENT, embedding_dim> colvec =
+                (this->dense_local)
+                    ->fetch_data_vector_from_cache(owner_rank, global_col_id);
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = (this->dense_local)
+                                 ->nCoordinates[row_id * embedding_dim + d] -
+                             colvec[d];
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = scale(forceDiff[d] * d1);
+              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
+            }
+
           } else {
 
             DENT attrc = 0;
@@ -202,11 +214,20 @@ public:
           fetch_from_cache = true;
         }
         if (fetch_from_cache) {
-          //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
-          //              (this->dense_local)
-          //                  ->fetch_data_vector_from_cache(owner_rank,
-          //                  global_col_id);
-          //          col_vec = col_vec_trans.transpose();
+          DENT repuls = 0;
+          std::array<DENT, embedding_dim> colvec =
+              (this->dense_local)
+                  ->fetch_data_vector_from_cache(owner, global_col_id);
+          for (int d = 0; d < embedding_dim; d++) {
+            forceDiff[d] =
+                (this->dense_local)->nCoordinates[row_id * embedding_dim + d] - colvec[d];
+            repuls += forceDiff[d] * forceDiff[d];
+          }
+          DENT d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
+          for (int d = 0; d < embedding_dim; d++) {
+            forceDiff[d] = scale(forceDiff[d] * d1);
+            prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
+          }
         } else {
           DENT repuls = 0;
           for (int d = 0; d < embedding_dim; d++) {

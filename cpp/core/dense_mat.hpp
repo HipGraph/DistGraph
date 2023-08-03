@@ -27,8 +27,7 @@ private:
 public:
   uint64_t rows;
   unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
-  unique_ptr<vector<unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>>>>
-      cachePtr;
+  unique_ptr<vector<unordered_map<uint64_t, >>> cachePtr;
   DENT *nCoordinates;
   /**
    * create matrix with random initialization
@@ -40,7 +39,7 @@ public:
     this->matrixPtr =
         make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
     this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
+        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
         world_size);
 
     this->rows = rows;
@@ -110,20 +109,28 @@ public:
   }
 
   void insert_cache(int rank, int key, std::array<DENT, embedding_dim> &arr) {
-    Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(), embedding_dim);
-    (*this->cachePtr)[rank].insert_or_assign(key, eigenVector);
+//    Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(), embedding_dim);
+    (*this->cachePtr)[rank].insert_or_assign(key, arr);
   }
 
-  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank,
+//  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank,
+//                                                              int key) {
+//    return (*this->cachePtr)[rank][key];
+//  }
+
+  std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
                                                               int key) {
     return (*this->cachePtr)[rank][key];
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
     std::array<DENT, embedding_dim> stdArray;
-    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
-    Eigen::Array<DENT, 1, embedding_dim> eigenArray = matrix.row(local_key).transpose().array();
-    std::copy(eigenArray.data(), eigenArray.data() + embedding_dim, stdArray.data());
+
+    int base_index =   local_key*embedding_dim;
+
+//    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix = *this->matrixPtr;
+//    Eigen::Array<DENT, 1, embedding_dim> eigenArray = matrix.row(local_key).transpose().array();
+    std::copy(base_index, base_index + embedding_dim, stdArray.data());
     return stdArray;
   }
 
