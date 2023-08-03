@@ -58,7 +58,7 @@ public:
     this->matrixPtr =
         make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
     this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
+        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
         world_size);
     (*this->matrixPtr).setRandom();
     nCoordinates =
