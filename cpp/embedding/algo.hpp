@@ -116,7 +116,7 @@ public:
         if (this->grid->world_size > 1) {
 
 
-          if (i=0 and j=0){
+          if (i==0 and j==0){
             this->data_comm->populate_cache(results_init_ptr.get(), request);
           }else {
             this->data_comm->populate_cache(results_init_ptr.get(), update_req);
