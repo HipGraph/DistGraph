@@ -117,6 +117,10 @@ public:
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, batch_size);
+        if (this->grid->world_size > 1) {
+          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+                                        j, batch_size, batch_size);
+        }
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
       }
@@ -220,7 +224,8 @@ public:
                   ->fetch_data_vector_from_cache(owner_rank, global_col_id);
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] =
-                (this->dense_local)->nCoordinates[row_id * embedding_dim + d] - colvec[d];
+                (this->dense_local)->nCoordinates[row_id * embedding_dim + d] -
+                colvec[d];
             repuls += forceDiff[d] * forceDiff[d];
           }
           DENT d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
