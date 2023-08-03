@@ -56,6 +56,12 @@ public:
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
+
+    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+        results_negative_ptr =
+            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+                new vector<DataTuple<DENT, embedding_dim>>());
+
     MPI_Request update_req;
     MPI_Request init_req;
     MPI_Request request_negative;
@@ -85,11 +91,8 @@ public:
         }
 
         if (this->grid->world_size > 1) {
-
-          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-              results_negative_ptr =
-                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                      new vector<DataTuple<DENT, embedding_dim>>());
+          results_negative_ptr.get()->clear();
+          results_negative_ptr.get()->shrink_to_fit();
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request_negative);
@@ -117,7 +120,7 @@ public:
 
 
           if (i==0 and j==0){
-            this->data_comm->populate_cache(results_init_ptr.get(), request);
+            this->data_comm->populate_cache(results_init_ptr.get(), init_req);
           }else {
             this->data_comm->populate_cache(results_init_ptr.get(), update_req);
           }
