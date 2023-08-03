@@ -53,14 +53,14 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
+        unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
+    MPI_Request update_req;
+    MPI_Request init_req;
+    MPI_Request request_negative;
+
     if (this->grid->world_size > 1) {
-      MPI_Request update_req;
-      MPI_Request init_req;
-
-      unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
-          unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
-              new vector<DataTuple<DENT, embedding_dim>>());
-
       this->data_comm->async_transfer(0, true, false, results_init_ptr.get(),
                                       init_req);
     }
@@ -85,14 +85,14 @@ public:
         }
 
         if (this->grid->world_size > 1) {
-          MPI_Request request_two;
+
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
               results_negative_ptr =
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
-                                          request_two);
+                                          request_negative);
         }
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
@@ -128,7 +128,7 @@ public:
 
         //populate negative results cache
         this->data_comm->populate_cache(results_negative_ptr.get(),
-                                        request_two);
+                                        request_negative);
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, batch_size);
 
