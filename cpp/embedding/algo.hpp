@@ -216,6 +216,8 @@ public:
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
+#pragma forceinline
+#pragma omp simd
       for (int j = 0; j < col_ids.size(); j++) {
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
@@ -229,8 +231,6 @@ public:
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
-        //        Eigen::Matrix<DENT, 1, embedding_dim> col_vec;
-
         if (fetch_from_cache) {
           //          Eigen::Matrix<DENT, embedding_dim, 1> col_vec_trans =
           //              (this->dense_local)
@@ -238,9 +238,6 @@ public:
           //                  global_col_id);
           //          col_vec = col_vec_trans.transpose();
         } else {
-
-          //          col_vec =
-          //          (this->dense_local)->fetch_local_eigen_vector(local_col_id);
           DENT repuls = 0;
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = (this->dense_local)->nCoordinates[row_id*embedding_dim + d] -
@@ -267,7 +264,7 @@ public:
         std::min((batch_id + 1) * batch_size, (this->sp_local)->proc_row_width);
 
     for(int i=0;i<(end_row-row_base_index);i++) {
-//      #pragma omp simd
+      #pragma omp simd
       for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)->nCoordinates[(row_base_index+i)*embedding_dim + d] +=
             prevCoordinates[i*embedding_dim + d];
