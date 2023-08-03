@@ -88,9 +88,9 @@ public:
           if (working_rank != grid->global_rank) {
             vector<uint64_t> col_ids;
             this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-//            receive_col_ids_list[working_rank].insert(
-//                receive_col_ids_list[working_rank].end(), col_ids.begin(),
-//                col_ids.end());
+            receive_col_ids_list[working_rank].insert(
+                receive_col_ids_list[working_rank].end(), col_ids.begin(),
+                col_ids.end());
 //            std::unordered_set<MKL_INT> unique_set(
 //                receive_col_ids_list[working_rank].begin(),
 //                receive_col_ids_list[working_rank].end());
