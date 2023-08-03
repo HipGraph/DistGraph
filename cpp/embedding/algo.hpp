@@ -64,7 +64,7 @@ public:
       this->data_comm->async_transfer(0, true, false, results_init_ptr.get(),
                                       request);
       auto transfer_cache = std::chrono::high_resolution_clock::now();
-      this->data_comm->populate_cache(results_init_ptr.get(), request);
+//      this->data_comm->populate_cache(results_init_ptr.get(), request);
       auto cache_update = std::chrono::high_resolution_clock::now();
 
       auto cache_update_duration = std::chrono::duration_cast<std::chrono::microseconds>(
