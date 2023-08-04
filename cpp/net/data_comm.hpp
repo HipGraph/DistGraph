@@ -380,9 +380,6 @@ public:
                       MPI_Request &request) {
     int total_receive_count = 0;
     for(int i=0;i<grid->world_size; i++){
-      cout<<"i "<<i<<" sendscount "<<sendcounts[i]<<" sdisps "
-           <<sdispls[i]<< " receivecounts "<<receivecounts[i]
-           <<" rdisps "<<rdispls[i]<<endl;
       total_receive_count = total_receive_count + receivecounts[i];
     }
 
