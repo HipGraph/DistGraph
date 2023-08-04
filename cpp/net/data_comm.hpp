@@ -432,7 +432,7 @@ public:
         if (fetch_from_cache) {
           if (!(this->dense_local)->searchForKey(global_col_id)) {
             cout<<" Assert not found my_rank "<<grid->global_rank<<
-                "  target_rank "<<owner_rank <<" id "<<global_col_id<<endl;
+                "  target_rank "<<owner_rank <<" id "<<global_col_id<<"batch Id"<<batch_id<<endl;
           }
         }
       }
