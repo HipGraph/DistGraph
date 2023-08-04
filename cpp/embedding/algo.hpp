@@ -170,7 +170,7 @@ public:
             data_comm_cache[j].get()->async_transfer(j, false, false,
                                                update_ptr.get(), request_three);
             this->data_comm->populate_cache(update_ptr.get(), request_three);
-          }else {
+          }else if (i>0) {
             data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
             this->data_comm->populate_cache(update_ptr.get(), request_three);
           }

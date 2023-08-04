@@ -378,6 +378,14 @@ public:
 
   void async_re_transfer(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request) {
+
+    for(int i=0;i<grid->world_size; i++){
+      cout<<"i "<<i<<" sendscount "<<sendcounts[i]<<" sdisps "
+           <<sdispls[i]<< " receivecounts "<<receivecounts[i]
+           <<" rdisps "<<rdispls[i]<<endl;
+    }
+
+
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD, &request);
