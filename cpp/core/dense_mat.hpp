@@ -165,6 +165,17 @@ public:
       }
     }
   }
+
+  bool searchForKey( uint64_t key) {
+    for (const auto& nestedMap : *cachePtr) {
+      auto it = nestedMap.find(key);
+      if (it != nestedMap.end()) {
+        result = it->second;
+        return true; // Key found in the current nestedMap
+      }
+    }
+    return false; // Key not found in any nestedMap
+  }
 };
 
 } // namespace distblas::core

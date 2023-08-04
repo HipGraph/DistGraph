@@ -15,7 +15,6 @@ namespace distblas::net {
  * based on internal data connectivity patterns.
  */
 
-
 template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 
 private:
@@ -28,7 +27,6 @@ private:
   vector<int> rdispls;
   vector<int> receivecounts;
   DataTuple<DENT, embedding_dim> *sendbuf;
-
 
   //  DataTuple<DENT, embedding_dim> *receivebuf;
 
@@ -51,7 +49,7 @@ public:
     //      delete[] receivebuf;
     //    }
     //    cout << "successfully executed" << endl;
-//    delete[] sendbuf;
+    //    delete[] sendbuf;
   }
 
   void async_transfer(int batch_id, bool fetch_all, bool verify,
@@ -256,12 +254,12 @@ public:
               matched = true;
             }
           }
-//          if (!matched) {
-//            cout << " rank " << grid->global_rank
-//                 << "cannot verify value
-//                    "
-//                 << (*receivebuf)[index].col << endl;
-//          }
+          //          if (!matched) {
+          //            cout << " rank " << grid->global_rank
+          //                 << "cannot verify value
+          //                    "
+          //                 << (*receivebuf)[index].col << endl;
+          //          }
         }
       }
       delete[] receivebufverify;
@@ -372,14 +370,15 @@ public:
     }
     //     cout<<"  verification success"<<endl;
     //     delete[] receivebufverify;
-//    delete[] sendbuf;
+    //    delete[] sendbuf;
     //     delete[] receivebuf;
   }
 
-  void async_re_transfer(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request &request) {
+  void
+  async_re_transfer(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+                    MPI_Request &request) {
     int total_receive_count = 0;
-    for(int i=0;i<grid->world_size; i++){
+    for (int i = 0; i < grid->world_size; i++) {
       total_receive_count = total_receive_count + receivecounts[i];
     }
 
@@ -410,5 +409,36 @@ public:
       }
     }
   }
+
+
+  void cross_validate_batch_from_metadata(int batch_id) {
+    int total_nodes = int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
+    for(int i=0;i<total_nodes;i++){
+      vector<uint64_t> col_ids;
+      this->sp_local->fill_col_ids(batch_id, i, col_ids, false, true);
+      for(int j=0;j<col_ids.size();j++){
+        uint64_t global_col_id = col_ids[j];
+        uint64_t local_col_id =
+            global_col_id -
+            static_cast<uint64_t>(
+                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
+        bool fetch_from_cache = false;
+
+        int owner_rank =
+            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
+        if (owner_rank != (this->grid)->global_rank) {
+          fetch_from_cache = true;
+        }
+        if (fetch_from_cache) {
+          if (!(this->dense_local)->searchForKey( uint64_t global_col_id)) {
+            cout<<" Assert not found my_rank "<<grid->global_rank<<
+                "  target_rank "<<owner_rank <<" id "<<global_col_id<<endl;
+          }
+        }
+      }
+    }
+  }
+
+
 };
 } // namespace distblas::net

@@ -307,6 +307,8 @@ public:
     return csr_linked_lists[batch_id].get();
   }
 
+
+
   void print_blocks_and_cols(bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
