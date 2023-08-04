@@ -152,16 +152,26 @@ public:
 
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
-
+        if (this->grid->global_rank==5){
+          cout<<" batch "<<j<<"calc_t_dist_grad_rowptr completed"<<endl;
+        }
        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, batch_size);
+       if (this->grid->global_rank==5){
+         cout<<" batch "<<j<<"repulsive completed"<<endl;
+       }
         if (this->grid->world_size > 1) {
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, batch_size);
+          if (this->grid->global_rank==5){
+            cout<<" batch "<<j<<"remote completed"<<endl;
+          }
         }
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-
+        if (this->grid->global_rank==5){
+          cout<<" batch "<<j<<"update completed"<<endl;
+        }
         if (this->grid->world_size>1){
           MPI_Request request_three;
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
@@ -175,6 +185,9 @@ public:
           }else if (i>0) {
             data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
             this->data_comm->populate_cache(update_ptr.get(), request_three);
+          }
+          if (this->grid->global_rank==5){
+            cout<<" batch "<<j<<"transfer completed"<<endl;
           }
         }
 
