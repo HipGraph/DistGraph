@@ -412,7 +412,7 @@ public:
 
 
   void cross_validate_batch_from_metadata(int batch_id) {
-    int total_nodes = int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
+    int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     for(int i=0;i<total_nodes;i++){
       vector<uint64_t> col_ids;
       this->sp_local->fill_col_ids(batch_id, i, col_ids, false, true);

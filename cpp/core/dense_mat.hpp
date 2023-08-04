@@ -170,7 +170,7 @@ public:
     for (const auto& nestedMap : *cachePtr) {
       auto it = nestedMap.find(key);
       if (it != nestedMap.end()) {
-        result = it->second;
+       auto result = it->second;
         return true; // Key found in the current nestedMap
       }
     }
