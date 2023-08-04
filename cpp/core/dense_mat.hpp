@@ -58,7 +58,7 @@ public:
     this->matrixPtr =
         make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
     this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
+        std::unordered_map<uint64_t, Eigen::Matrix<DENT, embedding_dim, 1>>>>(
         world_size);
     (*this->matrixPtr).setRandom();
     nCoordinates =
@@ -106,7 +106,7 @@ public:
     }
   }
 
-  void insert_cache(int rank, int key, std::array<DENT, embedding_dim> &arr) {
+  void insert_cache(int rank, uint64_t key, std::array<DENT, embedding_dim> &arr) {
     //    Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(),
     //    embedding_dim);
     (*this->cachePtr)[rank].insert_or_assign(key, arr);
@@ -119,18 +119,7 @@ public:
 
   std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
                                                                uint64_t key) {
-    auto& cacheVector = (*this->cachePtr)[rank];
-    auto it = std::find(cacheVector.begin(), cacheVector.end(), key);
-
-    // Check if the value was found
-    if (it == cacheVector.end()) {
-      std::cout << "Value " << key << " not found in the vector." << std::endl;
-//      return std::array<DENT, embedding_dim>(); // Return an empty array or handle the not-found case accordingly.
-    }
-
-    // Assuming the vector contains std::array<DENT, embedding_dim>
-    return cacheVector[std::distance(cacheVector.begin(), it)];
-//    return (*this->cachePtr)[rank][key];
+    return (*this->cachePtr)[rank][key];
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
