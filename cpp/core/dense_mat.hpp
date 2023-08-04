@@ -119,14 +119,18 @@ public:
 
   std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
                                                                uint64 key) {
-
-    auto it = std::find((*this->cachePtr)[rank].begin(), (*this->cachePtr)[rank].end(), key);
+    auto& cacheVector = (*this->cachePtr)[rank];
+    auto it = std::find(cacheVector.begin(), cacheVector.end(), key);
 
     // Check if the value was found
-    if ((it == (*this->cachePtr)[rank].end())) {
+    if (it == cacheVector.end()) {
       std::cout << "Value " << key << " not found in the vector." << std::endl;
+//      return std::array<DENT, embedding_dim>(); // Return an empty array or handle the not-found case accordingly.
     }
-    return (*this->cachePtr)[rank][key];
+
+    // Assuming the vector contains std::array<DENT, embedding_dim>
+    return cacheVector[std::distance(cacheVector.begin(), it)];
+//    return (*this->cachePtr)[rank][key];
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
