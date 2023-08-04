@@ -98,7 +98,9 @@ public:
 
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
-
+        if (this->grid->global_rank==0){
+          cout<<" batch "<<j<<endl;
+        }
         int seed = j + i;
 
         // negative samples generation
