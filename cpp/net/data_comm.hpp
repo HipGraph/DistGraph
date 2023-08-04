@@ -167,7 +167,7 @@ public:
           if (j == working_rank * no_of_nodes_per_proc_list + offset) {
             if (working_rank != grid->global_rank) {
               vector<uint64_t> col_ids;
-//              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
               //
               //              receive_col_ids_list[working_rank].insert(
               //                  receive_col_ids_list[working_rank].end(),
