@@ -67,7 +67,7 @@ public:
           unique_ptr<DataComm<SPT, DENT, embedding_dim>>(new DataComm<SPT, DENT, embedding_dim>(
               sp_local_metadata, sp_local_trans, dense_local,
               grid));
-      data_comm_cache.insert(std::make_pair(i,communicator));
+      data_comm_cache.insert(std::make_pair(i,std::move(communicator)));
     }
 
     if (this->grid->world_size > 1) {
