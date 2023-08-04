@@ -118,7 +118,7 @@ public:
   //  }
 
   std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
-                                                               uint64 key) {
+                                                               uint64_t key) {
     auto& cacheVector = (*this->cachePtr)[rank];
     auto it = std::find(cacheVector.begin(), cacheVector.end(), key);
 
