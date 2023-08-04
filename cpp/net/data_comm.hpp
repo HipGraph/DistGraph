@@ -27,7 +27,7 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-  DataTuple<DENT, embedding_dim> *sendbuf
+  DataTuple<DENT, embedding_dim> *sendbuf;
 
 
   //  DataTuple<DENT, embedding_dim> *receivebuf;
@@ -51,7 +51,7 @@ public:
     //      delete[] receivebuf;
     //    }
     //    cout << "successfully executed" << endl;
-    delete sendbuf[];
+    delete[] sendbuf;
   }
 
   void async_transfer(int batch_id, bool fetch_all, bool verify,
