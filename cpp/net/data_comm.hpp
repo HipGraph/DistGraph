@@ -118,16 +118,16 @@ public:
       }
 
       for (int i = 0; i < grid->world_size; i++) {
-        std::unordered_set<uint64_t> unique_set_receive(
-            receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
-        receive_col_ids_list[i] = vector<uint64_t>(unique_set_receive.begin(),
-                                                   unique_set_receive.end());
+//        std::unordered_set<uint64_t> unique_set_receive(
+//            receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
+//        receive_col_ids_list[i] = vector<uint64_t>(unique_set_receive.begin(),
+//                                                   unique_set_receive.end());
         receivecounts[i] = receive_col_ids_list[i].size();
 
-        std::unordered_set<uint64_t> unique_set_send(
-            send_col_ids_list[i].begin(), send_col_ids_list[i].end());
-        send_col_ids_list[i] =
-            vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
+//        std::unordered_set<uint64_t> unique_set_send(
+//            send_col_ids_list[i].begin(), send_col_ids_list[i].end());
+//        send_col_ids_list[i] =
+//            vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
 
         sendcounts[i] = send_col_ids_list[i].size();
 
