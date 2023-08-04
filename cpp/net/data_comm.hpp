@@ -14,6 +14,8 @@ namespace distblas::net {
  * This class represents the data transfer related operations across processes
  * based on internal data connectivity patterns.
  */
+
+
 template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 
 private:
@@ -25,6 +27,9 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
+  DataTuple<DENT, embedding_dim> *sendbuf
+
+
   //  DataTuple<DENT, embedding_dim> *receivebuf;
 
 public:
@@ -46,6 +51,7 @@ public:
     //      delete[] receivebuf;
     //    }
     //    cout << "successfully executed" << endl;
+    delete sendbuf[];
   }
 
   void async_transfer(int batch_id, bool fetch_all, bool verify,
@@ -200,11 +206,11 @@ public:
       }
     }
 
-    DataTuple<DENT, embedding_dim> *sendbuf =
-        new DataTuple<DENT, embedding_dim>[total_send_count];
+    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 
     receivebuf->resize(total_receive_count);
     DataTuple<DENT, embedding_dim> *receivebufverify;
+
     if (verify) {
       receivebufverify =
           new DataTuple<DENT, embedding_dim>[total_receive_count];
@@ -366,8 +372,15 @@ public:
     }
     //     cout<<"  verification success"<<endl;
     //     delete[] receivebufverify;
-    delete[] sendbuf;
+//    delete[] sendbuf;
     //     delete[] receivebuf;
+  }
+
+  void async_re_transfer(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+                      MPI_Request &request) {
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+                   DENSETUPLE, MPI_COMM_WORLD, &request);
   }
 
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,

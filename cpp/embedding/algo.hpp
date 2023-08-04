@@ -10,6 +10,7 @@
 #include <math.h>
 #include <memory>
 #include <mpi.h>
+#include <unordered_map>
 
 using namespace std;
 using namespace distblas::core;
@@ -24,12 +25,17 @@ class EmbeddingAlgo {
 private:
   DenseMat<DENT, embedding_dim> *dense_local;
   distblas::core::SpMat<SPT> *sp_local;
+  distblas::core::SpMat<SPT> *sp_local_metadata;
+  distblas::core::SpMat<SPT> *sp_local_trans;
   Process3DGrid *grid;
   DataComm<SPT, DENT, embedding_dim> *data_comm;
   DENT MAX_BOUND, MIN_BOUND;
+  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache;
 
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
+                distblas::core::SpMat<SPT> *sp_local_metadata,
+                distblas::core::SpMat<SPT> *sp_local_trans,
                 DenseMat<DENT, embedding_dim> *dense_local,
                 DataComm<SPT, DENT, embedding_dim> *data_comm,
                 Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
@@ -37,6 +43,8 @@ public:
     this->grid = grid;
     this->dense_local = dense_local;
     this->sp_local = sp_local;
+    this->sp_local_metadata = sp_local_metadata;
+    this->sp_local_trans = sp_local_trans;
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
   }
@@ -52,6 +60,15 @@ public:
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
+
+
+    for(int i=0;i<batches; i++) {
+      auto communicator =
+          unique_ptr<DataComm<SPT, DENT, embedding_dim>>(new DataComm<SPT, DENT, embedding_dim>(
+              sp_local_metadata, sp_local_trans, dense_local,
+              grid));
+      data_comm_cache.insert(i,communicator);
+    }
 
     if (this->grid->world_size > 1) {
 
@@ -149,9 +166,14 @@ public:
               update_ptr =
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
-          this->data_comm->async_transfer(j, false, false, update_ptr.get(),
-                                          request_three);
-          this->data_comm->populate_cache(update_ptr.get(), request_three);
+          if (i==0) {
+            data_comm_cache[j].get()->async_transfer(j, false, false,
+                                               update_ptr.get(), request_three);
+            this->data_comm->populate_cache(update_ptr.get(), request_three);
+          }else {
+            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
+            this->data_comm->populate_cache(update_ptr.get(), request_three);
+          }
         }
 
       }
