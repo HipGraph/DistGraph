@@ -250,12 +250,12 @@ public:
               matched = true;
             }
           }
-          if (!matched) {
-            cout << " rank " << grid->global_rank
-                 << "cannot verify value
-                    "
-                 << (*receivebuf)[index].col << endl;
-          }
+//          if (!matched) {
+//            cout << " rank " << grid->global_rank
+//                 << "cannot verify value
+//                    "
+//                 << (*receivebuf)[index].col << endl;
+//          }
         }
       }
       delete[] receivebufverify;
