@@ -138,7 +138,8 @@ int main(int argc, char **argv) {
       embedding_algo =
           unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
               new distblas::embedding::EmbeddingAlgo<int, double, 2>(
-                  shared_sparseMat_combined.get(), dense_mat.get(),
+                  shared_sparseMat_combined.get(), shared_sparseMat.get(),
+                    shared_sparseMat_Trans.get(), dense_mat.get(),
                   communicator.get(), grid.get(), 5, -5));
 
   auto end_init = std::chrono::high_resolution_clock::now();
