@@ -123,7 +123,7 @@ public:
     auto it = std::find((*this->cachePtr)[rank].begin(), (*this->cachePtr)[rank].end(), key);
 
     // Check if the value was found
-    if (it == (*this->cachePtr)[rank].end()) {
+    if (!(it != (*this->cachePtr)[rank].end())) {
       std::cout << "Value " << key << " not found in the vector." << std::endl;
     }
     return (*this->cachePtr)[rank][key];
