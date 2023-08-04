@@ -61,6 +61,7 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
+   cout<<" rank "<<this->grid->global_rank<< " total batches "<<batches<<endl;
 
     for(int i=0;i<batches; i++) {
       auto communicator =
@@ -161,6 +162,9 @@ public:
          cout<<" batch "<<j<<"repulsive completed"<<endl;
        }
         if (this->grid->world_size > 1) {
+          if (this->grid->global_rank==5){
+            cout<<" batch "<<j<<"attempintg remote "<<endl;
+          }
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, batch_size);
           if (this->grid->global_rank==5){
