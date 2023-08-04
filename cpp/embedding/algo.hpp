@@ -171,8 +171,8 @@ public:
                                                update_ptr.get(), request_three);
             this->data_comm->populate_cache(update_ptr.get(), request_three);
           }else {
-//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
-//            this->data_comm->populate_cache(update_ptr.get(), request_three);
+            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
+            this->data_comm->populate_cache(update_ptr.get(), request_three);
           }
         }
 
