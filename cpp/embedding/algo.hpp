@@ -183,11 +183,17 @@ public:
                                                update_ptr.get(), request_three);
             this->data_comm->populate_cache(update_ptr.get(), request_three);
           }else if (i>0) {
+            if (this->grid->global_rank==5){
+              cout<<" batch "<<j<<"attepmting transfer completed"<<endl;
+            }
             data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
+            if (this->grid->global_rank==5){
+              cout<<" batch "<<j<<" transfer completed"<<endl;
+            }
             this->data_comm->populate_cache(update_ptr.get(), request_three);
           }
           if (this->grid->global_rank==5){
-            cout<<" batch "<<j<<"transfer completed"<<endl;
+            cout<<" batch "<<j<<"puplate completed"<<endl;
           }
         }
 
