@@ -79,7 +79,7 @@ public:
               new vector<DataTuple<DENT, embedding_dim>>());
 
       auto init_cache = std::chrono::high_resolution_clock::now();
-      this->data_comm->async_transfer(0, true, false, results_init_ptr.get(),
+      this->data_comm->async_transfer(0, true, true, results_init_ptr.get(),
                                       request);
       auto transfer_cache = std::chrono::high_resolution_clock::now();
       this->data_comm->populate_cache(results_init_ptr.get(), request);
