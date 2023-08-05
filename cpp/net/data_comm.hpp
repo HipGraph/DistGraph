@@ -354,14 +354,14 @@ public:
                     MPI_Request &request) {
     int total_receive_count = 0;
     for (int i = 0; i < grid->world_size; i++) {
-      total_receive_count = total_receive_count + receivecounts[i];
+      total_receive_count  += receivecounts[i];
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
       for(int k=0;k<sendcount;k++){
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -
                         (grid->global_rank) * (this->sp_local)->proc_row_width;
-        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
+//        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
     }
     receivebuf->resize(total_receive_count);
