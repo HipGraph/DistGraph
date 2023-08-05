@@ -119,7 +119,12 @@ public:
 
   std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
                                                                uint64_t key) {
-    return (*this->cachePtr)[rank][key];
+
+    if(this->searchForKey(key)) {
+      return (*this->cachePtr)[rank][key];
+    }else {
+      cout<<"Error cannot find key"<<key<<" for rank "<< rank<<endl;
+    }
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
