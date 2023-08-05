@@ -96,7 +96,7 @@ public:
         coords[i].value = static_cast<T>(values[i]);
 
         if (coords[i].value>60000){
-          cout<<" rank "<<rank <<" found outdated value "<<coords[i].value<<endl
+          cout<<" rank "<<rank <<" found outdated value "<<coords[i].value<<endl;
         }
 
       }
