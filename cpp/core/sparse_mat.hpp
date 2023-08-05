@@ -130,7 +130,7 @@ public:
                        coords.begin() + first_batch_len,
                        [&](const auto &tuple) {
                          const auto &[row, col, value] = tuple;
-                         int64_t modifiedCol = col % (gCols-proc_col_width);
+                         int64_t modifiedCol = col;
                          return Tuple<T>{row, modifiedCol, value};
                        });
       }
@@ -247,8 +247,9 @@ public:
       int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+
       (csr_linked_lists[current_vector_pos].get())
-          ->insert(block_rows, block_cols, num_coords, coords_ptr, num_coords,
+          ->insert(block_rows, (col_merged)?gCols:block_cols, num_coords, coords_ptr, num_coords,
                    false, node_index);
     }
   }

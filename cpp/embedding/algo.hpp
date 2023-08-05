@@ -215,7 +215,7 @@ public:
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
                                       DENT *prevCoordinates, DENT lr,
                                       int batch_id, int batch_size,
-                                      int block_size) {
+                                      int block_size, bool local) {
 
     int row_base_index = batch_id * batch_size;
     if (csr_block->handler != nullptr) {
@@ -229,8 +229,13 @@ public:
 #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
+
+//            uint64_t local_col = csr_handle->col_idx[j];
+//            uint64_t global_col_id = (local)? grid->global_rank*sp_local->proc_col_width+local_col
+
+          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
+          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
           uint64_t local_col =
               global_col_id -
               (this->grid)->global_rank * (this->sp_local)->proc_row_width;
