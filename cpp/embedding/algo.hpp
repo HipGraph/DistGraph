@@ -214,7 +214,7 @@ public:
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
-          if (global_col_id>0){
+          if (global_col_id>60000){
             cout<<" invalid "<<global_col_id<<endl;
           }
 
