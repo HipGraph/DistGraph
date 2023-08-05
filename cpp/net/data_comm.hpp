@@ -356,14 +356,12 @@ public:
       total_receive_count  += receivecounts[i];
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
+      #pragma omp parallel
       for(int k=0;k<sendcount;k++){
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -
                         (grid->global_rank) * (this->sp_local)->proc_row_width;
-        if (local_key<0 or local_key>29000) {
-          cout<< (grid->global_rank) << " trying to access "<<local_key<<endl;
-        }
-//        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
+        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
     }
     receivebuf->resize(total_receive_count);
