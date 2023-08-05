@@ -239,7 +239,6 @@ public:
       }
       delete[] receivebufverify;
     }
-    delete[] sendbuf;
   }
 
   void async_transfer(vector<uint64_t> &col_ids, bool verify,
