@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
                               ini_csr_end2 - ini_csr_end1)
                               .count();
 
-  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
+//  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
 
-//  dense_mat.get()->print_matrix_rowptr();
+  dense_mat.get()->print_matrix_rowptr();
 
   auto io_duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)

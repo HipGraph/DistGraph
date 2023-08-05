@@ -119,14 +119,14 @@ public:
 
   std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
                                                                uint64_t key) {
-    int my_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+//    int my_rank;
+//    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-    if(this->searchForKey(key)) {
+//    if(this->searchForKey(key)) {
       return (*this->cachePtr)[rank][key];
-    }else {
-      cout<<" rank "<< my_rank<<"Error cannot find key"<<key<<" for rank "<< rank<<endl;
-    }
+//    }else {
+//      cout<<" rank "<< my_rank<<"Error cannot find key"<<key<<" for rank "<< rank<<endl;
+//    }
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {

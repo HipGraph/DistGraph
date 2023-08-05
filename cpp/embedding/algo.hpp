@@ -97,16 +97,14 @@ public:
 
     auto negative_update=0;
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i <iterations ; i++) {
       for (int j = 0; j < batches; j++) {
 
-        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<" cross validating"<<endl;
-        this->data_comm->cross_validate_batch_from_metadata(j);
+//        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<" cross validating"<<endl;
+//        this->data_comm->cross_validate_batch_from_metadata(j);
 //        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<" cross validation success"<<endl;
 
-        if (this->grid->global_rank==5){
-          cout<<" batch "<<j<<endl;
-        }
+
         int seed = j + i;
 
         // negative samples generation
@@ -158,29 +156,18 @@ public:
 
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
-        if (this->grid->global_rank==5){
-          cout<<" batch "<<j<<"calc_t_dist_grad_rowptr completed"<<endl;
-        }
+
        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, batch_size);
-       if (this->grid->global_rank==5){
-         cout<<" batch "<<j<<"repulsive completed"<<endl;
-       }
+
         if (this->grid->world_size > 1) {
-          if (this->grid->global_rank==5){
-            cout<<" batch "<<j<<"attempintg remote "<<endl;
-          }
+
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, batch_size);
-          if (this->grid->global_rank==5){
-            cout<<" batch "<<j<<"remote completed"<<endl;
-          }
         }
 
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        if (this->grid->global_rank==5){
-          cout<<" batch "<<j<<"update completed"<<endl;
-        }
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
         if (this->grid->world_size>1){
           MPI_Request request_three;
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
@@ -192,18 +179,12 @@ public:
                                                update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_three);
           }else if (i>0) {
-            if (this->grid->global_rank==5){
-              cout<<" batch "<<j<<"attepmting transfer completed"<<endl;
-            }
+
             data_comm_cache[j].get()->async_re_transfer(update_ptr.get(), request_three);
-            if (this->grid->global_rank==5){
-              cout<<" batch "<<j<<" transfer completed"<<endl;
-            }
+
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_three);
           }
-          if (this->grid->global_rank==5){
-            cout<<" batch "<<j<<"puplate completed"<<endl;
-          }
+
         }
 
       }
@@ -230,10 +211,6 @@ public:
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
-
-//            uint64_t local_col = csr_handle->col_idx[j];
-//            uint64_t global_col_id = (local)? grid->global_rank*sp_local->proc_col_width+local_col
-
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
           uint64_t local_col =
               global_col_id -
@@ -245,10 +222,6 @@ public:
           //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
           if (fetch_from_cache) {
 
-            if (global_col_id>60000){
-              cout<<" rank "<<grid->global_rank<<" requeting large value "<<global_col_id<<" for batch "
-                   <<batch_id<<" i "<<i <<" j "<< j <<endl;
-            }
 
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
