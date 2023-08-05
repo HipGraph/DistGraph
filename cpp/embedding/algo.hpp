@@ -61,7 +61,7 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
-   cout<<" rank "<<this->grid->global_rank<< " total batches "<<batches<<endl;
+   cout<<" rank "<< this->grid->global_rank << " total batches "<<batches<<endl;
 
     for(int i=0;i<batches; i++) {
       auto communicator =
@@ -91,6 +91,7 @@ public:
       auto transfer_duration = std::chrono::duration_cast<std::chrono::microseconds>(
                                        transfer_cache - init_cache)
                                        .count();
+
       cout<<" init_cache_transfer "<<(transfer_duration/1000)<<" cache_update "
            <<(cache_update_duration/1000)<<endl;
     }
