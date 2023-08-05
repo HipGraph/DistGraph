@@ -239,6 +239,12 @@ public:
               target_rank == (this->grid)->global_rank ? false : true;
           //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
           if (fetch_from_cache) {
+
+            if (global_col_id>60000){
+              cout<<" rank "<<grid->global_rank<<" requeting large value "<<global_col_id<<" for batch "
+                   <<batch_id<<" i "<<" j "<< j <<endl;
+            }
+
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
                     ->fetch_data_vector_from_cache(target_rank, global_col_id);
