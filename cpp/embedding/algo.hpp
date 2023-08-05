@@ -167,7 +167,7 @@ public:
                                         j, batch_size, batch_size);
         }
 
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size>1){
           MPI_Request request_three;
