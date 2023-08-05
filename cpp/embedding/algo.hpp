@@ -242,7 +242,7 @@ public:
 
             if (global_col_id>60000){
               cout<<" rank "<<grid->global_rank<<" requeting large value "<<global_col_id<<" for batch "
-                   <<batch_id<<" i "<<" j "<< j <<endl;
+                   <<batch_id<<" i "<<i <<" j "<< j <<endl;
             }
 
             std::array<DENT, embedding_dim> colvec =

@@ -55,6 +55,9 @@ public:
         rArray[i] = coords[i].row;
         cArray[i] = coords[i].col;
         vArray[i] = static_cast<double>(coords[i].value);
+        if (vArray[i]>60000){
+          cout<<" large value found in my rank "<<rank<<" "<<vArray[i]<<endl;
+        }
       }
 
       sparse_operation_t op;
