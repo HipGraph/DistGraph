@@ -353,7 +353,8 @@ public:
               int value = handle->values[k];
 
               if (value>60000){
-                cout<<" Large value encountered "<<" Row "<<i <<" col "<<col<<" value "<<value<<endl;
+                cout<<"Rank "<< rank <<" j "<<j
+                     <<" Large value encountered "<<" Row "<<i <<" col "<<col<<" value "<<value<<endl;
               }
               fout << "(" << col << ", " << value << ") ";
             }
