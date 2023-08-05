@@ -55,9 +55,6 @@ public:
         rArray[i] = coords[i].row;
         cArray[i] = coords[i].col;
         vArray[i] = static_cast<double>(coords[i].value);
-        if (vArray[i]>60000){
-          cout<<" rank "<<rank <<" found outdated value from begining "<<coords[i].value<<endl;
-        }
       }
 
       sparse_operation_t op;

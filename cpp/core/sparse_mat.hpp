@@ -122,14 +122,15 @@ public:
         std::transform(coords.begin(), coords.begin() + first_batch_len,
                        coords.begin(), [&](const auto &tuple) {
                          const auto &[row, col, value] = tuple;
-                         int64_t modifiedCol = col % (first_batch_len);
+//                         int64_t modifiedCol = col % (first_batch_len);
+                         int64_t modifiedCol = col % (proc_col_width);
                          return Tuple<T>{row, modifiedCol, value};
                        });
         std::transform(coords.begin() + first_batch_len, coords.end(),
                        coords.begin() + first_batch_len,
                        [&](const auto &tuple) {
                          const auto &[row, col, value] = tuple;
-                         int64_t modifiedCol = col % (second_batch_len);
+                         int64_t modifiedCol = col % (gCols-proc_col_width);
                          return Tuple<T>{row, modifiedCol, value};
                        });
       }
