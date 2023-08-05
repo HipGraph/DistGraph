@@ -344,7 +344,6 @@ public:
         for (int i = 0; i < numRows; i++) {
           int start = handle->rowStart[i];
           int end = handle->rowStart[i + 1];
-
           fout << "Row " << i << ": ";
           if (num_coords > 0) {
             for (int k = start; k < end; k++) {

@@ -94,6 +94,11 @@ public:
         coords[i].row = rv;
         coords[i].col = col_idx[i];
         coords[i].value = static_cast<T>(values[i]);
+
+        if (coords[i].value>60000){
+          cout<<" rank "<<rank <<" found outdated value "<<coords[i].value<<endl
+        }
+
       }
 
 //      assert(num_coords <= max_nnz);
