@@ -215,7 +215,7 @@ public:
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
                                       DENT *prevCoordinates, DENT lr,
                                       int batch_id, int batch_size,
-                                      int block_size, bool local) {
+                                      int block_size) {
 
     int row_base_index = batch_id * batch_size;
     if (csr_block->handler != nullptr) {
