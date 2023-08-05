@@ -352,6 +352,9 @@ public:
               int col = handle->col_idx[k];
               int value = handle->values[k];
 
+              if (value>60000){
+                cout<<" Large value encountered "<<" Row "<<i <<" col "<<col<<" value "<<value<<endl;
+              }
               fout << "(" << col << ", " << value << ") ";
             }
           }
