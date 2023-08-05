@@ -79,10 +79,10 @@ public:
               new vector<DataTuple<DENT, embedding_dim>>());
 
       auto init_cache = std::chrono::high_resolution_clock::now();
-      this->data_comm->async_transfer(0, true, true, results_init_ptr.get(),
+      data_comm_cache[0].get()->async_transfer(0, true, true, results_init_ptr.get(),
                                       request);
       auto transfer_cache = std::chrono::high_resolution_clock::now();
-      this->data_comm->populate_cache(results_init_ptr.get(), request);
+      data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);
       auto cache_update = std::chrono::high_resolution_clock::now();
 
       auto cache_update_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -129,10 +129,10 @@ public:
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
-          this->data_comm->async_transfer(random_number_vec, false,
+          data_comm_cache[j].get()->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request_two);
-          this->data_comm->populate_cache(results_negative_ptr.get(), request_two);
+          data_comm_cache[j].get()->populate_cache(results_negative_ptr.get(), request_two);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration = std::chrono::duration_cast<std::chrono::microseconds>(
                                        neg_cache_end - neg_cache)
