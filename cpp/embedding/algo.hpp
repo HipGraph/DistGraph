@@ -235,7 +235,6 @@ public:
 //            uint64_t global_col_id = (local)? grid->global_rank*sp_local->proc_col_width+local_col
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
-          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
           uint64_t local_col =
               global_col_id -
               (this->grid)->global_rank * (this->sp_local)->proc_row_width;
