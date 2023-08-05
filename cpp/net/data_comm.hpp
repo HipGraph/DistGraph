@@ -361,6 +361,9 @@ public:
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -
                         (grid->global_rank) * (this->sp_local)->proc_row_width;
+        if (local_key<0 or local_key>29000) {
+          cout<< (grid->global_rank) << " trying to access "<<local_key<<endl;
+        }
 //        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
     }
