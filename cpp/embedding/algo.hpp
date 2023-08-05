@@ -203,16 +203,22 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (int i = 0; i < block_size; i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         DENT forceDiff[embedding_dim];
-#pragma forceinline
-#pragma omp simd
+//#pragma forceinline
+//#pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
+
+          if (global_col_id>0){
+            cout<<" invalid "<<global_col_id<<endl;
+          }
+
+
           uint64_t local_col =
               global_col_id -
               (this->grid)->global_rank * (this->sp_local)->proc_row_width;
@@ -220,9 +226,13 @@ public:
               (int)(global_col_id / (this->sp_local)->proc_row_width);
           bool fetch_from_cache =
               target_rank == (this->grid)->global_rank ? false : true;
-          //          cout<<"("<<i<<","<<global_col_id<<")"<<endl;
-          if (fetch_from_cache) {
 
+
+
+
+
+          if (fetch_from_cache) {
+            cout<<" executing fecth from cache for rank "<<target_rank<<endl;
 
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
