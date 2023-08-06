@@ -62,8 +62,8 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+//    cout << " rank " << this->grid->global_rank << " total batches " << batches
+//         << endl;
 
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
@@ -95,16 +95,16 @@ public:
                                                                 init_cache)
               .count();
 
-      cout << " init_cache_transfer " << (transfer_duration / 1000)
-           << " cache_update " << (cache_update_duration / 1000) << endl;
+//      cout << " init_cache_transfer " << (transfer_duration / 1000)
+//           << " cache_update " << (cache_update_duration / 1000) << endl;
     }
 
     auto negative_update = 0;
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations ; i++) {
       for (int j = 0; j < batches; j++) {
 
-        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
+//        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
 
 //                this->data_comm->cross_validate_batch_from_metadata(j);
 //                cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
@@ -161,13 +161,13 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-        cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
+//        cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
 
-        //       this->calc_t_dist_replus_rowptr(prevCoordinates,
-        //       random_number_vec, lr,
-        //                                        j, batch_size, batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates,
+               random_number_vec, lr,
+                                                j, batch_size, batch_size);
 
         if (this->grid->world_size > 1) {
 
@@ -175,8 +175,7 @@ public:
                                         j, batch_size, batch_size);
         }
 
-        //        this->update_data_matrix_rowptr(prevCoordinates, j,
-        //        batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j,batch_size);
 
         if (this->grid->world_size > 1) {
           MPI_Request request_three;
@@ -212,15 +211,12 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      //#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (int i = 0; i < block_size; i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         DENT forceDiff[embedding_dim];
-        cout<<i<<"i "<<" for loop starting completed for i"<<i<<" outof "<<block_size<<endl;
-        cout<<i<<" i "<<" executing csr_handle_j<<"<<static_cast<uint64_t>(csr_handle->rowStart[i])<<endl;
-        cout<<i<<" i "<<" executing end csr_handle_j<<"<<static_cast<uint64_t>(csr_handle->rowStart[i+1])<<endl;
-        //#pragma forceinline
-        //#pragma omp simd
+        #pragma forceinline
+        #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
@@ -235,8 +231,8 @@ public:
               target_rank == (this->grid)->global_rank ? false : true;
 
           if (fetch_from_cache) {
-            cout << " executing fecth from cache for rank " << target_rank
-                 << endl;
+//            cout << " executing fecth from cache for rank " << target_rank
+//                 << endl;
 
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
@@ -271,7 +267,7 @@ public:
             }
           }
         }
-        cout<<" for loop successfully completed for i"<<i<<" outof "<<block_size<<endl;
+//        cout<<" for loop successfully completed for i"<<i<<" outof "<<block_size<<endl;
       }
     }
   }
