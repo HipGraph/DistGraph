@@ -171,7 +171,7 @@ public:
         const std::array<DENT, embedding_dim> &value = kvp.second;
         fout << key << " ";
         for (int i = 0; i < embedding_dim; ++i) {
-          fout << value(i) << " ";
+          fout << value[i] << " ";
         }
         fout << std::endl;
       }
