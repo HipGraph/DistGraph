@@ -217,6 +217,7 @@ public:
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         DENT forceDiff[embedding_dim];
         cout<<" for loop starting completed for i"<<i<<" outof "<<block_size<<endl;
+        cout<<" executing csr_handle_j<<"<<static_cast<uint64_t>(csr_handle->rowStart[i])<<endl;
         //#pragma forceinline
         //#pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
