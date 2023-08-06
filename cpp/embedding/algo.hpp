@@ -273,7 +273,7 @@ public:
 //            }
           }
         }
-        cout<<" for loop successfully completed "<<endl;
+        cout<<" for loop successfully completed for i"<<i<<" outof "<<block_size<<endl;
       }
     }
   }
