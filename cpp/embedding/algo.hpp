@@ -101,14 +101,14 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < 1; i++) {
       for (int j = 0; j < batches; j++) {
 
-        //        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
-        //        cross validating"<<endl;
-        //        this->data_comm->cross_validate_batch_from_metadata(j);
-        //        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
-        //        cross validation success"<<endl;
+        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
+
+//                this->data_comm->cross_validate_batch_from_metadata(j);
+//                cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
+//                cross validation success"<<endl;
 
         int seed = j + i;
 
