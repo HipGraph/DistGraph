@@ -161,6 +161,7 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
+        cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
 
