@@ -95,8 +95,8 @@ public:
                                                                 init_cache)
               .count();
 
-//      cout << " init_cache_transfer " << (transfer_duration / 1000)
-//           << " cache_update " << (cache_update_duration / 1000) << endl;
+      cout << " init_cache_transfer " << (transfer_duration / 1000)
+           << " cache_update " << (cache_update_duration / 1000) << endl;
     }
 
     auto negative_update = 0;
@@ -161,7 +161,7 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-//        cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
+       cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
 
@@ -197,6 +197,7 @@ public:
           }
         }
       }
+      cout << "print cache: " << endl;
       dense_local->print_cache(i);
     }
     cout << "negative_update: " << (negative_update / 1000) << endl;
