@@ -214,7 +214,7 @@ public:
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
-          if (global_col_id>60000){
+          if (global_col_id>59999 or row_id > 59999 or row_id< 0 or global_col_id<0){
             cout<<" invalid "<<global_col_id<<endl;
           }
 
@@ -228,9 +228,6 @@ public:
               target_rank == (this->grid)->global_rank ? false : true;
 
 
-
-
-
           if (fetch_from_cache) {
             cout<<" executing fecth from cache for rank "<<target_rank<<endl;
 
@@ -239,8 +236,7 @@ public:
                     ->fetch_data_vector_from_cache(target_rank, global_col_id);
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-              forceDiff[d] = (this->dense_local)
-                                 ->nCoordinates[row_id * embedding_dim + d] -
+              forceDiff[d] = (this->dense_local)->nCoordinates[row_id * embedding_dim + d] -
                              colvec[d];
               attrc += forceDiff[d] * forceDiff[d];
             }
