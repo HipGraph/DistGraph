@@ -257,7 +257,7 @@ public:
             }
 
           } else {
-
+            cout << " executing force calculation "  << endl;
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               forceDiff[d] = (this->dense_local)
