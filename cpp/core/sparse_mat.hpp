@@ -170,9 +170,9 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          if (col_merged) {
-            std::cout << " j " << j << std::endl;
-          }
+//          if (col_merged) {
+////            std::cout << " j " << j << std::endl;
+//          }
           current_start += batch_size;
           ++matched_count;
         }

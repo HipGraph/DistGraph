@@ -62,8 +62,7 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     int batches = ((this->dense_local)->rows / batch_size);
 
-//    cout << " rank " << this->grid->global_rank << " total batches " << batches
-//         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
