@@ -245,11 +245,6 @@ public:
                       std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request) {
 
-    vector<int> sdispls = vector<int>(grid->world_size, 0);
-    vector<int> sendcounts = vector<int>(grid->world_size, 0);
-    vector<int> rdispls = vector<int>(grid->world_size, 0);
-    vector<int> receivecounts = vector<int>(grid->world_size, 0);
-
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<uint64_t> send_col_ids_list;
 

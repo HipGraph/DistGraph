@@ -132,10 +132,10 @@ public:
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
-          data_comm_cache[j].get()->async_transfer(random_number_vec, false,
+          this->data_comm->async_transfer(random_number_vec, false,
                                                    results_negative_ptr.get(),
                                                    request_two);
-          data_comm_cache[j].get()->populate_cache(results_negative_ptr.get(),
+          this->data_comm->populate_cache(results_negative_ptr.get(),
                                                    request_two);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
