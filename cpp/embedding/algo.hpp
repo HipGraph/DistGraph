@@ -160,7 +160,7 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-       cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
+//       cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
 
@@ -196,7 +196,7 @@ public:
 //          }
         }
       }
-      cout << "print cache: " << endl;
+//      cout << "print cache: " << endl;
 //      dense_local->print_cache(i);
 //      dense_local->print_matrix_rowptr( i);
     }
