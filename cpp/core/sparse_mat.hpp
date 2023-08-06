@@ -170,7 +170,9 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-
+          if (col_merged) {
+            std::cout << " j " << j << std::endl;
+          }
           current_start += batch_size;
           ++matched_count;
         }
@@ -182,6 +184,10 @@ public:
       }
 
       int expected_matched_count = std::max(1, (proc_row_width / batch_size));
+      if (col_merged) {
+        std::cout << " expected_matched_count "
+                  << expected_matched_count<< " matched_count "<<matched_count << std::endl;
+      }
       if (matched_count < expected_matched_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
