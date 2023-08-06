@@ -5,6 +5,7 @@
 #include "../core/sparse_mat.hpp"
 #include "../net/process_3D_grid.hpp"
 #include "CombBLAS/CombBLAS.h"
+#include "../core/dense_mat.hpp"
 
 using namespace std;
 using namespace distblas::core;
@@ -78,5 +79,25 @@ public:
     sp_mat->gNNz = G.get()->getnnz();
 
   }
+
+  template <typename T>
+  void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols) {
+    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+    MPI_File fh;
+    MPI_File_open(MPI_COMM_WORLD, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+
+    for (uint64_t i = 0; i < rows; ++i) {
+       uint64_t   node_id = i + 1+ proc_rank*rows;
+       char buffer[100];
+       int offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
+      for (int j = 0; j < cols; ++j) {
+        offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
+      }
+      offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
+      MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
+    }
+    MPI_File_close(&fh);
+  }
+
 };
 } // namespace distblas::io
