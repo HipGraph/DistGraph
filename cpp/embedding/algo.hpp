@@ -101,7 +101,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations ; i++) {
+    for (int i = 0; i < 5 ; i++) {
       for (int j = 0; j < batches; j++) {
 
 //        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
@@ -197,8 +197,8 @@ public:
           }
         }
       }
+      dense_local->print_cache(i);
     }
-
     cout << "negative_update: " << (negative_update / 1000) << endl;
   }
 

@@ -52,15 +52,15 @@ public:
    */
   DenseMat(uint64_t rows, double init_mean, double std, int world_size) {
     this->rows = rows;
-    random_device rd;
-    mt19937 gen(rd());
-    normal_distribution<> distribution(init_mean, std);
-    this->matrixPtr =
-        make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
-    this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
-        world_size);
-    (*this->matrixPtr).setRandom();
+//    random_device rd;
+//    mt19937 gen(rd());
+//    normal_distribution<> distribution(init_mean, std);
+//    this->matrixPtr =
+//        make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
+//    this->cachePtr = std::make_unique<std::vector<
+//        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
+//        world_size);
+//    (*this->matrixPtr).setRandom();
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
     for (int i = 0; i < (*this->matrixPtr).rows(); i++) {
@@ -151,23 +151,24 @@ public:
     return matrix.row(local_key);
   }
 
-  void print_cache() {
+  void print_cache(int iter) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     for (int i = 0; i < (*this->cachePtr).size(); i++) {
-      unordered_map<uint64_t, Matrix<DENT, embedding_dim, 1>> map =
+      unordered_map<uint64_t,  std::array<DENT, embedding_dim>> map =
           (*this->cachePtr)[i];
 
       string output_path =
-          "rank_" + to_string(rank) + "remote_rank_" + to_string(i) + ".txt";
+          "rank_" + to_string(rank) + "remote_rank_" +
+          to_string(i) +" itr_"+to_string(iter)+".txt";
       char stats[500];
       strcpy(stats, output_path.c_str());
       ofstream fout(stats, std::ios_base::app);
 
       for (const auto &kvp : map) {
         uint64_t key = kvp.first;
-        const Eigen::Matrix<DENT, embedding_dim, 1> &value = kvp.second;
+        const std::array<DENT, embedding_dim> &value = kvp.second;
         fout << key << " ";
         for (int i = 0; i < embedding_dim; ++i) {
           fout << value(i) << " ";

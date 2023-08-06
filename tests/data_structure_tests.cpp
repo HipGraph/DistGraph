@@ -96,15 +96,15 @@ int main(int argc, char **argv) {
 
   auto ini_csr_start =
       std::chrono::high_resolution_clock::now();
-  shared_sparseMat.get()->initialize_CSR_blocks(600, 600, true, false);
+  shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
   auto ini_csr_end1 =
       std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 600, true,
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
                                                       true);
   auto ini_csr_end2 =
       std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(600, localBRows, true,
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
                                                          false);
 
   auto ini_csr_end =
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-  embedding_algo.get()->algo_force2_vec_ns(1200, 600, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, 300, 5, 0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
