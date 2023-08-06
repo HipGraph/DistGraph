@@ -57,9 +57,9 @@ public:
 //    normal_distribution<> distribution(init_mean, std);
 //    this->matrixPtr =
 //        make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
-//    this->cachePtr = std::make_unique<std::vector<
-//        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
-//        world_size);
+    this->cachePtr = std::make_unique<std::vector<
+        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
+        world_size);
 //    (*this->matrixPtr).setRandom();
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
@@ -67,7 +67,7 @@ public:
       for (int j = 0; j < (*this->matrixPtr).cols(); j++) {
         DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
         nCoordinates[i * embedding_dim + j] = val;
-        (*this->matrixPtr)(i, j) = val;
+//        (*this->matrixPtr)(i, j) = val;
       }
     }
   }
