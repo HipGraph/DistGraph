@@ -216,17 +216,13 @@ public:
       for (int i = 0; i < block_size; i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         DENT forceDiff[embedding_dim];
+        cout<<" for loop starting completed for i"<<i<<" outof "<<block_size<<endl;
         //#pragma forceinline
         //#pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
-
-          if (global_col_id > 59999 or row_id > 59999 or row_id < 0 or
-              global_col_id < 0) {
-            cout << " invalid " << global_col_id << endl;
-          }
 
           uint64_t local_col =
               global_col_id -
