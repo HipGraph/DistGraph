@@ -92,10 +92,10 @@ public:
     }
   }
 
-  void print_matrix_rowptr() {
+  void print_matrix_rowptr(int iter) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    string output_path = "embedding.txt";
+    string output_path = "itr_" +to_string(iter)+"_embedding.txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
