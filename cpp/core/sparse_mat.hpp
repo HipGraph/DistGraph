@@ -118,6 +118,7 @@ public:
           std::distance(coords.begin(), std::next(endIt).base());
       uint64_t first_batch_len = (endIndex + 1) - startIndex;
       uint64_t second_batch_len = coords.size() - first_batch_len;
+
       if (mod_ind) {
         std::transform(coords.begin(), coords.begin() + first_batch_len,
                        coords.begin(), [&](const auto &tuple) {
@@ -137,6 +138,8 @@ public:
 
       block_col_starts.push_back(0);
       block_col_starts.push_back(first_batch_len);
+      std::cout << " first_batch_len " << first_batch_len << " size "
+                << coords.size()<< std::endl;
     }
     block_col_starts.push_back(coords.size());
   }
