@@ -198,7 +198,7 @@ public:
       }
       cout << "print cache: " << endl;
       dense_local->print_cache(i);
-      dense_local->print_matrix_rowptr( iter);
+      dense_local->print_matrix_rowptr( i);
     }
     cout << "negative_update: " << (negative_update / 1000) << endl;
   }
