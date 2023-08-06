@@ -82,6 +82,7 @@ public:
 
   template <typename T>
   void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols) {
+    int proc_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
     MPI_File fh;
     MPI_File_open(MPI_COMM_WORLD, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
