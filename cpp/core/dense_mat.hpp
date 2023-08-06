@@ -63,8 +63,8 @@ public:
 //    (*this->matrixPtr).setRandom();
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
-    for (int i = 0; i < (*this->matrixPtr).rows(); i++) {
-      for (int j = 0; j < (*this->matrixPtr).cols(); j++) {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < embedding_dim; j++) {
         DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
         nCoordinates[i * embedding_dim + j] = val;
 //        (*this->matrixPtr)(i, j) = val;
