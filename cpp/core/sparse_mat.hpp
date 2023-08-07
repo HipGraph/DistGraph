@@ -43,7 +43,7 @@ public:
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
   SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols, uint64_t &gNNz,
-        uint64_t &block_row_width, uint64_t &block_col_width, uint64_t &proc_row_width,
+        int &block_row_width, int &block_col_width, int &proc_row_width,
         int &proc_col_width, bool col_merged) {
     this->gRows = gRows;
     this->gCols = gCols;
