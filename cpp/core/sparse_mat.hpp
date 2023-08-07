@@ -121,7 +121,7 @@ public:
       uint64_t first_batch_len = (endIndex + 1) - startIndex;
       uint64_t second_batch_len = coords.size() - first_batch_len;
 
-      int considered_col_width;
+      int considered_col_width=proc_col_width;
       if (rank == world_size - 1) {
         considered_col_width = gCols - proc_col_width * (world_size - 1);
       }
@@ -198,7 +198,7 @@ public:
             std::max(1, static_cast<int>(proc_row_width / batch_size));
       } else {
         expected_matched_count =
-            std::max(1, static_cast<int>(proc_row_width / batch_size))+1;
+            std::max(1, static_cast<int>(proc_row_width / batch_size))+1; //TODO:Error prone
       }
 
       if (col_merged) {
@@ -236,8 +236,8 @@ public:
 
 
 
-    int no_of_lists = (transpose) ? ((proc_col_width %block_cols == 0)?proc_col_width / block_cols:proc_col_width / block_cols+1)
-                                  : ((proc_row_width %block_rows == 0)?proc_row_width / block_rows:proc_row_width / block_rows+1);
+    int no_of_lists = (transpose) ? ((proc_col_width %block_cols == 0)?(proc_col_width / block_cols):(proc_col_width / block_cols)+1)
+                                  : ((proc_row_width %block_rows == 0)?(proc_row_width / block_rows):(proc_row_width / block_rows)+1);
 
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
