@@ -39,6 +39,13 @@ public:
     int world_size = process_3D_grid->world_size;
     int my_rank = process_3D_grid->global_rank;
 
+    int considered_row_width;
+    if (rank == world_size - 1) {
+      considered_row_width = shared_sparseMat.get()->gRows -
+                             sp_mat->proc_row_width * (grid.get()->world_size - 1);
+    }
+
+
     Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
 
     if (world_size > 1) {
@@ -54,7 +61,7 @@ public:
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col,
-                                      sp_mat->proc_row_width,
+                                      considered_row_width,
                                       sp_mat->proc_col_width,
                                       sp_mat->gCols,transpose);
 #pragma omp atomic update
@@ -66,7 +73,7 @@ public:
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col,
-                                      sp_mat->proc_row_width,
+                                      considered_row_width,
                                       sp_mat->proc_col_width,
                                       sp_mat->gCols,transpose);
 

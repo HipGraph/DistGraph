@@ -54,9 +54,16 @@ int main(int argc, char **argv) {
        << " completed " << endl;
 
   auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
-                                       grid.get()->world_size);
+                                        grid.get()->world_size);
   auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
-                                       grid.get()->world_size);
+                                        grid.get()->world_size);
+
+//  if (rank == grid.get()->world_size - 1) {
+//    localBRows = shared_sparseMat.get()->gCols -
+//                 localBRows * (grid.get()->world_size - 1);
+//    localARows = shared_sparseMat.get()->gRows -
+//                 localARows * (grid.get()->world_size - 1);
+//  }
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
@@ -81,8 +88,8 @@ int main(int argc, char **argv) {
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
       batch_size, localARows, localBRows, true);
 
-  auto partitioner =
-      unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(grid.get()));
+  auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
+      new GlobalAdjacency1DPartitioner(grid.get()));
 
   cout << " rank " << rank << " partitioning data started  " << endl;
 
@@ -92,33 +99,35 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
-  auto ini_csr_start =
-      std::chrono::high_resolution_clock::now();
-  shared_sparseMat.get()->initialize_CSR_blocks(batch_size, batch_size, true, false);
-  auto ini_csr_end1 =
-      std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, batch_size, true,
-                                                      true);
-  auto ini_csr_end2 =
-      std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows, true,
-                                                         false);
 
-  auto ini_csr_end =
-      std::chrono::high_resolution_clock::now();
+
+  auto ini_csr_start = std::chrono::high_resolution_clock::now();
+  shared_sparseMat.get()->initialize_CSR_blocks(batch_size, batch_size, true,
+                                                false);
+  auto ini_csr_end1 = std::chrono::high_resolution_clock::now();
+
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, batch_size,
+                                                      true, true);
+  auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,
+                                                         true, false);
+
+  auto ini_csr_end = std::chrono::high_resolution_clock::now();
 
   auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(
-                            ini_csr_end - ini_csr_start)
-                            .count();
-  auto ini_csr_duration1 = std::chrono::duration_cast<std::chrono::microseconds>(
-                              ini_csr_end1 - ini_csr_start)
+                              ini_csr_end - ini_csr_start)
                               .count();
-  auto ini_csr_duration2 = std::chrono::duration_cast<std::chrono::microseconds>(
-                              ini_csr_end2 - ini_csr_end1)
-                              .count();
+  auto ini_csr_duration1 =
+      std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end1 -
+                                                            ini_csr_start)
+          .count();
+  auto ini_csr_duration2 =
+      std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end2 -
+                                                            ini_csr_end1)
+          .count();
 
-//  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
+  //  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
@@ -132,14 +141,14 @@ int main(int argc, char **argv) {
           shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
           grid.get()));
 
-    cout << " rank " << rank << " async started  " << endl;
+  cout << " rank " << rank << " async started  " << endl;
 
   unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
       embedding_algo =
           unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
               new distblas::embedding::EmbeddingAlgo<int, double, 2>(
                   shared_sparseMat_combined.get(), shared_sparseMat.get(),
-                    shared_sparseMat_Trans.get(), dense_mat.get(),
+                  shared_sparseMat_Trans.get(), dense_mat.get(),
                   communicator.get(), grid.get(), 5, -5));
 
   auto end_init = std::chrono::high_resolution_clock::now();
@@ -149,8 +158,9 @@ int main(int argc, char **argv) {
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
 
-  reader->parallel_write("embedding.txt",dense_mat.get()->nCoordinates, localARows,2);
-//  dense_mat.get()->print_matrix_rowptr(0);
+  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,
+                         localARows, 2);
+  //  dense_mat.get()->print_matrix_rowptr(0);
 
   auto io_duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
@@ -165,10 +175,9 @@ int main(int argc, char **argv) {
   cout << " io: " << (io_duration / 1000)
        << " initialization: " << (init_duration / 1000)
        << " training: " << (train_duration / 1000)
-      << " ini CSR duration: "<<(ini_csr_duration/1000)
-       <<" ini_csr_duration1 "<<(ini_csr_duration1/1000)
-       <<" ini_csr_duration2 "<<(ini_csr_duration2/1000)
-       <<endl;
+       << " ini CSR duration: " << (ini_csr_duration / 1000)
+       << " ini_csr_duration1 " << (ini_csr_duration1 / 1000)
+       << " ini_csr_duration2 " << (ini_csr_duration2 / 1000) << endl;
 
   MPI_Finalize();
   return 0;

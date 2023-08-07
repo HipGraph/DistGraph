@@ -42,9 +42,9 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols, uint64_t &gNNz,
-        int &block_row_width, int &block_col_width, int &proc_row_width,
-        int &proc_col_width, bool col_merged) {
+  SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols,
+        uint64_t &gNNz, int &block_row_width, int &block_col_width,
+        int &proc_row_width, int &proc_col_width, bool col_merged) {
     this->gRows = gRows;
     this->gCols = gCols;
     this->gNNz = gNNz;
@@ -65,8 +65,10 @@ public:
   SpMat() {}
 
   void divide_block_cols(int batch_size, bool mod_ind, bool trans) {
-    int rank;
+    int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     block_col_starts.clear();
 
     int current_start = 0;
@@ -93,8 +95,8 @@ public:
       int end_index = 0;
       uint64_t checking_index = rank * proc_col_width;
       //      uint64_t checking_index = 1;
-      uint64_t checking_end_index =
-          std::min(static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
+      uint64_t checking_end_index = std::max(
+          static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
 
       auto startIt = std::find_if(coords.begin(), coords.end(),
                                   [&checking_index](const auto &tuple) {
@@ -119,12 +121,19 @@ public:
       uint64_t first_batch_len = (endIndex + 1) - startIndex;
       uint64_t second_batch_len = coords.size() - first_batch_len;
 
+      int considered_col_width;
+      if (rank == world_size - 1) {
+        considered_col_width = gCols - proc_col_width * (world_size - 1);
+      }
+
       if (mod_ind) {
         std::transform(coords.begin(), coords.begin() + first_batch_len,
-                       coords.begin(), [&](const auto &tuple) {
+                       coords.begin(),
+                       [&considered_row_width](const auto &tuple) {
                          const auto &[row, col, value] = tuple;
-//                         int64_t modifiedCol = col % (first_batch_len);
-                         int64_t modifiedCol = col % (proc_col_width);
+                         //                         int64_t modifiedCol = col %
+                         //                         (first_batch_len);
+                         int64_t modifiedCol = col % (considered_row_width);
                          return Tuple<T>{row, modifiedCol, value};
                        });
         std::transform(coords.begin() + first_batch_len, coords.end(),
@@ -139,7 +148,7 @@ public:
       block_col_starts.push_back(0);
       block_col_starts.push_back(first_batch_len);
       std::cout << " first_batch_len " << first_batch_len << " size "
-                << coords.size()<< std::endl;
+                << coords.size() << std::endl;
     }
     block_col_starts.push_back(coords.size());
   }
@@ -170,9 +179,9 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-//          if (col_merged) {
-////            std::cout << " j " << j << std::endl;
-//          }
+          //          if (col_merged) {
+          ////            std::cout << " j " << j << std::endl;
+          //          }
           current_start += batch_size;
           ++matched_count;
         }
@@ -183,10 +192,18 @@ public:
         }
       }
 
-      int expected_matched_count = std::max(1, static_cast<int>(proc_row_width / batch_size));
+      int expected_matched_count = 0;
+      if (proc_row_width %batch_size == 0) {
+        expected_matched_count =
+            std::max(1, static_cast<int>(proc_row_width / batch_size));
+      } else {
+        expected_matched_count =
+            std::max(1, static_cast<int>(proc_row_width / batch_size))+1;
+      }
+
       if (col_merged) {
-        std::cout << " expected_matched_count "
-                  << expected_matched_count<< " matched_count "<<matched_count << std::endl;
+        std::cout << " expected_matched_count " << expected_matched_count
+                  << " matched_count " << matched_count << std::endl;
       }
       if (matched_count < expected_matched_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
@@ -208,7 +225,7 @@ public:
                               ini_csr_end - ini_csr_start)
                               .count();
 
-    cout << " data preprocessing CSR " << train_duration / 1000 << endl;
+    cout <<" data preprocessing CSR " << train_duration / 1000 << endl;
 
     int col_block = 0;
 
@@ -217,8 +234,10 @@ public:
                     : (gCols / block_cols); // This assumes 1D partitioning, we
                                             // need to generalized this
 
-    int no_of_lists = (transpose) ? (proc_col_width / block_cols)
-                                  : (proc_row_width / block_rows);
+
+
+    int no_of_lists = (transpose) ? ((proc_col_width %block_cols == 0)?proc_col_width / block_cols:proc_col_width / block_cols+1)
+                                  : ((proc_row_width %block_rows == 0)?proc_row_width / block_rows:proc_row_width / block_rows+1);
 
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
@@ -258,8 +277,8 @@ public:
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
 
       (csr_linked_lists[current_vector_pos].get())
-          ->insert(block_rows, (col_merged)?gCols:block_cols, num_coords, coords_ptr, num_coords,
-                   false, node_index);
+          ->insert(block_rows, (col_merged) ? gCols : block_cols, num_coords,
+                   coords_ptr, num_coords, false, node_index);
     }
   }
 
@@ -318,8 +337,6 @@ public:
     return csr_linked_lists[batch_id].get();
   }
 
-
-
   void print_blocks_and_cols(bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -362,9 +379,11 @@ public:
               int col = handle->col_idx[k];
               int value = handle->values[k];
 
-              if (value>60000){
-                cout<<"Rank "<< rank <<" j "<<j
-                     <<" Large value encountered "<<" Row "<<i <<" col "<<col<<" value "<<value<<endl;
+              if (value > 60000) {
+                cout << "Rank " << rank << " j " << j
+                     << " Large value encountered "
+                     << " Row " << i << " col " << col << " value " << value
+                     << endl;
               }
               fout << "(" << col << ", " << value << ") ";
             }
