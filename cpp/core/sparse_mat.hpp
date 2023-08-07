@@ -183,7 +183,7 @@ public:
         }
       }
 
-      int expected_matched_count = std::max(1, (proc_row_width / batch_size));
+      int expected_matched_count = std::max(1, static_cast<int>(proc_row_width / batch_size));
       if (col_merged) {
         std::cout << " expected_matched_count "
                   << expected_matched_count<< " matched_count "<<matched_count << std::endl;
