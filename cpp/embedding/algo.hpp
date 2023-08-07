@@ -144,7 +144,7 @@ public:
                   .count();
           negative_update += neg_cache_duration;
         }
-
+        cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
 
         auto head = batch_list->getHeadNode();
@@ -160,7 +160,7 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-//       cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
+        cout<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
 
