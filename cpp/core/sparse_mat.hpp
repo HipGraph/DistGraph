@@ -28,10 +28,10 @@ private:
   vector<shared_ptr<CSRLinkedList<T>>> csr_linked_lists;
 
 public:
-  int gRows, gCols, gNNz;
+  uint64_t gRows, gCols, gNNz;
   vector<Tuple<T>> coords;
-  int block_row_width, block_col_width;
-  int proc_col_width, proc_row_width;
+  uint64_t block_row_width, block_col_width;
+  uint64_t proc_col_width, proc_row_width;
   int number_of_local_csr_nodes;
   bool col_merged = false;
 
@@ -42,8 +42,8 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(vector<Tuple<T>> &coords, int &gRows, int &gCols, int &gNNz,
-        int &block_row_width, int &block_col_width, int &proc_row_width,
+  SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols, uint64_t &gNNz,
+        uint64_t &block_row_width, uint64_t &block_col_width, uint64_t &proc_row_width,
         int &proc_col_width, bool col_merged) {
     this->gRows = gRows;
     this->gCols = gCols;

@@ -53,9 +53,9 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path
        << " completed " << endl;
 
-  int localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
+  auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                        grid.get()->world_size);
-  int localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
+  auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
                                        grid.get()->world_size);
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
@@ -82,9 +82,7 @@ int main(int argc, char **argv) {
       batch_size, localARows, localBRows, true);
 
   auto partitioner =
-      unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(
-          shared_sparseMat.get()->gRows, shared_sparseMat.get()->gCols,
-          grid.get()));
+      unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(grid.get()));
 
   cout << " rank " << rank << " partitioning data started  " << endl;
 
@@ -96,15 +94,15 @@ int main(int argc, char **argv) {
 
   auto ini_csr_start =
       std::chrono::high_resolution_clock::now();
-  shared_sparseMat.get()->initialize_CSR_blocks(300, 300, true, false);
+  shared_sparseMat.get()->initialize_CSR_blocks(batch_size, batch_size, true, false);
   auto ini_csr_end1 =
       std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, 300, true,
+  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, batch_size, true,
                                                       true);
   auto ini_csr_end2 =
       std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(300, localBRows, true,
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows, true,
                                                          false);
 
   auto ini_csr_end =
@@ -146,7 +144,7 @@ int main(int argc, char **argv) {
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-  embedding_algo.get()->algo_force2_vec_ns(1200, 300, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;

@@ -23,18 +23,15 @@ public:
 class GlobalAdjacency1DPartitioner : public Partitioner {
 
 public:
-  int proc_row_width;
-  int proc_col_width;
   Process3DGrid *process_3D_grid;
 
-  GlobalAdjacency1DPartitioner(int gRows, int gCols,
-                               Process3DGrid *process_3D_grid);
+  GlobalAdjacency1DPartitioner(Process3DGrid *process_3D_grid);
 
   ~GlobalAdjacency1DPartitioner();
 
   int block_owner(int row_block, int col_block);
 
-  int get_owner_Process(int row, int column, bool transpose);
+  int get_owner_Process(uint64_t row, uint64_t column, uint64_t  proc_row_width, uint64_t  proc_col_width, uint64_t gCols,bool transpose);
 
   template <typename T>
   void partition_data(distblas::core::SpMat<T> *sp_mat, bool transpose) {
@@ -56,7 +53,10 @@ public:
 
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
-        int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
+        int owner = get_owner_Process(coords[i].row, coords[i].col,
+                                      sp_mat->proc_row_width,
+                                      sp_mat->proc_col_width,
+                                      sp_mat->gCols,transpose);
 #pragma omp atomic update
         sendcounts[owner]++;
       }
@@ -65,7 +65,10 @@ public:
 
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
-        int owner = get_owner_Process(coords[i].row, coords[i].col, transpose);
+        int owner = get_owner_Process(coords[i].row, coords[i].col,
+                                      sp_mat->proc_row_width,
+                                      sp_mat->proc_col_width,
+                                      sp_mat->gCols,transpose);
 
         int idx;
 #pragma omp atomic capture

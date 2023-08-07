@@ -6,7 +6,7 @@ using namespace std;
 MPI_Datatype distblas::core::SPTUPLE;
 MPI_Datatype distblas::core::DENSETUPLE;
 
-int distblas::core::divide_and_round_up(int num, int denom){
+uint64_t distblas::core::divide_and_round_up(uint64_t num, int denom){
   if (num % denom > 0) {
     return num / denom + 1;
   }

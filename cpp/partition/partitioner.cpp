@@ -4,9 +4,7 @@
 
 using namespace  distblas::partition;
 
-GlobalAdjacency1DPartitioner::GlobalAdjacency1DPartitioner(int gRows, int gCols, Process3DGrid *process_3D_grid){
-  this->proc_row_width = divide_and_round_up(gRows, process_3D_grid->world_size);
-  this->proc_col_width = gCols;
+GlobalAdjacency1DPartitioner::GlobalAdjacency1DPartitioner(Process3DGrid *process_3D_grid){
   this->process_3D_grid =  process_3D_grid;
 
 }
@@ -21,11 +19,12 @@ int GlobalAdjacency1DPartitioner::block_owner(int row_block, int col_block) {
 
 }
 
-int GlobalAdjacency1DPartitioner::get_owner_Process(int row, int column, bool transpose) {
+int GlobalAdjacency1DPartitioner::get_owner_Process(uint64_t row, uint64_t column, uint64_t  proc_row_width,
+                                                    uint64_t  proc_col_width, uint64_t gCols,bool transpose) {
   if(!transpose) {
-    return block_owner(row / proc_row_width,  column/proc_col_width);
+    return block_owner(static_cast<int>(row / proc_row_width),  static_cast<int>(column/gCols));
   }
   else {
-    return block_owner(column / proc_row_width,  row/proc_col_width);
+    return block_owner(static_cast<int>(column / proc_row_width),  static_cast<int>(row/gCols));
   }
 }
