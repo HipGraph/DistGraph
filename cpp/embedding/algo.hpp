@@ -60,7 +60,6 @@ public:
   }
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
-    int batches = ((this->dense_local)->rows / batch_size);
     int last_batch_size=0;
 
     int batches = 0;
