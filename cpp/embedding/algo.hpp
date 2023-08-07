@@ -339,7 +339,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
     int end_row =
-        std::min((batch_id + 1) * batch_size, static_cast<int>((this->sp_local)->proc_row_width));
+        std::min((batch_id + 1) * batch_size, ((this->sp_local)->proc_row_width));
 
     for (int i = 0; i < (end_row - row_base_index); i++) {
 #pragma omp simd

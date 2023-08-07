@@ -30,8 +30,8 @@ private:
 public:
   uint64_t gRows, gCols, gNNz;
   vector<Tuple<T>> coords;
-  uint64_t block_row_width, block_col_width;
-  uint64_t proc_col_width, proc_row_width;
+  int block_row_width, block_col_width;
+  int proc_col_width, proc_row_width;
   int number_of_local_csr_nodes;
   bool col_merged = false;
 
