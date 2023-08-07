@@ -181,19 +181,19 @@ public:
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
               unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                   new vector<DataTuple<DENT, embedding_dim>>());
-          if (i == 0) {
+//          if (i == 0) {
             data_comm_cache[j].get()->async_transfer(
                 j, false, false, update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                      request_three);
-          } else if (i > 0) {
-
-            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-                                                        request_three);
-
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                     request_three);
-          }
+//          } else if (i > 0) {
+//
+//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+//                                                        request_three);
+//
+//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+//                                                     request_three);
+//          }
         }
       }
 //      cout << "print cache: " << endl;
