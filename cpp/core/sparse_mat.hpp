@@ -205,10 +205,10 @@ public:
             std::max(1, static_cast<int>(proc_row_width / batch_size))+1; //TODO:Error prone
       }
 
-      if (col_merged) {
-        std::cout << " expected_matched_count " << expected_matched_count
-                  << " matched_count " << matched_count << std::endl;
-      }
+//      if (col_merged) {
+//        std::cout << " expected_matched_count " << expected_matched_count
+//                  << " matched_count " << matched_count << std::endl;
+//      }
       if (matched_count < expected_matched_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
       }

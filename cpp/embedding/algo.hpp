@@ -100,10 +100,10 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < 1 ; i++) {
+    for (int i = 0; i < iterations ; i++) {
       for (int j = 0; j < batches; j++) {
 
-        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
+//        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
 
 //                this->data_comm->cross_validate_batch_from_metadata(j);
 //                cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
@@ -144,7 +144,7 @@ public:
                   .count();
           negative_update += neg_cache_duration;
         }
-        cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
+//        cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
 
         auto head = batch_list->getHeadNode();
@@ -160,10 +160,10 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-        cout<<" rank  "<<this->grid->global_rank<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
+//        cout<<" rank  "<<this->grid->global_rank<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
-        cout<<" rank  "<<this->grid->global_rank<<"executiong first row updatefor batch "<<j<<" completed "<<endl;
+//        cout<<" rank  "<<this->grid->global_rank<<"executiong first row updatefor batch "<<j<<" completed "<<endl;
 
         this->calc_t_dist_replus_rowptr(prevCoordinates,
                random_number_vec, lr,
