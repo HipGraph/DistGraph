@@ -42,7 +42,7 @@ public:
 
     int considered_row_width;
     if (my_rank == world_size - 1) {
-      considered_row_width = sp_mat->gRows - sp_mat->proc_row_width * (world_size - 1);
+      considered_row_width = sp_mat->gRows - sp_mat->proc_row_width *my_rank ;
     }
 
     Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
