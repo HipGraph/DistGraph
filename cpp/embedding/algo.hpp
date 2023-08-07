@@ -100,7 +100,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < 1 ; i++) {:q1
+    for (int i = 0; i < 1 ; i++) {
       for (int j = 0; j < batches; j++) {
 
         cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
