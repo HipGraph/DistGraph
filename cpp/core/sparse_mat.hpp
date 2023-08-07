@@ -95,8 +95,12 @@ public:
       int end_index = 0;
       uint64_t checking_index = rank * proc_col_width;
       //      uint64_t checking_index = 1;
-      uint64_t checking_end_index = std::max(
-          static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
+      uint64_t checking_end_index = (rank + 1) * proc_col_width - 1;
+
+      if (rank == world_size -1) {
+        checking_end_index = std::max(
+            static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
+      }
 
       auto startIt = std::find_if(coords.begin(), coords.end(),
                                   [&checking_index](const auto &tuple) {
