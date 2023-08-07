@@ -15,7 +15,7 @@ using namespace std;
 
 namespace distblas::core {
 
-uint64_t divide_and_round_up(uint64_t num, int denom);
+int divide_and_round_up(uint64_t num, int denom);
 
 vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                     int ns);
