@@ -163,6 +163,7 @@ public:
         cout<<" rank  "<<this->grid->global_rank<<"executiong first row updatefor batch "<<j<<" batch_size "<<batch_size<<endl;
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, batch_size);
+        cout<<" rank  "<<this->grid->global_rank<<"executiong first row updatefor batch "<<j<<" completed "<<endl;
 
         this->calc_t_dist_replus_rowptr(prevCoordinates,
                random_number_vec, lr,
@@ -181,19 +182,19 @@ public:
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
               unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                   new vector<DataTuple<DENT, embedding_dim>>());
-//          if (i == 0) {
+          if (i == 0) {
             data_comm_cache[j].get()->async_transfer(
                 j, false, false, update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                      request_three);
-//          } else if (i > 0) {
-//
-//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-//                                                        request_three);
-//
-//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                     request_three);
-//          }
+          } else if (i > 0) {
+
+            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+                                                        request_three);
+
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                     request_three);
+          }
         }
       }
 //      cout << "print cache: " << endl;
