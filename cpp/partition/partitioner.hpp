@@ -31,7 +31,8 @@ public:
 
   int block_owner(int row_block, int col_block);
 
-  int get_owner_Process(uint64_t row, uint64_t column, uint64_t  proc_row_width, uint64_t  proc_col_width, uint64_t gCols,bool transpose);
+  int get_owner_Process(uint64_t row, uint64_t column, uint64_t  proc_row_width,
+                        uint64_t  proc_col_width, uint64_t gCols,bool transpose);
 
   template <typename T>
   void partition_data(distblas::core::SpMat<T> *sp_mat, bool transpose) {
@@ -40,11 +41,9 @@ public:
     int my_rank = process_3D_grid->global_rank;
 
     int considered_row_width;
-    if (rank == world_size - 1) {
-      considered_row_width = shared_sparseMat.get()->gRows -
-                             sp_mat->proc_row_width * (grid.get()->world_size - 1);
+    if (my_rank == world_size - 1) {
+      considered_row_width = shared_sparseMat.get()->gRows - sp_mat->proc_row_width * (world_size - 1);
     }
-
 
     Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
 
