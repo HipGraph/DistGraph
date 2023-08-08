@@ -72,36 +72,46 @@ public:
     block_col_starts.clear();
 
     int current_start = 0;
+    int next_start = batch_size;
     if (trans) {
       current_start = proc_col_width * rank;
+      next_start = current_start + batch_size
     }
 
     if (!col_merged) {
       // TODO: introduce atomic capture
       bool divided_equallaly = true;
-      int last_proc_batch_size =  batch_size;
-      int batch_count = proc_col_width/batch_size;
-      if (!trans and proc_col_width % batch_size !=0) {
+      int last_proc_batch_size = batch_size;
+      int batch_count = proc_col_width / batch_size;
+      if (!trans and proc_col_width % batch_size != 0) {
 
-          divided_equallaly = false;
-          last_proc_batch_size = proc_col_width - batch_size*batch_count;
-          batch_count = batch_count+1;
+        divided_equallaly = false;
+        last_proc_batch_size = proc_col_width - batch_size * batch_count;
+        batch_count = batch_count + 1;
       }
 
       for (uint64_t i = 0; i < coords.size(); i++) {
         while (coords[i].col >= current_start) {
           block_col_starts.push_back(i);
-          if(!divided_equallaly) {
-            if (i > 0 and block_col_starts.size() % batch_count ==0) {
-              current_start += last_proc_batch_size;
+          if (coords[i].col < next_start) {
+            if (!divided_equallaly) {
+              if (i > 0 and block_col_starts.size() % batch_count == 0) {
+                current_start += last_proc_batch_size;
+              } else if (i > 0 and
+                         block_col_starts.size() % (batch_count - 1) == 0) {
+                next_start += last_proc_batch_size;
+              } else {
+                current_start += batch_size;
+                next_start += batch_size;
+              }
             } else {
               current_start += batch_size;
+              next_start += batch_size;
             }
-          } else {
-            current_start += batch_size;
           }
-          if (rank == 0){
-            cout<<" current start: "<<current_start<<" size: "<<block_col_starts.size()<<endl;
+          if (rank == 0) {
+            cout << " current start: " << current_start
+                 << " size: " << block_col_starts.size() << endl;
           }
         }
 
@@ -118,7 +128,7 @@ public:
       //      uint64_t checking_index = 1;
       uint64_t checking_end_index = (rank + 1) * proc_col_width - 1;
 
-      if (rank == world_size -1) {
+      if (rank == world_size - 1) {
         checking_end_index = std::max(
             static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
       }
@@ -146,7 +156,7 @@ public:
       uint64_t first_batch_len = (endIndex + 1) - startIndex;
       uint64_t second_batch_len = coords.size() - first_batch_len;
 
-      int considered_col_width=proc_col_width;
+      int considered_col_width = proc_col_width;
       if (rank == world_size - 1) {
         considered_col_width = gCols - proc_col_width * (world_size - 1);
       }
@@ -176,8 +186,9 @@ public:
                 << coords.size() << std::endl;
     }
     block_col_starts.push_back(coords.size());
-    if (!col_merged){
-      std::cout << " trans "<<trans << "col_blocks" << block_col_starts.size()  << std::endl;
+    if (!col_merged) {
+      std::cout << " trans " << trans << "col_blocks" << block_col_starts.size()
+                << std::endl;
     }
   }
 
@@ -203,14 +214,14 @@ public:
       }
 
       bool divided_equallaly = true;
-      int last_proc_batch_size =  batch_size;
-      int batch_count = proc_row_width/batch_size;
-      if (trans and proc_row_width % batch_size !=0) {
+      int last_proc_batch_size = batch_size;
+      int batch_count = proc_row_width / batch_size;
+      if (trans and proc_row_width % batch_size != 0) {
         divided_equallaly = false;
-        last_proc_batch_size = proc_row_width - batch_size*batch_count;
-        batch_count = batch_count+1;
-      } else if(proc_row_width %batch_size !=0) {
-        batch_count = batch_count+1;
+        last_proc_batch_size = proc_row_width - batch_size * batch_count;
+        batch_count = batch_count + 1;
+      } else if (proc_row_width % batch_size != 0) {
+        batch_count = batch_count + 1;
       }
 
       // TODO: introduce atomic capture
@@ -218,8 +229,8 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          if(!divided_equallaly) {
-            if (i > 0 and block_row_starts.size() % batch_count ==0) {
+          if (!divided_equallaly) {
+            if (i > 0 and block_row_starts.size() % batch_count == 0) {
               current_start += last_proc_batch_size;
             } else {
               current_start += batch_size;
@@ -228,8 +239,9 @@ public:
             current_start += batch_size;
           }
           ++matched_count;
-          if (rank == 0){
-            cout<<" current row start: "<<current_start<<" size: "<<block_row_starts.size()<<endl;
+          if (rank == 0) {
+            cout << " current row start: " << current_start
+                 << " size: " << block_row_starts.size() << endl;
           }
         }
 
@@ -239,18 +251,18 @@ public:
         }
       }
 
-
-
-//      if (col_merged) {
-//        std::cout << " expected_matched_count " << expected_matched_count
-//                  << " matched_count " << matched_count << std::endl;
-//      }
+      //      if (col_merged) {
+      //        std::cout << " expected_matched_count " <<
+      //        expected_matched_count
+      //                  << " matched_count " << matched_count << std::endl;
+      //      }
       if (matched_count < batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
-//      if (!col_merged and trans and rank ==0){
-//        std::cout << " i th batch "<<i << " row_blocks" << block_row_starts.size()  << std::endl;
-//      }
+      //      if (!col_merged and trans and rank ==0){
+      //        std::cout << " i th batch "<<i << " row_blocks" <<
+      //        block_row_starts.size()  << std::endl;
+      //      }
     }
     block_row_starts.push_back(coords.size());
   }
@@ -268,7 +280,7 @@ public:
                               ini_csr_end - ini_csr_start)
                               .count();
 
-    cout <<" data preprocessing CSR " << train_duration / 1000 << endl;
+    cout << " data preprocessing CSR " << train_duration / 1000 << endl;
 
     int col_block = 0;
 
@@ -277,10 +289,12 @@ public:
                     : (gCols / block_cols); // This assumes 1D partitioning, we
                                             // need to generalized this
 
-
-
-    int no_of_lists = (transpose) ? ((proc_col_width %block_cols == 0)?(proc_col_width / block_cols):(proc_col_width / block_cols)+1)
-                                  : ((proc_row_width %block_rows == 0)?(proc_row_width / block_rows):(proc_row_width / block_rows)+1);
+    int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
+                                         ? (proc_col_width / block_cols)
+                                         : (proc_col_width / block_cols) + 1)
+                                  : ((proc_row_width % block_rows == 0)
+                                         ? (proc_row_width / block_rows)
+                                         : (proc_row_width / block_rows) + 1);
 
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
