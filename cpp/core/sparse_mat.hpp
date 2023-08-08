@@ -246,9 +246,9 @@ public:
       batch_count = batch_count + 1;
     }
 
-    if (rank==0){
-      cout<<" trans "<<trans<< " expected_batch_count "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
-    }
+//    if (rank==0){
+//      cout<<" trans "<<trans<< " expected_batch_count "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
+//    }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
@@ -303,10 +303,10 @@ public:
               next_start += batch_size;
             }
           }
-          if (rank == 0 ) {
-            cout << " current row start: " << current_start
-                 << " size: " << matched_count << endl;
-          }
+//          if (rank == 0 ) {
+//            cout << " current row start: " << current_start
+//                 << " size: " << matched_count << endl;
+//          }
         }
 
         // This modding step helps indexing.
@@ -327,10 +327,10 @@ public:
         block_row_starts.push_back(block_col_starts[i + 1]);
         matched_count++;
       }
-      if ( rank == 0) {
-        std::cout << " i th batch " << i << " row_blocks"
-                  << block_row_starts.size() << std::endl;
-      }
+//      if ( rank == 0) {
+//        std::cout << " i th batch " << i << " row_blocks"
+//                  << block_row_starts.size() << std::endl;
+//      }
     }
     block_row_starts.push_back(coords.size());
   }
@@ -373,7 +373,7 @@ public:
                                          : (proc_row_width / block_rows) + 1);
 
 
-    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << " number_of_local_csr_nodes " << this->number_of_local_csr_nodes << endl;
+//    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << " number_of_local_csr_nodes " << this->number_of_local_csr_nodes << endl;
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
