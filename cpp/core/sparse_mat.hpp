@@ -94,8 +94,8 @@ public:
         while (coords[i].col >= current_start) {
           block_col_starts.push_back(i);
 
-          if (coords[i].col<next_start) {
-            while (coords[i].col < next_start) {
+          if (coords[i].col>=next_start) {
+            while (coords[i].col >= next_start) {
               block_col_starts.push_back(i);
               if (!divided_equallaly) {
                 if (i > 0 and block_col_starts.size() % batch_count == 0) {
