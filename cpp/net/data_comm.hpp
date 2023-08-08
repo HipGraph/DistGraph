@@ -84,7 +84,8 @@ public:
     int total_send_count = 0;
     int total_receive_count = 0;
 
-    cout<<" rank "<< grid->global_rank<<" initialization completed "<<" starting fetching all"<<endl;
+    cout<<" rank "<< grid->global_rank<<" no_of_lists "<<no_of_lists
+         <<" no_of_lists_trans "<< no_of_lists_trans<<" no_of_nodes_per_proc_list "<<no_of_nodes_per_proc_list<<endl;
     // processing initial communication
     if (fetch_all and batch_id == 0) {
 
