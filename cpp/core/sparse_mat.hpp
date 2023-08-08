@@ -352,7 +352,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     int world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 
     cout << "rank"<<rank<< " initialization time " << train_duration / 1000 << endl;
@@ -361,7 +361,7 @@ public:
 
     this->number_of_local_csr_nodes =
         (transpose) ? (gRows / block_rows)
-                    : (((proc_col_width/block_cols)+1)*world_size); // This assumes 1D partitioning, we
+                    : ((proc_col_width %block_cols)==0)? (((proc_col_width/block_cols)+1)*world_size):(gCols/block_cols); // This assumes 1D partitioning, we
                                             // need to generalized this
 
 
@@ -373,7 +373,7 @@ public:
                                          : (proc_row_width / block_rows) + 1);
 
 
-    cout << "rank"<<rank<< " no_of_lists  " << " number_of_local_csr_nodes " << this->number_of_local_csr_nodes << endl;
+    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << " number_of_local_csr_nodes " << this->number_of_local_csr_nodes << endl;
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
