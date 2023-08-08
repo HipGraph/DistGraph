@@ -233,6 +233,21 @@ public:
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     block_row_starts.clear();
 
+    int expected_batch_count = (trans)? ((proc_row_width % batch_size ==0)?(gRows/batch_size):(((proc_row_width/batch_size)+1)*world_size)):(proc_row_width / batch_size);
+
+    bool divided_equallaly = true;
+    int last_proc_batch_size = batch_size;
+    int batch_count = proc_row_width / batch_size;
+
+    if (proc_row_width % batch_size != 0) {
+      divided_equallaly = false;
+      last_proc_batch_size = proc_row_width - batch_size * batch_count;
+      batch_count = batch_count + 1;
+    }
+
+    if (rank==0){
+      cout<<" trans "<<trans<< " expected_batch_count "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
+    }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
@@ -241,23 +256,6 @@ public:
         current_start = 0;
         next_start = batch_size;
       }
-
-      bool divided_equallaly = true;
-      int last_proc_batch_size = batch_size;
-      int batch_count = proc_row_width / batch_size;
-      int expected_batch_count = (trans)? ((proc_row_width % batch_size ==0)?(gRows/batch_size):(((proc_row_width/batch_size)+1)*world_size)):(proc_row_width / batch_size);
-      if (rank==0){
-        cout<<" trans "<<trans<< " expected_batch_count "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
-      }
-
-      if (proc_row_width % batch_size != 0) {
-        divided_equallaly = false;
-        last_proc_batch_size = proc_row_width - batch_size * batch_count;
-        batch_count = batch_count + 1;
-      }
-//      } else if (proc_row_width % batch_size != 0) {
-//        batch_count = batch_count + 1;
-//      }
 
       // TODO: introduce atomic capture
       int matched_count = 0;
