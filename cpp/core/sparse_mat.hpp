@@ -75,7 +75,7 @@ public:
     int next_start = batch_size;
     if (trans) {
       current_start = proc_col_width * rank;
-      next_start = current_start + batch_size
+      next_start = current_start + batch_size;
     }
 
     if (!col_merged) {
