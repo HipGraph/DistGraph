@@ -59,17 +59,24 @@ public:
     int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
     int total_nodes_trans =
         this->sp_local_trans->gRows / this->sp_local_trans->block_row_width;
+
     int no_of_nodes_per_proc_list =
-        (this->sp_local->proc_col_width / this->sp_local->block_col_width);
-    int no_of_nodes_per_proc_list_trans =
-        (this->sp_local_trans->proc_row_width /
-         this->sp_local_trans->block_row_width);
+        (this->sp_local->proc_col_width % this->sp_local->block_col_width==0)?
+                                                                                (this->sp_local->proc_col_width / this->sp_local->block_col_width):
+                                                                                (this->sp_local->proc_col_width / this->sp_local->block_col_width)+1;
 
-    int no_of_lists =
-        (this->sp_local->proc_row_width / this->sp_local->block_row_width);
+    int no_of_nodes_per_proc_list_trans = ((this->sp_local_trans->proc_row_width % this->sp_local_trans->block_row_width)==0)?
+                                              (this->sp_local_trans->proc_row_width /this->sp_local_trans->block_row_width):
+                                              (this->sp_local_trans->proc_row_width /this->sp_local_trans->block_row_width)+1;
 
-    int no_of_lists_trans = (this->sp_local_trans->proc_col_width /
-                             this->sp_local_trans->block_col_width);
+    int no_of_lists = (this->sp_local->proc_row_width % this->sp_local->block_row_width)==0)?
+                     (this->sp_local->proc_row_width / this->sp_local->block_row_width)
+                     :(this->sp_local->proc_row_width / this->sp_local->block_row_width)+1;
+
+    int no_of_lists_trans = ((this->sp_local_trans->proc_col_width %
+                             this->sp_local_trans->block_col_width)==0)?
+                                (this->sp_local_trans->proc_col_width / this->sp_local_trans->block_col_width):
+                                (this->sp_local_trans->proc_col_width / this->sp_local_trans->block_col_width)+1;
 
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<vector<uint64_t>> send_col_ids_list(grid->world_size);
@@ -101,23 +108,23 @@ public:
 
       // calculating sending data cols
 
-      for (int i = 0; i < no_of_lists_trans; i++) {
-        int working_rank = 0;
-
-        for (int j = 0; j < total_nodes_trans; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-            ++working_rank;
-          }
-          if (working_rank != grid->global_rank) {
-            vector<uint64_t> col_ids;
-            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-            send_col_ids_list[working_rank].insert(
-                send_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
-          }
-        }
-      }
-    }
+//      for (int i = 0; i < no_of_lists_trans; i++) {
+//        int working_rank = 0;
+//
+//        for (int j = 0; j < total_nodes_trans; j++) {
+//          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
+//            ++working_rank;
+//          }
+//          if (working_rank != grid->global_rank) {
+//            vector<uint64_t> col_ids;
+//            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
+//            send_col_ids_list[working_rank].insert(
+//                send_col_ids_list[working_rank].end(), col_ids.begin(),
+//                col_ids.end());
+//          }
+//        }
+//      }
+//    }
     cout<<" rank "<< grid->global_rank<<" calc completed "<<endl;
 //    } else {
 //      // processing chunks
