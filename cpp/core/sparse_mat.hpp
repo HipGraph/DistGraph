@@ -118,8 +118,10 @@ public:
             if (!divided_equallaly) {
               if (i > 0 and block_col_starts.size() % batch_count == 0) {
                 current_start += last_proc_batch_size;
+                next_start += batch_size;
               } else if (i > 0 and
                          (block_col_starts.size() + 1) % batch_count == 0) {
+                current_start += batch_size;
                 next_start += last_proc_batch_size;
               } else {
                 current_start += batch_size;
