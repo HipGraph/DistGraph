@@ -155,6 +155,9 @@ public:
                 << coords.size() << std::endl;
     }
     block_col_starts.push_back(coords.size());
+    if (!col_merged){
+      std::cout << " trans "<<trans << "col_blocks" << block_col_starts.size()  << std::endl;
+    }
   }
 
   void sort_by_rows() {
