@@ -78,10 +78,28 @@ public:
 
     if (!col_merged) {
       // TODO: introduce atomic capture
+      bool divided_equallaly = true;
+      int last_proc_batch_size =  batch_size;
+      int batch_count = proc_col_width/batch_size;
+      if (!trans and proc_col_width % batch_size !=0) {
+
+          divided_equallaly = false;
+          last_proc_batch_size = proc_col_width - batch_size*batch_count;
+//          batch_count = batch_count+1;
+      }
+
       for (uint64_t i = 0; i < coords.size(); i++) {
         while (coords[i].col >= current_start) {
           block_col_starts.push_back(i);
-          current_start += batch_size;
+          if(!divided_equallaly) {
+            if (i > 0 and block_col_starts.size() % batch_count ==0) {
+              current_start += last_proc_batch_size;
+            } else {
+              current_start += batch_size;
+            }
+          } else {
+            current_start += batch_size;
+          }
         }
 
         // This modding step helps indexing.
