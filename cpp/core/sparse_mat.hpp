@@ -348,63 +348,63 @@ public:
                               ini_csr_end - ini_csr_start)
                               .count();
 
-    cout << " data preprocessing CSR " << train_duration / 1000 << endl;
-
-    int col_block = 0;
-
-    this->number_of_local_csr_nodes =
-        (transpose) ? (gRows / block_rows)
-                    : (gCols / block_cols); // This assumes 1D partitioning, we
-                                            // need to generalized this
-
-    int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
-                                         ? (proc_col_width / block_cols)
-                                         : (proc_col_width / block_cols) + 1)
-                                  : ((proc_row_width % block_rows == 0)
-                                         ? (proc_row_width / block_rows)
-                                         : (proc_row_width / block_rows) + 1);
-
-    csr_linked_lists =
-        std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
-
-    for (int i = 0; i < no_of_lists; i++) {
-      csr_linked_lists[i] =
-          std::make_shared<CSRLinkedList<T>>(this->number_of_local_csr_nodes);
-    }
-
-    auto ini_csr_end_while = std::chrono::high_resolution_clock::now();
-    auto train_duration_init =
-        std::chrono::duration_cast<std::chrono::microseconds>(
-            ini_csr_end_while - ini_csr_end)
-            .count();
-    cout << " train duration while " << train_duration_init / 1000 << endl;
-
-    int node_index = 0;
-    for (int j = 0; j < block_row_starts.size() - 1; j++) {
-      int current_vector_pos = 0;
-      if (!transpose) {
-        current_vector_pos = j % no_of_lists;
-        if (j > 0 and current_vector_pos == 0) {
-          ++col_block;
-          ++node_index;
-        }
-      } else {
-        current_vector_pos = j / this->number_of_local_csr_nodes;
-        col_block = current_vector_pos;
-        if (node_index >= this->number_of_local_csr_nodes) {
-          node_index = 0;
-        }
-        ++node_index;
-      }
-
-      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
-
-      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
-
-      (csr_linked_lists[current_vector_pos].get())
-          ->insert(block_rows, (col_merged) ? gCols : block_cols, num_coords,
-                   coords_ptr, num_coords, false, node_index);
-    }
+//    cout << " data preprocessing CSR " << train_duration / 1000 << endl;
+//
+//    int col_block = 0;
+//
+//    this->number_of_local_csr_nodes =
+//        (transpose) ? (gRows / block_rows)
+//                    : (gCols / block_cols); // This assumes 1D partitioning, we
+//                                            // need to generalized this
+//
+//    int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
+//                                         ? (proc_col_width / block_cols)
+//                                         : (proc_col_width / block_cols) + 1)
+//                                  : ((proc_row_width % block_rows == 0)
+//                                         ? (proc_row_width / block_rows)
+//                                         : (proc_row_width / block_rows) + 1);
+//
+//    csr_linked_lists =
+//        std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
+//
+//    for (int i = 0; i < no_of_lists; i++) {
+//      csr_linked_lists[i] =
+//          std::make_shared<CSRLinkedList<T>>(this->number_of_local_csr_nodes);
+//    }
+//
+//    auto ini_csr_end_while = std::chrono::high_resolution_clock::now();
+//    auto train_duration_init =
+//        std::chrono::duration_cast<std::chrono::microseconds>(
+//            ini_csr_end_while - ini_csr_end)
+//            .count();
+////    cout << " train duration while " << train_duration_init / 1000 << endl;
+//
+//    int node_index = 0;
+//    for (int j = 0; j < block_row_starts.size() - 1; j++) {
+//      int current_vector_pos = 0;
+//      if (!transpose) {
+//        current_vector_pos = j % no_of_lists;
+//        if (j > 0 and current_vector_pos == 0) {
+//          ++col_block;
+//          ++node_index;
+//        }
+//      } else {
+//        current_vector_pos = j / this->number_of_local_csr_nodes;
+//        col_block = current_vector_pos;
+//        if (node_index >= this->number_of_local_csr_nodes) {
+//          node_index = 0;
+//        }
+//        ++node_index;
+//      }
+//
+//      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
+//
+//      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+//
+//      (csr_linked_lists[current_vector_pos].get())
+//          ->insert(block_rows, (col_merged) ? gCols : block_cols, num_coords,
+//                   coords_ptr, num_coords, false, node_index);
+//    }
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
