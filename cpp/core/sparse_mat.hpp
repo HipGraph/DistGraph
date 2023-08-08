@@ -100,6 +100,9 @@ public:
           } else {
             current_start += batch_size;
           }
+          if (rank == 0){
+            cout<<" current start: "<<current_start<<endl;
+          }
         }
 
         // This modding step helps indexing.
