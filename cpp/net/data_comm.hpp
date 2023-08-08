@@ -190,6 +190,7 @@ public:
       total_send_count = total_send_count + sendcounts[i];
       total_receive_count = total_receive_count + receivecounts[i];
     }
+
     cout<<" rank "<< grid->global_rank<<" total_send_count "<<total_send_count <<" total_receive_count "<< total_receive_count<<endl;
 
     sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
@@ -221,6 +222,10 @@ public:
           receivebufverify[index].col = receiving_vec[j];
         }
       }
+
+      cout<<" rank "<< grid->global_rank<<" sending to rank "<<i<<" size "<<sending_vec.size()<<endl;
+      cout<<" rank "<< grid->global_rank<<" receving from   rank "<<i<<" size "<<receiving_vec.size()<<endl;
+
     }
 
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
