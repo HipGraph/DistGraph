@@ -202,15 +202,31 @@ public:
         current_start = 0;
       }
 
+      bool divided_equallaly = true;
+      int last_proc_batch_size =  batch_size;
+      int batch_count = proc_row_width/batch_size;
+      if (trans and proc_row_width % batch_size !=0) {
+        divided_equallaly = false;
+        last_proc_batch_size = proc_row_width - batch_size*batch_count;
+        batch_count = batch_count+1;
+      } else if(proc_row_width %batch_size !=0) {
+        batch_count = batch_count+1;
+      }
+
       // TODO: introduce atomic capture
       int matched_count = 0;
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          //          if (col_merged) {
-          ////            std::cout << " j " << j << std::endl;
-          //          }
-          current_start += batch_size;
+          if(!divided_equallaly) {
+            if (i > 0 and block_row_starts.size() % batch_count ==0) {
+              current_start += last_proc_batch_size;
+            } else {
+              current_start += batch_size;
+            }
+          } else {
+            current_start += batch_size;
+          }
           ++matched_count;
         }
 
@@ -220,21 +236,17 @@ public:
         }
       }
 
-      int expected_matched_count = 0;
-      if (proc_row_width %batch_size == 0) {
-        expected_matched_count =
-            std::max(1, static_cast<int>(proc_row_width / batch_size));
-      } else {
-        expected_matched_count =
-            std::max(1, static_cast<int>(proc_row_width / batch_size))+1; //TODO:Error prone
-      }
+
 
 //      if (col_merged) {
 //        std::cout << " expected_matched_count " << expected_matched_count
 //                  << " matched_count " << matched_count << std::endl;
 //      }
-      if (matched_count < expected_matched_count) {
+      if (matched_count < batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
+      }
+      if (!col_merged and trans){
+        std::cout << " i th batch "<<i << " col_blocks" << block_row_starts.size()  << std::endl;
       }
     }
     block_row_starts.push_back(coords.size());
