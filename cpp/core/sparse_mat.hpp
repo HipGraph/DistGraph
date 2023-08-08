@@ -93,12 +93,31 @@ public:
       for (uint64_t i = 0; i < coords.size(); i++) {
         while (coords[i].col >= current_start) {
           block_col_starts.push_back(i);
-          if (coords[i].col < next_start) {
+
+          if (coords[i].col<next_start) {
+            while (coords[i].col < next_start) {
+              block_col_starts.push_back(i);
+              if (!divided_equallaly) {
+                if (i > 0 and block_col_starts.size() % batch_count == 0) {
+                  current_start += last_proc_batch_size;
+                } else if (i > 0 and
+                           (block_col_starts.size() + 1) % batch_count == 0) {
+                  next_start += last_proc_batch_size;
+                } else {
+                  current_start += batch_size;
+                  next_start += batch_size;
+                }
+              } else {
+                current_start += batch_size;
+                next_start += batch_size;
+              }
+            }
+          } else {
             if (!divided_equallaly) {
               if (i > 0 and block_col_starts.size() % batch_count == 0) {
                 current_start += last_proc_batch_size;
               } else if (i > 0 and
-                         (block_col_starts.size()+1) % batch_count  == 0) {
+                         (block_col_starts.size() + 1) % batch_count == 0) {
                 next_start += last_proc_batch_size;
               } else {
                 current_start += batch_size;
