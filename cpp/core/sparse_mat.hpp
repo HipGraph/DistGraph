@@ -243,13 +243,14 @@ public:
       bool divided_equallaly = true;
       int last_proc_batch_size = batch_size;
       int batch_count = proc_row_width / batch_size;
-      if (trans and proc_row_width % batch_size != 0) {
+      if (proc_row_width % batch_size != 0) {
         divided_equallaly = false;
         last_proc_batch_size = proc_row_width - batch_size * batch_count;
         batch_count = batch_count + 1;
-      } else if (proc_row_width % batch_size != 0) {
-        batch_count = batch_count + 1;
       }
+//      } else if (proc_row_width % batch_size != 0) {
+//        batch_count = batch_count + 1;
+//      }
 
       // TODO: introduce atomic capture
       int matched_count = 0;
@@ -296,7 +297,7 @@ public:
             }
             ++matched_count;
           }
-          if (rank == 0) {
+          if (rank == 0 and trans) {
             cout << " current row start: " << current_start
                  << " size: " << matched_count << endl;
           }
