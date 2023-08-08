@@ -85,7 +85,7 @@ public:
 
           divided_equallaly = false;
           last_proc_batch_size = proc_col_width - batch_size*batch_count;
-//          batch_count = batch_count+1;
+          batch_count = batch_count+1;
       }
 
       for (uint64_t i = 0; i < coords.size(); i++) {
