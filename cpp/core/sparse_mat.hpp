@@ -256,14 +256,14 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          if (coords[i].row >= next_start) {
-            while (coords[i].row >= next_start) {
+          if (coords[j].row >= next_start) {
+            while (coords[j].row >= next_start) {
               block_row_starts.push_back(i);
               if (!divided_equallaly) {
-                if (i > 0 and (matched_count) % (batch_count-1) == 0) {
+                if (matched_count > 0 and (matched_count) % (batch_count-1) == 0) {
                   current_start += last_proc_batch_size;
                   next_start += batch_size;
-                } else if (i > 0 and
+                } else if (matched_count > 0 and
                            (matched_count + 1) % (batch_count-1) == 0) {
                   current_start += batch_size;
                   next_start += last_proc_batch_size;
@@ -279,10 +279,10 @@ public:
             }
           } else {
             if (!divided_equallaly) {
-              if (i > 0 and matched_count % (batch_count-1) == 0) {
+              if (matched_count > 0 and matched_count % (batch_count-1) == 0) {
                 current_start += last_proc_batch_size;
                 next_start += batch_size;
-              } else if (i > 0 and
+              } else if (matched_count > 0 and
                          (matched_count + 1) % (batch_count-1) == 0) {
                 current_start += batch_size;
                 next_start += last_proc_batch_size;
