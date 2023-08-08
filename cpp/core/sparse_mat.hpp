@@ -233,7 +233,8 @@ public:
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     block_row_starts.clear();
 
-    int expected_batch_count = (trans)? ((proc_row_width % batch_size ==0)?(gRows/batch_size):(((proc_row_width/batch_size)+1)*world_size)):(proc_row_width / batch_size);
+    int expected_batch_count = (trans)?
+                                       ((proc_row_width % batch_size ==0)?(gRows/batch_size):(((proc_row_width/batch_size)+1)*world_size)):((proc_row_width % batch_size ==0)?(proc_row_width / batch_size):(proc_row_width / batch_size)+1);
 
     bool divided_equallaly = true;
     int last_proc_batch_size = batch_size;
