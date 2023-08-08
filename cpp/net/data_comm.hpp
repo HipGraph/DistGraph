@@ -235,29 +235,29 @@ public:
     MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD, &request);
-//
-//    if (verify) {
-//      MPI_Status status;
-//      MPI_Wait(&request, &status);
-//
-//      for (int i = 0; i < grid->world_size; i++) {
-//        int base_index = rdispls[i];
-//        int size = receivecounts[i];
-//        for (int k = 0; k < size; k++) {
-//          int index = rdispls[i] + k;
-//          bool matched = false;
-//          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-//            if (receivebufverify[m].col == (*receivebuf)[index].col) {
-//              matched = true;
-//            }
-//          }
-//          if (!matched) {
-//            cout << " rank " << grid->global_rank << "cannot verify value" << (*receivebuf)[index].col << endl;
-//                    }
-//        }
-//      }
-//      delete[] receivebufverify;
-//    }
+
+    if (verify) {
+      MPI_Status status;
+      MPI_Wait(&request, &status);
+
+      for (int i = 0; i < grid->world_size; i++) {
+        int base_index = rdispls[i];
+        int size = receivecounts[i];
+        for (int k = 0; k < size; k++) {
+          int index = rdispls[i] + k;
+          bool matched = false;
+          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
+            if (receivebufverify[m].col == (*receivebuf)[index].col) {
+              matched = true;
+            }
+          }
+          if (!matched) {
+            cout << " rank " << grid->global_rank << "cannot verify value" << (*receivebuf)[index].col << endl;
+                    }
+        }
+      }
+      delete[] receivebufverify;
+    }
   }
 
   void async_transfer(vector<uint64_t> &col_ids, bool verify,
