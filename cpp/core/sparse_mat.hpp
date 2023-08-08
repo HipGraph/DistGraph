@@ -132,10 +132,10 @@ public:
               next_start += batch_size;
             }
           }
-          if (rank == 0) {
-            cout << " current start: " << current_start
-                 << " size: " << block_col_starts.size() << endl;
-          }
+//          if (rank == 0) {
+//            cout << " current start: " << current_start
+//                 << " size: " << block_col_starts.size() << endl;
+//          }
         }
 
         // This modding step helps indexing.
@@ -166,12 +166,12 @@ public:
                                   return tuple.col <= checking_end_index;
                                 });
 
-      cout << "checking_index" << checking_index << "checking_end_index"
-           << checking_end_index << endl;
-      std::cout << "Start value: (" << (*startIt).row << ", " << (*startIt).col
-                << ")" << std::endl;
-      std::cout << "End value: (" << (*endIt).row << ", " << (*endIt).col << ")"
-                << std::endl;
+//      cout << "checking_index" << checking_index << "checking_end_index"
+//           << checking_end_index << endl;
+//      std::cout << "Start value: (" << (*startIt).row << ", " << (*startIt).col
+//                << ")" << std::endl;
+//      std::cout << "End value: (" << (*endIt).row << ", " << (*endIt).col << ")"
+//                << std::endl;
       std::rotate(coords.begin(), startIt, std::next(endIt).base());
       uint64_t startIndex = std::distance(coords.begin(), startIt);
       uint64_t endIndex =
@@ -205,14 +205,14 @@ public:
 
       block_col_starts.push_back(0);
       block_col_starts.push_back(first_batch_len);
-      std::cout << " first_batch_len " << first_batch_len << " size "
-                << coords.size() << std::endl;
+//      std::cout << " first_batch_len " << first_batch_len << " size "
+//                << coords.size() << std::endl;
     }
     block_col_starts.push_back(coords.size());
-    if (!col_merged) {
-      std::cout << " trans " << trans << "col_blocks" << block_col_starts.size()
-                << std::endl;
-    }
+//    if (!col_merged) {
+//      std::cout << " trans " << trans << "col_blocks" << block_col_starts.size()
+//                << std::endl;
+//    }
   }
 
   void sort_by_rows() {
@@ -231,9 +231,10 @@ public:
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
-
+      int next_start = current_start+ batch_size;
       if (trans) {
         current_start = 0;
+        next_start = batch_size;
       }
 
       bool divided_equallaly = true;
@@ -252,16 +253,46 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
-          if (!divided_equallaly) {
-            if (i > 0 and block_row_starts.size() % batch_count == 0) {
-              current_start += last_proc_batch_size;
-            } else {
-              current_start += batch_size;
+          if (coords[i].col>=next_start) {
+            while (coords[i].row >= next_start) {
+              block_row_starts.push_back(i);
+              if (!divided_equallaly) {
+                if (i > 0 and block_row_starts.size() % batch_count == 0) {
+                  current_start += last_proc_batch_size;
+                  next_start += batch_size;
+                } else if (i > 0 and
+                           (block_row_starts.size() + 1) % batch_count == 0) {
+                  current_start += batch_size;
+                  next_start += last_proc_batch_size;
+                } else {
+                  current_start += batch_size;
+                  next_start += batch_size;
+                }
+              } else {
+                current_start += batch_size;
+                next_start += batch_size;
+              }
+              ++matched_count;
             }
           } else {
-            current_start += batch_size;
+            if (!divided_equallaly) {
+              if (i > 0 and block_row_starts.size() % batch_count == 0) {
+                current_start += last_proc_batch_size;
+                next_start += batch_size;
+              } else if (i > 0 and
+                         (block_row_starts.size() + 1) % batch_count == 0) {
+                current_start += batch_size;
+                next_start += last_proc_batch_size;
+              } else {
+                current_start += batch_size;
+                next_start += batch_size;
+              }
+            } else {
+              current_start += batch_size;
+              next_start += batch_size;
+            }
+            ++matched_count;
           }
-          ++matched_count;
           if (rank == 0) {
             cout << " current row start: " << current_start
                  << " size: " << block_row_starts.size() << endl;
@@ -279,13 +310,14 @@ public:
       //        expected_matched_count
       //                  << " matched_count " << matched_count << std::endl;
       //      }
-      if (matched_count < batch_count) {
+      while (matched_count < batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
+        matched_count++;
       }
-      //      if (!col_merged and trans and rank ==0){
-      //        std::cout << " i th batch "<<i << " row_blocks" <<
-      //        block_row_starts.size()  << std::endl;
-      //      }
+            if (!col_merged and trans and rank ==0){
+              std::cout << " i th batch "<<i << " row_blocks" <<
+              block_row_starts.size()  << std::endl;
+            }
     }
     block_row_starts.push_back(coords.size());
   }
