@@ -327,7 +327,7 @@ public:
         block_row_starts.push_back(block_col_starts[i + 1]);
         matched_count++;
       }
-      if (!col_merged and trans and rank == 0) {
+      if ( rank == 0) {
         std::cout << " i th batch " << i << " row_blocks"
                   << block_row_starts.size() << std::endl;
       }
@@ -348,7 +348,11 @@ public:
                               ini_csr_end - ini_csr_start)
                               .count();
 
-    cout << " data preprocessing CSR " << train_duration / 1000 << endl;
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+
+    cout << "rank"<<rank<< " initialization time " << train_duration / 1000 << endl;
 
     int col_block = 0;
 
