@@ -107,11 +107,11 @@ int main(int argc, char **argv) {
                                                 false);
   auto ini_csr_end1 = std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, batch_size,
-                                                      true, true);
+//  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, batch_size,
+//                                                      true, true);
   auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,
-                                                         true, false);
+//  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,
+//                                                         true, false);
 
   auto ini_csr_end = std::chrono::high_resolution_clock::now();
 
