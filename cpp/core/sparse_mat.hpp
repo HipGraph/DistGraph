@@ -229,6 +229,8 @@ public:
   void divide_block_rows(int batch_size, bool mod_ind, bool trans) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int rank,world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     block_row_starts.clear();
 
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
@@ -243,6 +245,11 @@ public:
       bool divided_equallaly = true;
       int last_proc_batch_size = batch_size;
       int batch_count = proc_row_width / batch_size;
+      int expected_batch_count = (trans)? ((proc_row_width % batch_size ==0)?(gRows/batch_size):(((proc_row_width/batch_size)+1)*world_size)):(proc_row_width / batch_size);
+      if (rank==0){
+        cout<<" trans "<<trans<< " expected_batch_count "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
+      }
+
       if (proc_row_width % batch_size != 0) {
         divided_equallaly = false;
         last_proc_batch_size = proc_row_width - batch_size * batch_count;
@@ -257,15 +264,17 @@ public:
       for (uint64_t j = block_col_starts[i]; j < block_col_starts[i + 1]; j++) {
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
+          ++matched_count;
           if (coords[j].row >= next_start) {
             while (coords[j].row >= next_start) {
-              block_row_starts.push_back(i);
+              block_row_starts.push_back(j);
+              ++matched_count;
               if (!divided_equallaly) {
-                if (matched_count > 0 and (matched_count) % (batch_count-1) == 0) {
+                if (j > block_col_starts[i] and (matched_count) % (batch_count) == 0) {
                   current_start += last_proc_batch_size;
                   next_start += batch_size;
-                } else if (matched_count > 0 and
-                           (matched_count + 1) % (batch_count-1) == 0) {
+                } else if (j > block_col_starts[i] and
+                           (matched_count + 1) % (batch_count) == 0) {
                   current_start += batch_size;
                   next_start += last_proc_batch_size;
                 } else {
@@ -276,15 +285,14 @@ public:
                 current_start += batch_size;
                 next_start += batch_size;
               }
-              ++matched_count;
             }
           } else {
             if (!divided_equallaly) {
-              if (matched_count > 0 and matched_count % (batch_count-1) == 0) {
+              if (j > block_col_starts[i] and matched_count % (batch_count) == 0) {
                 current_start += last_proc_batch_size;
                 next_start += batch_size;
-              } else if (matched_count > 0 and
-                         (matched_count + 1) % (batch_count-1) == 0) {
+              } else if (j > block_col_starts[i] and
+                         (matched_count + 1) % (batch_count) == 0) {
                 current_start += batch_size;
                 next_start += last_proc_batch_size;
               } else {
@@ -295,7 +303,6 @@ public:
               current_start += batch_size;
               next_start += batch_size;
             }
-            ++matched_count;
           }
           if (rank == 0 and trans) {
             cout << " current row start: " << current_start
@@ -314,7 +321,10 @@ public:
       //        expected_matched_count
       //                  << " matched_count " << matched_count << std::endl;
       //      }
-      while (matched_count < batch_count) {
+
+
+
+      while (matched_count < expected_batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
         matched_count++;
       }
