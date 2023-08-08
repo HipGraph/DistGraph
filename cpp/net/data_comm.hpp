@@ -77,6 +77,7 @@ public:
     int total_send_count = 0;
     int total_receive_count = 0;
 
+    cout<<" rank "<< grid->global_rank<<" initialization completed "<<" starting fetching all"<<endl;
     // processing initial communication
     if (fetch_all and batch_id == 0) {
 
@@ -116,48 +117,49 @@ public:
           }
         }
       }
-
-    } else {
-      // processing chunks
-      // calculating receiving data cols
-
-      int offset = batch_id;
-      for (int i = 0; i < no_of_lists; i++) {
-        int working_rank = 0;
-        for (int j = 0; j < total_nodes; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
-            ++working_rank;
-          }
-
-          if (j == working_rank * no_of_nodes_per_proc_list + offset) {
-            if (working_rank != grid->global_rank) {
-              vector<uint64_t> col_ids;
-              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-
-              receive_col_ids_list[working_rank].insert(
-                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                  col_ids.end());
-            }
-          }
-        }
-      }
-
-      // calculating sending data cols
-      int working_rank = 0;
-      for (int j = 0; j < total_nodes_trans; j++) {
-        if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-          ++working_rank;
-        }
-        if (working_rank != grid->global_rank) {
-          vector<uint64_t> col_ids;
-          this->sp_local_trans->fill_col_ids(j, batch_id, col_ids, true, true);
-
-          send_col_ids_list[working_rank].insert(
-              send_col_ids_list[working_rank].end(), col_ids.begin(),
-              col_ids.end());
-        }
-      }
     }
+    cout<<" rank "<< grid->global_rank<<" calc completed "<<endl;
+//    } else {
+//      // processing chunks
+//      // calculating receiving data cols
+//
+//      int offset = batch_id;
+//      for (int i = 0; i < no_of_lists; i++) {
+//        int working_rank = 0;
+//        for (int j = 0; j < total_nodes; j++) {
+//          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
+//            ++working_rank;
+//          }
+//
+//          if (j == working_rank * no_of_nodes_per_proc_list + offset) {
+//            if (working_rank != grid->global_rank) {
+//              vector<uint64_t> col_ids;
+//              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+//
+//              receive_col_ids_list[working_rank].insert(
+//                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
+//                  col_ids.end());
+//            }
+//          }
+//        }
+//      }
+//
+//      // calculating sending data cols
+//      int working_rank = 0;
+//      for (int j = 0; j < total_nodes_trans; j++) {
+//        if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
+//          ++working_rank;
+//        }
+//        if (working_rank != grid->global_rank) {
+//          vector<uint64_t> col_ids;
+//          this->sp_local_trans->fill_col_ids(j, batch_id, col_ids, true, true);
+//
+//          send_col_ids_list[working_rank].insert(
+//              send_col_ids_list[working_rank].end(), col_ids.begin(),
+//              col_ids.end());
+//        }
+//      }
+//    }
 
     for (int i = 0; i < grid->world_size; i++) {
       std::unordered_set<uint64_t> unique_set_receiv(
