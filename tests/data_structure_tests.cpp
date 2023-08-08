@@ -153,13 +153,13 @@ int main(int argc, char **argv) {
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-//  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
 
-//  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,
-//                         localARows, 2);
+  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,
+                         localARows, 2);
   //  dense_mat.get()->print_matrix_rowptr(0);
 
   auto io_duration =
