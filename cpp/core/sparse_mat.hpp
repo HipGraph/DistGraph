@@ -228,6 +228,9 @@ public:
             current_start += batch_size;
           }
           ++matched_count;
+          if (rank == 0){
+            cout<<" current row start: "<<current_start<<" size: "<<block_row_starts.size()<<endl;
+          }
         }
 
         // This modding step helps indexing.
@@ -245,9 +248,9 @@ public:
       if (matched_count < batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
       }
-      if (!col_merged and trans){
-        std::cout << " i th batch "<<i << " col_blocks" << block_row_starts.size()  << std::endl;
-      }
+//      if (!col_merged and trans and rank ==0){
+//        std::cout << " i th batch "<<i << " row_blocks" << block_row_starts.size()  << std::endl;
+//      }
     }
     block_row_starts.push_back(coords.size());
   }
