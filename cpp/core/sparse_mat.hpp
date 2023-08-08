@@ -101,7 +101,7 @@ public:
             current_start += batch_size;
           }
           if (rank == 0){
-            cout<<" current start: "<<current_start<<endl;
+            cout<<" current start: "<<current_start<<" size: "<<block_col_starts.size()<<endl;
           }
         }
 
