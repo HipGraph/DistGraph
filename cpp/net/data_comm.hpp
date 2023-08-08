@@ -69,7 +69,7 @@ public:
                                               (this->sp_local_trans->proc_row_width /this->sp_local_trans->block_row_width):
                                               (this->sp_local_trans->proc_row_width /this->sp_local_trans->block_row_width)+1;
 
-    int no_of_lists = (this->sp_local->proc_row_width % this->sp_local->block_row_width)==0)?
+    int no_of_lists = ((this->sp_local->proc_row_width % this->sp_local->block_row_width)==0)?
                      (this->sp_local->proc_row_width / this->sp_local->block_row_width)
                      :(this->sp_local->proc_row_width / this->sp_local->block_row_width)+1;
 
