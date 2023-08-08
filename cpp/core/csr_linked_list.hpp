@@ -22,11 +22,11 @@ private:
   int total_nodes;
 
 public:
-  vector<CSRLocal<T> *> direct_ref;
-  CSRLinkedList(int num_of_nodes) {
+//  vector<CSRLocal<T> *> direct_ref;
+  CSRLinkedList() {
     head = nullptr;
-    direct_ref = vector<CSRLocal<T>*>(num_of_nodes);
-    total_nodes = num_of_nodes;
+//    direct_ref = vector<CSRLocal<T>*>(num_of_nodes);
+//    total_nodes = num_of_nodes;
   }
 
   ~CSRLinkedList() {}
@@ -39,9 +39,9 @@ public:
     shared_ptr<CSRLocal<T>> data_ptr = make_shared<CSRLocal<T>>(rows, cols, max_nnz, coords,
                                                                num_coords, transpose);
     newNode.get()->data = data_ptr;
-    int index = static_cast<int>(id);
+//    int index = static_cast<int>(id);
     //    cout<<" index "<<index<<endl;
-    direct_ref[index] = data_ptr.get();
+//    direct_ref[index] = data_ptr.get();
 
     if (this->head == nullptr) {
       head = newNode;
