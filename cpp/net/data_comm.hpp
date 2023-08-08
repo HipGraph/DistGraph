@@ -223,14 +223,18 @@ public:
         }
       }
 
-      cout<<" rank "<< grid->global_rank<<" sending to rank "<<i<<" size "<<sending_vec.size()<<endl;
-      cout<<" rank "<< grid->global_rank<<" receving from   rank "<<i<<" size "<<receiving_vec.size()<<endl;
+      if(grid->global_rank==0 or grid->global_rank == 1) {
+        cout << " rank " << grid->global_rank << " sending to rank " << i
+             << " size " << sending_vec.size() << endl;
+        cout << " rank " << grid->global_rank << " receving from   rank " << i
+             << " size " << receiving_vec.size() << endl;
+      }
 
     }
 
-    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD, &request);
+//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+//                   DENSETUPLE, MPI_COMM_WORLD, &request);
 //
 //    if (verify) {
 //      MPI_Status status;
