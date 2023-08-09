@@ -462,7 +462,7 @@ public:
         distblas::core::CSRHandle *handle =
                 (csr_data.get())->handler.get();
         ////        col_ids = vector<uint64_t>((handle->col_idx).size());
-        //        col_ids = vector<uint64_t>((handle->values).size());
+                col_ids = vector<uint64_t>((handle->values).size());
         //        std::transform(
         //            std::begin((handle->col_idx)),
         //            std::end((handle->col_idx)), std::begin(col_ids),
