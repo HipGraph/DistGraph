@@ -462,13 +462,8 @@ public:
         distblas::core::CSRHandle *handle =
                 (csr_data.get())->handler.get();
         ////        col_ids = vector<uint64_t>((handle->col_idx).size());
-        if (handle == nullptr) {
-          cout << " rank " << rank << " values size  "
-               << "(" << block_row_id << "," << block_col_id << ")"
-               << "handler null" << endl;
-        }
 
-//        col_ids = vector<uint64_t>((handle->values).size());
+        col_ids = vector<uint64_t>((handle->values).size());
         //        std::transform(
         //            std::begin((handle->col_idx)),
         //            std::end((handle->col_idx)), std::begin(col_ids),
@@ -491,16 +486,16 @@ public:
         //              }
         //            });
 
-        //        std::transform(
-        //            std::begin((handle->values)), std::end((handle->values)),
-        //            std::begin(col_ids),
-        //            [&return_global_ids, &rank, &transpose, &batch_id,
-        //            &block_col_id,
-        //             &block_row_width, &block_col_width, &proc_col_width,
-        //             &proc_row_width](double value) {
-        //              return static_cast<uint64_t>(value);
-        //            });
-        //      }
+                std::transform(
+                    std::begin((handle->values)), std::end((handle->values)),
+                    std::begin(col_ids),
+                    [&return_global_ids, &rank, &transpose, &batch_id,
+                    &block_col_id,
+                     &block_row_width, &block_col_width, &proc_col_width,
+                     &proc_row_width](double value) {
+                      return static_cast<uint64_t>(value);
+                    });
+              }
       }
     }
   }
