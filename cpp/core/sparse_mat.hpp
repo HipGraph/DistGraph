@@ -460,7 +460,7 @@ public:
                     static_cast<uint64_t>(block_col_id * block_col_width);
                 uint64_t g_index = static_cast<uint64_t>(value) + base_id +
                                    static_cast<uint64_t>(starting_index);
-                return 40000;
+                return static_cast<uint64_t>(40000);
               }
             });
       }
