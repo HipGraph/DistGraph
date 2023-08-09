@@ -95,7 +95,7 @@ public:
       cout<<" rank "<<this->grid->global_rank<<" async_transfer_completed "<<endl;
 
       auto transfer_cache = std::chrono::high_resolution_clock::now();
-//     data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);
+     data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);
       auto cache_update = std::chrono::high_resolution_clock::now();
 
       auto cache_update_duration =
