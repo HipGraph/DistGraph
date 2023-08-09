@@ -227,12 +227,12 @@ public:
         }
       }
 
-      if(grid->global_rank==0 or grid->global_rank == 1) {
-        cout << " rank " << grid->global_rank << " sending to rank " << i
-             << " size " << sending_vec.size() << endl;
-        cout << " rank " << grid->global_rank << " receving from   rank " << i
-             << " size " << receiving_vec.size() << endl;
-      }
+//      if(grid->global_rank==0 or grid->global_rank == 1) {
+//        cout << " rank " << grid->global_rank << " sending to rank " << i
+//             << " size " << sending_vec.size() << endl;
+//        cout << " rank " << grid->global_rank << " receving from   rank " << i
+//             << " size " << receiving_vec.size() << endl;
+//      }
 
     }
 
