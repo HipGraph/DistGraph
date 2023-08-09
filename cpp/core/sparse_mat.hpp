@@ -253,8 +253,7 @@ public:
     }
 
         if (rank==3 and trans){
-          cout<<" trans "<<trans<< " expected_batch_count
-          "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
+          cout<<" trans "<<trans<< " expected_batch_count"<<expected_batch_count<< " batch_count "<<batch_count<<endl;
         }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
