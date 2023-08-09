@@ -468,7 +468,7 @@ public:
 
         std::transform(
             std::begin((handle->values)), std::end((handle->values)),
-            std::begin(values),
+            std::begin(col_ids),
             [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
              &block_row_width, &block_col_width, &proc_col_width,
              &proc_row_width](double value) {
