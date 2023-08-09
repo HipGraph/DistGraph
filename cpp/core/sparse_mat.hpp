@@ -440,7 +440,7 @@ public:
       head = (head.get())->next;
       ++count;
     }
-//    if (count == batch_id) {
+    if (count == batch_id) {
 //      auto csr_data = (head.get())->data;
 //      //      cout << " rank  " << rank << " inside fill_col_ids coords ( "
 //      //           << block_row_id << " ," << block_col_id << ")"
@@ -453,35 +453,35 @@ public:
 //        distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
 ////        col_ids = vector<uint64_t>((handle->col_idx).size());
 //        col_ids = vector<uint64_t>((handle->values).size());
-////        std::transform(
-////            std::begin((handle->col_idx)), std::end((handle->col_idx)),
-////            std::begin(col_ids),
-////            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-////             &block_row_width, &block_col_width, &proc_col_width,
-////             &proc_row_width](MKL_INT value) {
-////              if (!return_global_ids) {
-////                return static_cast<uint64_t>(value);
-////              } else {
-////                int starting_index = (transpose) ? rank * proc_col_width : 0;
-////                uint64_t base_id =
-////                    static_cast<uint64_t>(block_col_id * block_col_width);
-////                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
-////                                   static_cast<uint64_t>(starting_index);
-////                //TODO: do proper transformation here
-////                return g_index;
-////              }
-////            });
-//
-////        std::transform(
-////            std::begin((handle->values)), std::end((handle->values)),
-////            std::begin(col_ids),
-////            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-////             &block_row_width, &block_col_width, &proc_col_width,
-////             &proc_row_width](double value) {
-////              return static_cast<uint64_t>(value);
-////            });
-//      }
-//    }
+//        std::transform(
+//            std::begin((handle->col_idx)), std::end((handle->col_idx)),
+//            std::begin(col_ids),
+//            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
+//             &block_row_width, &block_col_width, &proc_col_width,
+//             &proc_row_width](MKL_INT value) {
+//              if (!return_global_ids) {
+//                return static_cast<uint64_t>(value);
+//              } else {
+//                int starting_index = (transpose) ? rank * proc_col_width : 0;
+//                uint64_t base_id =
+//                    static_cast<uint64_t>(block_col_id * block_col_width);
+//                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
+//                                   static_cast<uint64_t>(starting_index);
+//                //TODO: do proper transformation here
+//                return g_index;
+//              }
+//            });
+
+//        std::transform(
+//            std::begin((handle->values)), std::end((handle->values)),
+//            std::begin(col_ids),
+//            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
+//             &block_row_width, &block_col_width, &proc_col_width,
+//             &proc_row_width](double value) {
+//              return static_cast<uint64_t>(value);
+//            });
+      }
+    }
     //    }
   }
 
