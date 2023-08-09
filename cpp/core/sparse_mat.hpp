@@ -431,6 +431,7 @@ public:
     int csr_linked_list_id = (transpose) ? block_col_id : block_row_id;
     int batch_id = (transpose) ? block_row_id : block_col_id;
 
+
     auto linkedList = csr_linked_lists[csr_linked_list_id];
 
     auto head = (linkedList.get())->getHeadNode();
@@ -471,14 +472,14 @@ public:
 //              }
 //            });
 
-        std::transform(
-            std::begin((handle->values)), std::end((handle->values)),
-            std::begin(col_ids),
-            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-             &block_row_width, &block_col_width, &proc_col_width,
-             &proc_row_width](double value) {
-              return static_cast<uint64_t>(value);
-            });
+//        std::transform(
+//            std::begin((handle->values)), std::end((handle->values)),
+//            std::begin(col_ids),
+//            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
+//             &block_row_width, &block_col_width, &proc_col_width,
+//             &proc_row_width](double value) {
+//              return static_cast<uint64_t>(value);
+//            });
       }
     }
     //    }
