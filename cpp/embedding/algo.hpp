@@ -116,7 +116,7 @@ public:
     for (int i = 0; i < 1 ; i++) {
       for (int j = 0; j < batches; j++) {
 
-        if (rank == 0) {
+        if (grid->global_rank == 0) {
           cout << " rank  " << this->grid->global_rank << "  batch " << j
                << endl;
       }
