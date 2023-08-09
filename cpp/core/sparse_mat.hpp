@@ -459,8 +459,8 @@ public:
         int block_col_width = this->block_col_width;
         int proc_row_width = this->proc_row_width;
         int proc_col_width = this->proc_col_width;
-        //        distblas::core::CSRHandle *handle =
-        //        (csr_data.get())->handler.get();
+        distblas::core::CSRHandle *handle =
+                (csr_data.get())->handler.get();
         ////        col_ids = vector<uint64_t>((handle->col_idx).size());
         //        col_ids = vector<uint64_t>((handle->values).size());
         //        std::transform(
