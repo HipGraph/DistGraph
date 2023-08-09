@@ -100,11 +100,11 @@ public:
           }
           if (working_rank != grid->global_rank) {
             vector<uint64_t> col_ids;
-            if (grid->global_rank==13){
+            if (grid->global_rank==15){
               cout<<" Accessing i "<<i<<" j "<<j<<" working rank "<<working_rank<<endl;
             }
             this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-            if (grid->global_rank==13){
+            if (grid->global_rank==15){
               cout<<" Success Accessing i "<<i<<" j "<<j<<endl;
             }
             receive_col_ids_list[working_rank].insert(
