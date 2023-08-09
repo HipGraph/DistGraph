@@ -109,23 +109,23 @@ public:
       }
 
       // calculating sending data cols
-
-      for (int i = 0; i < no_of_lists_trans; i++) {
-        int working_rank = 0;
-
-        for (int j = 0; j < total_nodes_trans; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-            ++working_rank;
-          }
-          if (working_rank != grid->global_rank) {
-            vector<uint64_t> col_ids;
-            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-            send_col_ids_list[working_rank].insert(
-                send_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
-          }
-        }
-      }
+//
+//      for (int i = 0; i < no_of_lists_trans; i++) {
+//        int working_rank = 0;
+//
+//        for (int j = 0; j < total_nodes_trans; j++) {
+//          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
+//            ++working_rank;
+//          }
+//          if (working_rank != grid->global_rank) {
+//            vector<uint64_t> col_ids;
+//            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
+//            send_col_ids_list[working_rank].insert(
+//                send_col_ids_list[working_rank].end(), col_ids.begin(),
+//                col_ids.end());
+//          }
+//        }
+//      }
     }
 //     else {
 //      // processing chunks
