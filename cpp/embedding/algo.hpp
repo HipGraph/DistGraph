@@ -157,8 +157,7 @@ public:
                   .count();
           negative_update += neg_cache_duration;
         }
-        //        cout<<" rank  "<<this->grid->global_rank<<"  negative
-        //        population completed "<<j<<endl;
+                cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
 
         auto head = batch_list->getHeadNode();
