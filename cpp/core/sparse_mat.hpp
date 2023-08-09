@@ -252,10 +252,10 @@ public:
       batch_count = batch_count + 1;
     }
 
-    //    if (rank==0){
-    //      cout<<" trans "<<trans<< " expected_batch_count
-    //      "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
-    //    }
+        if (rank==3 and trans){
+          cout<<" trans "<<trans<< " expected_batch_count
+          "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
+        }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
@@ -400,9 +400,7 @@ public:
 
     int node_index = 0;
 
-    if ( transpose){
-      cout <<" rank "<<rank<< " block_row_starts "<<block_row_starts.size()<<endl;
-    }
+
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
       if (!transpose) {
