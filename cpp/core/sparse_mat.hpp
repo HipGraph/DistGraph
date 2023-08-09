@@ -326,7 +326,7 @@ public:
 
       if (trans and rank = 3) {
         std::cout << " expected_matched_count " << expected_matched_count
-                  << " matched_count " << matched_count << std::endl;
+                  << " matched_count " << matched_count <<" i "<<i << std::endl;
       }
 
       while (matched_count < expected_batch_count) {
