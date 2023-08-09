@@ -312,10 +312,8 @@ public:
               next_start += batch_size;
             }
           }
-          //          if (rank == 0 ) {
-          //            cout << " current row start: " << current_start
-          //                 << " size: " << matched_count << endl;
-          //          }
+          if (rank == 3 and i=22 and trans) {
+            cout << " current row start: " << current_start<< " size: " << matched_count << endl;}
         }
 
         // This modding step helps indexing.
