@@ -103,9 +103,9 @@ public:
             this->sp_local->fill_col_ids(i, j, col_ids, false, true);
 
 
-              receive_col_ids_list[working_rank].insert(
-                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                  col_ids.end());
+//              receive_col_ids_list[working_rank].insert(
+//                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
+//                  col_ids.end());
 
           }
         }
