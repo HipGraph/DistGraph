@@ -399,6 +399,10 @@ public:
     //    endl;
 
     int node_index = 0;
+
+    if ( transpose){
+      cout <<" rank "<<rank<< " block_row_starts "<<block_row_starts.size()<<endl;
+    }
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
       if (!transpose) {
