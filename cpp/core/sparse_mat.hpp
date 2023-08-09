@@ -479,13 +479,12 @@ public:
              &proc_row_width](double value) {
               return static_cast<uint64_t>(value);
             });
-         for(int k=0;k<col_ids.size();k++){
-           if (col_ids[k]>59999){
-             cout<<" invalid value range found "<<col_ids[k]<<endl;
-           }
-         }
-         cout<<" rank "<<rank<<" i,j "<<"("<<block_row_id<<","<<block_col_id<<")"<<" size"<<col_ids.size()<<endl;
 
+        if (rank==0) {
+          for (int k = 0; k < col_ids.size(); k++) {
+            cout<<" rank "<<rank<<" i,j,k "<<"("<<block_row_id<<","<<block_col_id<<","<<col_ids[k]<<")"<<" size"<<col_ids.size()<<endl;
+          }
+        }
       }
     }
     //    }
