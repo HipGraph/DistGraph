@@ -102,9 +102,12 @@ public:
 
             this->sp_local->fill_col_ids(i, j, col_ids, false, true);
 
-//            receive_col_ids_list[working_rank].insert(
-//                receive_col_ids_list[working_rank].end(), col_ids.begin(),
-//                col_ids.end());
+            if (working_rank<0  or working_rank>grid->world_size) {
+              cout<<"illegeal working rank "<<working_rank<<endl;
+            }
+            receive_col_ids_list[working_rank].insert(
+                receive_col_ids_list[working_rank].end(), col_ids.begin(),
+                col_ids.end());
           }
         }
       }
