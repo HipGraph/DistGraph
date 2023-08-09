@@ -54,12 +54,12 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
-    if (col_merged) {
+//    if (col_merged) {
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         this->coords[i].value = static_cast<T>(coords[i].col);
       }
-    }
+//    }
   }
 
   SpMat() {}
@@ -452,16 +452,19 @@ public:
             [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
              &block_row_width, &block_col_width, &proc_col_width,
              &proc_row_width](MKL_INT value) {
-              if (!return_global_ids) {
+//              if (!return_global_ids) {
+//                return static_cast<uint64_t>(value);
+//              } else {
+//                int starting_index = (transpose) ? rank * proc_col_width : 0;
+//                int last_col_id =
+//
+//                uint64_t base_id =
+//                    static_cast<uint64_t>(block_col_id * block_col_width);
+//                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
+//                                   static_cast<uint64_t>(starting_index);
+//                return g_index;
+//              }
                 return static_cast<uint64_t>(value);
-              } else {
-                int starting_index = (transpose) ? rank * proc_col_width : 0;
-                uint64_t base_id =
-                    static_cast<uint64_t>(block_col_id * block_col_width);
-                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
-                                   static_cast<uint64_t>(starting_index);
-                return g_index;
-              }
             });
       }
     }
