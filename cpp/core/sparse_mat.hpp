@@ -441,7 +441,7 @@ public:
       ++count;
     }
     if (count == batch_id) {
-//      auto csr_data = (head.get())->data;
+      auto csr_data = (head.get())->data;
 //      //      cout << " rank  " << rank << " inside fill_col_ids coords ( "
 //      //           << block_row_id << " ," << block_col_id << ")"
 //      //           << (csr_data.get())->num_coords << endl;
