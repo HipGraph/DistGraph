@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
        << endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
-  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get());
+  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get(),true);
   auto end_io = std::chrono::high_resolution_clock::now();
 
   cout << " rank " << rank << " reading data from file path:  " << file_path

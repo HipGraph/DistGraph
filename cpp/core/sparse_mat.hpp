@@ -60,13 +60,6 @@ public:
 //        this->coords[i].value = static_cast<T>(coords[i].col);
 //      }
 ////    }
-
-
- #pragma omp parallel for
-  for (int i = 0; i < coords.size(); i++) {
-  this->coords[i].value = static_cast<T>(coords[i].col);
-  }
-
   }
 
   SpMat() {}

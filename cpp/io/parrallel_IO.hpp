@@ -30,7 +30,7 @@ public:
    * @param file_path
    */
   template <typename T>
-  void parallel_read_MM(string file_path, distblas::core::SpMat<T> *sp_mat) {
+  void parallel_read_MM(string file_path, distblas::core::SpMat<T> *sp_mat, bool copy_col_to_value) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
@@ -62,7 +62,11 @@ public:
     for (int i = 0; i < tups.getnnz(); i++) {
       coords[i].row = get<0>(values[i]);
       coords[i].col = get<1>(values[i]);
-      coords[i].value = get<2>(values[i]);
+      if (copy_col_to_value){
+        coords[i].value = get<1>(values[i]);
+      }else {
+        coords[i].value = get<2>(values[i]);
+      }
     }
 
     int rowIncrement = G->getnrow() / num_procs;
