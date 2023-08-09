@@ -148,11 +148,11 @@ public:
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
-          this->data_comm->async_transfer(random_number_vec, false,
-                                                   results_negative_ptr.get(),
-                                                   request_two);
-          this->data_comm->populate_cache(results_negative_ptr.get(),
-                                                   request_two);
+//          this->data_comm->async_transfer(random_number_vec, false,
+//                                                   results_negative_ptr.get(),
+//                                                   request_two);
+//          this->data_comm->populate_cache(results_negative_ptr.get(),
+//                                                   request_two);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
               std::chrono::duration_cast<std::chrono::microseconds>(
@@ -200,25 +200,25 @@ public:
 //          this->update_data_matrix_rowptr(prevCoordinates, j,batch_size);
 //        }
 
-        if (this->grid->world_size > 1) {
-          MPI_Request request_three;
-          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                  new vector<DataTuple<DENT, embedding_dim>>());
-          if (i == 0) {
-            data_comm_cache[j].get()->async_transfer(
-                j, false, false, update_ptr.get(), request_three);
-//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                     request_three);
-          } else if (i > 0) {
-
-            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-                                                        request_three);
-
-//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                     request_three);
-          }
-        }
+//        if (this->grid->world_size > 1) {
+//          MPI_Request request_three;
+//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
+//              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//                  new vector<DataTuple<DENT, embedding_dim>>());
+//          if (i == 0) {
+//            data_comm_cache[j].get()->async_transfer(
+//                j, false, false, update_ptr.get(), request_three);
+////            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+////                                                     request_three);
+//          } else if (i > 0) {
+//
+//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+//                                                        request_three);
+//
+////            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+////                                                     request_three);
+//          }
+//        }
       }
 //      cout << "print cache: " << endl;
 //      dense_local->print_cache(i);
