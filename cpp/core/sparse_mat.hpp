@@ -480,7 +480,7 @@ public:
 //             &proc_row_width](double value) {
 //              return static_cast<uint64_t>(value);
 //            });
-      }
+//      }
     }
     //    }
   }
