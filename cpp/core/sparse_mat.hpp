@@ -468,7 +468,7 @@ public:
                << (handle->values).size() << endl;
         }
 
-        col_ids = vector<uint64_t>((handle->values).size());
+//        col_ids = vector<uint64_t>((handle->values).size());
         //        std::transform(
         //            std::begin((handle->col_idx)),
         //            std::end((handle->col_idx)), std::begin(col_ids),
