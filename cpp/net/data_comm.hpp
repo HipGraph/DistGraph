@@ -105,9 +105,13 @@ public:
             if (working_rank<0  or working_rank>=grid->world_size) {
               cout<<"illegeal working rank "<<working_rank<<endl;
             }
-            receive_col_ids_list[working_rank].insert(
-                receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
+
+
+            if (col_ids.size()>0) {
+              receive_col_ids_list[working_rank].insert(
+                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
+                  col_ids.end());
+            }
           }
         }
       }
