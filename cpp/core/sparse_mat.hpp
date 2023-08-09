@@ -95,8 +95,8 @@ public:
         while (coords[i].col >= current_start) {
           block_col_starts.push_back(i);
 
-          if (coords[i].col >= next_start) {
-            while (coords[i].col >= next_start) {
+          if (coords[i].col > next_start) {
+            while (coords[i].col > next_start) {
               block_col_starts.push_back(i);
               if (!divided_equallaly) {
                 if (i > 0 and block_col_starts.size() % batch_count == 0) {
@@ -271,8 +271,8 @@ public:
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
           ++matched_count;
-          if (coords[j].row >= next_start) {
-            while (coords[j].row >= next_start) {
+          if (coords[j].row > next_start) {
+            while (coords[j].row > next_start) {
               block_row_starts.push_back(j);
               ++matched_count;
               if (!divided_equallaly) {
