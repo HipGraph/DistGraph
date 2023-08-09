@@ -100,18 +100,18 @@ public:
           if (working_rank != grid->global_rank) {
             vector<uint64_t> col_ids;
 
-            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+//            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
 
             if (working_rank<0  or working_rank>=grid->world_size) {
               cout<<"illegeal working rank "<<working_rank<<endl;
             }
 
 
-            if (col_ids.size()>0) {
+
               receive_col_ids_list[working_rank].insert(
                   receive_col_ids_list[working_rank].end(), col_ids.begin(),
                   col_ids.end());
-            }
+
           }
         }
       }
