@@ -479,6 +479,12 @@ public:
              &proc_row_width](double value) {
               return static_cast<uint64_t>(value);
             });
+         for(int k=0;k<col_ids.size();k++){
+           if (col_ids[k]>59999){
+             cout<<" invalid value range found "<<col_ids[k]<<endl;
+           }
+         }
+
       }
     }
     //    }
