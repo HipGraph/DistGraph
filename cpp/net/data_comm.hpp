@@ -86,7 +86,7 @@ public:
     int total_receive_count = 0;
 
     cout<<" rank "<< grid->global_rank<<" no_of_lists "<<no_of_lists
-         <<" no_of_lists_trans "<< no_of_lists_trans<<" no_of_nodes_per_proc_list "<<no_of_nodes_per_proc_list<<endl;
+         <<" no_of_lists_trans "<< no_of_lists_trans<<" no_of_nodes_per_proc_list "<<no_of_nodes_per_proc_list<<"total_nodes"<<total_nodes<<endl;
     // processing initial communication
     if (fetch_all and batch_id == 0) {
 
@@ -100,16 +100,12 @@ public:
           }
           if (working_rank != grid->global_rank) {
             vector<uint64_t> col_ids;
-            if (grid->global_rank==15){
-              cout<<" Accessing i "<<i<<" j "<<j<<" working rank "<<working_rank<<endl;
-            }
-            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-            if (grid->global_rank==15){
-              cout<<" Success Accessing i "<<i<<" j "<<j<<endl;
-            }
-            receive_col_ids_list[working_rank].insert(
-                receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
+
+//            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+//
+//            receive_col_ids_list[working_rank].insert(
+//                receive_col_ids_list[working_rank].end(), col_ids.begin(),
+//                col_ids.end());
           }
         }
       }
