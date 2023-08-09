@@ -456,8 +456,6 @@ public:
                 return static_cast<uint64_t>(value);
               } else {
                 int starting_index = (transpose) ? rank * proc_col_width : 0;
-                int last_col_id =
-
                 uint64_t base_id =
                     static_cast<uint64_t>(block_col_id * block_col_width);
                 uint64_t g_index = static_cast<uint64_t>(value) + base_id +
