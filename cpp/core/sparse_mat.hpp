@@ -54,12 +54,12 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
-////    if (col_merged) {
-//#pragma omp parallel for
-//      for (int i = 0; i < coords.size(); i++) {
-//        this->coords[i].value = static_cast<T>(coords[i].col);
-//      }
-////    }
+    ////    if (col_merged) {
+    //#pragma omp parallel for
+    //      for (int i = 0; i < coords.size(); i++) {
+    //        this->coords[i].value = static_cast<T>(coords[i].col);
+    //      }
+    ////    }
   }
 
   SpMat() {}
@@ -233,8 +233,13 @@ public:
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     block_row_starts.clear();
 
-    int expected_batch_count = (trans)?
-                                       ((proc_row_width % batch_size ==0)?(gRows/batch_size):(((proc_row_width/batch_size)+1)*world_size)):((proc_row_width % batch_size ==0)?(proc_row_width / batch_size):(proc_row_width / batch_size)+1);
+    int expected_batch_count =
+        (trans) ? ((proc_row_width % batch_size == 0)
+                       ? (gRows / batch_size)
+                       : (((proc_row_width / batch_size) + 1) * world_size))
+                : ((proc_row_width % batch_size == 0)
+                       ? (proc_row_width / batch_size)
+                       : (proc_row_width / batch_size) + 1);
 
     bool divided_equallaly = true;
     int last_proc_batch_size = batch_size;
@@ -246,9 +251,10 @@ public:
       batch_count = batch_count + 1;
     }
 
-//    if (rank==0){
-//      cout<<" trans "<<trans<< " expected_batch_count "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
-//    }
+    //    if (rank==0){
+    //      cout<<" trans "<<trans<< " expected_batch_count
+    //      "<<expected_batch_count<< " batch_count "<<batch_count<<endl;
+    //    }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
@@ -269,7 +275,8 @@ public:
               block_row_starts.push_back(j);
               ++matched_count;
               if (!divided_equallaly) {
-                if (j > block_col_starts[i] and (matched_count) % (batch_count) == 0) {
+                if (j > block_col_starts[i] and
+                    (matched_count) % (batch_count) == 0) {
                   current_start += last_proc_batch_size;
                   next_start += batch_size;
                 } else if (j > block_col_starts[i] and
@@ -287,7 +294,8 @@ public:
             }
           } else {
             if (!divided_equallaly) {
-              if (j > block_col_starts[i] and matched_count % (batch_count) == 0) {
+              if (j > block_col_starts[i] and
+                  matched_count % (batch_count) == 0) {
                 current_start += last_proc_batch_size;
                 next_start += batch_size;
               } else if (j > block_col_starts[i] and
@@ -303,10 +311,10 @@ public:
               next_start += batch_size;
             }
           }
-//          if (rank == 0 ) {
-//            cout << " current row start: " << current_start
-//                 << " size: " << matched_count << endl;
-//          }
+          //          if (rank == 0 ) {
+          //            cout << " current row start: " << current_start
+          //                 << " size: " << matched_count << endl;
+          //          }
         }
 
         // This modding step helps indexing.
@@ -321,16 +329,14 @@ public:
       //                  << " matched_count " << matched_count << std::endl;
       //      }
 
-
-
       while (matched_count < expected_batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
         matched_count++;
       }
-//      if ( rank == 0) {
-//        std::cout << " i th batch " << i << " row_blocks"
-//                  << block_row_starts.size() << std::endl;
-//      }
+      //      if ( rank == 0) {
+      //        std::cout << " i th batch " << i << " row_blocks"
+      //                  << block_row_starts.size() << std::endl;
+      //      }
     }
     block_row_starts.push_back(coords.size());
   }
@@ -354,16 +360,17 @@ public:
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-
-    cout << "rank"<<rank<< " initialization time " << train_duration / 1000 << endl;
+    cout << "rank" << rank << " initialization time " << train_duration / 1000
+         << endl;
 
     int col_block = 0;
 
     this->number_of_local_csr_nodes =
         (transpose) ? (gRows / block_rows)
-                    : ((proc_col_width %block_cols)==0)? (((proc_col_width/block_cols)+1)*world_size):(gCols/block_cols); // This assumes 1D partitioning, we
-                                            // need to generalized this
-
+        : ((proc_col_width % block_cols) == 0)
+            ? (((proc_col_width / block_cols) + 1) * world_size)
+            : (gCols / block_cols); // This assumes 1D partitioning, we
+                                    // need to generalized this
 
     int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
                                          ? (proc_col_width / block_cols)
@@ -372,14 +379,14 @@ public:
                                          ? (proc_row_width / block_rows)
                                          : (proc_row_width / block_rows) + 1);
 
-
-//    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << " number_of_local_csr_nodes " << this->number_of_local_csr_nodes << endl;
+    //    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << "
+    //    number_of_local_csr_nodes " << this->number_of_local_csr_nodes <<
+    //    endl;
     csr_linked_lists =
         std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
 
     for (int i = 0; i < no_of_lists; i++) {
-      csr_linked_lists[i] =
-          std::make_shared<CSRLinkedList<T>>();
+      csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>();
     }
 
     auto ini_csr_end_while = std::chrono::high_resolution_clock::now();
@@ -387,7 +394,8 @@ public:
         std::chrono::duration_cast<std::chrono::microseconds>(
             ini_csr_end_while - ini_csr_end)
             .count();
-//    cout << " train duration while " << train_duration_init / 1000 << endl;
+    //    cout << " train duration while " << train_duration_init / 1000 <<
+    //    endl;
 
     int node_index = 0;
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
@@ -411,14 +419,15 @@ public:
 
       Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
 
-      //TODO change
-//      (csr_linked_lists[current_vector_pos].get())
-//          ->insert(block_rows, (col_merged) ? gCols : block_cols, num_coords,
-//                   coords_ptr, num_coords, false, node_index);
+      // TODO change
+      //      (csr_linked_lists[current_vector_pos].get())
+      //          ->insert(block_rows, (col_merged) ? gCols : block_cols,
+      //          num_coords,
+      //                   coords_ptr, num_coords, false, node_index);
 
       (csr_linked_lists[current_vector_pos].get())
-          ->insert(gRows,  gCols , num_coords,
-                   coords_ptr, num_coords, false, node_index);
+          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
+                   node_index);
     }
   }
 
@@ -431,7 +440,6 @@ public:
     int csr_linked_list_id = (transpose) ? block_col_id : block_row_id;
     int batch_id = (transpose) ? block_row_id : block_col_id;
 
-
     auto linkedList = csr_linked_lists[csr_linked_list_id];
 
     auto head = (linkedList.get())->getHeadNode();
@@ -442,47 +450,53 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
-//      //      cout << " rank  " << rank << " inside fill_col_ids coords ( "
-//      //           << block_row_id << " ," << block_col_id << ")"
-//      //           << (csr_data.get())->num_coords << endl;
-//      if ((csr_data.get())->num_coords > 0) {
-//        int block_row_width = this->block_row_width;
-//        int block_col_width = this->block_col_width;
-//        int proc_row_width = this->proc_row_width;
-//        int proc_col_width = this->proc_col_width;
-//        distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-////        col_ids = vector<uint64_t>((handle->col_idx).size());
-//        col_ids = vector<uint64_t>((handle->values).size());
-//        std::transform(
-//            std::begin((handle->col_idx)), std::end((handle->col_idx)),
-//            std::begin(col_ids),
-//            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-//             &block_row_width, &block_col_width, &proc_col_width,
-//             &proc_row_width](MKL_INT value) {
-//              if (!return_global_ids) {
-//                return static_cast<uint64_t>(value);
-//              } else {
-//                int starting_index = (transpose) ? rank * proc_col_width : 0;
-//                uint64_t base_id =
-//                    static_cast<uint64_t>(block_col_id * block_col_width);
-//                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
-//                                   static_cast<uint64_t>(starting_index);
-//                //TODO: do proper transformation here
-//                return g_index;
-//              }
-//            });
+      //      //      cout << " rank  " << rank << " inside fill_col_ids coords
+      //      ( "
+      //      //           << block_row_id << " ," << block_col_id << ")"
+      //      //           << (csr_data.get())->num_coords << endl;
+      if ((csr_data.get())->num_coords > 0) {
+        int block_row_width = this->block_row_width;
+        int block_col_width = this->block_col_width;
+        int proc_row_width = this->proc_row_width;
+        int proc_col_width = this->proc_col_width;
+        //        distblas::core::CSRHandle *handle =
+        //        (csr_data.get())->handler.get();
+        ////        col_ids = vector<uint64_t>((handle->col_idx).size());
+        //        col_ids = vector<uint64_t>((handle->values).size());
+        //        std::transform(
+        //            std::begin((handle->col_idx)),
+        //            std::end((handle->col_idx)), std::begin(col_ids),
+        //            [&return_global_ids, &rank, &transpose, &batch_id,
+        //            &block_col_id,
+        //             &block_row_width, &block_col_width, &proc_col_width,
+        //             &proc_row_width](MKL_INT value) {
+        //              if (!return_global_ids) {
+        //                return static_cast<uint64_t>(value);
+        //              } else {
+        //                int starting_index = (transpose) ? rank *
+        //                proc_col_width : 0; uint64_t base_id =
+        //                    static_cast<uint64_t>(block_col_id *
+        //                    block_col_width);
+        //                uint64_t g_index = static_cast<uint64_t>(value) +
+        //                base_id +
+        //                                   static_cast<uint64_t>(starting_index);
+        //                //TODO: do proper transformation here
+        //                return g_index;
+        //              }
+        //            });
 
-//        std::transform(
-//            std::begin((handle->values)), std::end((handle->values)),
-//            std::begin(col_ids),
-//            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
-//             &block_row_width, &block_col_width, &proc_col_width,
-//             &proc_row_width](double value) {
-//              return static_cast<uint64_t>(value);
-//            });
-//      }
+        //        std::transform(
+        //            std::begin((handle->values)), std::end((handle->values)),
+        //            std::begin(col_ids),
+        //            [&return_global_ids, &rank, &transpose, &batch_id,
+        //            &block_col_id,
+        //             &block_row_width, &block_col_width, &proc_col_width,
+        //             &proc_row_width](double value) {
+        //              return static_cast<uint64_t>(value);
+        //            });
+        //      }
+      }
     }
-    //    }
   }
 
   CSRLinkedList<T> *get_batch_list(int batch_id) {
