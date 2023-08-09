@@ -479,12 +479,6 @@ public:
              &proc_row_width](double value) {
               return static_cast<uint64_t>(value);
             });
-
-        if (rank==0) {
-          for (int k = 0; k < col_ids.size(); k++) {
-            cout<<" rank "<<rank<<" i,j,k "<<"("<<block_row_id<<","<<block_col_id<<","<<col_ids[k]<<")"<<" size"<<col_ids.size()<<endl;
-          }
-        }
       }
     }
     //    }

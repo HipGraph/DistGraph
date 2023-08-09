@@ -55,9 +55,6 @@ public:
         rArray[i] = coords[i].row;
         cArray[i] = coords[i].col;
         vArray[i] = static_cast<double>(coords[i].value);
-        if (rank==0){
-          cout<<" trans "<<transpose<<" copied value"<<vArray[i]<<endl;
-        }
       }
 
       sparse_operation_t op;
