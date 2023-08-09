@@ -484,6 +484,7 @@ public:
              cout<<" invalid value range found "<<col_ids[k]<<endl;
            }
          }
+         cout<<" rank "<<rank<<" i,j "<<(block_row_id,block_col_id)<<endl;
 
       }
     }
