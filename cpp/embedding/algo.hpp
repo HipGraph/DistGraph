@@ -163,18 +163,18 @@ public:
 //        cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
 
-        auto head = batch_list->getHeadNode();
-        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
-        CSRLocal<SPT> *csr_block_remote = nullptr;
-
-        if (this->grid->world_size > 1) {
-          auto remote = (head.get())->next;
-          csr_block_remote = (remote.get())->data.get();
-        }
-
-        int working_rank = 0;
-        bool fetch_remote =
-            (working_rank == ((this->grid)->global_rank)) ? false : true;
+//        auto head = batch_list->getHeadNode();
+//        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
+//        CSRLocal<SPT> *csr_block_remote = nullptr;
+//
+//        if (this->grid->world_size > 1) {
+//          auto remote = (head.get())->next;
+//          csr_block_remote = (remote.get())->data.get();
+//        }
+//
+//        int working_rank = 0;
+//        bool fetch_remote =
+//            (working_rank == ((this->grid)->global_rank)) ? false : true;
 
 //        if (j==batches-1){
 //          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
