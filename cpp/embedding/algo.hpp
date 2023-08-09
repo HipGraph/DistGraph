@@ -113,7 +113,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations ; i++) {
+    for (int i = 0; i < 1 ; i++) {
       for (int j = 0; j < batches; j++) {
 
 //                this->data_comm->cross_validate_batch_from_metadata(j);
@@ -171,29 +171,29 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-        if (j==batches-1){
-          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-                                        batch_size, last_batch_size);
-          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
-                                          lr, j, batch_size, last_batch_size);
-          if (this->grid->world_size > 1) {
-
-            this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-                                          j, batch_size, last_batch_size);
-          }
-          this->update_data_matrix_rowptr(prevCoordinates, j,last_batch_size);
-        }else{
-          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-                                        batch_size, batch_size);
-          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
-                                          lr, j, batch_size, batch_size);
-          if (this->grid->world_size > 1) {
-
-            this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-                                          j, batch_size, batch_size);
-          }
-          this->update_data_matrix_rowptr(prevCoordinates, j,batch_size);
-        }
+//        if (j==batches-1){
+//          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+//                                        batch_size, last_batch_size);
+//          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
+//                                          lr, j, batch_size, last_batch_size);
+//          if (this->grid->world_size > 1) {
+//
+//            this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+//                                          j, batch_size, last_batch_size);
+//          }
+//          this->update_data_matrix_rowptr(prevCoordinates, j,last_batch_size);
+//        }else{
+//          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+//                                        batch_size, batch_size);
+//          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
+//                                          lr, j, batch_size, batch_size);
+//          if (this->grid->world_size > 1) {
+//
+//            this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+//                                          j, batch_size, batch_size);
+//          }
+//          this->update_data_matrix_rowptr(prevCoordinates, j,batch_size);
+//        }
 
         if (this->grid->world_size > 1) {
           MPI_Request request_three;
