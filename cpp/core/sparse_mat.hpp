@@ -398,38 +398,38 @@ public:
     //    cout << " train duration while " << train_duration_init / 1000 <<
     //    endl;
 
-    int node_index = 0;
-    for (int j = 0; j < block_row_starts.size() - 1; j++) {
-      int current_vector_pos = 0;
-      if (!transpose) {
-        current_vector_pos = j % no_of_lists;
-        if (j > 0 and current_vector_pos == 0) {
-          ++col_block;
-          ++node_index;
-        }
-      } else {
-        current_vector_pos = j / this->number_of_local_csr_nodes;
-        col_block = current_vector_pos;
-        if (node_index >= this->number_of_local_csr_nodes) {
-          node_index = 0;
-        }
-        ++node_index;
-      }
-
-      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
-
-      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
-
-      // TODO change
-      //      (csr_linked_lists[current_vector_pos].get())
-      //          ->insert(block_rows, (col_merged) ? gCols : block_cols,
-      //          num_coords,
-      //                   coords_ptr, num_coords, false, node_index);
-
-      (csr_linked_lists[current_vector_pos].get())
-          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
-                   node_index);
-    }
+//    int node_index = 0;
+//    for (int j = 0; j < block_row_starts.size() - 1; j++) {
+//      int current_vector_pos = 0;
+//      if (!transpose) {
+//        current_vector_pos = j % no_of_lists;
+//        if (j > 0 and current_vector_pos == 0) {
+//          ++col_block;
+//          ++node_index;
+//        }
+//      } else {
+//        current_vector_pos = j / this->number_of_local_csr_nodes;
+//        col_block = current_vector_pos;
+//        if (node_index >= this->number_of_local_csr_nodes) {
+//          node_index = 0;
+//        }
+//        ++node_index;
+//      }
+//
+//      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
+//
+//      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+//
+//      // TODO change
+//      //      (csr_linked_lists[current_vector_pos].get())
+//      //          ->insert(block_rows, (col_merged) ? gCols : block_cols,
+//      //          num_coords,
+//      //                   coords_ptr, num_coords, false, node_index);
+//
+//      (csr_linked_lists[current_vector_pos].get())
+//          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
+//                   node_index);
+//    }
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
