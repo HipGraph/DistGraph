@@ -122,10 +122,10 @@ public:
           }
           if (working_rank != grid->global_rank) {
             vector<uint64_t> col_ids;
-//            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-//            send_col_ids_list[working_rank].insert(
-//                send_col_ids_list[working_rank].end(), col_ids.begin(),
-//                col_ids.end());
+            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
+            send_col_ids_list[working_rank].insert(
+                send_col_ids_list[working_rank].end(), col_ids.begin(),
+                col_ids.end());
           }
         }
       }
@@ -147,9 +147,9 @@ public:
               vector<uint64_t> col_ids;
               this->sp_local->fill_col_ids(i, j, col_ids, false, true);
 
-              receive_col_ids_list[working_rank].insert(
-                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                  col_ids.end());
+//              receive_col_ids_list[working_rank].insert(
+//                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
+//                  col_ids.end());
             }
           }
         }
