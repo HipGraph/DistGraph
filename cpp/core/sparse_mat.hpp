@@ -459,8 +459,7 @@ public:
         int block_col_width = this->block_col_width;
         int proc_row_width = this->proc_row_width;
         int proc_col_width = this->proc_col_width;
-        distblas::core::CSRHandle *handle =
-                (csr_data.get())->handler.get();
+        distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
         ////        col_ids = vector<uint64_t>((handle->col_idx).size());
 
         col_ids = vector<uint64_t>((handle->values).size());
@@ -486,16 +485,13 @@ public:
         //              }
         //            });
 
-                std::transform(
-                    std::begin((handle->values)), std::end((handle->values)),
-                    std::begin(col_ids),
-                    [&return_global_ids, &rank, &transpose, &batch_id,
-                    &block_col_id,
-                     &block_row_width, &block_col_width, &proc_col_width,
-                     &proc_row_width](double value) {
-                      return static_cast<uint64_t>(value);
-                    });
-              }
+        std::transform(std::begin((handle->values)), std::end((handle->values)),
+                       std::begin(col_ids),
+                       [&return_global_ids, &rank, &transpose, &batch_id,
+                        &block_col_id, &block_row_width, &block_col_width,
+                        &proc_col_width, &proc_row_width](double value) {
+                         return static_cast<uint64_t>(value);
+                       });
       }
     }
   }
