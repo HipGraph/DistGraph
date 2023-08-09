@@ -112,133 +112,133 @@ public:
       }
 
       // calculating sending data cols
-//
-//      for (int i = 0; i < no_of_lists_trans; i++) {
-//        int working_rank = 0;
-//
-//        for (int j = 0; j < total_nodes_trans; j++) {
-//          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-//            ++working_rank;
-//          }
-//          if (working_rank != grid->global_rank) {
-//            vector<uint64_t> col_ids;
-//            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-//            send_col_ids_list[working_rank].insert(
-//                send_col_ids_list[working_rank].end(), col_ids.begin(),
-//                col_ids.end());
-//          }
-//        }
-//      }
+
+      for (int i = 0; i < no_of_lists_trans; i++) {
+        int working_rank = 0;
+
+        for (int j = 0; j < total_nodes_trans; j++) {
+          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
+            ++working_rank;
+          }
+          if (working_rank != grid->global_rank) {
+            vector<uint64_t> col_ids;
+            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
+            send_col_ids_list[working_rank].insert(
+                send_col_ids_list[working_rank].end(), col_ids.begin(),
+                col_ids.end());
+          }
+        }
+      }
     }
-//     else {
-//      // processing chunks
-//      // calculating receiving data cols
-//
-//      int offset = batch_id;
-//      for (int i = 0; i < no_of_lists; i++) {
-//        int working_rank = 0;
-//        for (int j = 0; j < total_nodes; j++) {
-//          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
-//            ++working_rank;
-//          }
-//
-//          if (j == working_rank * no_of_nodes_per_proc_list + offset) {
-//            if (working_rank != grid->global_rank) {
-//              vector<uint64_t> col_ids;
-//              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-//
-//              receive_col_ids_list[working_rank].insert(
-//                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
-//                  col_ids.end());
-//            }
-//          }
+     else {
+      // processing chunks
+      // calculating receiving data cols
+
+      int offset = batch_id;
+      for (int i = 0; i < no_of_lists; i++) {
+        int working_rank = 0;
+        for (int j = 0; j < total_nodes; j++) {
+          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
+            ++working_rank;
+          }
+
+          if (j == working_rank * no_of_nodes_per_proc_list + offset) {
+            if (working_rank != grid->global_rank) {
+              vector<uint64_t> col_ids;
+              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+
+              receive_col_ids_list[working_rank].insert(
+                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
+                  col_ids.end());
+            }
+          }
+        }
+      }
+
+      // calculating sending data cols
+      int working_rank = 0;
+      for (int j = 0; j < total_nodes_trans; j++) {
+        if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
+          ++working_rank;
+        }
+        if (working_rank != grid->global_rank) {
+          vector<uint64_t> col_ids;
+          this->sp_local_trans->fill_col_ids(j, batch_id, col_ids, true, true);
+
+          send_col_ids_list[working_rank].insert(
+              send_col_ids_list[working_rank].end(), col_ids.begin(),
+              col_ids.end());
+        }
+      }
+    }
+
+    for (int i = 0; i < grid->world_size; i++) {
+      std::unordered_set<uint64_t> unique_set_receiv(
+          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
+      receive_col_ids_list[i] = vector<uint64_t>(unique_set_receiv.begin(),
+                                                 unique_set_receiv.end());
+
+      receivecounts[i] = receive_col_ids_list[i].size();
+
+      std::unordered_set<uint64_t> unique_set_send(
+          send_col_ids_list[i].begin(), send_col_ids_list[i].end());
+      send_col_ids_list[i] =
+          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
+
+      sendcounts[i] = send_col_ids_list[i].size();
+
+      sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
+      rdispls[i] =
+          (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
+
+      total_send_count = total_send_count + sendcounts[i];
+      total_receive_count = total_receive_count + receivecounts[i];
+    }
+
+    cout<<" rank "<< grid->global_rank<<" total_send_count "<<total_send_count <<" total_receive_count "<< total_receive_count<<endl;
+
+    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
+
+    receivebuf->resize(total_receive_count);
+    DataTuple<DENT, embedding_dim> *receivebufverify;
+
+    if (verify) {
+      receivebufverify =
+          new DataTuple<DENT, embedding_dim>[total_receive_count];
+    }
+
+    for (int i = 0; i < grid->world_size; i++) {
+      vector<uint64_t> sending_vec = send_col_ids_list[i];
+      vector<uint64_t> receiving_vec = receive_col_ids_list[i];
+
+#pragma omp parallel
+      for (int j = 0; j < sending_vec.size(); j++) {
+        int index = sdispls[i] + j;
+        sendbuf[index].col = sending_vec[j];
+        int local_key = sendbuf[index].col -
+                        (grid->global_rank) * (this->sp_local)->proc_row_width;
+//        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
+      }
+
+//      if (verify) {
+//        for (int j = 0; j < receiving_vec.size(); j++) {
+//          int index = rdispls[i] + j;
+//          receivebufverify[index].col = receiving_vec[j];
 //        }
 //      }
-//
-//      // calculating sending data cols
-//      int working_rank = 0;
-//      for (int j = 0; j < total_nodes_trans; j++) {
-//        if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-//          ++working_rank;
-//        }
-//        if (working_rank != grid->global_rank) {
-//          vector<uint64_t> col_ids;
-//          this->sp_local_trans->fill_col_ids(j, batch_id, col_ids, true, true);
-//
-//          send_col_ids_list[working_rank].insert(
-//              send_col_ids_list[working_rank].end(), col_ids.begin(),
-//              col_ids.end());
-//        }
-//      }
-//    }
 
-//    for (int i = 0; i < grid->world_size; i++) {
-//      std::unordered_set<uint64_t> unique_set_receiv(
-//          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
-//      receive_col_ids_list[i] = vector<uint64_t>(unique_set_receiv.begin(),
-//                                                 unique_set_receiv.end());
-//
-//      receivecounts[i] = receive_col_ids_list[i].size();
-//
-//      std::unordered_set<uint64_t> unique_set_send(
-//          send_col_ids_list[i].begin(), send_col_ids_list[i].end());
-//      send_col_ids_list[i] =
-//          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
-//
-//      sendcounts[i] = send_col_ids_list[i].size();
-//
-//      sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
-//      rdispls[i] =
-//          (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-//
-//      total_send_count = total_send_count + sendcounts[i];
-//      total_receive_count = total_receive_count + receivecounts[i];
-//    }
+      if(grid->global_rank==0 or grid->global_rank == 1) {
+        cout << " rank " << grid->global_rank << " sending to rank " << i
+             << " size " << sending_vec.size() << endl;
+        cout << " rank " << grid->global_rank << " receving from   rank " << i
+             << " size " << receiving_vec.size() << endl;
+      }
 
-//    cout<<" rank "<< grid->global_rank<<" total_send_count "<<total_send_count <<" total_receive_count "<< total_receive_count<<endl;
-//
-//    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
-//
-//    receivebuf->resize(total_receive_count);
-//    DataTuple<DENT, embedding_dim> *receivebufverify;
+    }
 
-//    if (verify) {
-//      receivebufverify =
-//          new DataTuple<DENT, embedding_dim>[total_receive_count];
-//    }
-//
-//    for (int i = 0; i < grid->world_size; i++) {
-//      vector<uint64_t> sending_vec = send_col_ids_list[i];
-//      vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-//
-//#pragma omp parallel
-//      for (int j = 0; j < sending_vec.size(); j++) {
-//        int index = sdispls[i] + j;
-//        sendbuf[index].col = sending_vec[j];
-//        int local_key = sendbuf[index].col -
-//                        (grid->global_rank) * (this->sp_local)->proc_row_width;
-////        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-//      }
-//
-////      if (verify) {
-////        for (int j = 0; j < receiving_vec.size(); j++) {
-////          int index = rdispls[i] + j;
-////          receivebufverify[index].col = receiving_vec[j];
-////        }
-////      }
-//
-//      if(grid->global_rank==0 or grid->global_rank == 1) {
-//        cout << " rank " << grid->global_rank << " sending to rank " << i
-//             << " size " << sending_vec.size() << endl;
-//        cout << " rank " << grid->global_rank << " receving from   rank " << i
-//             << " size " << receiving_vec.size() << endl;
-//      }
-//
-//    }
-
-//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-//                   DENSETUPLE, MPI_COMM_WORLD, &request);
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+                   DENSETUPLE, MPI_COMM_WORLD, &request);
 
 //    if (verify) {
 //      MPI_Status status;
