@@ -313,7 +313,7 @@ public:
             }
           }
           if (rank == 3 and i==22 and trans) {
-            cout << " current row start: " << current_start<< " size: " << matched_count << j<<" "<<coords[j].row << endl;}
+            cout << " current row start: " << current_start<< " size: " << matched_count<<" " << j<<" "<<coords[j].row << endl;}
         }
 
         // This modding step helps indexing.
