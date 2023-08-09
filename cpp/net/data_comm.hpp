@@ -220,12 +220,12 @@ public:
         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
 
-//      if (verify) {
-//        for (int j = 0; j < receiving_vec.size(); j++) {
-//          int index = rdispls[i] + j;
-//          receivebufverify[index].col = receiving_vec[j];
-//        }
-//      }
+      if (verify) {
+        for (int j = 0; j < receiving_vec.size(); j++) {
+          int index = rdispls[i] + j;
+          receivebufverify[index].col = receiving_vec[j];
+        }
+      }
 
       if(grid->global_rank==0 or grid->global_rank == 1) {
         cout << " rank " << grid->global_rank << " sending to rank " << i
@@ -240,28 +240,28 @@ public:
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD, &request);
 
-//    if (verify) {
-//      MPI_Status status;
-//      MPI_Wait(&request, &status);
-//
-//      for (int i = 0; i < grid->world_size; i++) {
-//        int base_index = rdispls[i];
-//        int size = receivecounts[i];
-//        for (int k = 0; k < size; k++) {
-//          int index = rdispls[i] + k;
-//          bool matched = false;
-//          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-//            if (receivebufverify[m].col == (*receivebuf)[index].col) {
-//              matched = true;
-//            }
-//          }
-//          if (!matched) {
-//            cout << " rank " << grid->global_rank << "cannot verify value" << (*receivebuf)[index].col << endl;
-//                    }
-//        }
-//      }
-//      delete[] receivebufverify;
-//    }
+    if (verify) {
+      MPI_Status status;
+      MPI_Wait(&request, &status);
+
+      for (int i = 0; i < grid->world_size; i++) {
+        int base_index = rdispls[i];
+        int size = receivecounts[i];
+        for (int k = 0; k < size; k++) {
+          int index = rdispls[i] + k;
+          bool matched = false;
+          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
+            if (receivebufverify[m].col == (*receivebuf)[index].col) {
+              matched = true;
+            }
+          }
+          if (!matched) {
+            cout << " rank " << grid->global_rank << "cannot verify value" << (*receivebuf)[index].col << endl;
+                    }
+        }
+      }
+      delete[] receivebufverify;
+    }
   }
 
   void async_transfer(vector<uint64_t> &col_ids, bool verify,
