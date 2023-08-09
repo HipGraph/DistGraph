@@ -462,11 +462,11 @@ public:
         distblas::core::CSRHandle *handle =
                 (csr_data.get())->handler.get();
         ////        col_ids = vector<uint64_t>((handle->col_idx).size());
-        if (rank == 13) {
-          cout << " rank " << rank << " values size  "
-               << "(" << block_row_id << "," << block_col_id << ")"
-               << (handle->values).size() << endl;
-        }
+//        if (rank == 13) {
+//          cout << " rank " << rank << " values size  "
+//               << "(" << block_row_id << "," << block_col_id << ")"
+//               << (handle->values).size() << endl;
+//        }
 
 //        col_ids = vector<uint64_t>((handle->values).size());
         //        std::transform(
