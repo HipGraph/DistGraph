@@ -116,11 +116,6 @@ public:
     for (int i = 0; i < iterations ; i++) {
       for (int j = 0; j < batches; j++) {
 
-        if (grid->global_rank == 0) {
-          cout << " rank  " << this->grid->global_rank << "  batch " << j
-               << endl;
-      }
-
 //                this->data_comm->cross_validate_batch_from_metadata(j);
 //                cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
 //                cross validation success"<<endl;
