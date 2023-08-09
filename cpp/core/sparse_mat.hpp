@@ -54,12 +54,12 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
-    if (col_merged) {
+//    if (col_merged) {
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         this->coords[i].value = static_cast<T>(coords[i].col);
       }
-    }
+//    }
   }
 
   SpMat() {}
@@ -445,23 +445,34 @@ public:
         int proc_row_width = this->proc_row_width;
         int proc_col_width = this->proc_col_width;
         distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-        col_ids = vector<uint64_t>((handle->col_idx).size());
+//        col_ids = vector<uint64_t>((handle->col_idx).size());
+        col_ids = vector<uint64_t>((handle->values).size());
+//        std::transform(
+//            std::begin((handle->col_idx)), std::end((handle->col_idx)),
+//            std::begin(col_ids),
+//            [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
+//             &block_row_width, &block_col_width, &proc_col_width,
+//             &proc_row_width](MKL_INT value) {
+//              if (!return_global_ids) {
+//                return static_cast<uint64_t>(value);
+//              } else {
+//                int starting_index = (transpose) ? rank * proc_col_width : 0;
+//                uint64_t base_id =
+//                    static_cast<uint64_t>(block_col_id * block_col_width);
+//                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
+//                                   static_cast<uint64_t>(starting_index);
+//                //TODO: do proper transformation here
+//                return g_index;
+//              }
+//            });
+
         std::transform(
-            std::begin((handle->col_idx)), std::end((handle->col_idx)),
-            std::begin(col_ids),
+            std::begin((handle->values)), std::end((handle->values)),
+            std::begin(values),
             [&return_global_ids, &rank, &transpose, &batch_id, &block_col_id,
              &block_row_width, &block_col_width, &proc_col_width,
-             &proc_row_width](MKL_INT value) {
-              if (!return_global_ids) {
-                return static_cast<uint64_t>(value);
-              } else {
-                int starting_index = (transpose) ? rank * proc_col_width : 0;
-                uint64_t base_id =
-                    static_cast<uint64_t>(block_col_id * block_col_width);
-                uint64_t g_index = static_cast<uint64_t>(value) + base_id +
-                                   static_cast<uint64_t>(starting_index);
-                return static_cast<uint64_t>(40000);
-              }
+             &proc_row_width](double value) {
+              return static_cast<uint64_t>(value);
             });
       }
     }
