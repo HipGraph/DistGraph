@@ -426,7 +426,7 @@ public:
       //          num_coords,
       //                   coords_ptr, num_coords, false, node_index);
 
-      if (rank ==  3){
+      if (rank ==  3 and transpose){
         cout << " number of lists "<<no_of_lists<< " vector position "<<current_vector_pos<<endl;
       }
       (csr_linked_lists[current_vector_pos].get())
