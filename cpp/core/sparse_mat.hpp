@@ -83,7 +83,8 @@ public:
       bool divided_equallaly = true;
       int last_proc_batch_size = batch_size;
       int batch_count = proc_col_width / batch_size;
-      if (!trans and proc_col_width % batch_size != 0) {
+      //      if (!trans and proc_col_width % batch_size != 0) {
+      if (proc_col_width % batch_size != 0) {
 
         divided_equallaly = false;
         last_proc_batch_size = proc_col_width - batch_size * batch_count;
