@@ -201,6 +201,10 @@ public:
               unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                   new vector<DataTuple<DENT, embedding_dim>>());
           if (i == 0) {
+            if (this->grid->global_rank==0){
+              cout<<" updating cache "<<j<<endl;
+            }
+            cout<<
             data_comm_cache[j].get()->async_transfer(
                 j, false, false, update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
