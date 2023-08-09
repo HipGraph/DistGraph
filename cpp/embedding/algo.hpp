@@ -115,7 +115,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < 4; i++) {
       for (int j = 0; j < batches; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
@@ -213,24 +213,24 @@ public:
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
               unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                   new vector<DataTuple<DENT, embedding_dim>>());
-//          if (i == 0) {
+          if (i == 0) {
 
             data_comm_cache[j].get()->async_transfer(
                 j, false, false, update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                      request_three);
-//          } else if (i > 0) {
-//
-//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-//                                                        request_three);
-//
-//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                     request_three);
-//          }
+          } else if (i > 0) {
+
+            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+                                                        request_three);
+
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                     request_three);
+          }
         }
       }
       //      cout << "print cache: " << endl;
-      //      dense_local->print_cache(i);
+            dense_local->print_cache(i);
       //      dense_local->print_matrix_rowptr( i);
     }
     cout << "negative_update: " << (negative_update / 1000) << endl;
