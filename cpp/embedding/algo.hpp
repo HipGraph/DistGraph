@@ -68,7 +68,7 @@ public:
       last_batch_size = batch_size;
     } else {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size)+1; //TODO:Error prone
-      last_batch_size = (this->dense_local)->rows - batch_size*batches;
+      last_batch_size = (this->dense_local)->rows - batch_size*(batches-1);
     }
 
 
@@ -110,7 +110,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations ; i++) {
+    for (int i = 0; i < 1 ; i++) {
       for (int j = 0; j < batches; j++) {
 
 //        cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<endl;
