@@ -129,7 +129,6 @@ public:
           }
         }
       }
-      cout<<" rank "<< grid->global_rank<<" receving data completed "<<total_send_count <<" sending data completed "<< total_receive_count<<endl;
     }
      else {
       // processing chunks
