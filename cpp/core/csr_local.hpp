@@ -22,7 +22,7 @@ template <typename T> class CSRLocal {
 public:
   MKL_INT rows, cols;
 
-  int max_nnz, num_coords;
+  int max_nnz, num_coords=0;
 
   bool transpose;
 
