@@ -56,7 +56,8 @@ public:
                       std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request) {
 
-    int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
+    int total_nodes =((this->sp_local->proc_col_width %this->sp_local->block_col_width)==0)? (((this->sp_local->proc_col_width/this->sp_local->block_col_width)+1)*world_size):
+                                                                                                ( this->sp_local->gCols/this->sp_local->block_col_width);
     int total_nodes_trans =
         this->sp_local_trans->gRows / this->sp_local_trans->block_row_width;
 
