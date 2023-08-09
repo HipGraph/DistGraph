@@ -90,7 +90,7 @@ public:
               new vector<DataTuple<DENT, embedding_dim>>());
 
       auto init_cache = std::chrono::high_resolution_clock::now();
-      data_comm_cache[0].get()->async_transfer(0, true, true,
+      data_comm_cache[0].get()->async_transfer(0, true, false,
                                                results_init_ptr.get(), request);
 
       cout << " rank " << this->grid->global_rank
@@ -216,7 +216,7 @@ public:
 //          if (i == 0) {
 
             data_comm_cache[j].get()->async_transfer(
-                j, false, true, update_ptr.get(), request_three);
+                j, false, false, update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                      request_three);
 //          } else if (i > 0) {
