@@ -60,19 +60,20 @@ public:
   }
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
-    int last_batch_size=0;
+    int last_batch_size = 0;
 
     int batches = 0;
-    if (sp_local->proc_row_width %batch_size == 0) {
+    if (sp_local->proc_row_width % batch_size == 0) {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size);
       last_batch_size = batch_size;
     } else {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size)+1; //TODO:Error prone
-      last_batch_size = (this->dense_local)->rows - batch_size*(batches-1);
+      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +
+                1; // TODO:Error prone
+      last_batch_size = (this->dense_local)->rows - batch_size * (batches - 1);
     }
 
-
-    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches
+         << endl;
 
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
@@ -92,10 +93,11 @@ public:
       data_comm_cache[0].get()->async_transfer(0, true, false,
                                                results_init_ptr.get(), request);
 
-      cout<<" rank "<<this->grid->global_rank<<" async_transfer_completed "<<endl;
+      cout << " rank " << this->grid->global_rank
+           << " async_transfer_completed " << endl;
 
       auto transfer_cache = std::chrono::high_resolution_clock::now();
-     data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);
+      data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);
       auto cache_update = std::chrono::high_resolution_clock::now();
 
       auto cache_update_duration =
@@ -113,12 +115,12 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < 1 ; i++) {
+    for (int i = 0; i < 1; i++) {
       for (int j = 0; j < batches; j++) {
 
-//                this->data_comm->cross_validate_batch_from_metadata(j);
-//                cout<<" rank  "<<this->grid->global_rank<<"  batch "<<j<<"
-//                cross validation success"<<endl;
+        //                this->data_comm->cross_validate_batch_from_metadata(j);
+        //                cout<<" rank  "<<this->grid->global_rank<<"  batch
+        //                "<<j<<" cross validation success"<<endl;
 
         int seed = j + i;
 
@@ -144,10 +146,10 @@ public:
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
           this->data_comm->async_transfer(random_number_vec, false,
-                                                   results_negative_ptr.get(),
-                                                   request_two);
+                                          results_negative_ptr.get(),
+                                          request_two);
           this->data_comm->populate_cache(results_negative_ptr.get(),
-                                                   request_two);
+                                          request_two);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
               std::chrono::duration_cast<std::chrono::microseconds>(
@@ -155,7 +157,8 @@ public:
                   .count();
           negative_update += neg_cache_duration;
         }
-//        cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
+        //        cout<<" rank  "<<this->grid->global_rank<<"  negative
+        //        population completed "<<j<<endl;
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
 
         auto head = batch_list->getHeadNode();
@@ -171,29 +174,40 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-//        if (j==batches-1){
-//          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-//                                        batch_size, last_batch_size);
-//          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
-//                                          lr, j, batch_size, last_batch_size);
-//          if (this->grid->world_size > 1) {
-//
-//            this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-//                                          j, batch_size, last_batch_size);
-//          }
-//          this->update_data_matrix_rowptr(prevCoordinates, j,last_batch_size);
-//        }else{
-//          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-//                                        batch_size, batch_size);
-//          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
-//                                          lr, j, batch_size, batch_size);
-//          if (this->grid->world_size > 1) {
-//
-//            this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-//                                          j, batch_size, batch_size);
-//          }
-//          this->update_data_matrix_rowptr(prevCoordinates, j,batch_size);
-//        }
+        //        if (j==batches-1){
+        //          this->calc_t_dist_grad_rowptr(csr_block_local,
+        //          prevCoordinates, lr, j,
+        //                                        batch_size, last_batch_size);
+        //          this->calc_t_dist_replus_rowptr(prevCoordinates,
+        //          random_number_vec,
+        //                                          lr, j, batch_size,
+        //                                          last_batch_size);
+        //          if (this->grid->world_size > 1) {
+        //
+        //            this->calc_t_dist_grad_rowptr(csr_block_remote,
+        //            prevCoordinates, lr,
+        //                                          j, batch_size,
+        //                                          last_batch_size);
+        //          }
+        //          this->update_data_matrix_rowptr(prevCoordinates,
+        //          j,last_batch_size);
+        //        }else{
+        //          this->calc_t_dist_grad_rowptr(csr_block_local,
+        //          prevCoordinates, lr, j,
+        //                                        batch_size, batch_size);
+        //          this->calc_t_dist_replus_rowptr(prevCoordinates,
+        //          random_number_vec,
+        //                                          lr, j, batch_size,
+        //                                          batch_size);
+        //          if (this->grid->world_size > 1) {
+        //
+        //            this->calc_t_dist_grad_rowptr(csr_block_remote,
+        //            prevCoordinates, lr,
+        //                                          j, batch_size, batch_size);
+        //          }
+        //          this->update_data_matrix_rowptr(prevCoordinates,
+        //          j,batch_size);
+        //        }
 
         if (this->grid->world_size > 1) {
           MPI_Request request_three;
@@ -201,10 +215,10 @@ public:
               unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                   new vector<DataTuple<DENT, embedding_dim>>());
           if (i == 0) {
-            if (this->grid->global_rank==0){
-              cout<<" updating cache "<<j<<endl;
+            if (this->grid->global_rank == 0) {
+              cout << " working on cache " << j << endl;
             }
-            cout<<
+
             data_comm_cache[j].get()->async_transfer(
                 j, false, false, update_ptr.get(), request_three);
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
@@ -219,9 +233,9 @@ public:
           }
         }
       }
-//      cout << "print cache: " << endl;
-//      dense_local->print_cache(i);
-//      dense_local->print_matrix_rowptr( i);
+      //      cout << "print cache: " << endl;
+      //      dense_local->print_cache(i);
+      //      dense_local->print_matrix_rowptr( i);
     }
     cout << "negative_update: " << (negative_update / 1000) << endl;
   }
@@ -235,12 +249,12 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (int i = 0; i < block_size; i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
         DENT forceDiff[embedding_dim];
-        #pragma forceinline
-        #pragma omp simd
+#pragma forceinline
+#pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
@@ -255,8 +269,9 @@ public:
               target_rank == (this->grid)->global_rank ? false : true;
 
           if (fetch_from_cache) {
-//            cout << " executing fecth from cache for rank " << target_rank
-//                 << endl;
+            //            cout << " executing fecth from cache for rank " <<
+            //            target_rank
+            //                 << endl;
 
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
@@ -291,7 +306,8 @@ public:
             }
           }
         }
-//        cout<<" for loop successfully completed for i"<<i<<" outof "<<block_size<<endl;
+        //        cout<<" for loop successfully completed for i"<<i<<" outof
+        //        "<<block_size<<endl;
       }
     }
   }
@@ -361,8 +377,8 @@ public:
                                         int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-    int end_row =
-        std::min((batch_id + 1) * batch_size, ((this->sp_local)->proc_row_width));
+    int end_row = std::min((batch_id + 1) * batch_size,
+                           ((this->sp_local)->proc_row_width));
 
     for (int i = 0; i < (end_row - row_base_index); i++) {
 #pragma omp simd
