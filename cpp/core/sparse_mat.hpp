@@ -54,12 +54,19 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
-//    if (col_merged) {
-#pragma omp parallel for
-      for (int i = 0; i < coords.size(); i++) {
-        this->coords[i].value = static_cast<T>(coords[i].col);
-      }
-//    }
+////    if (col_merged) {
+//#pragma omp parallel for
+//      for (int i = 0; i < coords.size(); i++) {
+//        this->coords[i].value = static_cast<T>(coords[i].col);
+//      }
+////    }
+
+
+ #pragma omp parallel for
+  for (int i = 0; i < coords.size(); i++) {
+  this->coords[i].value = static_cast<T>(coords[i].col);
+  }
+
   }
 
   SpMat() {}
