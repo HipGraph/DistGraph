@@ -252,9 +252,10 @@ public:
       batch_count = batch_count + 1;
     }
 
-        if (rank==3 and trans){
-          cout<<" trans "<<trans<< " expected_batch_count"<<expected_batch_count<< " batch_count "<<batch_count<<endl;
-        }
+    if (rank == 3 and trans) {
+      cout << " trans " << trans << " expected_batch_count"
+           << expected_batch_count << " batch_count " << batch_count << endl;
+    }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
@@ -323,11 +324,10 @@ public:
         }
       }
 
-      //      if (col_merged) {
-      //        std::cout << " expected_matched_count " <<
-      //        expected_matched_count
-      //                  << " matched_count " << matched_count << std::endl;
-      //      }
+      if (trans and rank = 3) {
+        std::cout << " expected_matched_count " << expected_matched_count
+                  << " matched_count " << matched_count << std::endl;
+      }
 
       while (matched_count < expected_batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
@@ -399,7 +399,6 @@ public:
 
     int node_index = 0;
 
-
     for (int j = 0; j < block_row_starts.size() - 1; j++) {
       int current_vector_pos = 0;
       if (!transpose) {
@@ -427,8 +426,9 @@ public:
       //          num_coords,
       //                   coords_ptr, num_coords, false, node_index);
 
-      if (rank ==  3 and transpose){
-        cout << " number of lists "<<no_of_lists<< " vector position "<<current_vector_pos<<endl;
+      if (rank == 3 and transpose) {
+        cout << " number of lists " << no_of_lists << " vector position "
+             << current_vector_pos << endl;
       }
       (csr_linked_lists[current_vector_pos].get())
           ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
