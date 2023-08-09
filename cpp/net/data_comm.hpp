@@ -123,9 +123,9 @@ public:
           if (working_rank != grid->global_rank) {
             vector<uint64_t> col_ids;
             this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-            send_col_ids_list[working_rank].insert(
-                send_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
+//            send_col_ids_list[working_rank].insert(
+//                send_col_ids_list[working_rank].end(), col_ids.begin(),
+//                col_ids.end());
           }
         }
       }
