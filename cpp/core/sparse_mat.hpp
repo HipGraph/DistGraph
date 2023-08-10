@@ -267,53 +267,57 @@ public:
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
           ++matched_count;
-//          if (coords[j].row > next_start) {
-//            while (coords[j].row > next_start) {
-//              if (!divided_equallaly) {
-//                if (j > block_col_starts[i] and
-//                    (matched_count) % (batch_count) == 0) {
-//                  current_start += last_proc_batch_size;
-//                  next_start += batch_size;
-//                } else if (j > block_col_starts[i] and
-//                           (matched_count + 1) % (batch_count) == 0) {
-//                  current_start += batch_size;
-//                  next_start += last_proc_batch_size;
-//                } else {
-//                  current_start += batch_size;
-//                  next_start += batch_size;
-//                }
-//              } else {
-//                current_start += batch_size;
-//                next_start += batch_size;
-//              }
-//              block_row_starts.push_back(j);
-//              ++matched_count;
-//              if (rank == 3 and i==22 and trans) {
-//                cout << " current row start: " << current_start<< " size: " << matched_count<<" " << j<<" "<<coords[j].row << endl;}
-//            }
-//          } else {
-            if (!divided_equallaly) {
-              if (j > block_col_starts[i] and
-                  matched_count % (batch_count) == 0) {
-                current_start += last_proc_batch_size;
-                next_start += batch_size;
-              } else if (j > block_col_starts[i] and
-                         (matched_count + 1) % (batch_count) == 0) {
-                current_start += batch_size;
-                next_start += last_proc_batch_size;
-              } else {
-                current_start += batch_size;
-                next_start += batch_size;
-              }
+          //          if (coords[j].row > next_start) {
+          //            while (coords[j].row > next_start) {
+          //              if (!divided_equallaly) {
+          //                if (j > block_col_starts[i] and
+          //                    (matched_count) % (batch_count) == 0) {
+          //                  current_start += last_proc_batch_size;
+          //                  next_start += batch_size;
+          //                } else if (j > block_col_starts[i] and
+          //                           (matched_count + 1) % (batch_count) == 0)
+          //                           {
+          //                  current_start += batch_size;
+          //                  next_start += last_proc_batch_size;
+          //                } else {
+          //                  current_start += batch_size;
+          //                  next_start += batch_size;
+          //                }
+          //              } else {
+          //                current_start += batch_size;
+          //                next_start += batch_size;
+          //              }
+          //              block_row_starts.push_back(j);
+          //              ++matched_count;
+          //              if (rank == 3 and i==22 and trans) {
+          //                cout << " current row start: " << current_start<< "
+          //                size: " << matched_count<<" " << j<<"
+          //                "<<coords[j].row << endl;}
+          //            }
+          //          } else {
+          if (!divided_equallaly) {
+            if (j > block_col_starts[i] and
+                matched_count % (batch_count) == 0) {
+              current_start += last_proc_batch_size;
+              next_start += batch_size;
+            } else if (j > block_col_starts[i] and
+                       (matched_count + 1) % (batch_count) == 0) {
+              current_start += batch_size;
+              next_start += last_proc_batch_size;
             } else {
               current_start += batch_size;
               next_start += batch_size;
             }
-//          }
-                          if (rank == 3 and i==22 and trans) {
-                            cout << " current row start: " << current_start<< " size: " << matched_count<<" " << j<<" "<<coords[j].row << endl;}
-
-
+          } else {
+            current_start += batch_size;
+            next_start += batch_size;
+          }
+          //          }
+          if (col_merged) {
+            cout << " current row start: " << current_start
+                 << " size: " << matched_count << " " << j << " "
+                 << coords[j].row << endl;
+          }
         }
 
         // This modding step helps indexing.
@@ -322,12 +326,10 @@ public:
         }
       }
 
-
       while (matched_count < expected_batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
         matched_count++;
       }
-
     }
     block_row_starts.push_back(coords.size());
   }
