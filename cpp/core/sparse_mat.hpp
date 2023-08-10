@@ -252,10 +252,6 @@ public:
       batch_count = batch_count + 1;
     }
 
-    if (rank == 3 and trans) {
-      cout << " trans " << trans << " expected_batch_count"
-           << expected_batch_count << " batch_count " << batch_count << endl;
-    }
     for (uint64_t i = 0; i < block_col_starts.size() - 1; i++) {
 
       int current_start = proc_row_width * rank;
@@ -271,8 +267,6 @@ public:
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
           ++matched_count;
-          if (rank == 3 and i==22 and trans) {
-            cout << " current row start: " << current_start<< " size: " << matched_count<<" " << j<<" "<<coords[j].row << endl;}
 //          if (coords[j].row > next_start) {
 //            while (coords[j].row > next_start) {
 //              if (!divided_equallaly) {
@@ -316,6 +310,9 @@ public:
               next_start += batch_size;
             }
 //          }
+                          if (rank == 3 and i==22 and trans) {
+                            cout << " current row start: " << current_start<< " size: " << matched_count<<" " << j<<" "<<coords[j].row << endl;}
+
 
         }
 
@@ -325,18 +322,12 @@ public:
         }
       }
 
-      if (trans and rank == 3) {
-        std::cout << " expected_matched_count " << expected_batch_count<< " matched_count " << matched_count <<" i "<<i << std::endl;
-      }
 
       while (matched_count < expected_batch_count) {
         block_row_starts.push_back(block_col_starts[i + 1]);
         matched_count++;
       }
-      //      if ( rank == 0) {
-      //        std::cout << " i th batch " << i << " row_blocks"
-      //                  << block_row_starts.size() << std::endl;
-      //      }
+
     }
     block_row_starts.push_back(coords.size());
   }
