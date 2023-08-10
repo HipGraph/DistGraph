@@ -85,8 +85,8 @@ int main(int argc, char **argv) {
   vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
   auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
       copiedVectorTwo, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
-      batch_size, localARows, localBRows, true);
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
+      localBRows, localARows, localBRows, true);
 
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
