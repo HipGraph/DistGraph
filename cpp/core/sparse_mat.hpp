@@ -420,7 +420,7 @@ public:
       //                   coords_ptr, num_coords, false, node_index);
 
       if (rank == 1 and col_merged) {
-        cout << " number of lists " << no_of_lists << " vector position " << current_vector_pos<<"j "<<j<<"corrds"<<num_coords << endl;
+        cout << " number of lists " << no_of_lists << " vector position " << current_vector_pos<<"j "<<j<<"corrds"<<num_coords<< "starting distance "<<block_row_starts[j] << endl;
       }
       (csr_linked_lists[current_vector_pos].get())
           ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
