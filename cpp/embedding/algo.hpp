@@ -242,18 +242,14 @@ public:
                                       int block_size) {
 
 //    int row_base_index = batch_id * batch_size;
-    int row_base_index =  (this->sp_local)->proc_row_width*(this->grid)->global_rank;
+//    int row_base_index =  (this->sp_local)->proc_row_width*(this->grid)->global_rank;
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
 #pragma omp parallel for schedule(static)
       for (uint64_t i = 0; i < csr_handle->rowStart.size()-1; i++) {
-        uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-
-        if (row_id < (this->sp_local)->proc_row_width*(this->grid)->global_rank or row_id >(this->sp_local)->proc_row_width*((this->grid)->global_rank+1)){
-          cout<<" rank"<<this->grid->global_rank <<" "<<  row_id <<endl;
-        }
-
+//        uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+        uint64_t row_id=i;
         DENT forceDiff[embedding_dim];
 #pragma forceinline
 #pragma omp simd
