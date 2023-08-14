@@ -342,6 +342,10 @@ public:
     this->sort_by_rows();
     this->divide_block_rows(block_rows, mod_ind, transpose);
 
+    if (col_merged) {
+      this->print_coords(false);
+    }
+
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
                               ini_csr_end - ini_csr_start)
