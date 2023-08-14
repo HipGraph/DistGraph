@@ -340,11 +340,14 @@ public:
 
     this->divide_block_cols(block_cols, mod_ind, transpose);
     this->sort_by_rows();
-    this->divide_block_rows(block_rows, mod_ind, transpose);
 
     if (col_merged) {
       this->print_coords(false);
     }
+
+    this->divide_block_rows(block_rows, mod_ind, transpose);
+
+
 
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -577,7 +580,7 @@ public:
     ofstream fout(stats, std::ios_base::app);
 
     for (int i = 0; i < coords.size(); i++) {
-      fout << coords[i].row << " " << coords[i].col << " " << endl;
+      fout << coords[i].row << " " << coords[i].value << " " << endl;
     }
   }
 
