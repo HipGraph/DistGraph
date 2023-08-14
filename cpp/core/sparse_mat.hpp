@@ -429,6 +429,7 @@ public:
       }
 
       if (rank == 1 and current_vector_pos==0 and col_merged){
+        cout<<" this is the tragedy "<<block_row_starts[j]<<endl;
         for(int k=block_row_starts[j]; k< block_row_starts[j+1];k++){
           Tuple<T> *coords_pr = coords.data()+k;
           cout<<coords_pr->row<<" "<<coords_pr->value<<endl;
