@@ -115,7 +115,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < 1; i++) {
       for (int j = 0; j < batches; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
@@ -173,40 +173,40 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-                if (j==batches-1){
-                  this->calc_t_dist_grad_rowptr(csr_block_local,
-                  prevCoordinates, lr, j,
-                                                batch_size, last_batch_size);
-                  this->calc_t_dist_replus_rowptr(prevCoordinates,
-                  random_number_vec,
-                                                  lr, j, batch_size,
-                                                  last_batch_size);
-                  if (this->grid->world_size > 1) {
-
-                    this->calc_t_dist_grad_rowptr(csr_block_remote,
-                    prevCoordinates, lr,
-                                                  j, batch_size,
-                                                  last_batch_size);
-                  }
-                  this->update_data_matrix_rowptr(prevCoordinates,
-                  j,batch_size);
-                }else{
-                  this->calc_t_dist_grad_rowptr(csr_block_local,
-                  prevCoordinates, lr, j,
-                                                batch_size, batch_size);
-                  this->calc_t_dist_replus_rowptr(prevCoordinates,
-                  random_number_vec,
-                                                  lr, j, batch_size,
-                                                  batch_size);
-                  if (this->grid->world_size > 1) {
-
-                    this->calc_t_dist_grad_rowptr(csr_block_remote,
-                    prevCoordinates, lr,
-                                                  j, batch_size, batch_size);
-                  }
-                  this->update_data_matrix_rowptr(prevCoordinates,
-                  j,batch_size);
-                }
+//                if (j==batches-1){
+//                  this->calc_t_dist_grad_rowptr(csr_block_local,
+//                  prevCoordinates, lr, j,
+//                                                batch_size, last_batch_size);
+//                  this->calc_t_dist_replus_rowptr(prevCoordinates,
+//                  random_number_vec,
+//                                                  lr, j, batch_size,
+//                                                  last_batch_size);
+//                  if (this->grid->world_size > 1) {
+//
+//                    this->calc_t_dist_grad_rowptr(csr_block_remote,
+//                    prevCoordinates, lr,
+//                                                  j, batch_size,
+//                                                  last_batch_size);
+//                  }
+//                  this->update_data_matrix_rowptr(prevCoordinates,
+//                  j,batch_size);
+//                }else{
+//                  this->calc_t_dist_grad_rowptr(csr_block_local,
+//                  prevCoordinates, lr, j,
+//                                                batch_size, batch_size);
+//                  this->calc_t_dist_replus_rowptr(prevCoordinates,
+//                  random_number_vec,
+//                                                  lr, j, batch_size,
+//                                                  batch_size);
+//                  if (this->grid->world_size > 1) {
+//
+//                    this->calc_t_dist_grad_rowptr(csr_block_remote,
+//                    prevCoordinates, lr,
+//                                                  j, batch_size, batch_size);
+//                  }
+//                  this->update_data_matrix_rowptr(prevCoordinates,
+//                  j,batch_size);
+//                }
 
         if (this->grid->world_size > 1) {
           MPI_Request request_three;
@@ -246,7 +246,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (uint64_t i = 0; i < csr_handle->rowStart.size()-1; i++) {
         uint64_t row_id = i;
 
@@ -257,11 +257,6 @@ public:
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
-          if (row_id < (this->sp_local)->proc_row_width*(this->grid)->global_rank or row_id >(this->sp_local)->proc_row_width*((this->grid)->global_rank+1)){
-            cout<<" rank"<<this->grid->global_rank <<" "<<  row_id <<" corresponding cplum"<<global_col_id <<endl;
-          }
-
-
 
           uint64_t local_col =
               global_col_id -
