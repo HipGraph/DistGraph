@@ -513,8 +513,6 @@ public:
 
       int count = 0;
       while (head != nullptr) {
-        cout << " rank " << rank << " j " << j << " count " << count
-             << " node id " << (head.get())->id << endl;
         string output_path = "blocks_rank" + to_string(rank) + "_trans" +
                              to_string(trans) + "_col_" +
                              to_string((trans) ? j : count) + "_row_" +
@@ -527,32 +525,36 @@ public:
 
         int num_coords = (csr_data.get())->num_coords;
 
-        distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-        int numRows = handle->rowStart.size() - 1;
+        cout << " rank " << rank << " j " << j << " num_coords " << num_coords << "_col_" +to_string((trans) ? j : count) + "_row_" +to_string((trans) ? count : j);
+        if (num_coords>0) {
+          distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+          int numRows = handle->rowStart.size() - 1;
 
-        for (int i = 0; i < numRows; i++) {
-          int start = handle->rowStart[i];
-          int end = handle->rowStart[i + 1];
-          fout << "Row " << i << ": ";
-          if (num_coords > 0) {
-            for (int k = start; k < end; k++) {
+          for (int i = 0; i < numRows; i++) {
+            int start = handle->rowStart[i];
+            int end = handle->rowStart[i + 1];
+            fout << "Row " << i << ": ";
+            if (num_coords > 0) {
+              for (int k = start; k < end; k++) {
 
-              int col = handle->col_idx[k];
-              int value = handle->values[k];
+                int col = handle->col_idx[k];
+                int value = handle->values[k];
 
-              if (value > 60000) {
-                cout << "Rank " << rank << " j " << j
-                     << " Large value encountered "
-                     << " Row " << i << " col " << col << " value " << value
-                     << endl;
+                if (value > 60000) {
+                  cout << "Rank " << rank << " j " << j
+                       << " Large value encountered "
+                       << " Row " << i << " col " << col << " value " << value
+                       << endl;
+                }
+                fout << "(" << col << ", " << value << ") ";
               }
-              fout << "(" << col << ", " << value << ") ";
             }
+            fout << endl;
           }
-          fout << endl;
         }
-        head = (head.get())->next;
-        ++count;
+          head = (head.get())->next;
+          ++count;
+
       }
     }
   }
