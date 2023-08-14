@@ -428,7 +428,7 @@ public:
              << current_vector_pos<<"j "<<j<<"corrds"<<num_coords<< "starting distance "<<block_row_starts[j] << endl;
       }
 
-      if (rank == 1 and current_vector_pos==0){
+      if (rank == 1 and current_vector_pos==0 and col_merged){
         for(int k=coords.data() + block_row_starts[j];k<coords.data() + block_row_starts[j+1]){
           cout<<coords[k].row<<" "<<coords[k].value<<endl;
         }
