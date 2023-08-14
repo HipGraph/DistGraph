@@ -271,37 +271,39 @@ public:
             //            target_rank
             //                 << endl;
 
-//            std::array<DENT, embedding_dim> colvec =
-//                (this->dense_local)
-//                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
-//            DENT attrc = 0;
-//            for (int d = 0; d < embedding_dim; d++) {
+            std::array<DENT, embedding_dim> colvec =
+                (this->dense_local)
+                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
 //              forceDiff[d] = (this->dense_local)
 //                                 ->nCoordinates[row_id * embedding_dim + d] -
 //                             colvec[d];
-//              attrc += forceDiff[d] * forceDiff[d];
-//            }
-//            DENT d1 = -2.0 / (1.0 + attrc);
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = scale(forceDiff[d] * d1);
-//              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
-//            }
+              forceDiff[d]=0.1;
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = scale(forceDiff[d] * d1);
+              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
+            }
 
           } else {
 
-//            DENT attrc = 0;
-//            for (int d = 0; d < embedding_dim; d++) {
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
 //              forceDiff[d] = (this->dense_local)
 //                                 ->nCoordinates[row_id * embedding_dim + d] -
 //                             (this->dense_local)
 //                                 ->nCoordinates[local_col * embedding_dim + d];
-//              attrc += forceDiff[d] * forceDiff[d];
-//            }
-//            DENT d1 = -2.0 / (1.0 + attrc);
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = scale(forceDiff[d] * d1);
-//              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
-//            }
+              forceDiff[d]=0.1;
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = scale(forceDiff[d] * d1);
+              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
+            }
           }
         }
         //        cout<<" for loop successfully completed for i"<<i<<" outof
