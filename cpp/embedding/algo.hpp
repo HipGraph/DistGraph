@@ -189,7 +189,7 @@ public:
                                                   last_batch_size);
                   }
                   this->update_data_matrix_rowptr(prevCoordinates,
-                  j,last_batch_size);
+                  j,batch_size);
                 }else{
                   this->calc_t_dist_grad_rowptr(csr_block_local,
                   prevCoordinates, lr, j,

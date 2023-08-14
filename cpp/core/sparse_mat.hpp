@@ -525,7 +525,7 @@ public:
 
         int num_coords = (csr_data.get())->num_coords;
 
-        cout << " rank " << rank << " j " << j << " num_coords " << num_coords << "_col_" +to_string((trans) ? j : count) + "_row_" +to_string((trans) ? count : j);
+        cout << " rank " << rank << " j " << j << " num_coords " << num_coords << "_col_" +to_string((trans) ? j : count) + "_row_" +to_string((trans) ? count : j)<<endl;
         if (num_coords>0) {
           distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
           int numRows = handle->rowStart.size() - 1;

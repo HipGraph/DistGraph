@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
   shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,
                                                          true, false);
 
-  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
+//  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
   cout << " rank " << rank << " initialize_CSR_blocks combined  completed  " << endl;
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
 
   auto end_init = std::chrono::high_resolution_clock::now();
 
-//  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
 
   auto end_train = std::chrono::high_resolution_clock::now();
   //  cout << " rank " << rank << " async completed  " << endl;
