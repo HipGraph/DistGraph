@@ -246,6 +246,8 @@ public:
     int last_proc_batch_size = batch_size;
     int batch_count = proc_row_width / batch_size;
 
+    int current_batch_size=batch_size;
+
     if (proc_row_width % batch_size != 0) {
       divided_equallaly = false;
       last_proc_batch_size = proc_row_width - batch_size * batch_count;
@@ -320,6 +322,7 @@ public:
           }
         }
 
+
         // This modding step helps indexing.
         if (mod_ind) {
           coords[j].row %= batch_size;
@@ -345,7 +348,7 @@ public:
       this->print_coords(false);
     }
 
-    this->divide_block_rows(block_rows, mod_ind, transpose);
+    this->divide_block_rows(block_rows, false, transpose);
 
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -436,9 +439,9 @@ public:
         }
       }
 
-      (csr_linked_lists[current_vector_pos].get())
-          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
-                   node_index);
+//      (csr_linked_lists[current_vector_pos].get())
+//          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
+//                   node_index);
     }
   }
 
