@@ -249,6 +249,11 @@ public:
 #pragma omp parallel for schedule(static)
       for (uint64_t i = 0; i < csr_handle->rowStart.size()-1; i++) {
         uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+
+        if (row_id < (this->sp_local)->proc_row_width*(this->grid)->global_rank or row_id >(this->sp_local)->proc_row_width*((this->grid)->global_rank+1)){
+          cout<<" rank"<<this->grid->global_rank <<" "<<  row_id <<endl;
+        }
+
         DENT forceDiff[embedding_dim];
 #pragma forceinline
 #pragma omp simd
