@@ -348,7 +348,7 @@ public:
       this->print_coords(false);
     }
 
-    this->divide_block_rows(block_rows, false, transpose);
+    this->divide_block_rows(block_rows,mod_ind , transpose);
 
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -439,9 +439,9 @@ public:
         }
       }
 
-//      (csr_linked_lists[current_vector_pos].get())
-//          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
-//                   node_index);
+      (csr_linked_lists[current_vector_pos].get())
+          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
+                   node_index);
     }
   }
 
