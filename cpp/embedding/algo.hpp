@@ -116,7 +116,7 @@ public:
     auto negative_update = 0;
 
     for (int i = 0; i < 1; i++) {
-      for (int j = 0; j < 1; j++) {
+      for (int j = 0; j < batches; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
         //                cout<<" rank  "<<this->grid->global_rank<<"  batch
@@ -251,6 +251,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 //      cout<<" rank "<<(this->grid)->global_rank<<" base Id
 //      "<<row_base_index<<endl;
+          cout<<" rank "<<(this->grid)->global_rank<<" batch "<<batch_id<<endl;
 #pragma omp parallel for schedule(static)
       for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
         uint64_t row_id = i;
