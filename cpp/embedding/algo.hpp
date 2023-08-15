@@ -116,7 +116,7 @@ public:
     auto negative_update = 0;
 
     for (int i = 0; i < 1; i++) {
-      for (int j = 0; j < 1; j++) {
+      for (int j = 0; j < batches; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
         //                cout<<" rank  "<<this->grid->global_rank<<"  batch
@@ -157,7 +157,8 @@ public:
                   .count();
           negative_update += neg_cache_duration;
         }
-//                cout<<" rank  "<<this->grid->global_rank<<"  negative population completed "<<j<<endl;
+        //                cout<<" rank  "<<this->grid->global_rank<<"  negative
+        //                population completed "<<j<<endl;
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
 
         auto head = batch_list->getHeadNode();
@@ -173,40 +174,41 @@ public:
         bool fetch_remote =
             (working_rank == ((this->grid)->global_rank)) ? false : true;
 
-                if (j==batches-1){
-//                  this->calc_t_dist_grad_rowptr(csr_block_local,
-//                  prevCoordinates, lr, j,
-//                                                batch_size, last_batch_size);
-//                  this->calc_t_dist_replus_rowptr(prevCoordinates,
-//                  random_number_vec,
-//                                                  lr, j, batch_size,
-//                                                  last_batch_size);
-//                  if (this->grid->world_size > 1) {
-//
-//                    this->calc_t_dist_grad_rowptr(csr_block_remote,
-//                    prevCoordinates, lr,
-//                                                  j, batch_size,
-//                                                  last_batch_size);
-//                  }
-//                  this->update_data_matrix_rowptr(prevCoordinates,
-//                  j,batch_size);
-                }else{
-                  this->calc_t_dist_grad_rowptr(csr_block_local,
-                  prevCoordinates, lr, j,
-                                                batch_size, batch_size);
-//                  this->calc_t_dist_replus_rowptr(prevCoordinates,
-//                  random_number_vec,
-//                                                  lr, j, batch_size,
-//                                                  batch_size);
-//                  if (this->grid->world_size > 1) {
-//
-//                    this->calc_t_dist_grad_rowptr(csr_block_remote,
-//                    prevCoordinates, lr,
-//                                                  j, batch_size, batch_size);
-//                  }
-//                  this->update_data_matrix_rowptr(prevCoordinates,
-//                  j,batch_size);
-                }
+        if (j == batches - 1) {
+          //                  this->calc_t_dist_grad_rowptr(csr_block_local,
+          //                  prevCoordinates, lr, j,
+          //                                                batch_size,
+          //                                                last_batch_size);
+          //                  this->calc_t_dist_replus_rowptr(prevCoordinates,
+          //                  random_number_vec,
+          //                                                  lr, j, batch_size,
+          //                                                  last_batch_size);
+          //                  if (this->grid->world_size > 1) {
+          //
+          //                    this->calc_t_dist_grad_rowptr(csr_block_remote,
+          //                    prevCoordinates, lr,
+          //                                                  j, batch_size,
+          //                                                  last_batch_size);
+          //                  }
+          //                  this->update_data_matrix_rowptr(prevCoordinates,
+          //                  j,batch_size);
+        } else {
+          this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+                                        batch_size, batch_size);
+          //                  this->calc_t_dist_replus_rowptr(prevCoordinates,
+          //                  random_number_vec,
+          //                                                  lr, j, batch_size,
+          //                                                  batch_size);
+          //                  if (this->grid->world_size > 1) {
+          //
+          //                    this->calc_t_dist_grad_rowptr(csr_block_remote,
+          //                    prevCoordinates, lr,
+          //                                                  j, batch_size,
+          //                                                  batch_size);
+          //                  }
+          //                  this->update_data_matrix_rowptr(prevCoordinates,
+          //                  j,batch_size);
+        }
 
         if (this->grid->world_size > 1) {
           MPI_Request request_three;
@@ -230,8 +232,8 @@ public:
         }
       }
       //      cout << "print cache: " << endl;
-//            dense_local->print_cache(i);
-//           dense_local->print_matrix_rowptr( i);
+      //            dense_local->print_cache(i);
+      //           dense_local->print_matrix_rowptr( i);
     }
     cout << "negative_update: " << (negative_update / 1000) << endl;
   }
@@ -241,21 +243,26 @@ public:
                                       int batch_id, int batch_size,
                                       int block_size) {
 
-//    int row_base_index = batch_id * batch_size;
-    int row_base_index =  (this->sp_local)->proc_row_width*(this->grid)->global_rank + batch_id * batch_size;
+    //    int row_base_index = batch_id * batch_size;
+    int row_base_index =
+        (this->sp_local)->proc_row_width * (this->grid)->global_rank +
+        batch_id * batch_size;
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-      cout<<" rank "<<(this->grid)->global_rank<<" base Id "<<row_base_index<<endl;
-//#pragma omp parallel for schedule(static)
-      for (uint64_t i = row_base_index; i < row_base_index+block_size; i++) {
+//      cout<<" rank "<<(this->grid)->global_rank<<" base Id
+//      "<<row_base_index<<endl;
+#pragma omp parallel for schedule(static)
+      for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
         uint64_t row_id = i;
-        cout<<" rank "<<(this->grid)->global_rank<<" row  Id "<<i<<endl;
+        //        cout<<" rank "<<(this->grid)->global_rank<<" row  Id
+        //        "<<i<<endl;
         DENT forceDiff[embedding_dim];
 #pragma forceinline
 #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          cout<<" rank "<<(this->grid)->global_rank<<" i "<<i<<" j "<<j<<endl;
+          //          cout<<" rank "<<(this->grid)->global_rank<<" i "<<i<<" j
+          //          "<<j<<endl;
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
           uint64_t local_col =
@@ -276,10 +283,9 @@ public:
                     ->fetch_data_vector_from_cache(target_rank, global_col_id);
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = (this->dense_local)
-//                                 ->nCoordinates[row_id * embedding_dim + d] -
-//                             colvec[d];
-              forceDiff[d]=0.1;
+              forceDiff[d] = (this->dense_local)
+                                 ->nCoordinates[row_id * embedding_dim + d] -
+                             colvec[d];
               attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
@@ -292,11 +298,11 @@ public:
 
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = (this->dense_local)
-//                                 ->nCoordinates[row_id * embedding_dim + d] -
-//                             (this->dense_local)
-//                                 ->nCoordinates[local_col * embedding_dim + d];
-              forceDiff[d]=0.1;
+              forceDiff[d] = (this->dense_local)
+                                 ->nCoordinates[row_id * embedding_dim + d] -
+                             (this->dense_local)
+                                 ->nCoordinates[local_col * embedding_dim + d];
+
               attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
