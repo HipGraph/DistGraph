@@ -237,11 +237,11 @@ public:
         batch_id * batch_size;
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-      cout << " rank " << (this->grid)->global_rank << " base Id"
-           << row_base_index << endl;
-      cout << " rank " << (this->grid)->global_rank << " batch " << batch_id
-           << endl;
-      //#pragma omp parallel for schedule(static)
+//      cout << " rank " << (this->grid)->global_rank << " base Id"
+//           << row_base_index << endl;
+//      cout << " rank " << (this->grid)->global_rank << " batch " << batch_id
+//           << endl;
+#pragma omp parallel for schedule(static)
       for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
         uint64_t row_id = i;
         int ind = i - row_base_index;
@@ -252,8 +252,8 @@ public:
 #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          cout << " rank " << (this->grid)->global_rank << " i " << i << " j"
-               << j << endl;
+//          cout << " rank " << (this->grid)->global_rank << " i " << i << " j"
+//               << j << endl;
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
           uint64_t local_col =
