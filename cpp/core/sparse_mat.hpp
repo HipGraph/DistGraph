@@ -54,12 +54,6 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
-    ////    if (col_merged) {
-    //#pragma omp parallel for
-    //      for (int i = 0; i < coords.size(); i++) {
-    //        this->coords[i].value = static_cast<T>(coords[i].col);
-    //      }
-    ////    }
   }
 
   SpMat() {}
@@ -71,152 +65,57 @@ public:
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     block_col_starts.clear();
 
-    int current_start = 0;
-    int next_start = batch_size;
-    if (trans) {
-      current_start = proc_col_width * rank;
-      next_start = current_start + batch_size;
+    int start_index = 0;
+    int end_index = 0;
+    uint64_t checking_index = rank * proc_col_width;
+    //      uint64_t checking_index = 1;
+    uint64_t checking_end_index = (rank + 1) * proc_col_width - 1;
+
+    if (rank == world_size - 1) {
+      checking_end_index = std::max(
+          static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
     }
 
-    if (!col_merged) {
-      // TODO: introduce atomic capture
-      bool divided_equallaly = true;
-      int last_proc_batch_size = batch_size;
-      int batch_count = proc_col_width / batch_size;
-      //      if (!trans and proc_col_width % batch_size != 0) {
-      if (proc_col_width % batch_size != 0) {
-
-        divided_equallaly = false;
-        last_proc_batch_size = proc_col_width - batch_size * batch_count;
-        batch_count = batch_count + 1;
-      }
-
-      for (uint64_t i = 0; i < coords.size(); i++) {
-        while (coords[i].col >= current_start) {
-          block_col_starts.push_back(i);
-
-          if (coords[i].col > next_start) {
-            while (coords[i].col > next_start) {
-              block_col_starts.push_back(i);
-              if (!divided_equallaly) {
-                if (i > 0 and block_col_starts.size() % batch_count == 0) {
-                  current_start += last_proc_batch_size;
-                  next_start += batch_size;
-                } else if (i > 0 and
-                           (block_col_starts.size() + 1) % batch_count == 0) {
-                  current_start += batch_size;
-                  next_start += last_proc_batch_size;
-                } else {
-                  current_start += batch_size;
-                  next_start += batch_size;
-                }
-              } else {
-                current_start += batch_size;
-                next_start += batch_size;
-              }
-            }
-          } else {
-            if (!divided_equallaly) {
-              if (i > 0 and block_col_starts.size() % batch_count == 0) {
-                current_start += last_proc_batch_size;
-                next_start += batch_size;
-              } else if (i > 0 and
-                         (block_col_starts.size() + 1) % batch_count == 0) {
-                current_start += batch_size;
-                next_start += last_proc_batch_size;
-              } else {
-                current_start += batch_size;
-                next_start += batch_size;
-              }
-            } else {
-              current_start += batch_size;
-              next_start += batch_size;
-            }
-          }
-          //          if (rank == 0) {
-          //            cout << " current start: " << current_start
-          //                 << " size: " << block_col_starts.size() << endl;
-          //          }
-        }
-
-        // This modding step helps indexing.
-        if (mod_ind) {
-          coords[i].col %= batch_size;
-        }
-      }
-
-    } else {
-      int start_index = 0;
-      int end_index = 0;
-      uint64_t checking_index = rank * proc_col_width;
-      //      uint64_t checking_index = 1;
-      uint64_t checking_end_index = (rank + 1) * proc_col_width - 1;
-
-      if (rank == world_size - 1) {
-        checking_end_index = std::max(
-            static_cast<uint64_t>((rank + 1) * proc_col_width) - 1, gCols - 1);
-      }
-
-      auto startIt = std::find_if(coords.begin(), coords.end(),
-                                  [&checking_index](const auto &tuple) {
-                                    return tuple.col >= checking_index;
-                                  });
-
-      auto endIt = std::find_if(coords.rbegin(), coords.rend(),
-                                [&checking_end_index](const auto &tuple) {
-                                  return tuple.col <= checking_end_index;
+    auto startIt = std::find_if(coords.begin(), coords.end(),
+                                [&checking_index](const auto &tuple) {
+                                  return tuple.col >= checking_index;
                                 });
 
-      //      cout << "checking_index" << checking_index << "checking_end_index"
-      //           << checking_end_index << endl;
-      //      std::cout << "Start value: (" << (*startIt).row << ", " <<
-      //      (*startIt).col
-      //                << ")" << std::endl;
-      //      std::cout << "End value: (" << (*endIt).row << ", " <<
-      //      (*endIt).col << ")"
-      //                << std::endl;
-      std::rotate(coords.begin(), startIt, std::next(endIt).base());
-      uint64_t startIndex = std::distance(coords.begin(), startIt);
-      uint64_t endIndex =
-          std::distance(coords.begin(), std::next(endIt).base());
-      uint64_t first_batch_len = (endIndex + 1) - startIndex;
-      uint64_t second_batch_len = coords.size() - first_batch_len;
+    auto endIt = std::find_if(coords.rbegin(), coords.rend(),
+                              [&checking_end_index](const auto &tuple) {
+                                return tuple.col <= checking_end_index;
+                              });
+    std::rotate(coords.begin(), startIt, std::next(endIt).base());
+    uint64_t startIndex = std::distance(coords.begin(), startIt);
+    uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
+    uint64_t first_batch_len = (endIndex + 1) - startIndex;
+    //    uint64_t second_batch_len = coords.size() - first_batch_len;
 
-      int considered_col_width = proc_col_width;
-      if (rank == world_size - 1) {
-        considered_col_width = gCols - proc_col_width * (world_size - 1);
-      }
-
-      if (mod_ind) {
-        std::transform(coords.begin(), coords.begin() + first_batch_len,
-                       coords.begin(),
-                       [&considered_col_width](const auto &tuple) {
-                         const auto &[row, col, value] = tuple;
-                         //                         int64_t modifiedCol = col %
-                         //                         (first_batch_len);
-                         int64_t modifiedCol = col % (considered_col_width);
-                         return Tuple<T>{row, modifiedCol, value};
-                       });
-        std::transform(coords.begin() + first_batch_len, coords.end(),
-                       coords.begin() + first_batch_len,
-                       [&](const auto &tuple) {
-                         const auto &[row, col, value] = tuple;
-                         int64_t modifiedCol = col;
-                         return Tuple<T>{row, modifiedCol, value};
-                       });
-      }
-
-      block_col_starts.push_back(0);
-      block_col_starts.push_back(first_batch_len);
-      //      std::cout << " first_batch_len " << first_batch_len << " size "
-      //                << coords.size() << std::endl;
-    }
-    block_col_starts.push_back(coords.size());
-    //    if (!col_merged) {
-    //      std::cout << " trans " << trans << "col_blocks" <<
-    //      block_col_starts.size()
-    //                << std::endl;
+    //    int considered_col_width = proc_col_width;
+    //    if (rank == world_size - 1) {
+    //      considered_col_width = gCols - proc_col_width * (world_size - 1);
     //    }
+
+    //    if (mod_ind) {
+    //      std::transform(coords.begin(), coords.begin() + first_batch_len,
+    //                     coords.begin(),
+    //                     [&considered_col_width](const auto &tuple) {
+    //                       const auto &[row, col, value] = tuple;
+    //                       int64_t modifiedCol = col % (considered_col_width);
+    //                       return Tuple<T>{row, modifiedCol, value};
+    //                     });
+    //      std::transform(coords.begin() + first_batch_len, coords.end(),
+    //                     coords.begin() + first_batch_len, [&](const auto
+    //                     &tuple) {
+    //                       const auto &[row, col, value] = tuple;
+    //                       int64_t modifiedCol = col;
+    //                       return Tuple<T>{row, modifiedCol, value};
+    //                     });
+    //    }
+
+    block_col_starts.push_back(0);
+    block_col_starts.push_back(first_batch_len);
+    block_col_starts.push_back(coords.size());
   }
 
   void sort_by_rows() {
@@ -246,7 +145,7 @@ public:
     int last_proc_batch_size = batch_size;
     int batch_count = proc_row_width / batch_size;
 
-    int current_batch_size=batch_size;
+    int current_batch_size = batch_size;
 
     if (proc_row_width % batch_size != 0) {
       divided_equallaly = false;
@@ -315,13 +214,12 @@ public:
             next_start += batch_size;
           }
           //          }
-//          if (col_merged and rank==1) {
-//            cout << " current row start: " << current_start
-//                 << " size: " << matched_count << " " << j << " "
-//                 << coords[j].row << endl;
-//          }
+          //          if (col_merged and rank==1) {
+          //            cout << " current row start: " << current_start
+          //                 << " size: " << matched_count << " " << j << " "
+          //                 << coords[j].row << endl;
+          //          }
         }
-
 
         // This modding step helps indexing.
         if (mod_ind) {
@@ -341,117 +239,103 @@ public:
                              bool transpose) {
     auto ini_csr_start = std::chrono::high_resolution_clock::now();
 
-//    this->divide_block_cols(block_cols, mod_ind, transpose);
-//    this->sort_by_rows();
-//    this->divide_block_rows(block_rows,mod_ind , transpose);
+    if (col_merged) {
+      this->divide_block_cols(block_cols, mod_ind, transpose);
+    }
+    //        this->sort_by_rows();
+    //        this->divide_block_rows(block_rows,mod_ind , transpose);
 
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
-                              ini_csr_end - ini_csr_start).count();
-
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+                              ini_csr_end - ini_csr_start)
+                              .count();
 
     cout << "rank" << rank << " initialization time " << train_duration / 1000
          << endl;
 
     int col_block = 0;
 
-//    this->number_of_local_csr_nodes =
-//        (transpose) ? (gRows / block_rows)
-//        : ((proc_col_width % block_cols) == 0)
-//            ? (((proc_col_width / block_cols) + 1) * world_size)
-//            : (gCols / block_cols); // This assumes 1D partitioning, we
-//                                    // need to generalized this
-//
-//    int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
-//                                         ? (proc_col_width / block_cols)
-//                                         : (proc_col_width / block_cols) + 1)
-//                                  : ((proc_row_width % block_rows == 0)
-//                                         ? (proc_row_width / block_rows)
-//                                         : (proc_row_width / block_rows) + 1);
-
-    //    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << "
-    //    number_of_local_csr_nodes " << this->number_of_local_csr_nodes <<
-    //    endl;
-    csr_linked_lists =
-        std::vector<std::shared_ptr<CSRLinkedList<T>>>(1);
+    csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(1);
 
     for (int i = 0; i < 1; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>();
     }
 
-    auto ini_csr_end_while = std::chrono::high_resolution_clock::now();
-    auto train_duration_init =
-        std::chrono::duration_cast<std::chrono::microseconds>(
-            ini_csr_end_while - ini_csr_end)
-            .count();
-    //    cout << " train duration while " << train_duration_init / 1000 <<
-    //    endl;
-
     int node_index = 0;
 
-//    for (int j = 0; j < block_row_starts.size() - 1; j++) {
-//      int current_vector_pos = 0;
-//      if (!transpose) {
-//        current_vector_pos = j % no_of_lists;
-//        if (j > 0 and current_vector_pos == 0) {
-//          ++col_block;
-//          ++node_index;
-//        }
-//      } else {
-//        current_vector_pos = j / this->number_of_local_csr_nodes;
-//        col_block = current_vector_pos;
-//        if (node_index >= this->number_of_local_csr_nodes) {
-//          node_index = 0;
-//        }
-//        ++node_index;
-//      }
+    //    for (int j = 0; j < block_row_starts.size() - 1; j++) {
+    //      int current_vector_pos = 0;
+    //      if (!transpose) {
+    //        current_vector_pos = j % no_of_lists;
+    //        if (j > 0 and current_vector_pos == 0) {
+    //          ++col_block;
+    //          ++node_index;
+    //        }
+    //      } else {
+    //        current_vector_pos = j / this->number_of_local_csr_nodes;
+    //        col_block = current_vector_pos;
+    //        if (node_index >= this->number_of_local_csr_nodes) {
+    //          node_index = 0;
+    //        }
+    //        ++node_index;
+    //      }
 
-//      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
+    //      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
-//    num_coords =
-//    coords.data()
+    //    num_coords =
+    //    coords.data()
 
-//      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+    //      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
 
     for (uint64_t i = 0; i < coords.size(); i++) {
       if (transpose) {
         coords[i].col %= block_cols;
-      }else {
+      } else {
         coords[i].row %= block_rows;
       }
     }
 
+    Tuple<T> *coords_ptr = coords.data();
 
-      Tuple<T> *coords_ptr = coords.data();
+    // TODO change
+    //      (csr_linked_lists[current_vector_pos].get())
+    //          ->insert(block_rows, (col_merged) ? gCols : block_cols,
+    //          num_coords,
+    //                   coords_ptr, num_coords, false, node_index);
 
-      // TODO change
-      //      (csr_linked_lists[current_vector_pos].get())
-      //          ->insert(block_rows, (col_merged) ? gCols : block_cols,
-      //          num_coords,
-      //                   coords_ptr, num_coords, false, node_index);
+    //      if (rank == 1 and col_merged) {
+    //        cout << " number of lists " << no_of_lists << " vector position "
+    //             << current_vector_pos<<"j "<<j<<"corrds"<<num_coords<<
+    //             "starting distance "<<block_row_starts[j] << endl;
+    //      }
+    //
+    //      if (rank == 1 and current_vector_pos==0 and col_merged){
+    //        cout<<" this is the tragedy "<<block_row_starts[j]<<endl;
+    //        for(int k=block_row_starts[j]; k< block_row_starts[j+1];k++){
+    //          Tuple<T> *coords_pr = coords.data()+k;
+    //          cout<<coords_pr->row<<" "<<coords_pr->value<<endl;
+    //        }
+    //      }
 
-//      if (rank == 1 and col_merged) {
-//        cout << " number of lists " << no_of_lists << " vector position "
-//             << current_vector_pos<<"j "<<j<<"corrds"<<num_coords<< "starting distance "<<block_row_starts[j] << endl;
-//      }
-//
-//      if (rank == 1 and current_vector_pos==0 and col_merged){
-//        cout<<" this is the tragedy "<<block_row_starts[j]<<endl;
-//        for(int k=block_row_starts[j]; k< block_row_starts[j+1];k++){
-//          Tuple<T> *coords_pr = coords.data()+k;
-//          cout<<coords_pr->row<<" "<<coords_pr->value<<endl;
-//        }
-//      }
+    if (col_merged) {
+
+      for (int i = 0; i < block_col_starts.size() - 1; i++) {
+
+        coords_ptr = coords_ptr + block_col_starts[i];
+        int num_coords = block_col_starts[i] - block_col_starts[i + 1];
+        (csr_linked_lists[0].get())
+            ->insert(block_rows, gCols, num_coords, coords_ptr, num_coords,
+                     transpose, node_index);
+      }
+
+    } else {
 
       (csr_linked_lists[0].get())
-          ->insert((transpose)?gRows:block_rows, (transpose)?block_cols:gCols, coords.size(), coords_ptr,  coords.size(), transpose,
-                   node_index);
-//    }
+          ->insert((transpose) ? gRows : block_rows,
+                   (transpose) ? block_cols : gCols, coords.size(), coords_ptr,
+                   coords.size(), transpose, node_index);
+    }
+
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
@@ -473,8 +357,8 @@ public:
     }
     if (count == batch_id) {
       auto csr_data = (head.get())->data;
-      //      //      cout << " rank  " << rank << " inside fill_col_ids coords
-      //      ( "
+      //      //      cout << " rank  " << rank << " inside fill_col_ids
+      //      coords ( "
       //      //           << block_row_id << " ," << block_col_id << ")"
       //      //           << (csr_data.get())->num_coords << endl;
       if ((csr_data.get())->num_coords > 0) {
