@@ -261,8 +261,7 @@ public:
 #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-                    cout<<" rank "<<(this->grid)->global_rank<<" i "<<i<<" j
-                    "<<j<<endl;
+          cout<<" rank "<<(this->grid)->global_rank<<" i "<<i<<" j"<<j<<endl;
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
           uint64_t local_col =
