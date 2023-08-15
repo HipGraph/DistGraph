@@ -341,9 +341,9 @@ public:
                              bool transpose) {
     auto ini_csr_start = std::chrono::high_resolution_clock::now();
 
-    this->divide_block_cols(block_cols, mod_ind, transpose);
-    this->sort_by_rows();
-    this->divide_block_rows(block_rows,mod_ind , transpose);
+//    this->divide_block_cols(block_cols, mod_ind, transpose);
+//    this->sort_by_rows();
+//    this->divide_block_rows(block_rows,mod_ind , transpose);
 
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
     auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -360,27 +360,27 @@ public:
 
     int col_block = 0;
 
-    this->number_of_local_csr_nodes =
-        (transpose) ? (gRows / block_rows)
-        : ((proc_col_width % block_cols) == 0)
-            ? (((proc_col_width / block_cols) + 1) * world_size)
-            : (gCols / block_cols); // This assumes 1D partitioning, we
-                                    // need to generalized this
-
-    int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
-                                         ? (proc_col_width / block_cols)
-                                         : (proc_col_width / block_cols) + 1)
-                                  : ((proc_row_width % block_rows == 0)
-                                         ? (proc_row_width / block_rows)
-                                         : (proc_row_width / block_rows) + 1);
+//    this->number_of_local_csr_nodes =
+//        (transpose) ? (gRows / block_rows)
+//        : ((proc_col_width % block_cols) == 0)
+//            ? (((proc_col_width / block_cols) + 1) * world_size)
+//            : (gCols / block_cols); // This assumes 1D partitioning, we
+//                                    // need to generalized this
+//
+//    int no_of_lists = (transpose) ? ((proc_col_width % block_cols == 0)
+//                                         ? (proc_col_width / block_cols)
+//                                         : (proc_col_width / block_cols) + 1)
+//                                  : ((proc_row_width % block_rows == 0)
+//                                         ? (proc_row_width / block_rows)
+//                                         : (proc_row_width / block_rows) + 1);
 
     //    cout << "rank"<<rank<< " no_of_lists  "<<no_of_lists << "
     //    number_of_local_csr_nodes " << this->number_of_local_csr_nodes <<
     //    endl;
     csr_linked_lists =
-        std::vector<std::shared_ptr<CSRLinkedList<T>>>(no_of_lists);
+        std::vector<std::shared_ptr<CSRLinkedList<T>>>(1);
 
-    for (int i = 0; i < no_of_lists; i++) {
+    for (int i = 0; i < 1; i++) {
       csr_linked_lists[i] = std::make_shared<CSRLinkedList<T>>();
     }
 
@@ -394,26 +394,30 @@ public:
 
     int node_index = 0;
 
-    for (int j = 0; j < block_row_starts.size() - 1; j++) {
-      int current_vector_pos = 0;
-      if (!transpose) {
-        current_vector_pos = j % no_of_lists;
-        if (j > 0 and current_vector_pos == 0) {
-          ++col_block;
-          ++node_index;
-        }
-      } else {
-        current_vector_pos = j / this->number_of_local_csr_nodes;
-        col_block = current_vector_pos;
-        if (node_index >= this->number_of_local_csr_nodes) {
-          node_index = 0;
-        }
-        ++node_index;
-      }
+//    for (int j = 0; j < block_row_starts.size() - 1; j++) {
+//      int current_vector_pos = 0;
+//      if (!transpose) {
+//        current_vector_pos = j % no_of_lists;
+//        if (j > 0 and current_vector_pos == 0) {
+//          ++col_block;
+//          ++node_index;
+//        }
+//      } else {
+//        current_vector_pos = j / this->number_of_local_csr_nodes;
+//        col_block = current_vector_pos;
+//        if (node_index >= this->number_of_local_csr_nodes) {
+//          node_index = 0;
+//        }
+//        ++node_index;
+//      }
 
-      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
+//      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
 
-      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+//    num_coords =
+//    coords.data()
+
+//      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
+      Tuple<T> *coords_ptr = coords.data();
 
       // TODO change
       //      (csr_linked_lists[current_vector_pos].get())
@@ -434,10 +438,10 @@ public:
 //        }
 //      }
 
-      (csr_linked_lists[current_vector_pos].get())
-          ->insert(gRows, gCols, num_coords, coords_ptr, num_coords, false,
+      (csr_linked_lists[0].get())
+          ->insert(block_rows, gCols, coords.size(), coords_ptr,  coords.size(), false,
                    node_index);
-    }
+//    }
   }
 
   void fill_col_ids(int block_row_id, int block_col_id,
