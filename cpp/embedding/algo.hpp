@@ -116,7 +116,7 @@ public:
     auto negative_update = 0;
 
     for (int i = 0; i < 1; i++) {
-      for (int j = 0; j < 2; j++) {
+      for (int j = 0; j < batches; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
         //                cout<<" rank  "<<this->grid->global_rank<<"  batch
