@@ -245,7 +245,7 @@ public:
     int row_base_index =  (this->sp_local)->proc_row_width*(this->grid)->global_rank;
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-
+      cout<<" rank "<<(this->grid)->global_rank<<" total i "<<csr_handle->rowStart.size()<<endl;
 //#pragma omp parallel for schedule(static)
       for (uint64_t i = 0; i < csr_handle->rowStart.size()-1; i++) {
         uint64_t row_id = i;
