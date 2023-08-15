@@ -419,7 +419,7 @@ public:
 //      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
 
     for (uint64_t i = 0; i < coords.size(); i++) {
-      if (!trans) {
+      if (!transpose) {
         coords[i].row %= block_rows;
       }
     }
@@ -447,7 +447,7 @@ public:
 //      }
 
       (csr_linked_lists[0].get())
-          ->insert((trans)?gRows:block_rows, (trans)?block_cols:gCols, coords.size(), coords_ptr,  coords.size(), false,
+          ->insert((transpose)?gRows:block_rows, (transpose)?block_cols:gCols, coords.size(), coords_ptr,  coords.size(), false,
                    node_index);
 //    }
   }
