@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data started  " << endl;
 
-  auto ini_csr_start = std::chrono::high_resolution_clock::now();
+
 
   partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
 
-
+  auto ini_csr_start = std::chrono::high_resolution_clock::now();
 //  shared_sparseMat.get()->initialize_CSR_blocks(batch_size, batch_size, false,false);
   shared_sparseMat.get()->initialize_CSR_blocks(localARows, localBRows, false,false);
 
