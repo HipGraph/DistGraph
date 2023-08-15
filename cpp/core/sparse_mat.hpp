@@ -447,7 +447,7 @@ public:
 //      }
 
       (csr_linked_lists[0].get())
-          ->insert(block_rows, gCols, coords.size(), coords_ptr,  coords.size(), false,
+          ->insert((trans)?gRows:block_rows, (trans)?block_cols:gCols, coords.size(), coords_ptr,  coords.size(), false,
                    node_index);
 //    }
   }
