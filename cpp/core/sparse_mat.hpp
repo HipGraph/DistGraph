@@ -419,7 +419,9 @@ public:
 //      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
 
     for (uint64_t i = 0; i < coords.size(); i++) {
-      coords[i].row %= block_rows;
+      if (!trans) {
+        coords[i].row %= block_rows;
+      }
     }
 
 
