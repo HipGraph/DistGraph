@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " initialize_CSR_blocks  completed  " << endl;
 
  shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, localBRows,false, true);
- shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
+
   cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
   auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
 //  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,false, false);
@@ -117,6 +117,9 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " initialize_CSR_blocks combined  completed  " << endl;
 
   auto ini_csr_end = std::chrono::high_resolution_clock::now();
+
+  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
+
 
   auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end - ini_csr_start).count();
   auto ini_csr_duration1 =
