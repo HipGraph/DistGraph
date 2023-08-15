@@ -343,11 +343,6 @@ public:
 
     this->divide_block_cols(block_cols, mod_ind, transpose);
     this->sort_by_rows();
-
-    if (col_merged) {
-      this->print_coords(false);
-    }
-
     this->divide_block_rows(block_rows,mod_ind , transpose);
 
     auto ini_csr_end = std::chrono::high_resolution_clock::now();
