@@ -315,11 +315,11 @@ public:
             next_start += batch_size;
           }
           //          }
-          if (col_merged and rank==1) {
-            cout << " current row start: " << current_start
-                 << " size: " << matched_count << " " << j << " "
-                 << coords[j].row << endl;
-          }
+//          if (col_merged and rank==1) {
+//            cout << " current row start: " << current_start
+//                 << " size: " << matched_count << " " << j << " "
+//                 << coords[j].row << endl;
+//          }
         }
 
 

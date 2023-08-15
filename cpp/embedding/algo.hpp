@@ -92,8 +92,7 @@ public:
       data_comm_cache[0].get()->async_transfer(0, true, false,
                                                results_init_ptr.get(), request);
 
-      cout << " rank " << this->grid->global_rank
-           << " async_transfer_completed " << endl;
+      cout << " rank " << this->grid->global_rank << " async_transfer_completed " << endl;
 
       auto transfer_cache = std::chrono::high_resolution_clock::now();
       data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);

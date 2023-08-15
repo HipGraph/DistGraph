@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-   batch_size = batch_size/world_size;
+//   batch_size = batch_size/world_size;
 
   // Initialize MPI DataTypes
   initialize_mpi_datatypes<int, double, 2>();
@@ -45,8 +45,7 @@ int main(int argc, char **argv) {
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
 
-  cout << " rank " << rank << " reading data from file path:  " << file_path
-       << endl;
+  cout << " rank " << rank << " reading data from file path:  " << file_path << endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
   reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get(),true);
