@@ -312,7 +312,7 @@ public:
       for (int i = 0; i < block_col_starts.size() - 1; i++) {
 
         coords_ptr = coords_ptr + block_col_starts[i];
-        int num_coords = block_col_starts[i] - block_col_starts[i + 1];
+        int num_coords = block_col_starts[i+1] - block_col_starts[i];
         (csr_linked_lists[0].get())
             ->insert(block_rows, gCols, num_coords, coords_ptr, num_coords,
                      transpose, node_index);
