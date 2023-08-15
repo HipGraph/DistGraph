@@ -116,7 +116,7 @@ public:
     auto negative_update = 0;
 
     for (int i = 0; i < 1; i++) {
-      for (int j = 0; j < batches; j++) {
+      for (int j = 0; j < 1; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
         //                cout<<" rank  "<<this->grid->global_rank<<"  batch
@@ -246,16 +246,17 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (uint64_t i = 0; i < csr_handle->rowStart.size()-1; i++) {
         uint64_t row_id = i;
+
 
         DENT forceDiff[embedding_dim];
 #pragma forceinline
 #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-
+          cout<<" rank "<<(this->grid)->global_rank<<" i "<<i<<" j "<<j<<endl;
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
           uint64_t local_col =
@@ -285,7 +286,7 @@ public:
             DENT d1 = -2.0 / (1.0 + attrc);
             for (int d = 0; d < embedding_dim; d++) {
               forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[j * embedding_dim + d] += (lr)*forceDiff[d];
+              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
             }
 
           } else {
@@ -302,7 +303,7 @@ public:
             DENT d1 = -2.0 / (1.0 + attrc);
             for (int d = 0; d < embedding_dim; d++) {
               forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[j * embedding_dim + d] += (lr)*forceDiff[d];
+              prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
             }
           }
         }
