@@ -77,11 +77,11 @@ int main(int argc, char **argv) {
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
       batch_size, localARows, localBRows, false);
 //
-//  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
-//  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
-//      copiedVectorTwo, shared_sparseMat.get()->gRows,
-//      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
-//      localBRows, localARows, localBRows, true);
+  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
+      copiedVectorTwo, shared_sparseMat.get()->gRows,
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
+      localBRows, localARows, localBRows, true);
 
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 
   partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
   partitioner.get()->partition_data(shared_sparseMat.get(), false);
-//  partitioner.get()->partition_data(shared_sparseMat_combined.get(), false);
+  partitioner.get()->partition_data(shared_sparseMat_combined.get(), false);
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
   auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
-//  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,false, false);
+  shared_sparseMat_combined.get()->initialize_CSR_blocks(batch_size, localBRows,false, false);
 
 //  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 
   auto ini_csr_end = std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
+  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
 
   auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end - ini_csr_start).count();

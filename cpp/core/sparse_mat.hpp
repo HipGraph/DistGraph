@@ -237,7 +237,6 @@ public:
 
   void initialize_CSR_blocks(int block_rows, int block_cols, bool mod_ind,
                              bool transpose) {
-    auto ini_csr_start = std::chrono::high_resolution_clock::now();
 
     if (col_merged) {
       this->divide_block_cols(block_cols, mod_ind, transpose);
@@ -245,15 +244,6 @@ public:
     //        this->sort_by_rows();
     //        this->divide_block_rows(block_rows,mod_ind , transpose);
 
-    auto ini_csr_end = std::chrono::high_resolution_clock::now();
-    auto train_duration = std::chrono::duration_cast<std::chrono::microseconds>(
-                              ini_csr_end - ini_csr_start)
-                              .count();
-
-    cout << "rank" << rank << " initialization time " << train_duration / 1000
-         << endl;
-
-    int col_block = 0;
 
     csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(1);
 
@@ -326,6 +316,7 @@ public:
         (csr_linked_lists[0].get())
             ->insert(block_rows, gCols, num_coords, coords_ptr, num_coords,
                      transpose, node_index);
+        node_index++;
       }
 
     } else {
