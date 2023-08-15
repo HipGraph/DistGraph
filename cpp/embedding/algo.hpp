@@ -67,8 +67,7 @@ public:
       batches = static_cast<int>(sp_local->proc_row_width / batch_size);
       last_batch_size = batch_size;
     } else {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +
-                1; // TODO:Error prone
+      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +1; // TODO:Error prone
       last_batch_size = (this->dense_local)->rows - batch_size * (batches - 1);
     }
 
@@ -115,7 +114,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
 
         //                this->data_comm->cross_validate_batch_from_metadata(j);
@@ -148,6 +147,7 @@ public:
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request_two);
+
           this->data_comm->populate_cache(results_negative_ptr.get(),
                                           request_two);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
@@ -188,10 +188,11 @@ public:
         } else {
           this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                         batch_size, batch_size);
+
           this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
                                           lr, j, batch_size, batch_size);
-          if (this->grid->world_size > 1) {
 
+          if (this->grid->world_size > 1) {
             this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                           j, batch_size, batch_size);
           }
@@ -203,17 +204,16 @@ public:
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
               unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                   new vector<DataTuple<DENT, embedding_dim>>());
-          if (i == 0) {
 
+          if (i == 0) {
             data_comm_cache[j].get()->async_transfer(
                 j, false, false, update_ptr.get(), request_three);
+
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                      request_three);
           } else if (i > 0) {
-
             data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
                                                         request_three);
-
             data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                      request_three);
           }
