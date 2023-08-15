@@ -243,7 +243,7 @@ public:
 //           << endl;
 #pragma omp parallel for schedule(static)
       for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
-        uint64_t row_id = i;
+        uint64_t row_id = i-(this->sp_local)->proc_row_width * (this->grid)->global_rank;
         int ind = i - row_base_index;
         //        cout<<" rank "<<(this->grid)->global_rank<<" row  Id
         //        "<<i<<endl;
