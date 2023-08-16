@@ -91,8 +91,8 @@ public:
       total_send_count = total_send_count + sendcounts[i];
       total_receive_count = total_receive_count + receivecounts[i];
 
-      cout << " rank " << grid->global_rank << " sending  " << sendcounts[i] << "  to rank " << i << endl;
-      cout << " rank " << grid->global_rank << " receiving  " << receivecounts[i] << "  from rank " << i << endl;
+      cout << " rank " << grid->global_rank<<" batch "<<batch_id << " sending  " << sendcounts[i] << "  to rank " << i << endl;
+      cout << " rank " << grid->global_rank <<" batch "<<batch_id << " receiving  " << receivecounts[i] << "  from rank " << i << endl;
     }
 
     cout << " rank " << grid->global_rank << " total_send_count "
