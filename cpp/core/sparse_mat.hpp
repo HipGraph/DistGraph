@@ -30,10 +30,10 @@ private:
 public:
   uint64_t gRows, gCols, gNNz;
   vector<Tuple<T>> coords;
-  int block_row_width, block_col_width;
+  int batch_size;
   int proc_col_width, proc_row_width;
-  int number_of_local_csr_nodes;
   bool col_merged = false;
+  bool transpose = false;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -43,22 +43,22 @@ public:
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
   SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols,
-        uint64_t &gNNz, int &block_row_width, int &block_col_width,
-        int &proc_row_width, int &proc_col_width, bool col_merged) {
+        uint64_t &gNNz, int &batch_size,int &proc_row_width,
+        int &proc_col_width, bool col_merged, bool transpose) {
     this->gRows = gRows;
     this->gCols = gCols;
     this->gNNz = gNNz;
     this->coords = coords;
-    this->block_row_width = block_row_width;
-    this->block_col_width = block_col_width;
+    this->batch_size = batch_size;
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->col_merged = col_merged;
+    this->transpose = transpose;
   }
 
   SpMat() {}
 
-  void divide_block_cols(int batch_size, bool mod_ind, bool trans) {
+  void divide_block_cols() {
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -235,15 +235,11 @@ public:
     block_row_starts.push_back(coords.size());
   }
 
-  void initialize_CSR_blocks(int block_rows, int block_cols, bool mod_ind,
-                             bool transpose) {
+  void initialize_CSR_blocks() {
 
     if (col_merged) {
-      this->divide_block_cols(block_cols, mod_ind, transpose);
+      this->divide_block_cols();
     }
-    //        this->sort_by_rows();
-    //        this->divide_block_rows(block_rows,mod_ind , transpose);
-
 
     csr_linked_lists = std::vector<std::shared_ptr<CSRLinkedList<T>>>(1);
 
@@ -253,59 +249,15 @@ public:
 
     int node_index = 0;
 
-    //    for (int j = 0; j < block_row_starts.size() - 1; j++) {
-    //      int current_vector_pos = 0;
-    //      if (!transpose) {
-    //        current_vector_pos = j % no_of_lists;
-    //        if (j > 0 and current_vector_pos == 0) {
-    //          ++col_block;
-    //          ++node_index;
-    //        }
-    //      } else {
-    //        current_vector_pos = j / this->number_of_local_csr_nodes;
-    //        col_block = current_vector_pos;
-    //        if (node_index >= this->number_of_local_csr_nodes) {
-    //          node_index = 0;
-    //        }
-    //        ++node_index;
-    //      }
-
-    //      int num_coords = block_row_starts[j + 1] - block_row_starts[j];
-
-    //    num_coords =
-    //    coords.data()
-
-    //      Tuple<T> *coords_ptr = (coords.data() + block_row_starts[j]);
-
     for (uint64_t i = 0; i < coords.size(); i++) {
       if (transpose) {
-        coords[i].col %= block_cols;
+        coords[i].col %= proc_col_width;
       } else {
-        coords[i].row %= block_rows;
+        coords[i].row %= proc_row_width;
       }
     }
 
     Tuple<T> *coords_ptr = coords.data();
-
-    // TODO change
-    //      (csr_linked_lists[current_vector_pos].get())
-    //          ->insert(block_rows, (col_merged) ? gCols : block_cols,
-    //          num_coords,
-    //                   coords_ptr, num_coords, false, node_index);
-
-    //      if (rank == 1 and col_merged) {
-    //        cout << " number of lists " << no_of_lists << " vector position "
-    //             << current_vector_pos<<"j "<<j<<"corrds"<<num_coords<<
-    //             "starting distance "<<block_row_starts[j] << endl;
-    //      }
-    //
-    //      if (rank == 1 and current_vector_pos==0 and col_merged){
-    //        cout<<" this is the tragedy "<<block_row_starts[j]<<endl;
-    //        for(int k=block_row_starts[j]; k< block_row_starts[j+1];k++){
-    //          Tuple<T> *coords_pr = coords.data()+k;
-    //          cout<<coords_pr->row<<" "<<coords_pr->value<<endl;
-    //        }
-    //      }
 
     if (col_merged) {
 
@@ -329,68 +281,26 @@ public:
 
   }
 
-  void fill_col_ids(int block_row_id, int block_col_id,
-                    vector<uint64_t> &col_ids, bool transpose,
-                    bool return_global_ids) {
+  void fill_col_ids(int batch_id,vector<uint64_t> &col_ids) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    int csr_linked_list_id = (transpose) ? block_col_id : block_row_id;
-    int batch_id = (transpose) ? block_row_id : block_col_id;
-
-    auto linkedList = csr_linked_lists[csr_linked_list_id];
+    auto linkedList = csr_linked_lists[0];
 
     auto head = (linkedList.get())->getHeadNode();
-    int count = 0;
-    while (count < batch_id && (head.get())->next != nullptr) {
-      head = (head.get())->next;
-      ++count;
-    }
-    if (count == batch_id) {
+
+    auto starting_index = batch_id*batch_size;
+
+    auto end_index = std::min((batch_id+1)*batch_size,(transpose)?proc_col_width:proc_row_width);
+
+    while ( (head.get())->data != nullptr) {
       auto csr_data = (head.get())->data;
-      //      //      cout << " rank  " << rank << " inside fill_col_ids
-      //      coords ( "
-      //      //           << block_row_id << " ," << block_col_id << ")"
-      //      //           << (csr_data.get())->num_coords << endl;
-      if ((csr_data.get())->num_coords > 0) {
-        int block_row_width = this->block_row_width;
-        int block_col_width = this->block_col_width;
-        int proc_row_width = this->proc_row_width;
-        int proc_col_width = this->proc_col_width;
-        distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-        ////        col_ids = vector<uint64_t>((handle->col_idx).size());
-
-        col_ids = vector<uint64_t>((handle->values).size());
-        //        std::transform(
-        //            std::begin((handle->col_idx)),
-        //            std::end((handle->col_idx)), std::begin(col_ids),
-        //            [&return_global_ids, &rank, &transpose, &batch_id,
-        //            &block_col_id,
-        //             &block_row_width, &block_col_width, &proc_col_width,
-        //             &proc_row_width](MKL_INT value) {
-        //              if (!return_global_ids) {
-        //                return static_cast<uint64_t>(value);
-        //              } else {
-        //                int starting_index = (transpose) ? rank *
-        //                proc_col_width : 0; uint64_t base_id =
-        //                    static_cast<uint64_t>(block_col_id *
-        //                    block_col_width);
-        //                uint64_t g_index = static_cast<uint64_t>(value) +
-        //                base_id +
-        //                                   static_cast<uint64_t>(starting_index);
-        //                //TODO: do proper transformation here
-        //                return g_index;
-        //              }
-        //            });
-
-        std::transform(std::begin((handle->values)), std::end((handle->values)),
-                       std::begin(col_ids),
-                       [&return_global_ids, &rank, &transpose, &batch_id,
-                        &block_col_id, &block_row_width, &block_col_width,
-                        &proc_col_width, &proc_row_width](double value) {
-                         return static_cast<uint64_t>(value);
-                       });
-      }
+      distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+      auto size = handle->rowStart[end_index]-handle->rowStart[starting_index];
+       for(auto i =handle->rowStart[starting_index]; i <handle->rowStart[end_index]; i++){
+//         auto ind = i - handle->rowStart[starting_index];
+         col_ids.push_back(handle->col_idx[i]);
+       }
     }
   }
 

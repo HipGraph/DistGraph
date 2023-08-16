@@ -64,7 +64,6 @@ int main(int argc, char **argv) {
        << localARows << endl;
 
   shared_sparseMat.get()->block_row_width = batch_size;
-  shared_sparseMat.get()->block_col_width = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
 
@@ -74,14 +73,12 @@ int main(int argc, char **argv) {
   vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
   auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
       copiedVector, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows,
-      batch_size, localARows, localBRows, false);
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, localARows, localARows, localBRows, false, true);
 //
   vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
   auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
       copiedVectorTwo, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
-      localBRows, localARows, localBRows, true);
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,localARows, localBRows, true, false);
 
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
@@ -99,18 +96,18 @@ int main(int argc, char **argv) {
 
   auto ini_csr_start = std::chrono::high_resolution_clock::now();
 //  shared_sparseMat.get()->initialize_CSR_blocks(batch_size, batch_size, false,false);
-  shared_sparseMat.get()->initialize_CSR_blocks(localARows, localBRows, false,false);
+  shared_sparseMat.get()->initialize_CSR_blocks();
 
   auto ini_csr_end1 = std::chrono::high_resolution_clock::now();
 //  shared_sparseMat.get()->print_blocks_and_cols(false);
 
   cout << " rank " << rank << " initialize_CSR_blocks  completed  " << endl;
 
- shared_sparseMat_Trans.get()->initialize_CSR_blocks(localARows, localBRows,false, true);
+ shared_sparseMat_Trans.get()->initialize_CSR_blocks);
 
   cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
   auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks(localARows, localBRows,false, false);
+  shared_sparseMat_combined.get()->initialize_CSR_blocks();
 
 //  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
