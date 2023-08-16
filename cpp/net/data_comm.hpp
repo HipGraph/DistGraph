@@ -71,17 +71,17 @@ public:
     this->sp_local_trans->fill_col_ids(batch_id, send_col_ids_list);
 
     for (int i = 0; i < grid->world_size; i++) {
-      std::unordered_set<uint64_t> unique_set_receiv(
-          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
-      receive_col_ids_list[i] =
-          vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
+//      std::unordered_set<uint64_t> unique_set_receiv(
+//          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
+//      receive_col_ids_list[i] =
+//          vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
 
       receivecounts[i] = receive_col_ids_list[i].size();
 
-      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
-                                                   send_col_ids_list[i].end());
-      send_col_ids_list[i] =
-          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
+//      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
+//                                                   send_col_ids_list[i].end());
+//      send_col_ids_list[i] =
+//          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
 
       sendcounts[i] = send_col_ids_list[i].size();
 
@@ -90,6 +90,9 @@ public:
 
       total_send_count = total_send_count + sendcounts[i];
       total_receive_count = total_receive_count + receivecounts[i];
+
+      cout << " rank " << grid->global_rank << " sending  " << sendcounts[i] << "  to rank " << i << endl;
+      cout << " rank " << grid->global_rank << " receiving  " << receivecounts[i] << "  from rank " << i << endl;
     }
 
     cout << " rank " << grid->global_rank << " total_send_count "
