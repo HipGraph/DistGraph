@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
 
-  shared_sparseMat.get()->block_row_width = batch_size;
+  shared_sparseMat.get()->batch_size = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
 
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " initialize_CSR_blocks  completed  " << endl;
 
- shared_sparseMat_Trans.get()->initialize_CSR_blocks);
+ shared_sparseMat_Trans.get()->initialize_CSR_blocks();
 
   cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
   auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
