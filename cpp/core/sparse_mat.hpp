@@ -322,8 +322,9 @@ public:
         }
         if (owner_rank != rank and diff>0) {
           proc_to_id_mapping[owner_rank].push_back(row_index);
+          count++;
         }
-        count++;
+
       } else {
         // calculation of receiving col_ids
         int owner_rank = col_val/proc_col_width;
