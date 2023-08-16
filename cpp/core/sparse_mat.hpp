@@ -320,7 +320,7 @@ public:
           count = 0;
           row_index++;
         }
-        if (owner_rank != rank) {
+        if (owner_rank != rank and diff>0) {
           proc_to_id_mapping[owner_rank].push_back(row_index);
         }
         count++;
