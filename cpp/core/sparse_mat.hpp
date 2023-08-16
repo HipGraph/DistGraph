@@ -295,33 +295,33 @@ public:
                               (transpose) ? proc_col_width : proc_row_width) -
                      1;
 
-    while ((head.get())->data != nullptr) {
-      auto csr_data = (head.get())->data;
-      distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-      auto size =
-          handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
-      int row_index = starting_index;
-      int count = 0;
-      for (auto i = handle->rowStart[starting_index];
-           i < handle->rowStart[starting_index] + size; i++) {
-        auto col_val = handle->col_idx[i];
-        int owner_rank = col_val / proc_row_width;
-        if (transpose) {
-          // calculation of sending row_ids
-          int diff =
-              handle->rowStart[row_index + 1] - handle->rowStart[row_index];
-          if (count >= diff) {
-            count = 0;
-            row_index++;
-          }
-          proc_to_id_mapping[owner_rank].push_back(row_index);
-          count++;
-        } else {
-          //calculation of receiving col_ids
-          proc_to_id_mapping[owner_rank].push_back(col_val);
+    //    while ((head.get())->data != nullptr) {
+    auto csr_data = (head.get())->data;
+    distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+    auto size =
+        handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
+    int row_index = starting_index;
+    int count = 0;
+    for (auto i = handle->rowStart[starting_index];
+         i < handle->rowStart[starting_index] + size; i++) {
+      auto col_val = handle->col_idx[i];
+      int owner_rank = col_val / proc_row_width;
+      if (transpose) {
+        // calculation of sending row_ids
+        int diff =
+            handle->rowStart[row_index + 1] - handle->rowStart[row_index];
+        if (count >= diff) {
+          count = 0;
+          row_index++;
         }
+        proc_to_id_mapping[owner_rank].push_back(row_index);
+        count++;
+      } else {
+        // calculation of receiving col_ids
+        proc_to_id_mapping[owner_rank].push_back(col_val);
       }
     }
+    //    }
   }
 
   CSRLinkedList<T> *get_batch_list(int batch_id) {
