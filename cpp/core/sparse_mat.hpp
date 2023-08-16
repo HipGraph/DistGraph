@@ -308,11 +308,11 @@ public:
     for (auto i = handle->rowStart[starting_index];
          i < handle->rowStart[starting_index] + size; i++) {
       auto col_val = handle->col_idx[i];
-      cout<<" rank "<<rank<<" trans"<<transpose<<" col_val "<<col_val<<" proc_row_width"<<proc_row_width<<"proc_col_width "<<proc_col_width <<endl;
-      int owner_rank = col_val/ (transpose)?proc_row_width:proc_col_width;
-      cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank "<<owner_rank<<" col_val "<<col_val  <<endl;
+      cout<<" rank "<<rank<<" trans"<<transpose<<" col_val "<<col_val <<endl;
       if (transpose) {
         // calculation of sending row_ids
+        int owner_rank = col_val/proc_row_width;
+        cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank "<<owner_rank<<" col_val "<<col_val  <<endl;
         int diff =
             handle->rowStart[row_index + 1] - handle->rowStart[row_index];
         if (count >= diff) {
@@ -323,6 +323,8 @@ public:
         count++;
       } else {
         // calculation of receiving col_ids
+        int owner_rank = col_val/proc_col_width;
+        cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank "<<owner_rank<<" col_val "<<col_val  <<endl;
         proc_to_id_mapping[owner_rank].push_back(col_val);
       }
     }
