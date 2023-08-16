@@ -308,7 +308,7 @@ public:
     for (auto i = handle->rowStart[starting_index];
          i < handle->rowStart[starting_index] + size; i++) {
       auto col_val = handle->col_idx[i];
-      cout<<" rank "<<rank<<" trans"<<transpose<<" col_val "<<col_val <<endl;
+      cout<<" rank "<<rank<<" trans"<<transpose<<" col_val "<<col_val<<" proc_row_width"<<proc_row_width<<"proc_col_width "<<proc_col_width <<endl;
       int owner_rank = col_val/ (transpose)?proc_row_width:proc_col_width;
       cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank "<<owner_rank<<" col_val "<<col_val  <<endl;
       if (transpose) {
