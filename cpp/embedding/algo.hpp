@@ -82,11 +82,12 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < 1; i++) {
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
 
+        cout<<" rank "<<grid->global_rank <<" batch  "<<j<<endl;
         // negative samples generation
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
@@ -108,12 +109,14 @@ public:
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
+          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative started "<<endl;
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request);
-
+          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative done "<<endl;
           this->data_comm->populate_cache(results_negative_ptr.get(),
                                           request);
+          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative populate_cache done "<<endl;
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
               std::chrono::duration_cast<std::chrono::microseconds>(
@@ -128,11 +131,13 @@ public:
                     new vector<DataTuple<DENT, embedding_dim>>());
 
             if (i == 0) {
+              cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" positive async_transfer started "<<endl;
               data_comm_cache[j].get()->async_transfer(
                   j,  false, update_ptr.get(), request_batch_update);
-
+              cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" positive populate_cache started "<<endl;
               data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                        request_batch_update);
+              cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" positive populate_cache  done "<<endl;
             } else if (i > 0) {
               data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
                                                           request_batch_update);
