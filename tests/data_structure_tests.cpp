@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 
   auto ini_csr_end = std::chrono::high_resolution_clock::now();
 
-  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
+//  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
 
   auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end - ini_csr_start).count();
