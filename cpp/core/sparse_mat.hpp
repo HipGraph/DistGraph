@@ -295,17 +295,20 @@ public:
                               (transpose) ? proc_col_width : proc_row_width) -
                      1;
 
+
+
     //    while ((head.get())->data != nullptr) {
     auto csr_data = (head.get())->data;
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
     auto size =
         handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
+    cout<<" rank "<<rank<<" starting_index "<<starting_index << " end_index "<<end_index<<" batch "<<batch_id<<" size "<<size<<endl;
     int row_index = starting_index;
     int count = 0;
     for (auto i = handle->rowStart[starting_index];
          i < handle->rowStart[starting_index] + size; i++) {
       auto col_val = handle->col_idx[i];
-      int owner_rank = col_val / proc_row_width;
+      int owner_rank = col_val / (transpose):proc_row_width:proc_col_width;
       if (transpose) {
         // calculation of sending row_ids
         int diff =

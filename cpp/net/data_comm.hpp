@@ -70,6 +70,10 @@ public:
     vector<uint64_t> col_receiv_ids;
     this->sp_local_trans->fill_col_ids(batch_id, send_col_ids_list);
 
+
+
+
+
     for (int i = 0; i < grid->world_size; i++) {
 //      std::unordered_set<uint64_t> unique_set_receiv(
 //          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
@@ -110,7 +114,7 @@ public:
     }
 
     for (int i = 0; i < grid->world_size; i++) {
-#pragma omp parallel
+//#pragma omp parallel
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         int index = sdispls[i] + j;
         uint64_t local_key = send_col_ids_list[i][j];
