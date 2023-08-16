@@ -60,19 +60,15 @@ public:
   }
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
-    int last_batch_size = 0;
 
     int batches = 0;
     if (sp_local->proc_row_width % batch_size == 0) {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size);
-      last_batch_size = batch_size;
     } else {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size) +1; // TODO:Error prone
-      last_batch_size = (this->dense_local)->rows - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
@@ -81,44 +77,11 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
     }
 
-    if (this->grid->world_size > 1) {
-
-      MPI_Request request;
-      unique_ptr<vector<DataTuple<DENT, embedding_dim>>> results_init_ptr =
-          unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
-              new vector<DataTuple<DENT, embedding_dim>>());
-
-      auto init_cache = std::chrono::high_resolution_clock::now();
-      data_comm_cache[0].get()->async_transfer(0, true, false,
-                                               results_init_ptr.get(), request);
-
-      cout << " rank " << this->grid->global_rank << " async_transfer_completed " << endl;
-
-      auto transfer_cache = std::chrono::high_resolution_clock::now();
-      data_comm_cache[0].get()->populate_cache(results_init_ptr.get(), request);
-      auto cache_update = std::chrono::high_resolution_clock::now();
-
-      auto cache_update_duration =
-          std::chrono::duration_cast<std::chrono::microseconds>(cache_update -
-                                                                transfer_cache)
-              .count();
-      auto transfer_duration =
-          std::chrono::duration_cast<std::chrono::microseconds>(transfer_cache -
-                                                                init_cache)
-              .count();
-
-      cout << " init_cache_transfer " << (transfer_duration / 1000)
-           << " cache_update " << (cache_update_duration / 1000) << endl;
-    }
 
     auto negative_update = 0;
 
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
-
-        //                this->data_comm->cross_validate_batch_from_metadata(j);
-        //                cout<<" rank  "<<this->grid->global_rank<<"  batch
-        //                "<<j<<" cross validation success"<<endl;
 
         int seed = j + i;
 
@@ -137,7 +100,7 @@ public:
         }
 
         if (this->grid->world_size > 1) {
-          MPI_Request request_two;
+          MPI_Request request;
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
               results_negative_ptr =
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -145,20 +108,40 @@ public:
           auto neg_cache = std::chrono::high_resolution_clock::now();
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
-                                          request_two);
+                                          request);
 
           this->data_comm->populate_cache(results_negative_ptr.get(),
-                                          request_two);
+                                          request);
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
               std::chrono::duration_cast<std::chrono::microseconds>(
                   neg_cache_end - neg_cache)
                   .count();
           negative_update += neg_cache_duration;
+
+          if (this->grid->world_size > 1) {
+            MPI_Request request_batch_update;
+            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
+                unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+                    new vector<DataTuple<DENT, embedding_dim>>());
+
+            if (i == 0) {
+              data_comm_cache[j].get()->async_transfer(
+                  j,  false, update_ptr.get(), request_batch_update);
+
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                       request_batch_update);
+            } else if (i > 0) {
+              data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+                                                          request_batch_update);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                       request_batch_update);
+            }
+          }
+
         }
-        //                cout<<" rank  "<<this->grid->global_rank<<"  negative
-        //                population completed "<<j<<endl;
-        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(j);
+
+        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
 
         auto head = batch_list->getHeadNode();
         CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
@@ -198,29 +181,8 @@ public:
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         }
 
-        if (this->grid->world_size > 1) {
-          MPI_Request request_three;
-          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                  new vector<DataTuple<DENT, embedding_dim>>());
-
-          if (i == 0) {
-            data_comm_cache[j].get()->async_transfer(
-                j, false, false, update_ptr.get(), request_three);
-
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                     request_three);
-          } else if (i > 0) {
-            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-                                                        request_three);
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                     request_three);
-          }
-        }
       }
-      //      cout << "print cache: " << endl;
-      //            dense_local->print_cache(i);
-      //           dense_local->print_matrix_rowptr( i);
+
     }
     cout << "negative_update: " << (negative_update / 1000) << endl;
   }
@@ -230,29 +192,22 @@ public:
                                       int batch_id, int batch_size,
                                       int block_size) {
 
-    //    int row_base_index = batch_id * batch_size;
-    int row_base_index =
-        (this->sp_local)->proc_row_width * (this->grid)->global_rank +
-        batch_id * batch_size;
+    auto row_base_index = batch_id * batch_size;
+
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-//      cout << " rank " << (this->grid)->global_rank << " base Id"
-//           << row_base_index << endl;
-//      cout << " rank " << (this->grid)->global_rank << " batch " << batch_id
-//           << endl;
+
 #pragma omp parallel for schedule(static)
       for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
-        uint64_t row_id = i-(this->sp_local)->proc_row_width * (this->grid)->global_rank;
+        uint64_t row_id = i;
         int ind = i - row_base_index;
-        //        cout<<" rank "<<(this->grid)->global_rank<<" row  Id
-        //        "<<i<<endl;
+
         DENT forceDiff[embedding_dim];
 #pragma forceinline
 #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-//          cout << " rank " << (this->grid)->global_rank << " i " << i << " j"
-//               << j << endl;
+
           uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
 
           uint64_t local_col =
@@ -264,9 +219,6 @@ public:
               target_rank == (this->grid)->global_rank ? false : true;
 
           if (fetch_from_cache) {
-            //            cout << " executing fecth from cache for rank " <<
-            //            target_rank
-            //                 << endl;
 
             std::array<DENT, embedding_dim> colvec =
                 (this->dense_local)
@@ -302,8 +254,6 @@ public:
             }
           }
         }
-        //        cout<<" for loop successfully completed for i"<<i<<" outof
-        //        "<<block_size<<endl;
       }
     }
   }

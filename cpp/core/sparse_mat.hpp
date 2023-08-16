@@ -43,7 +43,7 @@ public:
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
   SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols,
-        uint64_t &gNNz, int &batch_size,int &proc_row_width,
+        uint64_t &gNNz, int &batch_size, int &proc_row_width,
         int &proc_col_width, bool col_merged, bool transpose) {
     this->gRows = gRows;
     this->gCols = gCols;
@@ -264,7 +264,7 @@ public:
       for (int i = 0; i < block_col_starts.size() - 1; i++) {
 
         coords_ptr = coords_ptr + block_col_starts[i];
-        int num_coords = block_col_starts[i+1] - block_col_starts[i];
+        int num_coords = block_col_starts[i + 1] - block_col_starts[i];
         (csr_linked_lists[0].get())
             ->insert(proc_row_width, gCols, num_coords, coords_ptr, num_coords,
                      transpose, node_index);
@@ -275,13 +275,13 @@ public:
 
       (csr_linked_lists[0].get())
           ->insert((transpose) ? gRows : proc_row_width,
-                   (transpose) ? proc_col_width : gCols, coords.size(), coords_ptr,
-                   coords.size(), transpose, node_index);
+                   (transpose) ? proc_col_width : gCols, coords.size(),
+                   coords_ptr, coords.size(), transpose, node_index);
     }
-
   }
 
-  void fill_col_ids(int batch_id,vector<uint64_t> &col_ids) {
+  void fill_col_ids(int batch_id,
+                    vector<vector<uint64_t>> &proc_to_id_mapping) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -289,18 +289,38 @@ public:
 
     auto head = (linkedList.get())->getHeadNode();
 
-    auto starting_index = batch_id*batch_size;
+    auto starting_index = batch_id * batch_size;
 
-    auto end_index = std::min((batch_id+1)*batch_size,(transpose)?proc_col_width:proc_row_width);
+    auto end_index = std::min((batch_id + 1) * batch_size,
+                              (transpose) ? proc_col_width : proc_row_width) -
+                     1;
 
-    while ( (head.get())->data != nullptr) {
+    while ((head.get())->data != nullptr) {
       auto csr_data = (head.get())->data;
       distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-      auto size = handle->rowStart[end_index]-handle->rowStart[starting_index];
-       for(auto i =handle->rowStart[starting_index]; i <handle->rowStart[end_index]; i++){
-//         auto ind = i - handle->rowStart[starting_index];
-         col_ids.push_back(handle->col_idx[i]);
-       }
+      auto size =
+          handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
+      int row_index = starting_index;
+      int count = 0;
+      for (auto i = handle->rowStart[starting_index];
+           i < handle->rowStart[starting_index] + size; i++) {
+        auto col_val = handle->col_idx[i];
+        int owner_rank = col_val / proc_row_width;
+        if (transpose) {
+          // calculation of sending row_ids
+          int diff =
+              handle->rowStart[row_index + 1] - handle->rowStart[row_index];
+          if (count >= diff) {
+            count = 0;
+            row_index++;
+          }
+          proc_to_id_mapping[owner_rank].push_back(row_index);
+          count++;
+        } else {
+          //calculation of receiving col_ids
+          proc_to_id_mapping[owner_rank].push_back(col_val);
+        }
+      }
     }
   }
 

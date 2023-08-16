@@ -126,32 +126,32 @@ int main(int argc, char **argv) {
 
 //    shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 //
-//  cout << " rank " << rank << " CSR block initialization completed  " << endl;
-//  auto dense_mat = shared_ptr<DenseMat<double, 2>>(
-//      new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
-//
-//  //    dense_mat.get()->print_matrix();
-//  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
-//
-//  auto communicator =
-//      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
-//          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
-//          grid.get()));
-//
-//  cout << " rank " << rank << " async started  " << endl;
-//
-//  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
-//      embedding_algo =
-//          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
-//              new distblas::embedding::EmbeddingAlgo<int, double, 2>(shared_sparseMat_combined.get(),
-//                                                                     shared_sparseMat.get(),
-//                                                                     shared_sparseMat_Trans.get(),
-//                                                                     dense_mat.get(),
-//                                                                     communicator.get(),
-//                                                                     grid.get(),
-//                                                                     5,
-//                                                                     -5));
-//
+  cout << " rank " << rank << " CSR block initialization completed  " << endl;
+  auto dense_mat = shared_ptr<DenseMat<double, 2>>(
+      new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
+
+  //    dense_mat.get()->print_matrix();
+  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
+
+  auto communicator =
+      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
+          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
+          grid.get()));
+
+  cout << " rank " << rank << " async started  " << endl;
+
+  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
+      embedding_algo =
+          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
+              new distblas::embedding::EmbeddingAlgo<int, double, 2>(shared_sparseMat_combined.get(),
+                                                                     shared_sparseMat.get(),
+                                                                     shared_sparseMat_Trans.get(),
+                                                                     dense_mat.get(),
+                                                                     communicator.get(),
+                                                                     grid.get(),
+                                                                     5,
+                                                                     -5));
+
   auto end_init = std::chrono::high_resolution_clock::now();
 //
 //  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
