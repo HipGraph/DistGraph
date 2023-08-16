@@ -266,7 +266,7 @@ public:
         coords_ptr = coords_ptr + block_col_starts[i];
         int num_coords = block_col_starts[i+1] - block_col_starts[i];
         (csr_linked_lists[0].get())
-            ->insert(block_rows, gCols, num_coords, coords_ptr, num_coords,
+            ->insert(proc_row_width, gCols, num_coords, coords_ptr, num_coords,
                      transpose, node_index);
         node_index++;
       }
@@ -274,8 +274,8 @@ public:
     } else {
 
       (csr_linked_lists[0].get())
-          ->insert((transpose) ? gRows : block_rows,
-                   (transpose) ? block_cols : gCols, coords.size(), coords_ptr,
+          ->insert((transpose) ? gRows : proc_row_width,
+                   (transpose) ? proc_col_width : gCols, coords.size(), coords_ptr,
                    coords.size(), transpose, node_index);
     }
 
