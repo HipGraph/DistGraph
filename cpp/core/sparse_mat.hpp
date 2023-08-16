@@ -308,7 +308,7 @@ public:
     for (auto i = handle->rowStart[starting_index];
          i < handle->rowStart[starting_index] + size; i++) {
       auto col_val = handle->col_idx[i];
-      int owner_rank = col_val / (transpose):proc_row_width:proc_col_width;
+      int owner_rank = col_val / (transpose)?proc_row_width:proc_col_width;
       if (transpose) {
         // calculation of sending row_ids
         int diff =
