@@ -305,9 +305,9 @@ public:
          << size << endl;
     int row_index = starting_index;
     int count = 0;
-    for (auto i = handle->rowStart[starting_index];i < handle->rowStart[starting_index] + size; i++) {
+    for (auto i = handle->rowStart[starting_index];
+         i < handle->rowStart[starting_index] + size; i++) {
       auto col_val = handle->col_idx[i];
-      cout<<" rank "<<rank<<" trans"<<transpose<<" col_val "<<col_val <<endl;
       if (transpose) {
         // calculation of sending row_ids
         int owner_rank = col_val / proc_row_width;
@@ -315,15 +315,16 @@ public:
         int diff =
             handle->rowStart[row_index + 1] - handle->rowStart[row_index];
 
-        if (count >= diff and count>0) {
-          count = 0;
+        if (count >= diff) {
           row_index++;
         }
-        if (diff>0){
-          count++;
-        }
+        cout << " rank " << rank << " col_val " << col_val << " target rank"
+             << owner_rank << " row_id" << row_index << endl;
         if (owner_rank != rank and diff > 0) {
           proc_to_id_mapping[owner_rank].push_back(row_index);
+        }
+        if (diff > 0) {
+          count++;
         }
 
       } else {
