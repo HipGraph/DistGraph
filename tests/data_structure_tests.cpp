@@ -160,8 +160,8 @@ int main(int argc, char **argv) {
   auto end_train = std::chrono::high_resolution_clock::now();
 //  //  cout << " rank " << rank << " async completed  " << endl;
 //
-//  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, 2);
-    dense_mat.get()->print_matrix_rowptr(0);
+  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, 2);
+//    dense_mat.get()->print_matrix_rowptr(0);
 
   auto io_duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end_io - start_io)
