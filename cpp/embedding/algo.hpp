@@ -87,7 +87,7 @@ public:
 
         int seed = j + i;
 
-        cout<<" rank "<<grid->global_rank <<" batch  "<<j<<endl;
+//        cout<<" rank "<<grid->global_rank <<" batch  "<<j<<endl;
         // negative samples generation
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
