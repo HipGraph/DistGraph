@@ -306,7 +306,7 @@ public:
             // calculation of sending row_ids
             auto col_val = handle->col_idx[j];
             if (rank != r) {
-              proc_to_id_mapping[owner_rank].push_back(col_val);
+              proc_to_id_mapping[r].push_back(col_val);
             }
           }
         }
