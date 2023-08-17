@@ -114,8 +114,8 @@ public:
                                           results_negative_ptr.get(),
                                           request);
 //          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative done "<<endl;
-          this->data_comm->populate_cache(results_negative_ptr.get(),
-                                          request);
+//          this->data_comm->populate_cache(results_negative_ptr.get(),
+//                                          request);
 //          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative populate_cache done "<<endl;
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
