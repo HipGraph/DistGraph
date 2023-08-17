@@ -84,6 +84,13 @@ public:
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
+    for (int i = 0; i < batch_size; i += 1) {
+      int IDIM = i * embedding_dim;
+      for (int d = 0; d < embedding_dim; d++) {
+        prevCoordinates[IDIM + d] = 0;
+      }
+    }
+
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
 
@@ -93,13 +100,6 @@ public:
         // negative samples generation
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
-
-        for (int i = 0; i < batch_size; i += 1) {
-          int IDIM = i * embedding_dim;
-          for (int d = 0; d < embedding_dim; d++) {
-            prevCoordinates[IDIM + d] = 0;
-          }
-        }
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
 
