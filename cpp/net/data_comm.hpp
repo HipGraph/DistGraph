@@ -109,7 +109,7 @@ public:
     }
 
     for (int i = 0; i < grid->world_size; i++) {
-#pragma omp parallel
+//#pragma omp parallel
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         int index = sdispls[i] + j;
         uint64_t local_key = send_col_ids_list[i][j];
@@ -264,7 +264,7 @@ public:
       total_receive_count += receivecounts[i];
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
-#pragma omp parallel
+//#pragma omp parallel
       for (int k = 0; k < sendcount; k++) {
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -

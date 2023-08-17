@@ -132,17 +132,17 @@ public:
 
             if (i == 0) {
 //              cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" positive async_transfer started "<<endl;
-//              data_comm_cache[j].get()->async_transfer(
-//                  j,  false, update_ptr.get(), request_batch_update);
+              data_comm_cache[j].get()->async_transfer(
+                  j,  false, update_ptr.get(), request_batch_update);
 //              cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" positive populate_cache started "<<endl;
-//              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                       request_batch_update);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                       request_batch_update);
 //              cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" positive populate_cache  done "<<endl;
             } else if (i > 0) {
-//              data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-//                                                          request_batch_update);
-//              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                       request_batch_update);
+              data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+                                                          request_batch_update);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                       request_batch_update);
 
             }
           }
