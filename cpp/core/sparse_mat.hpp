@@ -298,36 +298,22 @@ public:
     //    while ((head.get())->data != nullptr) {
     auto csr_data = (head.get())->data;
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-    auto size =
-        handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
-    cout << " rank " << rank << " starting_index " << starting_index
-         << " end_index " << end_index << " batch " << batch_id << " size "
-         << size << endl;
-    int row_index = starting_index;
-    int count = 0;
-    for (auto i = handle->rowStart[starting_index];
-         i < handle->rowStart[starting_index] + size; i++) {
-      auto col_val = handle->col_idx[i];
-      if (transpose) {
-        // calculation of sending row_ids
-        int owner_rank = col_val / proc_row_width;
-
-        int diff = handle->rowStart[row_index + 1] - handle->rowStart[row_index];
-
-        if (count >= diff) {
-          count=0;
-          row_index++;
+    if (transpose) {
+      for(auto i=starting_index;i<=(end_index);i++){
+        for(auto j= handle->rowStart[starting_index];j<handle->rowStart[i+1];j++){
+          // calculation of sending row_ids
+          auto col_val = handle->col_idx[j];
+          int owner_rank = col_val / proc_row_width;
+          if (owner_rank != rank ) {
+            proc_to_id_mapping[owner_rank].push_back(i);
+          }
         }
-        cout << " rank " << rank << " col_val " << col_val << " target rank"
-             << owner_rank << " row_id" << row_index <<" diff"<<diff<< endl;
-        if (owner_rank != rank and diff > 0) {
-          proc_to_id_mapping[owner_rank].push_back(row_index);
-        }
-        if (diff > 0) {
-          count++;
-        }
-
-      } else {
+      }
+    } else {
+      auto size = handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
+      for (auto i = handle->rowStart[starting_index];
+           i < handle->rowStart[starting_index] + size; i++) {
+        auto col_val = handle->col_idx[i];
         // calculation of receiving col_ids
         int owner_rank = col_val / proc_col_width;
         if (owner_rank != rank) {
