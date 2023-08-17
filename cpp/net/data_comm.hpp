@@ -228,9 +228,9 @@ public:
       }
     }
 
-//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-//                   DENSETUPLE, MPI_COMM_WORLD, &request);
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+                   DENSETUPLE, MPI_COMM_WORLD, &request);
     //     cout<<"  MPI executed  success"<<endl;
     if (verify) {
       MPI_Status status;
