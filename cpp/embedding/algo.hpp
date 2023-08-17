@@ -82,7 +82,7 @@ public:
 
     auto negative_update = 0;
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
