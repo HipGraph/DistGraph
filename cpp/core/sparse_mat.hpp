@@ -282,7 +282,7 @@ public:
 
   void fill_col_ids(int batch_id,
                     vector<vector<uint64_t>> &proc_to_id_mapping) {
-    int rank,world_size;
+    int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
@@ -297,14 +297,15 @@ public:
     if (transpose) {
 
       for (int r = 0; r < world_size; r++) {
-        auto starting_index = batch_id * batch_size + proc_row_width*r;
-        auto end_index = std::min(starting_index+ batch_size, proc_row_width) - 1;
+        auto starting_index = batch_id * batch_size + proc_row_width * r;
+        auto end_index =
+            std::min(starting_index + batch_size, proc_row_width) - 1;
 
         for (auto i = starting_index; i <= (end_index); i++) {
           for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
             // calculation of sending row_ids
             auto col_val = handle->col_idx[j];
-            if (owner_rank != r) {
+            if (rank != r) {
               proc_to_id_mapping[owner_rank].push_back(col_val);
             }
           }
