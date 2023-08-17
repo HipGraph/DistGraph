@@ -189,7 +189,6 @@ public:
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
       }
     }
-    cout << "negative_update: " << (negative_update / 1000) << endl;
   }
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
