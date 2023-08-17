@@ -312,10 +312,10 @@ public:
         // calculation of sending row_ids
         int owner_rank = col_val / proc_row_width;
 
-        int diff =
-            handle->rowStart[row_index + 1] - handle->rowStart[row_index];
+        int diff = handle->rowStart[row_index + 1] - handle->rowStart[row_index];
 
         if (count >= diff) {
+          count=0
           row_index++;
         }
         cout << " rank " << rank << " col_val " << col_val << " target rank"
