@@ -319,7 +319,7 @@ public:
           row_index++;
         }
         cout << " rank " << rank << " col_val " << col_val << " target rank"
-             << owner_rank << " row_id" << row_index << endl;
+             << owner_rank << " row_id" << row_index <<" diff"<<diff<< endl;
         if (owner_rank != rank and diff > 0) {
           proc_to_id_mapping[owner_rank].push_back(row_index);
         }
