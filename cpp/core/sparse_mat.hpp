@@ -300,7 +300,7 @@ public:
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
     if (transpose) {
       for(auto i=starting_index;i<=(end_index);i++){
-        for(auto j= handle->rowStart[starting_index];j<handle->rowStart[i+1];j++){
+        for(auto j= handle->rowStart[i];j<handle->rowStart[i+1];j++){
           // calculation of sending row_ids
           auto col_val = handle->col_idx[j];
           int owner_rank = col_val / proc_row_width;
