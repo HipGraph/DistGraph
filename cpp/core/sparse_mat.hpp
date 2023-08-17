@@ -315,7 +315,7 @@ public:
         int diff = handle->rowStart[row_index + 1] - handle->rowStart[row_index];
 
         if (count >= diff) {
-          count=0
+          count=0;
           row_index++;
         }
         cout << " rank " << rank << " col_val " << col_val << " target rank"
