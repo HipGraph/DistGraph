@@ -110,9 +110,9 @@ public:
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
 //          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative started "<<endl;
-          this->data_comm->async_transfer(random_number_vec, false,
-                                          results_negative_ptr.get(),
-                                          request);
+//          this->data_comm->async_transfer(random_number_vec, false,
+//                                          results_negative_ptr.get(),
+//                                          request);
 //          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative done "<<endl;
 //          this->data_comm->populate_cache(results_negative_ptr.get(),
 //                                          request);
