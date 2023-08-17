@@ -83,7 +83,7 @@ public:
     auto negative_update = 0;
 
     for (int i = 0; i < 1; i++) {
-      for (int j = 0; j < 1; j++) {
+      for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
 
@@ -109,14 +109,14 @@ public:
                   unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
                       new vector<DataTuple<DENT, embedding_dim>>());
           auto neg_cache = std::chrono::high_resolution_clock::now();
-          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative started "<<endl;
+//          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative started "<<endl;
           this->data_comm->async_transfer(random_number_vec, false,
                                           results_negative_ptr.get(),
                                           request);
-          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative done "<<endl;
+//          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative done "<<endl;
           this->data_comm->populate_cache(results_negative_ptr.get(),
                                           request);
-          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative populate_cache done "<<endl;
+//          cout<<" rank "<<grid->global_rank <<" batch  "<<j<<" negative populate_cache done "<<endl;
           auto neg_cache_end = std::chrono::high_resolution_clock::now();
           auto neg_cache_duration =
               std::chrono::duration_cast<std::chrono::microseconds>(
