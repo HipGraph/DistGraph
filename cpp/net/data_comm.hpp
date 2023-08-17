@@ -95,6 +95,9 @@ public:
       total_send_count = total_send_count + sendcounts[i];
       total_receive_count = total_receive_count + receivecounts[i];
 
+      cout<<" rank "<<grid->global_rank<< " sending to rank "<<i<< " count:"<<sendcounts[i]<<endl;
+      cout<<" rank "<<grid->global_rank<< " receiving from rank "<<i<< " count:"<<receivecounts[i]<<endl;
+
     }
 
 
