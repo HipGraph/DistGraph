@@ -126,13 +126,13 @@ public:
       }
     }
 
-//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-//                   DENSETUPLE, MPI_COMM_WORLD, &request);
-
-    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD);
+                   DENSETUPLE, MPI_COMM_WORLD, &request);
+
+//    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+//                   DENSETUPLE, MPI_COMM_WORLD);
 
     if (verify) {
       MPI_Status status;
@@ -229,12 +229,12 @@ public:
       }
     }
 
-//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-//                   DENSETUPLE, MPI_COMM_WORLD, &request);
-    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD);
+                   DENSETUPLE, MPI_COMM_WORLD, &request);
+//    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+//                   DENSETUPLE, MPI_COMM_WORLD);
 
     if (verify) {
       MPI_Status status;
@@ -278,18 +278,18 @@ public:
       }
     }
     receivebuf->resize(total_receive_count);
-//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-//                   DENSETUPLE, MPI_COMM_WORLD, &request);
-    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD);
+                   DENSETUPLE, MPI_COMM_WORLD, &request);
+//    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+//                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+//                   DENSETUPLE, MPI_COMM_WORLD);
   }
 
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request) {
-//    MPI_Status status;
-//    MPI_Wait(&request, &status);
+    MPI_Status status;
+    MPI_Wait(&request, &status);
 
     // TODO parallaize
     for (int i = 0; i < this->grid->world_size; i++) {
