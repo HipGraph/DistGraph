@@ -112,9 +112,9 @@ public:
 //          this->data_comm->populate_cache(results_negative_ptr.get(), request);
 //
 ////          MPI_Request request_batch_update;
-////          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-////              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-////                  new vector<DataTuple<DENT, embedding_dim>>());
+//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
+//              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//                  new vector<DataTuple<DENT, embedding_dim>>());
 //
 ////          if (i == 0) {
 ////            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
@@ -150,11 +150,11 @@ public:
           considering_batch_size = last_batch_size;
         }
 
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
+            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+                new vector<DataTuple<DENT, embedding_dim>>());
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
-          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                  new vector<DataTuple<DENT, embedding_dim>>());
           if (i == 0) {
             data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
                                                      request_batch_update);
