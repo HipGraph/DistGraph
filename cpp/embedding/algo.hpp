@@ -101,34 +101,6 @@ public:
           }
         }
 
-//        if (this->grid->world_size > 1) {
-//          MPI_Request request;
-//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-//              results_negative_ptr =
-//                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-//                      new vector<DataTuple<DENT, embedding_dim>>());
-//          this->data_comm->async_transfer(random_number_vec, false,
-//                                          results_negative_ptr.get(), request);
-//          this->data_comm->populate_cache(results_negative_ptr.get(), request);
-//
-////          MPI_Request request_batch_update;
-//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-//              unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-//                  new vector<DataTuple<DENT, embedding_dim>>());
-//
-////          if (i == 0) {
-////            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
-////                                                     request_batch_update);
-////            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-////                                                     request_batch_update);
-////          } else if (i > 0) {
-////            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-////                                                        request_batch_update);
-////            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-////                                                     request_batch_update);
-////          }
-//        }
-
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
 
         auto head = batch_list->getHeadNode();
