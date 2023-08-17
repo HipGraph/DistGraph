@@ -143,6 +143,7 @@ public:
 //                                                          request_batch_update);
 //              data_comm_cache[j].get()->populate_cache(update_ptr.get(),
 //                                                       request_batch_update);
+
             }
           }
 
