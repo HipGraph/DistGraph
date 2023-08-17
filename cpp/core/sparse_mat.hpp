@@ -267,7 +267,7 @@ public:
         int num_coords = block_col_starts[i + 1] - block_col_starts[i];
         (csr_linked_lists[0].get())
             ->insert(proc_row_width, gCols, num_coords, coords_ptr, num_coords,
-                     transpose, node_index);
+                     false, node_index);
         node_index++;
       }
 
@@ -276,41 +276,45 @@ public:
       (csr_linked_lists[0].get())
           ->insert((transpose) ? gRows : proc_row_width,
                    (transpose) ? proc_col_width : gCols, coords.size(),
-                   coords_ptr, coords.size(), transpose, node_index);
+                   coords_ptr, coords.size(), false, node_index);
     }
   }
 
   void fill_col_ids(int batch_id,
                     vector<vector<uint64_t>> &proc_to_id_mapping) {
-    int rank;
+    int rank,world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     auto linkedList = csr_linked_lists[0];
 
     auto head = (linkedList.get())->getHeadNode();
 
-    auto starting_index = batch_id * batch_size;
-
-    auto end_index = std::min((batch_id + 1) * batch_size,
-                              (transpose) ? proc_col_width : proc_row_width) -
-                     1;
-
     //    while ((head.get())->data != nullptr) {
     auto csr_data = (head.get())->data;
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
     if (transpose) {
-      for(auto i=starting_index;i<=(end_index);i++){
-        for(auto j= handle->rowStart[i];j<handle->rowStart[i+1];j++){
-          // calculation of sending row_ids
-          auto col_val = handle->col_idx[j];
-          int owner_rank = col_val / proc_row_width;
-          if (owner_rank != rank ) {
-            proc_to_id_mapping[owner_rank].push_back(i);
+
+      for (int r = 0; r < world_size; r++) {
+        auto starting_index = batch_id * batch_size + proc_row_width*r;
+        auto end_index = std::min(starting_index+ batch_size, proc_row_width) - 1;
+
+        for (auto i = starting_index; i <= (end_index); i++) {
+          for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+            // calculation of sending row_ids
+            auto col_val = handle->col_idx[j];
+            if (owner_rank != r) {
+              proc_to_id_mapping[owner_rank].push_back(col_val);
+            }
           }
         }
       }
     } else {
-      for (auto i=starting_index;i<=(end_index);i++) {
+      auto starting_index = batch_id * batch_size;
+      auto end_index =
+          std::min((batch_id + 1) * batch_size, proc_row_width) - 1;
+      for (auto i = starting_index; i <= (end_index); i++) {
         for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
           auto col_val = handle->col_idx[j];
           // calculation of receiving col_ids
