@@ -297,7 +297,7 @@ public:
     if (transpose) {
 
       for (int r = 0; r < world_size; r++) {
-        auto starting_index = batch_id * batch_size + proc_row_width * r;
+        uint64_t starting_index = batch_id * batch_size + proc_row_width * r;
         auto end_index =
             std::min(starting_index + batch_size, gRows) - 1;
 
