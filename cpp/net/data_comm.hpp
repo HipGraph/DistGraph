@@ -229,7 +229,6 @@ public:
 //                   DENSETUPLE, MPI_COMM_WORLD, &request);
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                    (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD);
     //     cout<<"  MPI executed  success"<<endl;
     if (verify) {
