@@ -75,17 +75,17 @@ public:
 
 
     for (int i = 0; i < grid->world_size; i++) {
-      std::unordered_set<uint64_t> unique_set_receiv(
-          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
-      receive_col_ids_list[i] =
-          vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
+//      std::unordered_set<uint64_t> unique_set_receiv(
+//          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
+//      receive_col_ids_list[i] =
+//          vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
 
       receivecounts[i] = receive_col_ids_list[i].size();
 
-      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
-                                                   send_col_ids_list[i].end());
-      send_col_ids_list[i] =
-          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
+//      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
+//                                                   send_col_ids_list[i].end());
+//      send_col_ids_list[i] =
+//          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
 
       sendcounts[i] = send_col_ids_list[i].size();
 
@@ -208,21 +208,18 @@ public:
     }
 
     for (int i = 0; i < grid->world_size; i++) {
-      vector<uint64_t> sending_vec = send_col_ids_list;
-      vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-
-      for (int j = 0; j < sending_vec.size(); j++) {
+      for (int j = 0; j < send_col_ids_list.size(); j++) {
         int index = sdispls[i] + j;
-        ((sendbuf)[index]).col = sending_vec[j];
+        ((sendbuf)[index]).col = send_col_ids_list[j];
         int local_key = ((sendbuf)[index]).col -
                         (grid->global_rank) * (this->sp_local)->proc_row_width;
         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
 
       if (verify) {
-        for (int j = 0; j < receiving_vec.size(); j++) {
+        for (int j = 0; j < receive_col_ids_list[i].size(); j++) {
           int index = rdispls[i] + j;
-          receivebufverify[index].col = receiving_vec[j];
+          receivebufverify[index].col = receive_col_ids_list[i][j];
         }
       }
     }
@@ -264,7 +261,7 @@ public:
       total_receive_count += receivecounts[i];
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
-//#pragma omp parallel
+
       for (int k = 0; k < sendcount; k++) {
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -
