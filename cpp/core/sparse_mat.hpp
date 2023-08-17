@@ -310,16 +310,16 @@ public:
         }
       }
     } else {
-      auto size = handle->rowStart[end_index + 1] - handle->rowStart[starting_index];
-      for (auto i = handle->rowStart[starting_index];
-           i < handle->rowStart[starting_index] + size; i++) {
-        auto col_val = handle->col_idx[i];
-        // calculation of receiving col_ids
-        int owner_rank = col_val / proc_col_width;
-        if (owner_rank != rank) {
-          //          cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank
-          //          "<<owner_rank<<" col_val "<<col_val  <<endl;
-          proc_to_id_mapping[owner_rank].push_back(col_val);
+      for (auto i=starting_index;i<=(end_index);i++) {
+        for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+          auto col_val = handle->col_idx[j];
+          // calculation of receiving col_ids
+          int owner_rank = col_val / proc_col_width;
+          if (owner_rank != rank) {
+            //          cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank
+            //          "<<owner_rank<<" col_val "<<col_val  <<endl;
+            proc_to_id_mapping[owner_rank].push_back(col_val);
+          }
         }
       }
     }
