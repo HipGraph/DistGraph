@@ -84,8 +84,8 @@ public:
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
-    for (int i = 0; i < iterations; i++) {
-      for (int j = 0; j < batches; j++) {
+    for (int i = 0; i < 1; i++) {
+      for (int j = 0; j < 1; j++) {
 
         int seed = j + i;
 
@@ -136,28 +136,28 @@ public:
           }
         }
 
-        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size);
-
-        if (this->grid->world_size > 1) {
-          data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                   request_batch_update);
-          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-                                        j, batch_size, considering_batch_size);
-          MPI_Request request;
-          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-              results_negative_ptr =
-                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                      new vector<DataTuple<DENT, embedding_dim>>());
-          this->data_comm->async_transfer(random_number_vec, false,
-                                          results_negative_ptr.get(), request);
-          this->data_comm->populate_cache(results_negative_ptr.get(), request);
-        }
-
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
-
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+//                                      batch_size, considering_batch_size);
+//
+//        if (this->grid->world_size > 1) {
+//          data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+//                                                   request_batch_update);
+//          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+//                                        j, batch_size, considering_batch_size);
+//          MPI_Request request;
+//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+//              results_negative_ptr =
+//                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//                      new vector<DataTuple<DENT, embedding_dim>>());
+//          this->data_comm->async_transfer(random_number_vec, false,
+//                                          results_negative_ptr.get(), request);
+//          this->data_comm->populate_cache(results_negative_ptr.get(), request);
+//        }
+//
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
+//
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
       }
     }
   }
