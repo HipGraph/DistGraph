@@ -299,7 +299,7 @@ public:
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index = batch_id * batch_size + proc_row_width * r;
         auto end_index =
-            std::min(starting_index + batch_size, static_cast<uint64_t>((r+1)*proc_row_width)) - 1;
+            std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_row_width),gRows)) - 1;
 
         for (auto i = starting_index; i <= (end_index); i++) {
           for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
