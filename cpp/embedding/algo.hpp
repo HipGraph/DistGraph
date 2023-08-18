@@ -85,6 +85,7 @@ public:
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
     for (int i = 0; i < iterations; i++) {
+      cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<endl;
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;

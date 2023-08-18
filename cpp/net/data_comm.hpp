@@ -55,8 +55,6 @@ public:
   void async_transfer(int batch_id, bool verify,
                       std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request) {
-
-    cout<<" rank "<<grid->global_rank<<" processing batch id "<<batch_id<<endl;
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<vector<uint64_t>> send_col_ids_list(grid->world_size);
 
