@@ -150,26 +150,26 @@ public:
 //          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
 //                                        j, batch_size, considering_batch_size);
 
-          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" calc_t_dist_grad_rowptr completed" <<endl;
-          MPI_Request request;
-          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-              results_negative_ptr =
-                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                      new vector<DataTuple<DENT, embedding_dim>>());
-          this->data_comm->async_transfer(random_number_vec, false,
-                                          results_negative_ptr.get(), request);
-          this->data_comm->populate_cache(results_negative_ptr.get(), request);
-          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" negative populate_cache completed" <<endl;
+//          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" calc_t_dist_grad_rowptr completed" <<endl;
+//          MPI_Request request;
+//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+//              results_negative_ptr =
+//                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//                      new vector<DataTuple<DENT, embedding_dim>>());
+//          this->data_comm->async_transfer(random_number_vec, false,
+//                                          results_negative_ptr.get(), request);
+//          this->data_comm->populate_cache(results_negative_ptr.get(), request);
+
         }
 
 //        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
 //                                        j, batch_size, considering_batch_size);
 
-        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<"  calc_t_dist_replus_rowptr completed" <<endl;
+//        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<"  calc_t_dist_replus_rowptr completed" <<endl;
 
 //        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
-        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<"  update_data_matrix_rowptr completed" <<endl;
+//        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<"  update_data_matrix_rowptr completed" <<endl;
       }
     }
   }
