@@ -124,13 +124,13 @@ public:
       }
     }
 
-    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD, &request);
-
-//    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+//    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
 //                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-//                   DENSETUPLE, MPI_COMM_WORLD);
+//                   DENSETUPLE, MPI_COMM_WORLD, &request);
+
+    MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
+                   DENSETUPLE, MPI_COMM_WORLD);
 
     if (verify) {
       MPI_Status status;
