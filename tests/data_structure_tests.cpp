@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
   cout << " file_path " << file_path << endl;
 
-  int batch_size = 128;
+  int batch_size = 256;
 
 
   MPI_Init(&argc, &argv);

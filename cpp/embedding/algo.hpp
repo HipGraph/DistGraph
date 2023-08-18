@@ -98,7 +98,7 @@ public:
 
       for (int j = 0; j < batches; j++) {
 
-        if (rank == grid->global_rank) {
+        if (grid->global_rank ==0) {
           cout << " rank " << grid->global_rank << " processing iteration " << i
                << "batch " << j << endl;
         }
