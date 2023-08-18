@@ -130,13 +130,13 @@ public:
                 new vector<DataTuple<DENT, embedding_dim>>());
         if (this->grid->world_size > 1) {
 
-//          if (i == 0) {
-//            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
-//                                                     request_batch_update);
-//          } else if (i > 0) {
-//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-//                                                        request_batch_update);
-//          }
+          if (i == 0) {
+            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
+                                                     request_batch_update);
+          } else if (i > 0) {
+            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+                                                        request_batch_update);
+          }
         }
         cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" async_transfer completed" <<endl;
 //        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
