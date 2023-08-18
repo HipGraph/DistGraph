@@ -74,7 +74,7 @@ public:
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col,
-                                      considered_row_width,
+                                      sp_mat->proc_row_width,
                                       sp_mat->proc_col_width,
                                       sp_mat->gCols,transpose);
 
