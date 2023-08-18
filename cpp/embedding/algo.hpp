@@ -151,14 +151,14 @@ public:
 //                                        j, batch_size, considering_batch_size);
 
 //          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" calc_t_dist_grad_rowptr completed" <<endl;
-//          MPI_Request request;
-//          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-//              results_negative_ptr =
-//                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-//                      new vector<DataTuple<DENT, embedding_dim>>());
-//          this->data_comm->async_transfer(random_number_vec, false,
-//                                          results_negative_ptr.get(), request);
-//          this->data_comm->populate_cache(results_negative_ptr.get(), request);
+          MPI_Request request;
+          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+              results_negative_ptr =
+                  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+                      new vector<DataTuple<DENT, embedding_dim>>());
+          this->data_comm->async_transfer(random_number_vec, false,
+                                          results_negative_ptr.get(), request);
+          this->data_comm->populate_cache(results_negative_ptr.get(), request);
 
         }
 
