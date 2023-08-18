@@ -87,7 +87,7 @@ public:
     for (int i = 0; i < 1; i++) {
 
       for (int j = 0; j < batches; j++) {
-        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j <<endl;
+//        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j <<endl;
         int seed = j + i;
 
         for (int i = 0; i < batch_size; i += 1) {
@@ -112,7 +112,7 @@ public:
           csr_block_remote = (remote.get())->data.get();
         }
 
-        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" csr processing completed" <<endl;
+//        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" csr processing completed" <<endl;
 
         int working_rank = 0;
         bool fetch_remote =
@@ -138,17 +138,17 @@ public:
                                                         request_batch_update);
           }
         }
-        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" async_transfer completed" <<endl;
-//        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size);
-        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" calc_t_dist_grad_rowptr completed" <<endl;
+//        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" async_transfer completed" <<endl;
+        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size);
+//        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" calc_t_dist_grad_rowptr completed" <<endl;
         if (this->grid->world_size > 1) {
           data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                    request_batch_update);
 
-          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" populate_cache completed" <<endl;
-//          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-//                                        j, batch_size, considering_batch_size);
+//          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" populate_cache completed" <<endl;
+          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+                                        j, batch_size, considering_batch_size);
 
 //          cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<" calc_t_dist_grad_rowptr completed" <<endl;
           MPI_Request request;
@@ -162,12 +162,12 @@ public:
 
         }
 
-//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-//                                        j, batch_size, considering_batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
 
 //        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<"  calc_t_dist_replus_rowptr completed" <<endl;
 
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
 //        cout<<" rank "<<grid->global_rank<<" processing iteration "<<i<<"batch " << j<<"  update_data_matrix_rowptr completed" <<endl;
       }
