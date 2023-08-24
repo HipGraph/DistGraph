@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
                                                                      -5));
 
   auto end_init = std::chrono::high_resolution_clock::now();
-//  dense_mat.get()->print_matrix();
+  dense_mat.get()->print_matrix();
 //
   embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
 
