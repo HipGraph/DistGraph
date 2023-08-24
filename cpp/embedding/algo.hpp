@@ -10,8 +10,8 @@
 #include <math.h>
 #include <memory>
 #include <mpi.h>
-#include <unordered_map>
 #include <random>
+#include <unordered_map>
 
 using namespace std;
 using namespace distblas::core;
@@ -24,7 +24,7 @@ template <typename SPT, typename DENT, size_t embedding_dim>
 class EmbeddingAlgo {
 
 private:
-  DenseMat<SPT,DENT, embedding_dim> *dense_local;
+  DenseMat<SPT, DENT, embedding_dim> *dense_local;
   distblas::core::SpMat<SPT> *sp_local;
   distblas::core::SpMat<SPT> *sp_local_metadata;
   distblas::core::SpMat<SPT> *sp_local_trans;
@@ -38,7 +38,7 @@ public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
                 distblas::core::SpMat<SPT> *sp_local_metadata,
                 distblas::core::SpMat<SPT> *sp_local_trans,
-                DenseMat<SPT,DENT, embedding_dim> *dense_local,
+                DenseMat<SPT, DENT, embedding_dim> *dense_local,
                 DataComm<SPT, DENT, embedding_dim> *data_comm,
                 Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
     this->data_comm = data_comm;
@@ -67,7 +67,8 @@ public:
     if (sp_local->proc_row_width % batch_size == 0) {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size);
     } else {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +1; // TODO:Error prone
+      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +
+                1; // TODO:Error prone
       last_batch_size = sp_local->proc_row_width - batch_size * (batches - 1);
     }
 
@@ -99,11 +100,10 @@ public:
 
       for (int j = 0; j < batches; j++) {
 
-        //        if (grid->global_rank ==0) {
-        //          cout << " rank " << grid->global_rank << " processing
-        //          iteration " << i
-        //               << "batch " << j << endl;
-        //        }
+        if (grid->global_rank == 0) {
+          cout << " rank " << grid->global_rank << " processing iteration " << i
+               << "batch " << j << endl;
+        }
         int seed = j + i;
 
         for (int i = 0; i < batch_size; i += 1) {
@@ -138,16 +138,14 @@ public:
           considering_batch_size = last_batch_size;
         }
 
-
-
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size);
 
         if (this->grid->world_size > 1) {
-//          if (i > 0) {
-//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                     request_batch_update);
-//          }
+          //          if (i > 0) {
+          //            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+          //                                                     request_batch_update);
+          //          }
 
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size);
@@ -166,17 +164,17 @@ public:
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
-           MPI_Request request_batch_update_new;
-           request_batch_update = request_batch_update_new;
+          MPI_Request request_batch_update_new;
+          request_batch_update = request_batch_update_new;
 
           if (i == 0) {
-//            data_comm_cache[j].get()->async_transfer(
-//                j, false, update_ptr.get(), request_batch_update_new);
+            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
+                                                     request_batch_update);
           }
-//          } else if (i > 0) {
-//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-//                                                        request_batch_update);
-//          }
+          //          } else if (i > 0) {
+          //            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+          //                                                        request_batch_update);
+          //          }
         }
       }
     }
@@ -330,10 +328,5 @@ public:
       }
     }
   }
-
-
-
-
-
 };
 } // namespace distblas::embedding
