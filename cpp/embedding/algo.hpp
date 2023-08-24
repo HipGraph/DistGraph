@@ -94,7 +94,7 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    MPI_Request request_batch_update;
+
 
     for (int i = 0; i < 1; i++) {
 
@@ -164,17 +164,17 @@ public:
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
-          MPI_Request request_batch_update_new;
-//          request_batch_update = request_batch_update_new;
+          MPI_Request request_batch_update;
+          //          request_batch_update = request_batch_update_new;
 
           if (i == 0) {
             data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
-                                                     request_batch_update_new);
+                                                     request_batch_update);
+          } else if (i > 0) {
+            data_comm_cache[j].get()->async_re_transfer(
+                update_ptr.get(), request_batch_update);
           }
-          //          } else if (i > 0) {
-          //            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-          //                                                        request_batch_update);
-          //          }
+          data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update);
         }
       }
     }
