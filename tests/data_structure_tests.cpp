@@ -128,8 +128,8 @@ int main(int argc, char **argv) {
 //    shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 //
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
-  auto dense_mat = shared_ptr<DenseMat<double, 2>>(
-      new DenseMat<double, 2>(shared_sparseMat_combined.get(),grid->get() ,localARows, 0, 1.0));
+  auto dense_mat = shared_ptr<DenseMat<int,double, 2>>(
+      new DenseMat<int, double, 2>(shared_sparseMat_combined.get(),grid->get() ,localARows, 0, 1.0));
 
   //    dense_mat.get()->print_matrix();
   cout << " rank " << rank << " creation of dense matrices completed  " << endl;

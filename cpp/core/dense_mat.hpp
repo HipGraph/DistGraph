@@ -21,7 +21,7 @@ namespace distblas::core {
  * This class wraps the Eigen/Dense matrix and represents
  * local dense matrix.
  */
-template <typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
+template <typename SPT, typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
 
 private:
 public:
