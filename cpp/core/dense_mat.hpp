@@ -65,7 +65,7 @@ public:
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::srand(rank);
+    std::srand(3);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < embedding_dim; j++) {
         DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
@@ -80,7 +80,7 @@ public:
   void print_matrix() {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    string output_path = "embedding.txt";
+    string output_path = "embedding"+to_string(rank)+".txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
