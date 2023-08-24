@@ -165,11 +165,11 @@ public:
 
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update_new;
-          request_batch_update = request_batch_update_new;
+//          request_batch_update = request_batch_update_new;
 
           if (i == 0) {
             data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
-                                                     request_batch_update);
+                                                     request_batch_update_new);
           }
           //          } else if (i > 0) {
           //            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
