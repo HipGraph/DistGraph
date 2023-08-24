@@ -276,7 +276,7 @@ public:
       (csr_linked_lists[0].get())
           ->insert((transpose) ? gRows : proc_row_width,
                    (transpose) ? proc_col_width : gCols, coords.size(),
-                   coords_ptr, coords.size(), false, node_index);
+                   coords_ptr, coords.size(), true, node_index);
     }
   }
 
