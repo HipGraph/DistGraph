@@ -93,7 +93,7 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
 
