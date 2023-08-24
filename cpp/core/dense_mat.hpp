@@ -175,7 +175,7 @@ public:
               cout<<" "<<global_index<<endl;
             }
 
-//            auto result = std::find(values.begin(), values.end(), global_index);
+            auto result = std::find(values.begin(), values.end(), global_index);
             std::array<DENT, embedding_dim> stdArray;
 
             for (int k = 0; k < embedding_dim; k++) {
