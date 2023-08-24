@@ -72,7 +72,7 @@ public:
         nCoordinates[i * embedding_dim + j] = val;
       }
     }
-    this->initialize_cache();
+//    this->initialize_cache();
   }
 
   ~DenseMat() {}
