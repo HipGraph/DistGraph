@@ -156,12 +156,10 @@ public:
   }
 
   void initialize_cache() {
-    cout<<" "<<grid->global_rank<<" trying initialization "<<endl;
     CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
     auto head = batch_list->getHeadNode();
     CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
     CSRLocal<SPT> *csr_block_remote = nullptr;
-    cout<<" "<<grid->global_rank<<" first CSR block accessed "<<endl;
     if (this->grid->world_size > 1) {
       auto remote = (head.get())->next;
       csr_block_remote = (remote.get())->data.get();
@@ -174,9 +172,6 @@ public:
           for (uint64_t j = 0; j < this->sp_local->proc_row_width; j++) {
 
             auto global_index = j + i*this->sp_local->proc_row_width;
-            if (this->grid->global_rank==0){
-              cout<<" "<<global_index<<endl;
-            }
 
             auto result = std::find(values.begin(), values.end(), global_index);
             std::array<DENT, embedding_dim> stdArray;
