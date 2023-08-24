@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
 //
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<double, 2>>(
-      new DenseMat<double, 2>(localARows, 0, 1.0, grid.get()->world_size));
+      new DenseMat<double, 2>(shared_sparseMat_combined.get(),grid->get() ,localARows, 0, 1.0));
 
   //    dense_mat.get()->print_matrix();
   cout << " rank " << rank << " creation of dense matrices completed  " << endl;
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
   auto end_init = std::chrono::high_resolution_clock::now();
   dense_mat.get()->print_matrix();
 //
-//  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
 
   cout << " rank " << rank << " training completed  " << endl;
 
