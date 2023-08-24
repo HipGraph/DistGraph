@@ -182,7 +182,7 @@ public:
             }
 
             if (result != values.end()) {
-              this->insert_cache(i,global_index,stdArray);
+//              this->insert_cache(i,global_index,stdArray);
             }
           }
         }
