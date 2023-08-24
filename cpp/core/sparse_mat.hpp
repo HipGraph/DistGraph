@@ -294,32 +294,32 @@ public:
     //    while ((head.get())->data != nullptr) {
     auto csr_data = (head.get())->data;
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-    if (transpose) {
+    if (!transpose) {
 
       for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = batch_id * batch_size + proc_row_width * r;
+        uint64_t starting_index = batch_id * batch_size + proc_col_width * r;
         auto end_index =
-            std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_row_width),gRows)) - 1;
+            std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)) - 1;
 
         for (auto i = starting_index; i <= (end_index); i++) {
-          for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+//          for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
             // calculation of sending row_ids
-            auto col_val = handle->col_idx[j];
-            if (rank != r) {
-              proc_to_id_mapping[r].push_back(col_val);
+//            auto col_val = handle->col_idx[j];
+            if (rank != r and (handle->rowStart[i + 1]-handle->rowStart[i])>0) {
+              proc_to_id_mapping[r].push_back(i);
             }
-          }
+//          }
         }
       }
     } else {
       auto starting_index = batch_id * batch_size;
       auto end_index =
-          std::min((batch_id + 1) * batch_size, proc_row_width) - 1;
+          std::min((batch_id + 1) * batch_size, proc_col_width) - 1;
       for (auto i = starting_index; i <= (end_index); i++) {
         for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
           auto col_val = handle->col_idx[j];
           // calculation of receiving col_ids
-          int owner_rank = col_val / proc_col_width;
+          int owner_rank = col_val / proc_row_width;
           if (owner_rank != rank) {
             //          cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank
             //          "<<owner_rank<<" col_val "<<col_val  <<endl;
