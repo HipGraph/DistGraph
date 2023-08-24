@@ -96,14 +96,10 @@ public:
 
 
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
 
-        if (grid->global_rank == 0) {
-          cout << " rank " << grid->global_rank << " processing iteration " << i
-               << "batch " << j << endl;
-        }
         int seed = j + i;
 
         for (int i = 0; i < batch_size; i += 1) {
