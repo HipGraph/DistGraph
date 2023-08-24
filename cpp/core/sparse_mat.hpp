@@ -320,11 +320,10 @@ public:
           auto col_val = handle->col_idx[j];
           // calculation of receiving col_ids
           int owner_rank = col_val / proc_row_width;
-          auto global_id = i + rank*proc_col_width;
           if (owner_rank != rank) {
             //          cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank
             //          "<<owner_rank<<" col_val "<<col_val  <<endl;
-            proc_to_id_mapping[owner_rank].push_back(global_id);
+            proc_to_id_mapping[owner_rank].push_back(i);
           }
         }
       }
