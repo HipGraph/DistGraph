@@ -144,10 +144,10 @@ public:
                                       batch_size, considering_batch_size);
 
         if (this->grid->world_size > 1) {
-          if (i > 0) {
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                     request_batch_update);
-          }
+//          if (i > 0) {
+//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+//                                                     request_batch_update);
+//          }
 
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size);
@@ -170,12 +170,13 @@ public:
            request_batch_update = request_batch_update_new;
 
           if (i == 0) {
-            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
-                                                     request_batch_update);
-          } else if (i > 0) {
-            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
-                                                        request_batch_update);
+            data_comm_cache[j].get()->async_transfer(
+                j, false, update_ptr.get(), request_batch_update);
           }
+//          } else if (i > 0) {
+//            data_comm_cache[j].get()->async_re_transfer(update_ptr.get(),
+//                                                        request_batch_update);
+//          }
         }
       }
     }
