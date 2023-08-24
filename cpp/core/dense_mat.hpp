@@ -153,15 +153,18 @@ public:
   }
 
   void initialize_cache() {
+    cout<<" "<<grid->global_rank<<" trying initialization "<<endl;
     CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
     auto head = batch_list->getHeadNode();
     CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
     CSRLocal<SPT> *csr_block_remote = nullptr;
+    cout<<" "<<grid->global_rank<<" first CSR block accessed "<<endl;
     if (this->grid->world_size > 1) {
       auto remote = (head.get())->next;
       csr_block_remote = (remote.get())->data.get();
       CSRHandle *csr_handle = csr_block_remote->handler.get();
       vector<double> values = csr_handle->values;
+      cout<<" "<<grid->global_rank<<" remote CSR block accessed success"<<endl;
       for (int i = 0; i < this->grid->world_size; i++) {
         if (i != this->grid->global_rank) {
           std::srand(i);
