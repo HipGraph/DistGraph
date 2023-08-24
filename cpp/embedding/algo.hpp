@@ -24,7 +24,7 @@ template <typename SPT, typename DENT, size_t embedding_dim>
 class EmbeddingAlgo {
 
 private:
-  DenseMat<DENT, embedding_dim> *dense_local;
+  DenseMat<SPT,DENT, embedding_dim> *dense_local;
   distblas::core::SpMat<SPT> *sp_local;
   distblas::core::SpMat<SPT> *sp_local_metadata;
   distblas::core::SpMat<SPT> *sp_local_trans;
@@ -38,7 +38,7 @@ public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
                 distblas::core::SpMat<SPT> *sp_local_metadata,
                 distblas::core::SpMat<SPT> *sp_local_trans,
-                DenseMat<DENT, embedding_dim> *dense_local,
+                DenseMat<SPT,DENT, embedding_dim> *dense_local,
                 DataComm<SPT, DENT, embedding_dim> *data_comm,
                 Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
     this->data_comm = data_comm;
