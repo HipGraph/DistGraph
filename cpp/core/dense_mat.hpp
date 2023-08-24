@@ -60,6 +60,9 @@ public:
     this->rows = rows;
     this->sp_local = sp_local;
     this->grid = grid;
+    this->cachePtr = std::make_unique<std::vector<
+        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
+        grid->world_size);
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
     std::srand(this->grid->global_rank);
@@ -183,9 +186,9 @@ public:
               stdArray[k]=val;
             }
 
-//            if (result != values.end()) {
-//              this->insert_cache(i,global_index,stdArray);
-//            }
+            if (result != values.end()) {
+              this->insert_cache(i,global_index,stdArray);
+            }
           }
         }
       }
