@@ -168,13 +168,16 @@ public:
           for (uint64_t j = 0; j < this->sp_local->proc_row_width; j++) {
 
             auto global_index = j + i*this->sp_local->proc_row_width;
+            if (this->grid->global_rank==0){
+              cout<<" "<<global_index<<endl;
+            }
 
             auto result = std::find(values.begin(), values.end(), global_index);
             std::array<DENT, embedding_dim> stdArray;
 
-            for (int j = 0; j < embedding_dim; j++) {
+            for (int k = 0; k < embedding_dim; k++) {
               DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
-              stdArray[j]=val;
+              stdArray[k]=val;
             }
 
             if (result != values.end()) {
