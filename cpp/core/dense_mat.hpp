@@ -84,8 +84,6 @@ public:
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
-    fout << (*this->matrixPtr).rows() << " " << (*this->matrixPtr).cols()
-         << endl;
     for (int i = 0; i < rows; ++i) {
       fout << (i + 1)  << " ";
       for (int j = 0; j < embedding_dim; ++j) {
