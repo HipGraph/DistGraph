@@ -166,6 +166,7 @@ public:
       CSRHandle *csr_handle = csr_block_remote->handler.get();
       vector<double> values = csr_handle->values;
       cout<<" "<<grid->global_rank<<" remote CSR block accessed success"<<endl;
+      # pragma omp parallel for
       for (int i = 0; i < this->grid->world_size; i++) {
         if (i != this->grid->global_rank) {
           std::srand(i);
@@ -182,7 +183,7 @@ public:
             }
 
             if (result != values.end()) {
-//              this->insert_cache(i,global_index,stdArray);
+              this->insert_cache(i,global_index,stdArray);
             }
           }
         }
