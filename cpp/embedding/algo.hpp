@@ -76,6 +76,15 @@ public:
         new DataComm<SPT, DENT, embedding_dim>(
             sp_local_metadata, sp_local_trans, dense_local, grid));
 
+    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> fetch_all_ptr =
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
+
+    negative_update_com.get()->onboard_data(-1);
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(),true,false,nullptr);
+    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), nullptr, true);
+
+
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
