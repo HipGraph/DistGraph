@@ -29,7 +29,6 @@ private:
   distblas::core::SpMat<SPT> *sp_local_metadata;
   distblas::core::SpMat<SPT> *sp_local_trans;
   Process3DGrid *grid;
-  DataComm<SPT, DENT, embedding_dim> *data_comm;
   DENT MAX_BOUND, MIN_BOUND;
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
       data_comm_cache;
@@ -39,9 +38,7 @@ public:
                 distblas::core::SpMat<SPT> *sp_local_metadata,
                 distblas::core::SpMat<SPT> *sp_local_trans,
                 DenseMat<SPT, DENT, embedding_dim> *dense_local,
-                DataComm<SPT, DENT, embedding_dim> *data_comm,
                 Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
-    this->data_comm = data_comm;
     this->grid = grid;
     this->dense_local = dense_local;
     this->sp_local = sp_local;
@@ -67,19 +64,24 @@ public:
     if (sp_local->proc_row_width % batch_size == 0) {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size);
     } else {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +
-                1; // TODO:Error prone
+      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +1;
+      // TODO:Error prone
       last_batch_size = sp_local->proc_row_width - batch_size * (batches - 1);
     }
 
     cout << " rank " << this->grid->global_rank << " total batches " << batches
          << endl;
 
+    auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+        new DataComm<SPT, DENT, embedding_dim>(
+            sp_local_metadata, sp_local_trans, dense_local, grid));
+
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
               sp_local_metadata, sp_local_trans, dense_local, grid));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+      data_comm_cache[j].get()->onboard_data(i);
     }
 
     DENT *prevCoordinates = static_cast<DENT *>(
@@ -138,19 +140,15 @@ public:
                                       batch_size, considering_batch_size);
 
         if (this->grid->world_size > 1) {
-          //          if (i > 0) {
-          //            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-          //                                                     request_batch_update);
-          //          }
 
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size);
 
           MPI_Request request;
           results_negative_ptr.get()->clear();
-          this->data_comm->async_transfer(random_number_vec, false,
+          negative_update_com.get()->transfer_data(random_number_vec, false,
                                           results_negative_ptr.get(), request);
-          this->data_comm->populate_cache(results_negative_ptr.get(), request);
+          negative_update_com.get()->populate_cache(results_negative_ptr.get(), request);
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
@@ -161,15 +159,7 @@ public:
 
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
-          //          request_batch_update = request_batch_update_new;
-
-          if (i == 0) {
-            data_comm_cache[j].get()->async_transfer(j, false, update_ptr.get(),
-                                                     request_batch_update);
-          } else if (i > 0) {
-            data_comm_cache[j].get()->async_re_transfer(
-                update_ptr.get(), request_batch_update);
-          }
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(),false,false,request_batch_update);
           data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update);
         }
       }

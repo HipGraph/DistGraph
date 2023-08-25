@@ -89,29 +89,6 @@ public:
     uint64_t startIndex = std::distance(coords.begin(), startIt);
     uint64_t endIndex = std::distance(coords.begin(), std::next(endIt).base());
     uint64_t first_batch_len = (endIndex + 1) - startIndex;
-    //    uint64_t second_batch_len = coords.size() - first_batch_len;
-
-    //    int considered_col_width = proc_col_width;
-    //    if (rank == world_size - 1) {
-    //      considered_col_width = gCols - proc_col_width * (world_size - 1);
-    //    }
-
-    //    if (mod_ind) {
-    //      std::transform(coords.begin(), coords.begin() + first_batch_len,
-    //                     coords.begin(),
-    //                     [&considered_col_width](const auto &tuple) {
-    //                       const auto &[row, col, value] = tuple;
-    //                       int64_t modifiedCol = col % (considered_col_width);
-    //                       return Tuple<T>{row, modifiedCol, value};
-    //                     });
-    //      std::transform(coords.begin() + first_batch_len, coords.end(),
-    //                     coords.begin() + first_batch_len, [&](const auto
-    //                     &tuple) {
-    //                       const auto &[row, col, value] = tuple;
-    //                       int64_t modifiedCol = col;
-    //                       return Tuple<T>{row, modifiedCol, value};
-    //                     });
-    //    }
 
     block_col_starts.push_back(0);
     block_col_starts.push_back(first_batch_len);
@@ -168,34 +145,6 @@ public:
         while (coords[j].row >= current_start) {
           block_row_starts.push_back(j);
           ++matched_count;
-          //          if (coords[j].row > next_start) {
-          //            while (coords[j].row > next_start) {
-          //              if (!divided_equallaly) {
-          //                if (j > block_col_starts[i] and
-          //                    (matched_count) % (batch_count) == 0) {
-          //                  current_start += last_proc_batch_size;
-          //                  next_start += batch_size;
-          //                } else if (j > block_col_starts[i] and
-          //                           (matched_count + 1) % (batch_count) == 0)
-          //                           {
-          //                  current_start += batch_size;
-          //                  next_start += last_proc_batch_size;
-          //                } else {
-          //                  current_start += batch_size;
-          //                  next_start += batch_size;
-          //                }
-          //              } else {
-          //                current_start += batch_size;
-          //                next_start += batch_size;
-          //              }
-          //              block_row_starts.push_back(j);
-          //              ++matched_count;
-          //              if (rank == 3 and i==22 and trans) {
-          //                cout << " current row start: " << current_start<< "
-          //                size: " << matched_count<<" " << j<<"
-          //                "<<coords[j].row << endl;}
-          //            }
-          //          } else {
           if (!divided_equallaly) {
             if (j > block_col_starts[i] and
                 matched_count % (batch_count) == 0) {
@@ -213,12 +162,6 @@ public:
             current_start += batch_size;
             next_start += batch_size;
           }
-          //          }
-          //          if (col_merged and rank==1) {
-          //            cout << " current row start: " << current_start
-          //                 << " size: " << matched_count << " " << j << " "
-          //                 << coords[j].row << endl;
-          //          }
         }
 
         // This modding step helps indexing.
@@ -280,6 +223,8 @@ public:
     }
   }
 
+
+  //if batch_id<0 it will fetch all the batches
   void fill_col_ids(int batch_id,
                     vector<vector<uint64_t>> &proc_to_id_mapping) {
     int rank, world_size;
@@ -291,38 +236,33 @@ public:
 
     auto head = (linkedList.get())->getHeadNode();
 
-    //    while ((head.get())->data != nullptr) {
     auto csr_data = (head.get())->data;
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
     if (!transpose) {
 
+      // calculation of sender col_ids
       for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = batch_id * batch_size + proc_col_width * r;
-        auto end_index =
-            std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)) - 1;
+        uint64_t starting_index = (batch_id>=0)?batch_id * batch_size + proc_col_width * r:proc_col_width * r;
+        auto end_index = (batch_id>=0)?
+            std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)) - 1:
+                                         std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)-1;
 
         for (auto i = starting_index; i <= (end_index); i++) {
-//          for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
-            // calculation of sending row_ids
-//            auto col_val = handle->col_idx[j];
             if (rank != r and (handle->rowStart[i + 1]-handle->rowStart[i])>0) {
               proc_to_id_mapping[r].push_back(i);
             }
-//          }
         }
       }
     } else {
-      auto starting_index = batch_id * batch_size;
-      auto end_index =
-          std::min((batch_id + 1) * batch_size, proc_col_width) - 1;
+      auto starting_index = (batch_id>=0)?batch_id * batch_size:0;
+      auto end_index =(batch_id>=0)?
+          std::min((batch_id + 1) * batch_size, proc_col_width) - 1:proc_col_width-1;
       for (auto i = starting_index; i <= (end_index); i++) {
         for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
           auto col_val = handle->col_idx[j];
-          // calculation of receiving col_ids
+          // calculation of sender col_ids
           int owner_rank = col_val / proc_row_width;
           if (owner_rank != rank) {
-            //          cout<<" rank "<<rank<<" trans"<<transpose<<" owner_rank
-            //          "<<owner_rank<<" col_val "<<col_val  <<endl;
             proc_to_id_mapping[owner_rank].push_back(i);
           }
         }
