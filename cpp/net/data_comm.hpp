@@ -47,8 +47,8 @@ public:
     this->sendcounts = vector<int>(grid->world_size, 0);
     this->rdispls = vector<int>(grid->world_size, 0);
     this->receivecounts = vector<int>(grid->world_size, 0);
-    this->receive_col_ids_list = vector<int>(grid->world_size);
-    this->send_col_ids_list =  vector<int>(grid->world_size);
+    this->receive_col_ids_list = vector<vector<uint64_t>>(grid->world_size);
+    this->send_col_ids_list =  vector<vector<uint64_t>>(grid->world_size);
   }
 
   ~DataComm() {

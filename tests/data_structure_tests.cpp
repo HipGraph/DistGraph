@@ -148,7 +148,6 @@ int main(int argc, char **argv) {
                                                                      shared_sparseMat.get(),
                                                                      shared_sparseMat_Trans.get(),
                                                                      dense_mat.get(),
-                                                                     communicator.get(),
                                                                      grid.get(),
                                                                      5,
                                                                      -5));
