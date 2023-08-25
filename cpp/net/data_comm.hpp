@@ -26,6 +26,8 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
+  vector<vector<uint64_t>> receive_col_ids_list;
+  vector<vector<uint64_t>> send_col_ids_list;
   DataTuple<DENT, embedding_dim> *sendbuf;
   int total_send_count;
   int total_receive_count;
@@ -45,6 +47,8 @@ public:
     this->sendcounts = vector<int>(grid->world_size, 0);
     this->rdispls = vector<int>(grid->world_size, 0);
     this->receivecounts = vector<int>(grid->world_size, 0);
+    this->receive_col_ids_list = vector<int>(grid->world_size);
+    this->send_col_ids_list =  vector<int>(grid->world_size);
   }
 
   ~DataComm() {
@@ -56,8 +60,7 @@ public:
   }
 
   void onboard_data(int batch_id) {
-    vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
-    vector<vector<uint64_t>> send_col_ids_list(grid->world_size);
+
 
     // processing chunks
     // calculating receiving data cols
@@ -123,9 +126,11 @@ public:
     if (verify) {
       receivebufverify =
           new DataTuple<DENT, embedding_dim>[total_receive_count];
-      for (int j = 0; j < total_receive_count; j++) {
-        int index = rdispls[i] + j;
-        receivebufverify[index].col = receive_col_ids_list[i][j];
+      for (int i=0; i< grid->world_size; i++) {
+        for (int j = 0; j < total_receive_count; j++) {
+          int index = rdispls[i] + j;
+          receivebufverify[index].col = receive_col_ids_list[i][j];
+        }
       }
     }
 
@@ -266,8 +271,8 @@ public:
   }
 
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request &request) {
-    if (request != nullptr) {
+                      MPI_Request &request, bool synchronous) {
+    if (!synchronous) {
       MPI_Status status;
       MPI_Wait(&request, &status);
     }

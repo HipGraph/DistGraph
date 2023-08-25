@@ -148,7 +148,7 @@ public:
           results_negative_ptr.get()->clear();
           negative_update_com.get()->transfer_data(random_number_vec, false,
                                           results_negative_ptr.get(), request);
-          negative_update_com.get()->populate_cache(results_negative_ptr.get(), request);
+          negative_update_com.get()->populate_cache(results_negative_ptr.get(), request, false);
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
@@ -160,7 +160,7 @@ public:
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
           data_comm_cache[j].get()->transfer_data(update_ptr.get(),false,false,request_batch_update);
-          data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update);
+          data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update,false);
         }
       }
     }
