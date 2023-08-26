@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix();
 //  dense_mat.get()->print_cache(0);
 //
-  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
+//  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
 
   cout << " rank " << rank << " training completed  " << endl;
 
