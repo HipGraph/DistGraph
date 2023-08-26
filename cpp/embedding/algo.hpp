@@ -97,14 +97,14 @@ public:
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-        results_negative_ptr =
-            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                new vector<DataTuple<DENT, embedding_dim>>());
-
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+//        results_negative_ptr =
+//            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//                new vector<DataTuple<DENT, embedding_dim>>());
+//
+//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
+//        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//            new vector<DataTuple<DENT, embedding_dim>>());
 
 
 
