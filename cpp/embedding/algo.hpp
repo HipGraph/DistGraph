@@ -94,8 +94,8 @@ public:
 //      data_comm_cache[i].get()->onboard_data(i);
     }
 
-    DENT *prevCoordinates = static_cast<DENT *>(
-        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+//    DENT *prevCoordinates = static_cast<DENT *>(
+//        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
 //    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
 //        results_negative_ptr =
