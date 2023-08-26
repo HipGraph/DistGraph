@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   cout << " file_path " << file_path << endl;
 
   int batch_size = 1280;
-  int dimension = 128;
+   const  int dimension = 128;
 
 
   MPI_Init(&argc, &argv);
