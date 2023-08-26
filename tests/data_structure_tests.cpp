@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
   cout << " file_path " << file_path << endl;
 
   int batch_size = 1280;
+  int dimension = 128;
 
 
   MPI_Init(&argc, &argv);
@@ -34,7 +35,7 @@ int main(int argc, char **argv) {
   batch_size = batch_size/world_size;
 
   // Initialize MPI DataTypes
-  initialize_mpi_datatypes<int, double, 2>();
+  initialize_mpi_datatypes<int, double, dimension>();
 
   // Creating reader
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
@@ -128,23 +129,23 @@ int main(int argc, char **argv) {
 //    shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 //
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
-  auto dense_mat = shared_ptr<DenseMat<int,double, 2>>(
-      new DenseMat<int, double, 2>(shared_sparseMat_combined.get(),grid.get() ,localARows, 0, 1.0));
+  auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
+      new DenseMat<int, double, dimension>(shared_sparseMat_combined.get(),grid.get() ,localARows, 0, 1.0));
 
   //    dense_mat.get()->print_matrix();
   cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 
   auto communicator =
-      unique_ptr<DataComm<int, double, 2>>(new DataComm<int, double, 2>(
+      unique_ptr<DataComm<int, double, dimension>>(new DataComm<int, double, dimension>(
           shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
           grid.get()));
 
   cout << " rank " << rank << " async started  " << endl;
 
-  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>
+  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, dimension>>
       embedding_algo =
-          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, 2>>(
-              new distblas::embedding::EmbeddingAlgo<int, double, 2>(shared_sparseMat_combined.get(),
+          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, dimension>>(
+              new distblas::embedding::EmbeddingAlgo<int, double, dimension>(shared_sparseMat_combined.get(),
                                                                      shared_sparseMat.get(),
                                                                      shared_sparseMat_Trans.get(),
                                                                      dense_mat.get(),
@@ -156,7 +157,7 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix();
 //  dense_mat.get()->print_cache(0);
 //
-  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
 
   cout << " rank " << rank << " training completed  " << endl;
 
@@ -164,7 +165,7 @@ int main(int argc, char **argv) {
   auto end_train = std::chrono::high_resolution_clock::now();
 //  //  cout << " rank " << rank << " async completed  " << endl;
 //
-  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, 2);
+  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
 //    dense_mat.get()->print_matrix_rowptr(0);
 
   auto io_duration =
