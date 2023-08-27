@@ -283,8 +283,8 @@ public:
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
-      #pragma forceinline
-      #pragma omp simd
+//      #pragma forceinline
+//      #pragma omp simd
       for (int j = 0; j < col_ids.size(); j++) {
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
@@ -339,9 +339,8 @@ public:
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
                            ((this->sp_local)->proc_row_width));
-
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
-      #pragma omp simd
       for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)
             ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
