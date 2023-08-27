@@ -121,7 +121,7 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
 
     for (int i = 0; i < iterations; i++) {
-
+      cout<<" global rank "<<grid->global_rank<<endl;
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
