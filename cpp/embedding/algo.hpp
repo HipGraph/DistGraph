@@ -82,8 +82,8 @@ public:
 
     MPI_Request fetch_all;
     negative_update_com.get()->onboard_data(-1);
-//    negative_update_com.get()->transfer_data(fetch_all_ptr.get(),true,false,fetch_all);
-//    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all, true);
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(),true,false,fetch_all);
+    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all, true);
 
 
     for (int i = 0; i < batches; i++) {
@@ -91,7 +91,7 @@ public:
           new DataComm<SPT, DENT, embedding_dim>(
               sp_local_metadata, sp_local_trans, dense_local, grid));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
-//      data_comm_cache[i].get()->onboard_data(i);
+      data_comm_cache[i].get()->onboard_data(i);
     }
 
     DENT *prevCoordinates = static_cast<DENT *>(
@@ -108,72 +108,72 @@ public:
 
 
 
-//    for (int i = 0; i < iterations; i++) {
-//
-//      for (int j = 0; j < batches; j++) {
-//
-//        int seed = j + i;
-//
-//        for (int i = 0; i < batch_size; i += 1) {
-//          int IDIM = i * embedding_dim;
-//          for (int d = 0; d < embedding_dim; d++) {
-//            prevCoordinates[IDIM + d] = 0;
-//          }
-//        }
-//
-//        // negative samples generation
-//        vector<uint64_t> random_number_vec =
-//            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
-//
-//        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
-//
-//        auto head = batch_list->getHeadNode();
-//        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
-//        CSRLocal<SPT> *csr_block_remote = nullptr;
-//
-//        if (this->grid->world_size > 1) {
-//          auto remote = (head.get())->next;
-//          csr_block_remote = (remote.get())->data.get();
-//        }
-//
-//        int working_rank = 0;
-//        bool fetch_remote =
-//            (working_rank == ((this->grid)->global_rank)) ? false : true;
-//
-//        int considering_batch_size = batch_size;
-//
-//        if (j == batches - 1) {
-//          considering_batch_size = last_batch_size;
-//        }
-//
-//        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size);
-//
-//        if (this->grid->world_size > 1) {
-//
-//          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-//                                        j, batch_size, considering_batch_size);
-//
-//          MPI_Request request;
-//          results_negative_ptr.get()->clear();
-//          negative_update_com.get()->transfer_data(random_number_vec, false,
-//                                          results_negative_ptr.get(), request);
-//          negative_update_com.get()->populate_cache(results_negative_ptr.get(), request, false);
-//        }
-//
-//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-//                                        j, batch_size, considering_batch_size);
-//
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-//        update_ptr.get()->clear();
-//
-//        if (this->grid->world_size > 1) {
-//          MPI_Request request_batch_update;
-//          data_comm_cache[j].get()->transfer_data(update_ptr.get(),false,false,request_batch_update);
-//          data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update,false);
-//        }
-//      }
-//    }
+    for (int i = 0; i < iterations; i++) {
+
+      for (int j = 0; j < batches; j++) {
+
+        int seed = j + i;
+
+        for (int i = 0; i < batch_size; i += 1) {
+          int IDIM = i * embedding_dim;
+          for (int d = 0; d < embedding_dim; d++) {
+            prevCoordinates[IDIM + d] = 0;
+          }
+        }
+
+        // negative samples generation
+        vector<uint64_t> random_number_vec =
+            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+
+        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
+
+        auto head = batch_list->getHeadNode();
+        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
+        CSRLocal<SPT> *csr_block_remote = nullptr;
+
+        if (this->grid->world_size > 1) {
+          auto remote = (head.get())->next;
+          csr_block_remote = (remote.get())->data.get();
+        }
+
+        int working_rank = 0;
+        bool fetch_remote =
+            (working_rank == ((this->grid)->global_rank)) ? false : true;
+
+        int considering_batch_size = batch_size;
+
+        if (j == batches - 1) {
+          considering_batch_size = last_batch_size;
+        }
+
+        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size);
+
+        if (this->grid->world_size > 1) {
+
+          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+                                        j, batch_size, considering_batch_size);
+
+          MPI_Request request;
+          results_negative_ptr.get()->clear();
+          negative_update_com.get()->transfer_data(random_number_vec, false,
+                                          results_negative_ptr.get(), request);
+          negative_update_com.get()->populate_cache(results_negative_ptr.get(), request, false);
+        }
+
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
+
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        update_ptr.get()->clear();
+
+        if (this->grid->world_size > 1) {
+          MPI_Request request_batch_update;
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(),false,false,request_batch_update);
+          data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update,false);
+        }
+      }
+    }
   }
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
