@@ -21,9 +21,6 @@ namespace distblas::core {
 
 int divide_and_round_up(uint64_t num, int denom);
 
-my_timer_t start_clock();
-double stop_clock_get_elapsed(my_timer_t &start);
-
 vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                     int ns);
 

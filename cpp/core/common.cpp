@@ -6,15 +6,6 @@ using namespace std::chrono;
 MPI_Datatype distblas::core::SPTUPLE;
 MPI_Datatype distblas::core::DENSETUPLE;
 
-my_timer_t start_clock() {
-  return std::chrono::steady_clock::now();
-}
-
-double stop_clock_get_elapsed(my_timer_t &start) {
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> diff = end - start;
-  return diff.count();
-}
 
 
 int distblas::core::divide_and_round_up(uint64_t num, int denom){
