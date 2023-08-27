@@ -69,40 +69,39 @@ public:
     // calculating sending data cols
     this->sp_local_trans->fill_col_ids(batch_id, send_col_ids_list);
 
-    for (int i = 0; i < grid->world_size; i++) {
-      std::unordered_set<uint64_t> unique_set_receiv(
-          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
-      receive_col_ids_list[i] =
-          vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
-
-      receivecounts[i] = receive_col_ids_list[i].size();
-
-      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
-                                                   send_col_ids_list[i].end());
-      send_col_ids_list[i] =
-          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
-
-      sendcounts[i] = send_col_ids_list[i].size();
-
-      sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
-      rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-
-      total_send_count = total_send_count + sendcounts[i];
-      total_receive_count = total_receive_count + receivecounts[i];
-    }
-
-    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
-
-    for (int i = 0; i < grid->world_size; i++) {
-      //#pragma omp parallel
-      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
-        int index = sdispls[i] + j;
-        uint64_t local_key = send_col_ids_list[i][j];
-        sendbuf[index].col = local_key + (this->sp_local->proc_row_width *
-                                          this->grid->global_rank);
-//        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-      }
-    }
+//    for (int i = 0; i < grid->world_size; i++) {
+//      std::unordered_set<uint64_t> unique_set_receiv(
+//          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
+//      receive_col_ids_list[i] =
+//          vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
+//
+//      receivecounts[i] = receive_col_ids_list[i].size();
+//
+//      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
+//                                                   send_col_ids_list[i].end());
+//      send_col_ids_list[i] =
+//          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
+//
+//      sendcounts[i] = send_col_ids_list[i].size();
+//
+//      sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
+//      rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
+//
+//      total_send_count = total_send_count + sendcounts[i];
+//      total_receive_count = total_receive_count + receivecounts[i];
+//    }
+//
+//    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
+//
+//    for (int i = 0; i < grid->world_size; i++) {
+//      //#pragma omp parallel
+//      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
+//        int index = sdispls[i] + j;
+//        uint64_t local_key = send_col_ids_list[i][j];
+//        sendbuf[index].col = local_key + (this->sp_local->proc_row_width *
+//                                          this->grid->global_rank);
+//      }
+//    }
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
