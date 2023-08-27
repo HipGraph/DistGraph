@@ -218,7 +218,7 @@ public:
 
         DENT forceDiff[embedding_dim];
         //#pragma forceinline
-        #pragma omp simd
+//        #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
@@ -284,7 +284,7 @@ public:
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
       //#pragma forceinline
-      #pragma omp simd
+//      #pragma omp simd
       for (int j = 0; j < col_ids.size(); j++) {
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
