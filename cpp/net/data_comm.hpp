@@ -29,8 +29,7 @@ private:
   vector<vector<uint64_t>> receive_col_ids_list;
   vector<vector<uint64_t>> send_col_ids_list;
   DataTuple<DENT, embedding_dim> *sendbuf;
-  int total_send_count;
-  int total_receive_count;
+
 
   //  DataTuple<DENT, embedding_dim> *receivebuf;
 
@@ -61,7 +60,8 @@ public:
 
   void onboard_data(int batch_id) {
 
-
+    int total_send_count=0;
+    int total_receive_count=0;
     // processing chunks
     // calculating receiving data cols
     this->sp_local->fill_col_ids(batch_id, receive_col_ids_list);
@@ -91,15 +91,17 @@ public:
       total_receive_count = total_receive_count + receivecounts[i];
     }
 
-    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
+    if (total_send_count>0) {
+      sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 
-    for (int i = 0; i < grid->world_size; i++) {
-      //#pragma omp parallel
-      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
-        int index = sdispls[i] + j;
-        uint64_t local_key = send_col_ids_list[i][j];
-        sendbuf[index].col = local_key + (this->sp_local->proc_row_width *
-                                          this->grid->global_rank);
+      for (int i = 0; i < grid->world_size; i++) {
+        //#pragma omp parallel
+        for (int j = 0; j < send_col_ids_list[i].size(); j++) {
+          int index = sdispls[i] + j;
+          uint64_t local_key = send_col_ids_list[i][j];
+          sendbuf[index].col = local_key + (this->sp_local->proc_row_width *
+                                            this->grid->global_rank);
+        }
       }
     }
   }
