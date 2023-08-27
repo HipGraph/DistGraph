@@ -2,9 +2,21 @@
 
 
 using namespace std;
-
+using namespace std::chrono;
 MPI_Datatype distblas::core::SPTUPLE;
 MPI_Datatype distblas::core::DENSETUPLE;
+
+time_point<steady_clock> start_clock() {
+  return steady_clock::now();
+}
+
+double stop_clock_get_elapsed(chrono::time_point<steady_clock> &start) {
+  auto end = steady_clock::now();
+  duration<double> diff = end - start;
+  return diff.count();
+}
+
+
 
 int distblas::core::divide_and_round_up(uint64_t num, int denom){
   if (num % denom > 0) {
@@ -40,12 +52,4 @@ vector<uint64_t> distblas::core::generate_random_numbers(int lower_bound, int up
   return vec;
 }
 
-my_timer_t start_clock() {
-  return std::chrono::steady_clock::now();
-}
 
-double stop_clock_get_elapsed(my_timer_t &start) {
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> diff = end - start;
-  return diff.count();
-}

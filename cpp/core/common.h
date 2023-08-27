@@ -13,16 +13,18 @@
 #include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
-typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
 
 int divide_and_round_up(uint64_t num, int denom);
 
-my_timer_t start_clock();
+time_point<steady_clock> start_clock();
 
-double stop_clock_get_elapsed(my_timer_t &start);
+double stop_clock_get_elapsed(time_point<steady_clock> &start);
+
+
 
 vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                     int ns);
