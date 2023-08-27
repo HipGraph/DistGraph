@@ -3,6 +3,7 @@
 #include "../core/csr_local.hpp"
 #include "../core/dense_mat.hpp"
 #include "../core/sparse_mat.hpp"
+#include "../core/json.hpp"
 #include "../net/data_comm.hpp"
 #include "../net/process_3D_grid.hpp"
 #include <Eigen/Dense>
@@ -12,6 +13,7 @@
 #include <mpi.h>
 #include <random>
 #include <unordered_map>
+
 
 using namespace std;
 using namespace distblas::core;
