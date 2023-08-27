@@ -217,8 +217,8 @@ public:
         int ind = i - row_base_index;
 
         DENT forceDiff[embedding_dim];
-        #pragma forceinline
-        #pragma omp simd
+//        #pragma forceinline
+//        #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
