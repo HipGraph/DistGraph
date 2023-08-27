@@ -33,6 +33,11 @@ private:
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
       data_comm_cache;
 
+  // Related to performance counting
+  vector<string> perf_counter_keys;
+  map<string, int> call_count;
+  map<string, double> total_time;
+
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
                 distblas::core::SpMat<SPT> *sp_local_metadata,
@@ -46,6 +51,8 @@ public:
     this->sp_local_trans = sp_local_trans;
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
+
+    perf_counter_keys = {"Computation Time", "Communication Time"};
   }
 
   DENT scale(DENT v) {
@@ -58,13 +65,13 @@ public:
   }
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
-
+    auto t = start_clock();
     int batches = 0;
     int last_batch_size = batch_size;
     if (sp_local->proc_row_width % batch_size == 0) {
       batches = static_cast<int>(sp_local->proc_row_width / batch_size);
     } else {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size) +1;
+      batches = static_cast<int>(sp_local->proc_row_width / batch_size) + 1;
       // TODO:Error prone
       last_batch_size = sp_local->proc_row_width - batch_size * (batches - 1);
     }
@@ -82,10 +89,15 @@ public:
 
     MPI_Request fetch_all;
     negative_update_com.get()->onboard_data(-1);
-    negative_update_com.get()->transfer_data(fetch_all_ptr.get(),true,false,fetch_all);
-    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all, true);
+    stop_clock_and_add(t, "Computation Time");
+    t = start_clock();
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
+                                             fetch_all);
+    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
+                                              true);
+    stop_clock_and_add(t, "Communication Time");
 
-
+    t = start_clock();
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
@@ -105,8 +117,6 @@ public:
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
-
-
 
     for (int i = 0; i < iterations; i++) {
 
@@ -156,9 +166,14 @@ public:
 
           MPI_Request request;
           results_negative_ptr.get()->clear();
-          negative_update_com.get()->transfer_data(random_number_vec, false,
-                                          results_negative_ptr.get(), request);
-          negative_update_com.get()->populate_cache(results_negative_ptr.get(), request, false);
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          negative_update_com.get()->transfer_data(
+              random_number_vec, false, results_negative_ptr.get(), request);
+          negative_update_com.get()->populate_cache(results_negative_ptr.get(),
+                                                    request, false);
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
@@ -169,10 +184,18 @@ public:
 
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(),false,false,request_batch_update);
-          data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update,false);
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+                                                  false, request_batch_update);
+          data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                   request_batch_update, false);
+          stop_clock_and_add(t, "Communication Time");
         }
       }
+    }
+    if (this->grid->world_size == 0) {
+      stop_clock_and_add(t, "Computation Time");
     }
   }
 
@@ -323,6 +346,65 @@ public:
             prevCoordinates[i * embedding_dim + d];
       }
     }
+  }
+
+  void reset_performance_timers() {
+    for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
+         it++) {
+      call_count[*it] = 0;
+      total_time[*it] = 0.0;
+    }
+  }
+
+  void stop_clock_and_add(my_timer_t &start, string counter_name) {
+    if (find(perf_counter_keys.begin(), perf_counter_keys.end(),
+             counter_name) != perf_counter_keys.end()) {
+      call_count[counter_name]++;
+      total_time[counter_name] += stop_clock_get_elapsed(start);
+    } else {
+      cout << "Error, performance counter " << counter_name
+           << " not registered." << endl;
+      exit(1);
+    }
+  }
+
+  void print_performance_statistics() {
+    // This is going to assume that all timing starts and ends with a barrier,
+    // so that all processors enter and leave the call at the same time. Also,
+    // I'm taking an average over several calls by all processors; might want to
+    // compute the variance as well.
+    if (proc_rank == 0) {
+      cout << endl;
+      cout << "================================" << endl;
+      cout << "==== Performance Statistics ====" << endl;
+      cout << "================================" << endl;
+//      print_algorithm_info();
+    }
+
+    cout << json_perf_statistics().dump(4);
+
+    if (proc_rank == 0) {
+      cout << "=================================" << endl;
+    }
+  }
+
+  json json_perf_statistics() {
+    json j_obj;
+
+    for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
+         it++) {
+      double val = total_time[*it];
+
+      MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+      // We also have the call count for each statistic timed
+      val /= grid->world_size;
+
+      if (grid->global_rank == 0) {
+        j_obj[*it] = val;
+      }
+    }
+    return j_obj;
   }
 };
 } // namespace distblas::embedding

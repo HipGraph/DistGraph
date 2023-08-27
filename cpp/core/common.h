@@ -10,12 +10,23 @@
 #include <mpi.h>
 #include <random>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
 namespace distblas::core {
 
 int divide_and_round_up(uint64_t num, int denom);
+
+my_timer_t start_clock() {
+  return std::chrono::steady_clock::now();
+}
+
+double stop_clock_get_elapsed(my_timer_t &start) {
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> diff = end - start;
+  return diff.count();
+}
 
 vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                     int ns);

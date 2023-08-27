@@ -12,6 +12,9 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 using namespace std;
 using namespace distblas::io;
@@ -161,9 +164,21 @@ int main(int argc, char **argv) {
 //
   embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
 
-  cout << " rank " << rank << " training completed  " << endl;
 
-//
+  cout << " rank " << rank << " training completed  " << endl;
+  ofstream fout;
+  fout.open("perf_output", std::ios_base::app
+  );
+
+  json j_obj;
+  j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
+  if(rank == 0) {
+    fout << j_obj.dump(4) << "," << endl;
+  }
+
+  fout.close();
+
+  //
   auto end_train = std::chrono::high_resolution_clock::now();
 //  //  cout << " rank " << rank << " async completed  " << endl;
 //
