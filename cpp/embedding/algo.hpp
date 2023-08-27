@@ -211,14 +211,14 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
         uint64_t row_id = i;
         int ind = i - row_base_index;
 
         DENT forceDiff[embedding_dim];
         //#pragma forceinline
-//        #pragma omp simd
+        #pragma omp simd
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
 
@@ -279,12 +279,12 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
       //#pragma forceinline
-      //#pragma omp simd
+      #pragma omp simd
       for (int j = 0; j < col_ids.size(); j++) {
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
