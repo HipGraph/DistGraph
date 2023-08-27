@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
   cout << " file_path " << file_path << endl;
 
-  int batch_size = 1280;
+  int batch_size = 256 ;
    const  int dimension = 128;
 
 
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-  batch_size = batch_size/world_size;
+//  batch_size = batch_size/world_size;
 
   // Initialize MPI DataTypes
   initialize_mpi_datatypes<int, double, dimension>();
@@ -60,6 +60,8 @@ int main(int argc, char **argv) {
   auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
                                         grid.get()->world_size);
 
+  //To enable full batch size
+  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
