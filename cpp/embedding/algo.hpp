@@ -14,7 +14,7 @@
 #include <random>
 #include <unordered_map>
 
-
+using json = nlohmann::json;
 using namespace std;
 using namespace distblas::core;
 using namespace distblas::net;
@@ -375,7 +375,7 @@ public:
     // so that all processors enter and leave the call at the same time. Also,
     // I'm taking an average over several calls by all processors; might want to
     // compute the variance as well.
-    if (proc_rank == 0) {
+    if (grid->global_rank == 0) {
       cout << endl;
       cout << "================================" << endl;
       cout << "==== Performance Statistics ====" << endl;
@@ -383,9 +383,9 @@ public:
 //      print_algorithm_info();
     }
 
-    cout << json_perf_statistics().dump(4);
+    cout << this->json_perf_statistics().dump(4);
 
-    if (proc_rank == 0) {
+    if (grid->global_rank == 0) {
       cout << "=================================" << endl;
     }
   }
