@@ -92,7 +92,6 @@ public:
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 #pragma omp parallel for
       for (int i = 0; i < grid->world_size; i++) {
-//        #pragma omp parallel for
         for (int j = 0; j < send_col_ids_list[i].size(); j++) {
           int index = sdispls[i] + j;
           uint64_t local_key = send_col_ids_list[i][j];
@@ -111,7 +110,6 @@ public:
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
       total_receive_count += receivecounts[i];
-//      #pragma omp parallel for
       for (int k = 0; k < sendcount; k++) {
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -

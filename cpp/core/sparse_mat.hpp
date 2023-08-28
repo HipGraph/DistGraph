@@ -267,7 +267,6 @@ public:
         for (auto i = starting_index; i <= (end_index); i++) {
           if (rank != r and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-//#pragma omp critical
             { proc_to_id_mapping[r].push_back(i); }
           }
         }
@@ -306,7 +305,6 @@ public:
               auto col_val = handle->col_idx[j];
               if (col_val >= eligible_col_id_start and col_val < eligible_col_id_end) {
                 // calculation of sender col_ids
-//#pragma omp critical
                 { proc_to_id_mapping[r].push_back(col_val); }
               }
             }

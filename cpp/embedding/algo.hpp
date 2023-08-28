@@ -95,10 +95,8 @@ public:
 
     MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
     t = start_clock();
-    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false, false,
                                              fetch_all);
-    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-                                              true);
     stop_clock_and_add(t, "Communication Time");
 
     t = start_clock();
@@ -109,8 +107,13 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data(i);
     }
-
+    stop_clock_and_add(t, "Computation Time");
+    t = start_clock();
+    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
+                                              false);
+    stop_clock_and_add(t, "Communication Time");
     MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
+    t = start_clock();
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
@@ -122,7 +125,7 @@ public:
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
-
+    vector<MPI_Request> mpi_requests(iterations*batches);
     for (int i = 0; i < iterations; i++) {
       cout<<" global rank "<<grid->global_rank<<endl;
       for (int j = 0; j < batches; j++) {
@@ -139,6 +142,18 @@ public:
         // negative samples generation
         vector<uint64_t> random_number_vec =
             generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+
+        MPI_Request request_negative_update;
+
+        if (this->grid->world_size>1){
+          results_negative_ptr.get()->clear();
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          negative_update_com.get()->transfer_data(
+              random_number_vec, false, results_negative_ptr.get(), request_negative_update);
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
+        }
 
         CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
 
@@ -163,24 +178,23 @@ public:
 
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size);
-        cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" grad calculation completed " <<endl;
+
         if (this->grid->world_size > 1) {
+          if (!(i==0 and j==0) ) {
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), mpi_requests[i*batches+j-1], false);
+            stop_clock_and_add(t, "Communication Time");
+            t = start_clock();
+          }
 
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size);
-
-          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" remote grad calculation completed " <<endl;
-          MPI_Request request;
-          results_negative_ptr.get()->clear();
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" nregative starting transfer data " <<endl;
-          negative_update_com.get()->transfer_data(
-              random_number_vec, false, results_negative_ptr.get(), request);
-          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" negative transfer data "<<" completed" <<endl;
           negative_update_com.get()->populate_cache(results_negative_ptr.get(),
-                                                    request, false);
-          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" negative populate cache "<<" completed" <<endl;
+                                                    request_negative_update, false);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -196,8 +210,11 @@ public:
           t = start_clock();
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   false, request_batch_update);
-          data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                   request_batch_update, false);
+          mpi_requests[i*batches+j]=request_batch_update;
+          if (i== iterations-1 and j==batches-1) {
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), request_batch_update, false);
+          }
           stop_clock_and_add(t, "Communication Time");
         }
       }
