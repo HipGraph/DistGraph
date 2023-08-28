@@ -98,6 +98,7 @@ public:
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 
       for (int i = 0; i < grid->world_size; i++) {
+        cout<<"rank "<< grid->global_rank<<" sending to "<<i<<" amount "<<send_col_ids_list[i].size() <<endl;
 //        #pragma omp parallel
         for (int j = 0; j < send_col_ids_list[i].size(); j++) {
           int index = sdispls[i] + j;
