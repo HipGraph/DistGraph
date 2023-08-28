@@ -292,22 +292,15 @@ public:
 
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index = proc_row_width * r;
-        auto end_index =
-            std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols) -
-            1;
+        auto end_index = std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols) -1;
 
 #pragma omp parallel for
         for (auto i = starting_index; i <= (end_index); i++) {
 
           auto eligible_col_id_start = batch_id * batch_size;
-          auto eligible_col_id_end =
-              std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),
-                       proc_col_width) -
-              1;
-          if (rank != r and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
-                 j++) {
+          auto eligible_col_id_end =std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),proc_col_width) -1;
+          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               // calculation of sender col_ids
 #pragma omp critical
