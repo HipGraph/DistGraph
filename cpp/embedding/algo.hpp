@@ -91,12 +91,14 @@ public:
 
     MPI_Request fetch_all;
     negative_update_com.get()->onboard_data(-1);
+    cout<<"rank "<< grid->global_rank<<" onboarding completed "<<endl;
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
                                              fetch_all);
     negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
                                               true);
+    cout<<"rank "<< grid->global_rank<<" transfer data and populate cache completed bootstrapping "<<endl;
     stop_clock_and_add(t, "Communication Time");
 
     t = start_clock();

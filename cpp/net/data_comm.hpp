@@ -64,9 +64,11 @@ public:
     int total_receive_count=0;
     // processing chunks
     // calculating receiving data cols
+    cout<<"rank "<< grid->global_rank<<" processing receive_col_ids_list batch_id"<<batch_id<<endl;
     this->sp_local->fill_col_ids(batch_id, receive_col_ids_list);
 
     // calculating sending data cols
+    cout<<"rank "<< grid->global_rank<<" processing send_col_ids_list batch_id"<<batch_id<<endl;
     this->sp_local_trans->fill_col_ids(batch_id, send_col_ids_list);
 
     for (int i = 0; i < grid->world_size; i++) {
@@ -90,7 +92,7 @@ public:
       total_send_count = total_send_count + sendcounts[i];
       total_receive_count = total_receive_count + receivecounts[i];
     }
-
+    cout<<"rank "<< grid->global_rank<<" pre processing  batch_id completed"<<batch_id<<endl;
     if (total_send_count>0) {
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 
@@ -104,6 +106,7 @@ public:
         }
       }
     }
+    cout<<"rank "<< grid->global_rank<<" total_send_count  batch_id completed"<<batch_id<<endl;
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
