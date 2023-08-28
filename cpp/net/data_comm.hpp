@@ -70,7 +70,8 @@ public:
     // calculating sending data cols
     cout<<"rank "<< grid->global_rank<<" processing send_col_ids_list batch_id"<<batch_id<<endl;
     this->sp_local_trans->fill_col_ids(batch_id, send_col_ids_list);
-
+    cout<<"rank "<< grid->global_rank<<" COMPLETED send_col_ids_list batch_id"<<batch_id<<endl;
+   #pragma omp parallel for
     for (int i = 0; i < grid->world_size; i++) {
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
@@ -89,8 +90,8 @@ public:
       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
       rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
 
-      total_send_count = total_send_count + sendcounts[i];
-      total_receive_count = total_receive_count + receivecounts[i];
+       #pragma omp atomic update
+        total_send_count +=   sendcounts[i];
     }
     cout<<"rank "<< grid->global_rank<<" pre processing  batch_id completed"<<batch_id<<endl;
     if (total_send_count>0) {
