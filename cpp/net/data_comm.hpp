@@ -93,7 +93,7 @@ public:
 //       #pragma omp atomic update
         total_send_count +=   sendcounts[i];
     }
-    cout<<"rank "<< grid->global_rank<<" pre processing  batch_id completed"<<batch_id<<endl;
+    cout<<"rank "<< grid->global_rank<<" pre processing  batch_id completed"<<batch_id<<" total send count "<<total_send_count<<endl;
     if (total_send_count>0) {
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 
