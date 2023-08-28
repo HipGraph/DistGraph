@@ -96,6 +96,7 @@ public:
 
     MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
     t = start_clock();
+    cout<<"rank "<< grid->global_rank<<" starting transfer data  "<<endl;
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
                                              fetch_all);
     cout<<"rank "<< grid->global_rank<<" transfer data completed "<<endl;
