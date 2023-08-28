@@ -298,7 +298,7 @@ public:
         for (auto i = starting_index; i <= (end_index); i++) {
 
           auto eligible_col_id_start = batch_id * batch_size;
-          auto eligible_col_id_end =std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),proc_col_width) -1;
+          auto eligible_col_id_end = std::min(static_cast<uint64_t>((batch_id + 1) * batch_size), static_cast<uint64_t>(proc_col_width)) - 1;
           if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
