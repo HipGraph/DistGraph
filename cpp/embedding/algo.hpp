@@ -91,18 +91,14 @@ public:
 
     MPI_Request fetch_all;
     negative_update_com.get()->onboard_data(-1);
-    cout<<"rank "<< grid->global_rank<<" onboarding completed "<<endl;
     stop_clock_and_add(t, "Computation Time");
 
     MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
     t = start_clock();
-    cout<<"rank "<< grid->global_rank<<" starting transfer data  "<<endl;
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
                                              fetch_all);
-    cout<<"rank "<< grid->global_rank<<" transfer data completed "<<endl;
     negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
                                               true);
-    cout<<"rank "<< grid->global_rank<<" transfer data and populate cache completed bootstrapping "<<endl;
     stop_clock_and_add(t, "Communication Time");
 
     t = start_clock();
@@ -191,19 +187,15 @@ public:
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
-        cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"calc_t_dist_replus_rowptr " <<endl;
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"update_data_matrix_rowptr " <<endl;
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"transfer_data full update " <<endl;
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   false, request_batch_update);
-          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"populate cache full update " <<endl;
           data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                    request_batch_update, false);
           stop_clock_and_add(t, "Communication Time");

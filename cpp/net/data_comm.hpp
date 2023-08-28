@@ -64,14 +64,10 @@ public:
     int total_receive_count=0;
     // processing chunks
     // calculating receiving data cols
-    cout<<"rank "<< grid->global_rank<<" processing receive_col_ids_list batch_id"<<batch_id<<endl;
     this->sp_local->fill_col_ids(batch_id, receive_col_ids_list);
 
     // calculating sending data cols
-    cout<<"rank "<< grid->global_rank<<" processing send_col_ids_list batch_id"<<batch_id<<endl;
     this->sp_local_trans->fill_col_ids(batch_id, send_col_ids_list);
-    cout<<"rank "<< grid->global_rank<<" COMPLETED send_col_ids_list batch_id"<<batch_id<<endl;
-//   #pragma omp parallel for
     for (int i = 0; i < grid->world_size; i++) {
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
@@ -90,16 +86,13 @@ public:
       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
       rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
 
-//       #pragma omp atomic update
         total_send_count +=   sendcounts[i];
     }
-    cout<<"rank "<< grid->global_rank<<" pre processing  batch_id completed"<<batch_id<<" total send count "<<total_send_count<<endl;
     if (total_send_count>0) {
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
 
       for (int i = 0; i < grid->world_size; i++) {
-        cout<<"rank "<< grid->global_rank<<" sending to "<<i<<" amount "<<send_col_ids_list[i].size() <<endl;
-//        #pragma omp parallel
+        #pragma omp parallel for
         for (int j = 0; j < send_col_ids_list[i].size(); j++) {
           int index = sdispls[i] + j;
           uint64_t local_key = send_col_ids_list[i][j];
@@ -108,7 +101,6 @@ public:
         }
       }
     }
-    cout<<"rank "<< grid->global_rank<<" total_send_count  batch_id completed"<<batch_id<<endl;
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
@@ -118,7 +110,7 @@ public:
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
       total_receive_count += receivecounts[i];
-//      #pragma omp parallel for // Testing for large data
+      #pragma omp parallel for
       for (int k = 0; k < sendcount; k++) {
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -
@@ -142,7 +134,6 @@ public:
     }
 
     if (synchronous) {
-      cout<<grid->global_rank<<" sending data in batch  "<<endl;
       MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                     DENSETUPLE, MPI_COMM_WORLD);
