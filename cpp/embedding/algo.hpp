@@ -163,36 +163,43 @@ public:
 
         this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size);
-
+        cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" grad calculation completed " <<endl;
         if (this->grid->world_size > 1) {
 
           this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size);
 
+          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" remote grad calculation completed " <<endl;
           MPI_Request request;
           results_negative_ptr.get()->clear();
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
+          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" nregative starting transfer data " <<endl;
           negative_update_com.get()->transfer_data(
               random_number_vec, false, results_negative_ptr.get(), request);
+          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" negative transfer data "<<" completed" <<endl;
           negative_update_com.get()->populate_cache(results_negative_ptr.get(),
                                                     request, false);
+          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<" negative populate cache "<<" completed" <<endl;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
-
+        cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"calc_t_dist_replus_rowptr " <<endl;
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"update_data_matrix_rowptr " <<endl;
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
+          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"transfer_data full update " <<endl;
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   false, request_batch_update);
+          cout<<" global rank "<<grid->global_rank<<" iteration "<< i <<"populate cache full update " <<endl;
           data_comm_cache[j].get()->populate_cache(update_ptr.get(),
                                                    request_batch_update, false);
           stop_clock_and_add(t, "Communication Time");

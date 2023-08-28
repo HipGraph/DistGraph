@@ -162,6 +162,7 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix();
 //  dense_mat.get()->print_cache(0);
 //
+  MPI_Barrier(MPI_COMM_WORLD);
   embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
 
 

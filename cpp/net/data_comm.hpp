@@ -276,7 +276,6 @@ public:
       delete[] receivebufverify;
     }
   }
-
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request, bool synchronous) {
     if (!synchronous) {
