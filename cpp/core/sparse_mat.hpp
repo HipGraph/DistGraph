@@ -250,8 +250,8 @@ public:
         #pragma omp parallel for
         for (auto i = starting_index; i <= (end_index); i++) {
             if (rank != r and (handle->rowStart[i + 1]-handle->rowStart[i])>0) {
-             #pragma omp atomic
-              proc_to_id_mapping[r].push_back(i);
+             #pragma omp critical
+              { proc_to_id_mapping[r].push_back(i); }
             }
         }
       }
@@ -266,8 +266,8 @@ public:
           // calculation of sender col_ids
           int owner_rank = col_val / proc_row_width;
           if (owner_rank != rank) {
-            #pragma omp atomic
-            proc_to_id_mapping[owner_rank].push_back(i);
+            #pragma omp critical
+            { proc_to_id_mapping[owner_rank].push_back(i); }
           }
         }
       }
