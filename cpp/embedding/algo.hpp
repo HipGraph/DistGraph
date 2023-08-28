@@ -96,6 +96,7 @@ public:
     t = start_clock();
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
                                              fetch_all);
+    cout<<"rank "<< grid->global_rank<<" transfer data completed "<<endl;
     negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
                                               true);
     cout<<"rank "<< grid->global_rank<<" transfer data and populate cache completed bootstrapping "<<endl;
