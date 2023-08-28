@@ -247,8 +247,10 @@ public:
             std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)) - 1:
                                          std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)-1;
 
+        #pragma omp parallel for
         for (auto i = starting_index; i <= (end_index); i++) {
             if (rank != r and (handle->rowStart[i + 1]-handle->rowStart[i])>0) {
+             #pragma omp atomic
               proc_to_id_mapping[r].push_back(i);
             }
         }
@@ -257,12 +259,14 @@ public:
       auto starting_index = (batch_id>=0)?batch_id * batch_size:0;
       auto end_index =(batch_id>=0)?
           std::min((batch_id + 1) * batch_size, proc_col_width) - 1:proc_col_width-1;
+     #pragma omp parallel for
       for (auto i = starting_index; i <= (end_index); i++) {
         for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
           auto col_val = handle->col_idx[j];
           // calculation of sender col_ids
           int owner_rank = col_val / proc_row_width;
           if (owner_rank != rank) {
+            #pragma omp atomic
             proc_to_id_mapping[owner_rank].push_back(i);
           }
         }
