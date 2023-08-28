@@ -93,7 +93,6 @@ public:
     negative_update_com.get()->onboard_data(-1);
     stop_clock_and_add(t, "Computation Time");
 
-    MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
     t = start_clock();
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false, false,
                                              fetch_all);
