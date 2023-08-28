@@ -90,9 +90,9 @@ public:
     }
     if (total_send_count>0) {
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
-
+#pragma omp parallel for
       for (int i = 0; i < grid->world_size; i++) {
-        #pragma omp parallel for
+//        #pragma omp parallel for
         for (int j = 0; j < send_col_ids_list[i].size(); j++) {
           int index = sdispls[i] + j;
           uint64_t local_key = send_col_ids_list[i][j];
@@ -106,11 +106,12 @@ public:
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous, bool verify,MPI_Request &request) {
     int total_receive_count =0;
+#pragma omp parallel for
     for (int i = 0; i < grid->world_size; i++) {
       int sendcount = sendcounts[i];
       int offset = sdispls[i];
       total_receive_count += receivecounts[i];
-      #pragma omp parallel for
+//      #pragma omp parallel for
       for (int k = 0; k < sendcount; k++) {
         int index = offset + k;
         int local_key = ((sendbuf)[index]).col -
