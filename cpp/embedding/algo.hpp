@@ -93,6 +93,8 @@ public:
     negative_update_com.get()->onboard_data(-1);
     cout<<"rank "<< grid->global_rank<<" onboarding completed "<<endl;
     stop_clock_and_add(t, "Computation Time");
+
+    MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
     t = start_clock();
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true, false,
                                              fetch_all);
@@ -111,6 +113,7 @@ public:
       data_comm_cache[i].get()->onboard_data(i);
     }
 
+    MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
