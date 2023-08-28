@@ -214,15 +214,15 @@ public:
         node_index++;
       }
 
-    } else if (transpose){
+    } else if (transpose) {
 
-      //sender
+      // sender
       (csr_linked_lists[0].get())
           ->insert((transpose) ? gRows : proc_row_width,
                    (transpose) ? proc_col_width : gCols, coords.size(),
                    coords_ptr, coords.size(), false, node_index);
     } else {
-      //receiver
+      // receiver
       (csr_linked_lists[0].get())
           ->insert((transpose) ? gRows : proc_row_width,
                    (transpose) ? proc_col_width : gCols, coords.size(),
@@ -230,8 +230,7 @@ public:
     }
   }
 
-
-  //if batch_id<0 it will fetch all the batches
+  // if batch_id<0 it will fetch all the batches
   void fill_col_ids(int batch_id,
                     vector<vector<uint64_t>> &proc_to_id_mapping) {
     int rank, world_size;
@@ -245,43 +244,81 @@ public:
 
     auto csr_data = (head.get())->data;
     distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-//    if (!transpose) {
+    if (!transpose) {
 
       // calculation of sender col_ids
       for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = (batch_id>=0)?batch_id * batch_size + proc_col_width * r:proc_col_width * r;
-        auto end_index = (batch_id>=0)?
-            std::min(starting_index + batch_size, std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)) - 1:
-                                         std::min(static_cast<uint64_t>((r+1)*proc_col_width),gCols)-1;
+        uint64_t starting_index =
+            (batch_id >= 0) ? batch_id * batch_size + proc_col_width * r
+                            : proc_col_width * r;
+        auto end_index =
+            (batch_id >= 0)
+                ? std::min(
+                      starting_index + batch_size,
+                      std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
+                               gCols)) -
+                      1
+                : std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
+                           gCols) -
+                      1;
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (auto i = starting_index; i <= (end_index); i++) {
-            if (rank != r and (handle->rowStart[i + 1]-handle->rowStart[i])>0) {
-             #pragma omp critical
-              { proc_to_id_mapping[r].push_back(i); }
-            }
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+#pragma omp critical
+            { proc_to_id_mapping[r].push_back(i); }
+          }
         }
       }
-//    } else {
-//      auto starting_index = (batch_id>=0)?batch_id * batch_size:0;
-//      auto end_index =(batch_id>=0)?
-//          std::min((batch_id + 1) * batch_size, proc_col_width) - 1:proc_col_width-1;
-//     #pragma omp parallel for
-//      for (auto i = starting_index; i <= (end_index); i++) {
-//        for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
-//          auto col_val = handle->col_idx[j];
-//          // calculation of sender col_ids
-//          int owner_rank = col_val / proc_row_width;
-//          if (owner_rank != rank) {
-//            #pragma omp critical
-//            { proc_to_id_mapping[owner_rank].push_back(i); }
-//          }
-//        }
-//      }
-//    }
-    //    }
-  }
+    } else {
+      //      auto starting_index = (batch_id>=0)?batch_id * batch_size:0;
+      //      auto end_index =(batch_id>=0)?
+      //          std::min((batch_id + 1) * batch_size, proc_col_width) -
+      //          1:proc_col_width-1;
+      //     #pragma omp parallel for
+      //      for (auto i = starting_index; i <= (end_index); i++) {
+      //        for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+      //        j++) {
+      //          auto col_val = handle->col_idx[j];
+      //          // calculation of sender col_ids
+      //          int owner_rank = col_val / proc_row_width;
+      //          if (owner_rank != rank) {
+      //            #pragma omp critical
+      //            { proc_to_id_mapping[owner_rank].push_back(i); }
+      //          }
+      //        }
+      //      }
 
+      for (int r = 0; r < world_size; r++) {
+        uint64_t starting_index = proc_row_width * r;
+        auto end_index =
+            std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols) -
+            1;
+
+#pragma omp parallel for
+        for (auto i = starting_index; i <= (end_index); i++) {
+
+          auto eligible_col_id_start = batch_id * batch_size;
+          auto eligible_col_id_end =
+              std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),
+                       proc_col_width) -
+              1;
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
+              auto col_val = handle->col_idx[j];
+              // calculation of sender col_ids
+#pragma omp critical
+              { proc_to_id_mapping[r].push_back(col_val); }
+            }
+          }
+        }
+        //    }
+      }
+    }
+  }
   CSRLinkedList<T> *get_batch_list(int batch_id) {
     return csr_linked_lists[batch_id].get();
   }
