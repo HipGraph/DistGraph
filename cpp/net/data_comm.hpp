@@ -141,6 +141,7 @@ public:
     }
 
     if (synchronous) {
+      cout<<grid->global_rank<<" sending data in batch  "<<endl;
       MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                     DENSETUPLE, MPI_COMM_WORLD);
