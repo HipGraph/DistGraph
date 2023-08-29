@@ -141,75 +141,75 @@ public:
     }
   }
 
-  CSRLinkedList<T> *get_batch_list(int batch_id) {
-    return csr_linked_lists[batch_id].get();
-  }
+//  CSRLinkedList<T> *get_batch_list(int batch_id) {
+//    return csr_linked_lists[batch_id].get();
+//  }
 
-  void print_blocks_and_cols(bool trans) {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    //    cout << " rank " << rank << "_" << trans
-    //         << " printing print_blocks_and_cols" << endl;
-    int current_col_block = 0;
-    for (int j = 0; j < csr_linked_lists.size(); j++) {
-      if (j == 0 or
-          j == csr_linked_lists.size() - 1) { // print first and last one
-        cout << " rank " << rank << " j " << j << endl;
-        auto linkedList = csr_linked_lists[j];
-
-        auto head = (linkedList.get())->getHeadNode();
-
-        int count = 0;
-        while (head != nullptr) {
-          string output_path = "blocks_rank" + to_string(rank) + "_trans" +
-                               to_string(trans) + "_col_" +
-                               to_string((trans) ? j : count) + "_row_" +
-                               to_string((trans) ? count : j) + ".txt";
-          char stats[500];
-          strcpy(stats, output_path.c_str());
-          ofstream fout(stats, std::ios_base::app);
-
-          auto csr_data = (head.get())->data;
-
-          int num_coords = (csr_data.get())->num_coords;
-
-          cout << " rank " << rank << " j " << j << " num_coords " << num_coords
-               << "_col_" + to_string((trans) ? j : count) + "_row_" +
-                      to_string((trans) ? count : j)
-               << endl;
-          if (num_coords > 0) {
-            distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
-            int numRows = handle->rowStart.size() - 1;
-
-            for (int i = 0; i < numRows; i++) {
-              int start = handle->rowStart[i];
-              int end = handle->rowStart[i + 1];
-              fout << "Row " << i << ": ";
-              if (num_coords > 0) {
-                for (int k = start; k < end; k++) {
-
-                  int col = handle->col_idx[k];
-                  int value = handle->values[k];
-
-                  if (value > 60000) {
-                    cout << "Rank " << rank << " j " << j
-                         << " Large value encountered "
-                         << " Row " << i << " col " << col << " value " << value
-                         << endl;
-                  }
-                  fout << "(" << col << ", " << value << ") ";
-                }
-              }
-              fout << endl;
-            }
-          }
-          head = (head.get())->next;
-          ++count;
-        }
-      }
-    }
-  }
+//  void print_blocks_and_cols(bool trans) {
+//    int rank;
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//    //    cout << " rank " << rank << "_" << trans
+//    //         << " printing print_blocks_and_cols" << endl;
+//    int current_col_block = 0;
+//    for (int j = 0; j < csr_linked_lists.size(); j++) {
+//      if (j == 0 or
+//          j == csr_linked_lists.size() - 1) { // print first and last one
+//        cout << " rank " << rank << " j " << j << endl;
+//        auto linkedList = csr_linked_lists[j];
+//
+//        auto head = (linkedList.get())->getHeadNode();
+//
+//        int count = 0;
+//        while (head != nullptr) {
+//          string output_path = "blocks_rank" + to_string(rank) + "_trans" +
+//                               to_string(trans) + "_col_" +
+//                               to_string((trans) ? j : count) + "_row_" +
+//                               to_string((trans) ? count : j) + ".txt";
+//          char stats[500];
+//          strcpy(stats, output_path.c_str());
+//          ofstream fout(stats, std::ios_base::app);
+//
+//          auto csr_data = (head.get())->data;
+//
+//          int num_coords = (csr_data.get())->num_coords;
+//
+//          cout << " rank " << rank << " j " << j << " num_coords " << num_coords
+//               << "_col_" + to_string((trans) ? j : count) + "_row_" +
+//                      to_string((trans) ? count : j)
+//               << endl;
+//          if (num_coords > 0) {
+//            distblas::core::CSRHandle *handle = (csr_data.get())->handler.get();
+//            int numRows = handle->rowStart.size() - 1;
+//
+//            for (int i = 0; i < numRows; i++) {
+//              int start = handle->rowStart[i];
+//              int end = handle->rowStart[i + 1];
+//              fout << "Row " << i << ": ";
+//              if (num_coords > 0) {
+//                for (int k = start; k < end; k++) {
+//
+//                  int col = handle->col_idx[k];
+//                  int value = handle->values[k];
+//
+//                  if (value > 60000) {
+//                    cout << "Rank " << rank << " j " << j
+//                         << " Large value encountered "
+//                         << " Row " << i << " col " << col << " value " << value
+//                         << endl;
+//                  }
+//                  fout << "(" << col << ", " << value << ") ";
+//                }
+//              }
+//              fout << endl;
+//            }
+//          }
+//          head = (head.get())->next;
+//          ++count;
+//        }
+//      }
+//    }
+//  }
 
   void print_coords(bool trans) {
     int rank;
