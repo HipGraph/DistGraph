@@ -54,12 +54,12 @@ public:
     if (batch_id >= 0) {
       auto base_index = batch_id * sp_local_sender->batch_size;
       for (int i = 0; i < sp_local_sender->batch_size; i++) {
-        send_indices_to_proc_map.insert(base_index + i,
+        send_indices_to_proc_map.emplace(base_index + i,
                                         vector<int>(grid->world_size, 0));
       }
     } else {
       for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
-        send_indices_to_proc_map.insert(i, vector<int>(grid->world_size, 0));
+        send_indices_to_proc_map.emplace(i, vector<int>(grid->world_size, 0));
       }
     }
   }
