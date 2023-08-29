@@ -72,19 +72,20 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->batch_size = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
+  shared_sparseMat.get()->transpose = true;
 
   cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
        << "gCols" << shared_sparseMat.get()->gCols << endl;
 
   vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_Trans = make_shared<distblas::core::SpMat<int>>(
+  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<int>>(
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, false, true);
 //
-  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
-      copiedVectorTwo, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,localARows, localBRows, true, false);
+//  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
+//  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
+//      copiedVectorTwo, shared_sparseMat.get()->gRows,
+//      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,localARows, localBRows, true, false);
 
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
@@ -93,9 +94,9 @@ int main(int argc, char **argv) {
 
 
 
-  partitioner.get()->partition_data(shared_sparseMat_Trans.get(), true);
-  partitioner.get()->partition_data(shared_sparseMat.get(), false);
-  partitioner.get()->partition_data(shared_sparseMat_combined.get(), false);
+  partitioner.get()->partition_data(shared_sparseMat_Trans.get());
+  partitioner.get()->partition_data(shared_sparseMat.get());
+//  partitioner.get()->partition_data(shared_sparseMat_combined.get());
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
@@ -114,7 +115,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
   auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
-  shared_sparseMat_combined.get()->initialize_CSR_blocks();
+//  shared_sparseMat_combined.get()->initialize_CSR_blocks();
 
 //  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
@@ -134,50 +135,50 @@ int main(int argc, char **argv) {
 //    shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 //
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
-  auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
-      new DenseMat<int, double, dimension>(shared_sparseMat_combined.get(),grid.get() ,localARows, 0, 1.0));
-
-  //    dense_mat.get()->print_matrix();
-  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
-
-  auto communicator =
-      unique_ptr<DataComm<int, double, dimension>>(new DataComm<int, double, dimension>(
-          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
-          grid.get()));
-
-  cout << " rank " << rank << " async started  " << endl;
-
-  unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
-      embedding_algo =
-          unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
-              new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat_combined.get(),
-                                                                     shared_sparseMat.get(),
-                                                                     shared_sparseMat_Trans.get(),
-                                                                     dense_mat.get(),
-                                                                     grid.get(),
-                                                                     5,
-                                                                     -5));
-
-  auto end_init = std::chrono::high_resolution_clock::now();
-//  dense_mat.get()->print_matrix();
-//  dense_mat.get()->print_cache(0);
+//  auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
+//      new DenseMat<int, double, dimension>(shared_sparseMat_combined.get(),grid.get() ,localARows, 0, 1.0));
 //
-  MPI_Barrier(MPI_COMM_WORLD);
-  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
-
-
-  cout << " rank " << rank << " training completed  " << endl;
-  ofstream fout;
-  fout.open("perf_output", std::ios_base::app
-  );
-
-  json j_obj;
-  j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
-  if(rank == 0) {
-    fout << j_obj.dump(4) << "," << endl;
-  }
-
-  fout.close();
+//  //    dense_mat.get()->print_matrix();
+//  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
+//
+//  auto communicator =
+//      unique_ptr<DataComm<int, double, dimension>>(new DataComm<int, double, dimension>(
+//          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
+//          grid.get()));
+//
+//  cout << " rank " << rank << " async started  " << endl;
+//
+//  unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
+//      embedding_algo =
+//          unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
+//              new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat_combined.get(),
+//                                                                     shared_sparseMat.get(),
+//                                                                     shared_sparseMat_Trans.get(),
+//                                                                     dense_mat.get(),
+//                                                                     grid.get(),
+//                                                                     5,
+//                                                                     -5));
+//
+//  auto end_init = std::chrono::high_resolution_clock::now();
+////  dense_mat.get()->print_matrix();
+////  dense_mat.get()->print_cache(0);
+////
+//  MPI_Barrier(MPI_COMM_WORLD);
+//  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
+//
+//
+//  cout << " rank " << rank << " training completed  " << endl;
+//  ofstream fout;
+//  fout.open("perf_output", std::ios_base::app
+//  );
+//
+//  json j_obj;
+//  j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
+//  if(rank == 0) {
+//    fout << j_obj.dump(4) << "," << endl;
+//  }
+//
+//  fout.close();
 
   //
   auto end_train = std::chrono::high_resolution_clock::now();
