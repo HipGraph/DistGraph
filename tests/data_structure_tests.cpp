@@ -145,6 +145,8 @@ int main(int argc, char **argv) {
           shared_sparseMat.get(), shared_sparseMat_sender.get(), dense_mat.get(),
           grid.get(),-1));
   communicator.get()->onboard_data();
+  cout << " rank " << rank << " data onbaord  completed  " << endl;
+//  communicator.get()->onboard_data();
 //
 //  cout << " rank " << rank << " async started  " << endl;
 //
