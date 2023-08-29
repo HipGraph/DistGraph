@@ -20,7 +20,7 @@ using namespace distblas::core;
 using namespace distblas::net;
 using namespace Eigen;
 
-namespace distblas::embedding {
+namespace distblas::algo {
 template <typename SPT, typename DENT, size_t embedding_dim>
 
 class EmbeddingAlgo {

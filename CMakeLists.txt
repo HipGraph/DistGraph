@@ -45,7 +45,7 @@ add_library(disblas_lib SHARED
         cpp/net/process_3D_grid.cpp
         cpp/net/process_3D_grid.hpp
         cpp/net/data_comm.hpp
-        cpp/embedding/algo.hpp
+        cpp/algo/algo.hpp
         cpp/core/json.hpp
         cpp/partition/partitioner.cpp
         cpp/core/csr_linked_list.hpp

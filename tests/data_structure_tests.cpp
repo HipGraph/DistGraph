@@ -147,10 +147,10 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " async started  " << endl;
 
-  unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, dimension>>
+  unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
       embedding_algo =
-          unique_ptr<distblas::embedding::EmbeddingAlgo<int, double, dimension>>(
-              new distblas::embedding::EmbeddingAlgo<int, double, dimension>(shared_sparseMat_combined.get(),
+          unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
+              new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat_combined.get(),
                                                                      shared_sparseMat.get(),
                                                                      shared_sparseMat_Trans.get(),
                                                                      dense_mat.get(),
