@@ -140,10 +140,11 @@ int main(int argc, char **argv) {
 //  //    dense_mat.get()->print_matrix();
 //  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
 //
-//  auto communicator =
-//      unique_ptr<DataComm<int, double, dimension>>(new DataComm<int, double, dimension>(
-//          shared_sparseMat.get(), shared_sparseMat_Trans.get(), dense_mat.get(),
-//          grid.get()));
+  auto communicator =
+      unique_ptr<DataComm<int, double, dimension>>(new DataComm<int, double, dimension>(
+          shared_sparseMat.get(), shared_sparseMat_sender.get(), dense_mat.get(),
+          grid.get(),-1));
+  communicator.get()->onboard_data();
 //
 //  cout << " rank " << rank << " async started  " << endl;
 //
