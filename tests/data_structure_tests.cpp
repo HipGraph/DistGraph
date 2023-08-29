@@ -102,7 +102,6 @@ int main(int argc, char **argv) {
 
 
   auto ini_csr_start = std::chrono::high_resolution_clock::now();
-//  shared_sparseMat.get()->initialize_CSR_blocks(batch_size, batch_size, false,false);
   shared_sparseMat.get()->initialize_CSR_blocks();
 
   auto ini_csr_end1 = std::chrono::high_resolution_clock::now();
@@ -135,8 +134,8 @@ int main(int argc, char **argv) {
 //    shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 //
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
-//  auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
-//      new DenseMat<int, double, dimension>(shared_sparseMat_combined.get(),grid.get() ,localARows, 0, 1.0));
+  auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
+      new DenseMat<int, double, dimension>(grid.get() ,localARows));
 //
 //  //    dense_mat.get()->print_matrix();
 //  cout << " rank " << rank << " creation of dense matrices completed  " << endl;

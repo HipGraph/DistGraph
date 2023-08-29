@@ -2,6 +2,7 @@
 #include "../net/process_3D_grid.hpp"
 #include "common.h"
 #include "distributed_mat.hpp"
+#include "sparse_mat.hpp"
 #include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
@@ -9,7 +10,6 @@
 #include <mpi.h>
 #include <random>
 #include <unordered_map>
-#include "sparse_mat.hpp"
 
 using namespace std;
 using namespace Eigen;
@@ -21,30 +21,16 @@ namespace distblas::core {
  * This class wraps the Eigen/Dense matrix and represents
  * local dense matrix.
  */
-template <typename SPT, typename DENT, size_t embedding_dim> class DenseMat : DistributedMat {
+template <typename SPT, typename DENT, size_t embedding_dim>
+class DenseMat : DistributedMat {
 
 private:
 public:
   uint64_t rows;
-  unique_ptr<Matrix<DENT, Dynamic, embedding_dim>> matrixPtr;
   unique_ptr<vector<unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>
       cachePtr;
   DENT *nCoordinates;
-  SpMat<SPT> *sp_local;
   Process3DGrid *grid;
-  /**
-   * create matrix with random initialization
-   * @param rows Number of rows of the matrix
-   * @param cols Number of cols of the matrix
-   */
-  DenseMat(uint64_t rows, int world_size) {
-    this->matrixPtr =
-        make_unique<Matrix<DENT, Dynamic, embedding_dim>>(rows, embedding_dim);
-    this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
-        world_size);
-    this->rows = rows;
-  }
 
   /**
    *
@@ -54,11 +40,9 @@ public:
    * @param std  initialize with normal distribution with given standard
    * deviation
    */
-  DenseMat(SpMat<SPT> *sp_local, Process3DGrid *grid,
-           uint64_t rows, double init_mean, double std) {
+  DenseMat(Process3DGrid *grid, uint64_t rows) {
 
     this->rows = rows;
-    this->sp_local = sp_local;
     this->grid = grid;
     this->cachePtr = std::make_unique<std::vector<
         std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
@@ -72,11 +56,30 @@ public:
         nCoordinates[i * embedding_dim + j] = val;
       }
     }
-//    this->initialize_cache();
   }
 
   ~DenseMat() {}
 
+  void insert_cache(int rank, uint64_t key,
+                    std::array<DENT, embedding_dim> &arr) {
+    (*this->cachePtr)[rank].insert_or_assign(key, arr);
+  }
+
+  std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
+                                                               uint64_t key) {
+    return (*this->cachePtr)[rank][key];
+  }
+
+  std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
+    std::array<DENT, embedding_dim> stdArray;
+
+    int base_index = local_key * embedding_dim;
+    std::copy(nCoordinates + base_index,
+              nCoordinates + base_index + embedding_dim, stdArray.data());
+    return stdArray;
+  }
+
+  // Utitly methods
   void print_matrix() {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -108,86 +111,6 @@ public:
         fout << this->nCoordinates[i * embedding_dim + j] << " ";
       }
       fout << endl;
-    }
-  }
-
-  void insert_cache(int rank, uint64_t key,
-                    std::array<DENT, embedding_dim> &arr) {
-    //    Map<Matrix<DENT, Eigen::Dynamic, 1>> eigenVector(arr.data(),
-    //    embedding_dim);
-    (*this->cachePtr)[rank].insert_or_assign(key, arr);
-  }
-
-  //  Matrix<DENT, embedding_dim, 1> fetch_data_vector_from_cache(int rank,
-  //                                                              int key) {
-  //    return (*this->cachePtr)[rank][key];
-  //  }
-
-  std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
-                                                               uint64_t key) {
-    //    int my_rank;
-    //    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-
-    //    if(this->searchForKey(key)) {
-    return (*this->cachePtr)[rank][key];
-    //    }else {
-    //      cout<<" rank "<< my_rank<<"Error cannot find key"<<key<<" for rank
-    //      "<< rank<<endl;
-    //    }
-  }
-
-  std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
-    std::array<DENT, embedding_dim> stdArray;
-
-    int base_index = local_key * embedding_dim;
-
-    //    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim>& matrix =
-    //    *this->matrixPtr; Eigen::Array<DENT, 1, embedding_dim> eigenArray =
-    //    matrix.row(local_key).transpose().array();
-    std::copy(nCoordinates + base_index,
-              nCoordinates + base_index + embedding_dim, stdArray.data());
-    return stdArray;
-  }
-
-  Eigen::Array<DENT, 1, embedding_dim> fetch_local_eigen_vector(int local_key) {
-    Eigen::Matrix<DENT, Eigen::Dynamic, embedding_dim> &matrix =
-        *this->matrixPtr;
-    return matrix.row(local_key);
-  }
-
-  void initialize_cache() {
-    CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
-    auto head = batch_list->getHeadNode();
-    CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
-    CSRLocal<SPT> *csr_block_remote = nullptr;
-    if (this->grid->world_size > 1) {
-      auto remote = (head.get())->next;
-      csr_block_remote = (remote.get())->data.get();
-      CSRHandle *csr_handle = csr_block_remote->handler.get();
-      vector<double> values = csr_handle->values;
-      cout<<" "<<grid->global_rank<<" remote CSR block accessed success"<<endl;
-      # pragma omp parallel for
-      for (int i = 0; i < this->grid->world_size; i++) {
-        if (i != this->grid->global_rank) {
-          std::srand(i);
-          for (uint64_t j = 0; j < this->sp_local->proc_row_width; j++) {
-
-            auto global_index = j + i*this->sp_local->proc_row_width;
-
-            auto result = std::find(values.begin(), values.end(), global_index);
-            std::array<DENT, embedding_dim> stdArray;
-
-            for (int k = 0; k < embedding_dim; k++) {
-              DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
-              stdArray[k]=val;
-            }
-
-            if (result != values.end()) {
-              this->insert_cache(i,global_index,stdArray);
-            }
-          }
-        }
-      }
     }
   }
 
