@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " initialize_CSR_blocks  completed  " << endl;
 
- shared_sparseMat_Trans.get()->initialize_CSR_blocks();
+  shared_sparseMat_sender.get()->initialize_CSR_blocks();
 // shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
   cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
