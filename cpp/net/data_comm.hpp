@@ -108,7 +108,7 @@ public:
       auto col_id = pair.first;
       vector<int> proc_list = pair.second;
       std::array<DENT, embedding_dim> dense_vector = nullptr;
-      for (int i = 0; i < proc_list.size; i++) {
+      for (int i = 0; i < proc_list.size(); i++) {
         if (proc_list[i] == 1) {
           if (dense_vector == nullptr) {
             dense_vector = (this->dense_local)->fetch_local_data(col_id);
@@ -196,9 +196,10 @@ public:
     }
 
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                  receivebuf.data(), receivecounts.data(), rdispls.data(),
+                  receivebuf, receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD);
-    this->populate_cache(receivebuf, request, true);
+    MPI_Request dumy;
+    this->populate_cache(receivebuf, dumy, true);
 
     delete[] sendbuf;
     delete[] receivebuf;
