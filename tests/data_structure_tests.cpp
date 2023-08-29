@@ -2,7 +2,7 @@
 #include "../cpp/core/csr_local.hpp"
 #include "../cpp/core/dense_mat.hpp"
 #include "../cpp/core/sparse_mat.hpp"
-#include "../cpp/embedding/algo.hpp"
+#include "../cpp/algo/algo.hpp"
 #include "../cpp/io/parrallel_IO.hpp"
 #include "../cpp/net/data_comm.hpp"
 #include "../cpp/partition/partitioner.hpp"
