@@ -184,7 +184,7 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), true,
                                                   request_batch_update);
 //          mpi_requests[i * batches + j] = request_batch_update;
           if (i == iterations - 1 and j == batches - 1) {
