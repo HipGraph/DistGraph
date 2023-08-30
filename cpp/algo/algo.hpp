@@ -142,6 +142,7 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           negative_update_com.get()->transfer_data(random_number_vec);
+          cout << " global rank " << grid->global_rank<<"  repulsive force transfer done  " << endl;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -150,7 +151,7 @@ public:
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-
+        cout << " global rank " << grid->global_rank<<" starting repulsive force calculation  " << endl;
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
 
