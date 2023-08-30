@@ -93,28 +93,21 @@ public:
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), true,fetch_all);
     stop_clock_and_add(t, "Communication Time");
 
-//    t = start_clock();
-//    for (int i = 0; i < batches; i++) {
-//      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-//          new DataComm<SPT, DENT, embedding_dim>(
-//              sp_local_metadata, sp_local_trans, dense_local, grid));
-//      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
-//      data_comm_cache[i].get()->onboard_data(i);
-//    }
-//    stop_clock_and_add(t, "Computation Time");
-//    t = start_clock();
-//    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-//                                              false);
-//    stop_clock_and_add(t, "Communication Time");
-//    MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
+    t = start_clock();
+    for (int i = 0; i < batches; i++) {
+      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+          new DataComm<SPT, DENT, embedding_dim>(
+              sp_local_receiver, sp_local_sender, dense_local, grid,i));
+      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+      data_comm_cache[i].get()->onboard_data();
+    }
+    stop_clock_and_add(t, "Computation Time");
+    t = start_clock();
+//    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,false);
+    stop_clock_and_add(t, "Communication Time");
 //    t = start_clock();
 //    DENT *prevCoordinates = static_cast<DENT *>(
 //        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
-//
-//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-//        results_negative_ptr =
-//            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-//                new vector<DataTuple<DENT, embedding_dim>>());
 //
 //    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
 //        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -137,23 +130,16 @@ public:
 //        vector<uint64_t> random_number_vec =
 //            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
 //
-//        MPI_Request request_negative_update;
-//
 //        if (this->grid->world_size>1){
-//          results_negative_ptr.get()->clear();
 //          stop_clock_and_add(t, "Computation Time");
 //          t = start_clock();
-//          negative_update_com.get()->transfer_data(
-//              random_number_vec, false, results_negative_ptr.get(), request_negative_update);
+//          negative_update_com.get()->transfer_data(random_number_vec);
 //          stop_clock_and_add(t, "Communication Time");
 //          t = start_clock();
 //        }
 //
-//        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
+//        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data;
 //
-//        auto head = batch_list->getHeadNode();
-//        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
-//        CSRLocal<SPT> *csr_block_remote = nullptr;
 //
 //        if (this->grid->world_size > 1) {
 //          auto remote = (head.get())->next;
@@ -216,77 +202,77 @@ public:
 //    if (this->grid->world_size == 0) {
 //      stop_clock_and_add(t, "Computation Time");
 //    }
-//  }
-//
-//  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
-//                                      DENT *prevCoordinates, DENT lr,
-//                                      int batch_id, int batch_size,
-//                                      int block_size) {
-//
-//    auto row_base_index = batch_id * batch_size;
-//
-//    if (csr_block->handler != nullptr) {
-//      CSRHandle *csr_handle = csr_block->handler.get();
-//
-//#pragma omp parallel for schedule(static)
-//      for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
-//        uint64_t row_id = i;
-//        int ind = i - row_base_index;
-//
-//        DENT forceDiff[embedding_dim];
-////        #pragma forceinline
-////        #pragma omp simd
-//        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-//             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-//
-//          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
-//
-//          uint64_t local_col =
-//              global_col_id -
-//              (this->grid)->global_rank * (this->sp_local)->proc_row_width;
-//          int target_rank =
-//              (int)(global_col_id / (this->sp_local)->proc_row_width);
-//          bool fetch_from_cache =
-//              target_rank == (this->grid)->global_rank ? false : true;
-//
-//          if (fetch_from_cache) {
-//
-//            std::array<DENT, embedding_dim> colvec =
-//                (this->dense_local)
-//                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
-//            DENT attrc = 0;
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = (this->dense_local)
-//                                 ->nCoordinates[row_id * embedding_dim + d] -
-//                             colvec[d];
-//              attrc += forceDiff[d] * forceDiff[d];
-//            }
-//            DENT d1 = -2.0 / (1.0 + attrc);
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = scale(forceDiff[d] * d1);
-//              prevCoordinates[ind * embedding_dim + d] += (lr)*forceDiff[d];
-//            }
-//
-//          } else {
-//
-//            DENT attrc = 0;
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = (this->dense_local)
-//                                 ->nCoordinates[row_id * embedding_dim + d] -
-//                             (this->dense_local)
-//                                 ->nCoordinates[local_col * embedding_dim + d];
-//
-//              attrc += forceDiff[d] * forceDiff[d];
-//            }
-//            DENT d1 = -2.0 / (1.0 + attrc);
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = scale(forceDiff[d] * d1);
-//              prevCoordinates[ind * embedding_dim + d] += (lr)*forceDiff[d];
-//            }
-//          }
-//        }
-//      }
-//    }
+  }
+
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
+                                      DENT *prevCoordinates, DENT lr,
+                                      int batch_id, int batch_size,
+                                      int block_size) {
+
+    auto row_base_index = batch_id * batch_size;
+
+    if (csr_block->handler != nullptr) {
+      CSRHandle *csr_handle = csr_block->handler.get();
+
+#pragma omp parallel for schedule(static)
+      for (uint64_t i = row_base_index; i < row_base_index + block_size; i++) {
+        uint64_t row_id = i;
+        int ind = i - row_base_index;
+
+        DENT forceDiff[embedding_dim];
+//        #pragma forceinline
+//        #pragma omp simd
+        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
+             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+
+          uint64_t global_col_id = static_cast<uint64_t>(csr_handle->values[j]);
+
+          uint64_t local_col =
+              global_col_id -
+              (this->grid)->global_rank * (this->sp_local)->proc_row_width;
+          int target_rank =
+              (int)(global_col_id / (this->sp_local)->proc_row_width);
+          bool fetch_from_cache =
+              target_rank == (this->grid)->global_rank ? false : true;
+
+          if (fetch_from_cache) {
+
+            std::array<DENT, embedding_dim> colvec =
+                (this->dense_local)
+                    ->fetch_data_vector_from_cache(target_rank, global_col_id);
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = (this->dense_local)
+                                 ->nCoordinates[row_id * embedding_dim + d] -
+                             colvec[d];
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = scale(forceDiff[d] * d1);
+              prevCoordinates[ind * embedding_dim + d] += (lr)*forceDiff[d];
+            }
+
+          } else {
+
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = (this->dense_local)
+                                 ->nCoordinates[row_id * embedding_dim + d] -
+                             (this->dense_local)
+                                 ->nCoordinates[local_col * embedding_dim + d];
+
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+            for (int d = 0; d < embedding_dim; d++) {
+              forceDiff[d] = scale(forceDiff[d] * d1);
+              prevCoordinates[ind * embedding_dim + d] += (lr)*forceDiff[d];
+            }
+          }
+        }
+      }
+    }
   }
 
   inline void calc_t_dist_replus_rowptr(DENT *prevCoordinates,

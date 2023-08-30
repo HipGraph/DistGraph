@@ -138,8 +138,9 @@ public:
       MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                     DENSETUPLE, MPI_COMM_WORLD);
+      cout<<" global rank "<<grid->global_rank<<" synchronuse MPI_Alltoallv completed"<<endl;
       MPI_Request dumy;
-      this->populate_cache(receivebuf, dumy, true);
+//      this->populate_cache(receivebuf, dumy, true);
 
     } else {
       MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
