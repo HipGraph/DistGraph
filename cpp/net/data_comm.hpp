@@ -212,8 +212,8 @@ public:
     cout<<" grid global "<<grid->global_rank<< " populating cache"<<endl;
     this->populate_cache(receivebuf, dumy, true);
 
-    delete[] sendbuf;
-    delete[] receivebuf;
+//    delete[] sendbuf;
+//    delete[] receivebuf;
   }
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request, bool synchronous) {
