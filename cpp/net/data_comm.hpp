@@ -113,14 +113,14 @@ public:
         if (proc_list[i] == 1) {
           if (!already_fetched) {
             cout<<" global rank "<<grid->global_rank<<" fetching data id "<<col_id<<" completed"<<endl;
-            dense_vector = (this->dense_local)->fetch_local_data(col_id);
+//            dense_vector = (this->dense_local)->fetch_local_data(col_id);
             already_fetched = true;
           }
           int offset = sdispls[i];
           int index = offset_vector[i] + offset;
-          sendbuf[index].col =
-              col_id + (this->sp_local_sender->proc_col_width *this->grid->global_rank);
-          sendbuf[index].value =dense_vector;
+//          sendbuf[index].col =
+//              col_id + (this->sp_local_sender->proc_col_width *this->grid->global_rank);
+//          sendbuf[index].value =dense_vector;
           offset_vector[i]++;
         }
       }
