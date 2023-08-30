@@ -194,7 +194,6 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    cout<<" rank "<<grid->global_rank<<" receive_count "<<total_receive_count<<endl;
     receivebuf_ptr.get()->resize(total_receive_count);
 
     for (int i = 0; i < grid->world_size; i++) {
@@ -205,18 +204,15 @@ public:
                         (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
-
     }
 
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                   (*receivebuf_ptr.get()).data(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
-    cout<<" grid global "<<grid->global_rank<< " populating cache"<<endl;
     this->populate_cache(receivebuf_ptr.get(), dumy, true);
 
 //    delete[] sendbuf;
-//    delete[] receivebuf;
   }
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request, bool synchronous) {
@@ -229,11 +225,8 @@ public:
     for (int i = 0; i < this->grid->world_size; i++) {
       int base_index = this->rdispls[i];
       int count = this->receivecounts[i];
-       if (synchronous) cout<<" rank "<<grid->global_rank<<" accessing base index "<<base_index<<" count "<<count<<" for rank "<<i<<endl;
       for (int j = base_index; j < base_index + count; j++) {
-        if (synchronous)  cout<<" rank "<<grid->global_rank<<" accessing "<<j<<endl;
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        if (synchronous)  cout<<" rank "<<grid->global_rank<<" accessing "<<j<<" success and inserting into cache"<<endl;
         (this->dense_local)->insert_cache(i, t.col, t.value);
       }
     }
