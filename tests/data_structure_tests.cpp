@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
       embedding_algo =
           unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
               new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat.get(),
-                                                                     shared_sparseMat_Trans.get(),
+                                                                     shared_sparseMat_sender.get(),
                                                                      dense_mat.get(),
                                                                      grid.get(),
                                                                      5,

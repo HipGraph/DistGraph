@@ -67,12 +67,12 @@ public:
     auto t = start_clock();
     int batches = 0;
     int last_batch_size = batch_size;
-    if (sp_local->proc_row_width % batch_size == 0) {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size);
+    if (sp_local_receiver->proc_row_width % batch_size == 0) {
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
     } else {
-      batches = static_cast<int>(sp_local->proc_row_width / batch_size) + 1;
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
       // TODO:Error prone
-      last_batch_size = sp_local->proc_row_width - batch_size * (batches - 1);
+      last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
     cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
