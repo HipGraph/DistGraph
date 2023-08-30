@@ -226,8 +226,11 @@ public:
     for (int i = 0; i < this->grid->world_size; i++) {
       int base_index = this->rdispls[i];
       int count = this->receivecounts[i];
+      cout<<" rank "<<grid->global_rank<<" accessing base index "<<base_index<<" count "<<count<<" for rank "<<i<<endl;
       for (int j = base_index; j < base_index + count; j++) {
+        cout<<" rank "<<grid->global_rank<<" accessing "<<j<<endl;
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
+        cout<<" rank "<<grid->global_rank<<" accessing "<<j<<" success and inserting into cache"<<endl;
         (this->dense_local)->insert_cache(i, t.col, t.value);
       }
     }
