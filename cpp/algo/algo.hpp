@@ -104,7 +104,7 @@ public:
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid, i));
+              sp_local_receiver, sp_local_sender, dense_local, grid, -1));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
@@ -184,7 +184,7 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), true,
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   request_batch_update);
 //          mpi_requests[i * batches + j] = request_batch_update;
           if (i == iterations - 1 and j == batches - 1) {
@@ -206,9 +206,7 @@ public:
                                       int block_size, bool local) {
 
     auto source_start_index = batch_id * batch_size;
-    auto source_end_index = std::min((batch_id + 1) * batch_size,
-                                     this->sp_local_receiver->proc_row_width) -
-                            1;
+    auto source_end_index = std::min((batch_id + 1) * batch_size,this->sp_local_receiver->proc_row_width) -1;
 
     auto dst_start_index = this->sp_local_receiver->proc_row_width * this->grid->global_rank;
     auto dst_end_index = std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width *(this->grid->global_rank + 1)),this->sp_local_receiver->gCols) -1;
