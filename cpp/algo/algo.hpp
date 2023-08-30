@@ -176,7 +176,7 @@ public:
           stop_clock_and_add(t, "Computation Time");
         }
 //        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-//        update_ptr.get()->clear();
+        update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
           MPI_Request request_batch_update;
@@ -185,10 +185,10 @@ public:
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   request_batch_update);
 //          mpi_requests[i * batches + j] = request_batch_update;
-//          if (i == iterations - 1 and j == batches - 1) {
-//            data_comm_cache[j].get()->populate_cache(
-//                update_ptr.get(), request_batch_update, false);
-//          }
+          if (i == iterations - 1 and j == batches - 1) {
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), request_batch_update, false);
+          }
           stop_clock_and_add(t, "Communication Time");
         }
       }
