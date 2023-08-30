@@ -145,15 +145,16 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
-        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
-
         int considering_batch_size = batch_size;
 
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
+
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
+        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
@@ -239,7 +240,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 #pragma omp parallel for schedule(static)
-      for (uint64_t i = dst_start_index; i <= dst_end_index i++) {
+      for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         DENT forceDiff[embedding_dim];
 
@@ -253,8 +254,7 @@ public:
         bool matched = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          if (csr_handle->col_idx[j] >= source_start_index >=
-              and csr_handle->col_idx[j] <= source_end_index) {
+          if (csr_handle->col_idx[j] >= source_start_index and csr_handle->col_idx[j] <= source_end_index) {
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
 
