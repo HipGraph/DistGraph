@@ -127,7 +127,6 @@ public:
         }
       }
     }
-    cout<<" global rank "<<grid->global_rank<<" dense vector loading completed"<<endl;
     for (int i = 0; i < grid->world_size; i++) {
       total_receive_count += receivecounts[i];
     }
@@ -138,11 +137,8 @@ public:
       MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                     DENSETUPLE, MPI_COMM_WORLD);
-      cout<<" global rank "<<grid->global_rank<<" synchronuse MPI_Alltoallv completed"<<endl;
       MPI_Request dumy;
       this->populate_cache(receivebuf, dumy, true);
-      cout<<" global rank "<<grid->global_rank<<" populate_cache completed"<<endl;
-
     } else {
       MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                      (*receivebuf).data(), receivecounts.data(), rdispls.data(),
