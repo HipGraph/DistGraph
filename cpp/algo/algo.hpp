@@ -107,7 +107,7 @@ public:
               sp_local_receiver, sp_local_sender, dense_local, grid, i));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
-      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
+      data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,
                                                    fetch_all);
     }
     stop_clock_and_add(t, "Computation Time");
