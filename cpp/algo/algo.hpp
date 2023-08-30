@@ -218,7 +218,7 @@ public:
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
-              std::min(this->sp_local_receiver->proc_row_width * (r + 1),
+              std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
           calc_embedding(source_start_index, source_end_index, dst_start_index,

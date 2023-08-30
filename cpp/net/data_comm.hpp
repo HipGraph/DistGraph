@@ -190,8 +190,8 @@ public:
     DataTuple<DENT, embedding_dim> *sendbuf =
         new DataTuple<DENT, embedding_dim>[total_send_count];
 
-    DataTuple<DENT, embedding_dim> *receivebuf =
-        new DataTuple<DENT, embedding_dim>[total_receive_count];
+    vector<DataTuple<DENT, embedding_dim>> *receivebuf =
+        new vector<DataTuple<DENT, embedding_dim>>(total_receive_count);
 
 
     for (int i = 0; i < grid->world_size; i++) {
