@@ -164,8 +164,8 @@ public:
           if (!(i == 0 and j == 0)) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-//            data_comm_cache[j].get()->populate_cache(
-//                update_ptr.get(), mpi_requests[i * batches + j - 1], false);
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), mpi_requests[i * batches + j - 1], false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
