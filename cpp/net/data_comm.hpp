@@ -92,7 +92,7 @@ public:
       total_send_count += sendcounts[i];
       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
       rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-      cout<<" rank "<<grid->global_rank<<" sending data   "<<sendcounts[i]<<"to rank "<<i <<" receving data "<<receivecounts[i]<< " from rank "<<i<<endl;
+      if (batch_id>=0) cout<<" rank "<<grid->global_rank<<" sending data   "<<sendcounts[i]<<"to rank "<<i <<" receving data "<<receivecounts[i]<< " from rank "<<i<<endl;
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
