@@ -209,6 +209,7 @@ public:
                   receivebuf, receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
+    cout<<" grid global "<<grid->global_rank<< " populating cache"<<endl;
     this->populate_cache(receivebuf, dumy, true);
 
     delete[] sendbuf;
