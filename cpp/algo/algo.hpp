@@ -153,50 +153,50 @@ public:
           considering_batch_size = last_batch_size;
         }
         cout << " global rank " << grid->global_rank<<" starting repulsive force calculation  " << endl;
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
 
         cout << " global rank " << grid->global_rank<<" repulsive force calculation done " << endl;
-        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
-
-
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, true);
-        cout << " global rank " << grid->global_rank<<" local attractive force calculation done " << endl;
-
-        if (this->grid->world_size > 1) {
-          if (!(i == 0 and j == 0)) {
-            stop_clock_and_add(t, "Computation Time");
-            t = start_clock();
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), mpi_requests[i * batches + j - 1], false);
-            stop_clock_and_add(t, "Communication Time");
-            t = start_clock();
-          }
-
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                        batch_size, considering_batch_size,
-                                        false);
-
-          cout << " global rank " << grid->global_rank<<" local remote force calculation done " << endl;
-          stop_clock_and_add(t, "Computation Time");
-        }
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        update_ptr.get()->clear();
-
-        if (this->grid->world_size > 1) {
-          MPI_Request request_batch_update;
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  request_batch_update);
-          mpi_requests[i * batches + j] = request_batch_update;
-          if (i == iterations - 1 and j == batches - 1) {
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false);
-          }
-          stop_clock_and_add(t, "Communication Time");
-        }
+//        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+//
+//
+//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                      batch_size, considering_batch_size, true);
+//        cout << " global rank " << grid->global_rank<<" local attractive force calculation done " << endl;
+//
+//        if (this->grid->world_size > 1) {
+//          if (!(i == 0 and j == 0)) {
+//            stop_clock_and_add(t, "Computation Time");
+//            t = start_clock();
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), mpi_requests[i * batches + j - 1], false);
+//            stop_clock_and_add(t, "Communication Time");
+//            t = start_clock();
+//          }
+//
+//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                        batch_size, considering_batch_size,
+//                                        false);
+//
+//          cout << " global rank " << grid->global_rank<<" local remote force calculation done " << endl;
+//          stop_clock_and_add(t, "Computation Time");
+//        }
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        update_ptr.get()->clear();
+//
+//        if (this->grid->world_size > 1) {
+//          MPI_Request request_batch_update;
+//          stop_clock_and_add(t, "Computation Time");
+//          t = start_clock();
+//          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+//                                                  request_batch_update);
+//          mpi_requests[i * batches + j] = request_batch_update;
+//          if (i == iterations - 1 and j == batches - 1) {
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), request_batch_update, false);
+//          }
+//          stop_clock_and_add(t, "Communication Time");
+//        }
       }
     }
     if (this->grid->world_size == 0) {
