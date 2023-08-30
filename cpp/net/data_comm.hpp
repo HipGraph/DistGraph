@@ -209,7 +209,7 @@ public:
     }
 
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                  receivebuf_ptr.get(), receivecounts.data(), rdispls.data(),
+                  (*receivebuf_ptr.get()).data(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
     cout<<" grid global "<<grid->global_rank<< " populating cache"<<endl;
