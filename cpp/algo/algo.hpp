@@ -245,7 +245,7 @@ public:
 
         uint64_t local_dst = i - (this->grid)->global_rank *
                                      (this->sp_local_receiver)->proc_row_width;
-        int target_rank = (int)(i / (this->sp_local)->proc_row_width);
+        int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;
         std::array<DENT, embedding_dim> colvec;
@@ -350,7 +350,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
-                           ((this->sp_local)->proc_row_width));
+                           ((this->sp_local_receiver)->proc_row_width));
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
