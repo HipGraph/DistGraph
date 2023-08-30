@@ -153,11 +153,14 @@ public:
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
+
+        cout << " global rank " << grid->global_rank<<" repulsive force calculation done " << endl;
         CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
+        cout << " global rank " << grid->global_rank<<" local attractive force calculation done " << endl;
 
         if (this->grid->world_size > 1) {
           if (!(i == 0 and j == 0)) {
@@ -172,6 +175,8 @@ public:
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
                                         false);
+
+          cout << " global rank " << grid->global_rank<<" local remote force calculation done " << endl;
           stop_clock_and_add(t, "Computation Time");
         }
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
