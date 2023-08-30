@@ -107,6 +107,8 @@ public:
               sp_local_receiver, sp_local_sender, dense_local, grid, -1));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
+      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
+                                                   fetch_all);
     }
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
@@ -184,8 +186,8 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  request_batch_update);
+//          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+//                                                  request_batch_update);
 //          mpi_requests[i * batches + j] = request_batch_update;
           if (i == iterations - 1 and j == batches - 1) {
 //            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
