@@ -188,8 +188,8 @@ public:
                                                   request_batch_update);
 //          mpi_requests[i * batches + j] = request_batch_update;
           if (i == iterations - 1 and j == batches - 1) {
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false);
+//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+//                                                     request_batch_update, false);
           }
           stop_clock_and_add(t, "Communication Time");
         }
