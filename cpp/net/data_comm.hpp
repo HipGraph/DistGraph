@@ -89,7 +89,7 @@ public:
           vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
 
       sendcounts[i] = send_col_ids_list[i].size();
-
+      total_send_count += sendcounts[i];
       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
       rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
 //      cout<<" rank "<<grid->global_rank<<" sending data   "<<sendcounts[i]<<"to rank "<<i <<" receving data "<<receivecounts[i]<< " from rank "<<i<<endl;
@@ -97,6 +97,9 @@ public:
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
       }
+    }
+    if (total_send_count>0){
+      send_buf = new DataTuple<DENT, embedding_dim>[total_send_count];
     }
   }
 
@@ -118,9 +121,9 @@ public:
           }
           int offset = sdispls[i];
           int index = offset_vector[i] + offset;
-//          sendbuf[index].col =
-//              col_id + (this->sp_local_sender->proc_col_width *this->grid->global_rank);
-//          sendbuf[index].value =dense_vector;
+          sendbuf[index].col =
+              col_id + (this->sp_local_sender->proc_col_width *this->grid->global_rank);
+          sendbuf[index].value =dense_vector;
           offset_vector[i]++;
         }
       }
