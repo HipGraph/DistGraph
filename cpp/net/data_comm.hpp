@@ -113,7 +113,7 @@ public:
         if (proc_list[i] == 1) {
           if (!already_fetched) {
             cout<<" global rank "<<grid->global_rank<<" fetching data id "<<col_id<<" completed"<<endl;
-//            dense_vector = (this->dense_local)->fetch_local_data(col_id);
+            dense_vector = (this->dense_local)->fetch_local_data(col_id);
             already_fetched = true;
           }
           int offset = sdispls[i];
