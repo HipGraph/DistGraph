@@ -140,7 +140,8 @@ public:
                     DENSETUPLE, MPI_COMM_WORLD);
       cout<<" global rank "<<grid->global_rank<<" synchronuse MPI_Alltoallv completed"<<endl;
       MPI_Request dumy;
-//      this->populate_cache(receivebuf, dumy, true);
+      this->populate_cache(receivebuf, dumy, true);
+      cout<<" global rank "<<grid->global_rank<<" populate_cache completed"<<endl;
 
     } else {
       MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
