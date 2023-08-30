@@ -159,7 +159,7 @@ public:
     int total_receive_count = 0;
 
     for (int i = 0; i < col_ids.size(); i++) {
-      int owner_rank = col_ids[i] / (this->sp_local)->proc_row_width;
+      int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
       if (owner_rank == grid->global_rank) {
         send_col_ids_list.push_back(col_ids[i]);
       } else {
@@ -199,7 +199,7 @@ public:
         int index = sdispls[i] + j;
         ((sendbuf)[index]).col = send_col_ids_list[j];
         int local_key = ((sendbuf)[index]).col -
-                        (grid->global_rank) * (this->sp_local)->proc_row_width;
+                        (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
 
@@ -233,10 +233,10 @@ public:
   }
 
   void cross_validate_batch_from_metadata(int batch_id) {
-    int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
+    int total_nodes = this->sp_local_receiver->gCols / this->sp_local_receiver->block_col_width;
     for (int i = 0; i < total_nodes; i++) {
       vector<uint64_t> col_ids;
-      this->sp_local->fill_col_ids(batch_id, i, col_ids, false, true);
+      this->sp_local_receiver->fill_col_ids(batch_id, i, col_ids, false, true);
       for (int j = 0; j < col_ids.size(); j++) {
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
@@ -246,7 +246,7 @@ public:
         bool fetch_from_cache = false;
 
         int owner_rank =
-            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
+            static_cast<int>(global_col_id / (this->sp_local_receiver)->proc_row_width);
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
