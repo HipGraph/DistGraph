@@ -306,7 +306,7 @@ public:
         bool fetch_from_cache = false;
 
         int owner_rank =
-            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
+            static_cast<int>(global_col_id / (this->sp_local_receiver)->proc_row_width);
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
