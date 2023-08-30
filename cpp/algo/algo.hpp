@@ -86,6 +86,7 @@ public:
 
     MPI_Request fetch_all;
     negative_update_com.get()->onboard_data();
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
     stop_clock_and_add(t, "Computation Time");
 
     t = start_clock();
