@@ -131,35 +131,21 @@ int main(int argc, char **argv) {
   auto ini_csr_duration2 =
       std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end2 -ini_csr_end1).count();
 
-//    shared_sparseMat_combined.get()->print_blocks_and_cols(false);
-//
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get() ,localARows));
-//
-//  //    dense_mat.get()->print_matrix();
-//  cout << " rank " << rank << " creation of dense matrices completed  " << endl;
-//
-  auto communicator =
-      unique_ptr<DataComm<int, double, dimension>>(new DataComm<int, double, dimension>(
-          shared_sparseMat.get(), shared_sparseMat_sender.get(), dense_mat.get(),
-          grid.get(),-1));
-  communicator.get()->onboard_data();
-  cout << " rank " << rank << " data onbaord  completed  " << endl;
-//  communicator.get()->onboard_data();
-//
-//  cout << " rank " << rank << " async started  " << endl;
-//
-//  unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
-//      embedding_algo =
-//          unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
-//              new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat_combined.get(),
-//                                                                     shared_sparseMat.get(),
-//                                                                     shared_sparseMat_Trans.get(),
-//                                                                     dense_mat.get(),
-//                                                                     grid.get(),
-//                                                                     5,
-//                                                                     -5));
+
+  cout << " rank " << rank << " async started  " << endl;
+
+  unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
+      embedding_algo =
+          unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
+              new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat.get(),
+                                                                     shared_sparseMat_Trans.get(),
+                                                                     dense_mat.get(),
+                                                                     grid.get(),
+                                                                     5,
+                                                                     -5));
 //
 //  auto end_init = std::chrono::high_resolution_clock::now();
 ////  dense_mat.get()->print_matrix();

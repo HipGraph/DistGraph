@@ -27,9 +27,8 @@ class EmbeddingAlgo {
 
 private:
   DenseMat<SPT, DENT, embedding_dim> *dense_local;
-  distblas::core::SpMat<SPT> *sp_local;
-  distblas::core::SpMat<SPT> *sp_local_metadata;
-  distblas::core::SpMat<SPT> *sp_local_trans;
+  distblas::core::SpMat<SPT> *sp_local_receiver;
+  distblas::core::SpMat<SPT> *sp_local_sender;
   Process3DGrid *grid;
   DENT MAX_BOUND, MIN_BOUND;
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
@@ -41,16 +40,14 @@ private:
   map<string, double> total_time;
 
 public:
-  EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local,
-                distblas::core::SpMat<SPT> *sp_local_metadata,
-                distblas::core::SpMat<SPT> *sp_local_trans,
+  EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_receiver,
+                distblas::core::SpMat<SPT> *sp_local_sender,
                 DenseMat<SPT, DENT, embedding_dim> *dense_local,
                 Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
     this->grid = grid;
     this->dense_local = dense_local;
-    this->sp_local = sp_local;
-    this->sp_local_metadata = sp_local_metadata;
-    this->sp_local_trans = sp_local_trans;
+    this->sp_local_sender = sp_local_sender;
+    this->sp_local_receiver = sp_local_receiver;
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
 
@@ -78,149 +75,142 @@ public:
       last_batch_size = sp_local->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-        new DataComm<SPT, DENT, embedding_dim>(
-            sp_local_metadata, sp_local_trans, dense_local, grid));
-
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> fetch_all_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+        new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver, sp_local_sender, dense_local, grid,-1));
 
     MPI_Request fetch_all;
-    negative_update_com.get()->onboard_data(-1);
+    negative_update_com.get()->onboard_data();
     stop_clock_and_add(t, "Computation Time");
 
     t = start_clock();
-    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false, false,
-                                             fetch_all);
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,fetch_all);
     stop_clock_and_add(t, "Communication Time");
 
-    t = start_clock();
-    for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-          new DataComm<SPT, DENT, embedding_dim>(
-              sp_local_metadata, sp_local_trans, dense_local, grid));
-      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
-      data_comm_cache[i].get()->onboard_data(i);
-    }
-    stop_clock_and_add(t, "Computation Time");
-    t = start_clock();
-    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-                                              false);
-    stop_clock_and_add(t, "Communication Time");
-    MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
-    t = start_clock();
-    DENT *prevCoordinates = static_cast<DENT *>(
-        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
-
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-        results_negative_ptr =
-            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-                new vector<DataTuple<DENT, embedding_dim>>());
-
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
-    vector<MPI_Request> mpi_requests(iterations*batches);
-    for (int i = 0; i < iterations; i++) {
-      cout<<" global rank "<<grid->global_rank<<endl;
-      for (int j = 0; j < batches; j++) {
-
-        int seed = j + i;
-
-        for (int i = 0; i < batch_size; i += 1) {
-          int IDIM = i * embedding_dim;
-          for (int d = 0; d < embedding_dim; d++) {
-            prevCoordinates[IDIM + d] = 0;
-          }
-        }
-
-        // negative samples generation
-        vector<uint64_t> random_number_vec =
-            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
-
-        MPI_Request request_negative_update;
-
-        if (this->grid->world_size>1){
-          results_negative_ptr.get()->clear();
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          negative_update_com.get()->transfer_data(
-              random_number_vec, false, results_negative_ptr.get(), request_negative_update);
-          stop_clock_and_add(t, "Communication Time");
-          t = start_clock();
-        }
-
-        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
-
-        auto head = batch_list->getHeadNode();
-        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
-        CSRLocal<SPT> *csr_block_remote = nullptr;
-
-        if (this->grid->world_size > 1) {
-          auto remote = (head.get())->next;
-          csr_block_remote = (remote.get())->data.get();
-        }
-
-        int working_rank = 0;
-        bool fetch_remote =
-            (working_rank == ((this->grid)->global_rank)) ? false : true;
-
-        int considering_batch_size = batch_size;
-
-        if (j == batches - 1) {
-          considering_batch_size = last_batch_size;
-        }
-
-        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size);
-
-        if (this->grid->world_size > 1) {
-          if (!(i==0 and j==0) ) {
-            stop_clock_and_add(t, "Computation Time");
-            t = start_clock();
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), mpi_requests[i*batches+j-1], false);
-            stop_clock_and_add(t, "Communication Time");
-            t = start_clock();
-          }
-
-          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
-                                        j, batch_size, considering_batch_size);
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          negative_update_com.get()->populate_cache(results_negative_ptr.get(),
-                                                    request_negative_update, false);
-          stop_clock_and_add(t, "Communication Time");
-          t = start_clock();
-        }
-
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        update_ptr.get()->clear();
-
-        if (this->grid->world_size > 1) {
-          MPI_Request request_batch_update;
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  false, request_batch_update);
-          mpi_requests[i*batches+j]=request_batch_update;
-          if (i== iterations-1 and j==batches-1) {
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false);
-          }
-          stop_clock_and_add(t, "Communication Time");
-        }
-      }
-    }
-    if (this->grid->world_size == 0) {
-      stop_clock_and_add(t, "Computation Time");
-    }
+//    t = start_clock();
+//    for (int i = 0; i < batches; i++) {
+//      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+//          new DataComm<SPT, DENT, embedding_dim>(
+//              sp_local_metadata, sp_local_trans, dense_local, grid));
+//      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+//      data_comm_cache[i].get()->onboard_data(i);
+//    }
+//    stop_clock_and_add(t, "Computation Time");
+//    t = start_clock();
+//    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
+//                                              false);
+//    stop_clock_and_add(t, "Communication Time");
+//    MPI_Barrier(MPI_COMM_WORLD); //MPI Barrier
+//    t = start_clock();
+//    DENT *prevCoordinates = static_cast<DENT *>(
+//        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+//
+//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+//        results_negative_ptr =
+//            unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//                new vector<DataTuple<DENT, embedding_dim>>());
+//
+//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
+//        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//            new vector<DataTuple<DENT, embedding_dim>>());
+//    vector<MPI_Request> mpi_requests(iterations*batches);
+//    for (int i = 0; i < iterations; i++) {
+//      cout<<" global rank "<<grid->global_rank<<endl;
+//      for (int j = 0; j < batches; j++) {
+//
+//        int seed = j + i;
+//
+//        for (int i = 0; i < batch_size; i += 1) {
+//          int IDIM = i * embedding_dim;
+//          for (int d = 0; d < embedding_dim; d++) {
+//            prevCoordinates[IDIM + d] = 0;
+//          }
+//        }
+//
+//        // negative samples generation
+//        vector<uint64_t> random_number_vec =
+//            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+//
+//        MPI_Request request_negative_update;
+//
+//        if (this->grid->world_size>1){
+//          results_negative_ptr.get()->clear();
+//          stop_clock_and_add(t, "Computation Time");
+//          t = start_clock();
+//          negative_update_com.get()->transfer_data(
+//              random_number_vec, false, results_negative_ptr.get(), request_negative_update);
+//          stop_clock_and_add(t, "Communication Time");
+//          t = start_clock();
+//        }
+//
+//        CSRLinkedList<SPT> *batch_list = (this->sp_local)->get_batch_list(0);
+//
+//        auto head = batch_list->getHeadNode();
+//        CSRLocal<SPT> *csr_block_local = (head.get())->data.get();
+//        CSRLocal<SPT> *csr_block_remote = nullptr;
+//
+//        if (this->grid->world_size > 1) {
+//          auto remote = (head.get())->next;
+//          csr_block_remote = (remote.get())->data.get();
+//        }
+//
+//        int working_rank = 0;
+//        bool fetch_remote =
+//            (working_rank == ((this->grid)->global_rank)) ? false : true;
+//
+//        int considering_batch_size = batch_size;
+//
+//        if (j == batches - 1) {
+//          considering_batch_size = last_batch_size;
+//        }
+//
+//        this->calc_t_dist_grad_rowptr(csr_block_local, prevCoordinates, lr, j,
+//                                      batch_size, considering_batch_size);
+//
+//        if (this->grid->world_size > 1) {
+//          if (!(i==0 and j==0) ) {
+//            stop_clock_and_add(t, "Computation Time");
+//            t = start_clock();
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), mpi_requests[i*batches+j-1], false);
+//            stop_clock_and_add(t, "Communication Time");
+//            t = start_clock();
+//          }
+//
+//          this->calc_t_dist_grad_rowptr(csr_block_remote, prevCoordinates, lr,
+//                                        j, batch_size, considering_batch_size);
+//          stop_clock_and_add(t, "Computation Time");
+//          t = start_clock();
+//          negative_update_com.get()->populate_cache(results_negative_ptr.get(),
+//                                                    request_negative_update, false);
+//          stop_clock_and_add(t, "Communication Time");
+//          t = start_clock();
+//        }
+//
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        update_ptr.get()->clear();
+//
+//        if (this->grid->world_size > 1) {
+//          MPI_Request request_batch_update;
+//          stop_clock_and_add(t, "Computation Time");
+//          t = start_clock();
+//          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+//                                                  false, request_batch_update);
+//          mpi_requests[i*batches+j]=request_batch_update;
+//          if (i== iterations-1 and j==batches-1) {
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), request_batch_update, false);
+//          }
+//          stop_clock_and_add(t, "Communication Time");
+//        }
+//      }
+//    }
+//    if (this->grid->world_size == 0) {
+//      stop_clock_and_add(t, "Computation Time");
+//    }
   }
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
