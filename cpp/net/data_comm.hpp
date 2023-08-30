@@ -99,7 +99,7 @@ public:
       }
     }
     if (total_send_count>0){
-      send_buf = new DataTuple<DENT, embedding_dim>[total_send_count];
+      sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
     }
   }
 
