@@ -190,9 +190,12 @@ public:
     DataTuple<DENT, embedding_dim> *sendbuf =
         new DataTuple<DENT, embedding_dim>[total_send_count];
 
-    vector<DataTuple<DENT, embedding_dim>> *receivebuf =
-        new vector<DataTuple<DENT, embedding_dim>>(total_receive_count);
+    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> receivebuf_ptr =
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
 
+    cout<<" rank "<<grid->global_rank<<" receive_count "<<total_receive_count<<endl;
+    receivebuf_ptr.get()->resize(total_receive_count);
 
     for (int i = 0; i < grid->world_size; i++) {
       for (int j = 0; j < send_col_ids_list.size(); j++) {
@@ -206,11 +209,11 @@ public:
     }
 
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                  receivebuf, receivecounts.data(), rdispls.data(),
+                  receivebuf_ptr.get(), receivecounts.data(), rdispls.data(),
                    DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
     cout<<" grid global "<<grid->global_rank<< " populating cache"<<endl;
-    this->populate_cache(receivebuf, dumy, true);
+    this->populate_cache(receivebuf_ptr.get(), dumy, true);
 
 //    delete[] sendbuf;
 //    delete[] receivebuf;
