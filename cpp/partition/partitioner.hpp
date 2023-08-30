@@ -101,8 +101,8 @@ public:
                     recvoffsets.data(), SPTUPLE, process_3D_grid->global);
 
       // TODO: Parallelize the sort routine?
-//            std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
-//            column_major<T>);
+            std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
+            column_major<T>);
     }
 //    __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
 //                         column_major<T>);
