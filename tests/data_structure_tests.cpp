@@ -153,14 +153,13 @@ int main(int argc, char **argv) {
 ////
   MPI_Barrier(MPI_COMM_WORLD);
   cout << " rank " << rank << "  algo started  " << endl;
-  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
+//  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
   cout << " rank " << rank << " async completed  " << endl;
 //
 //
 //  cout << " rank " << rank << " training completed  " << endl;
   ofstream fout;
-  fout.open("perf_output", std::ios_base::app
-  );
+  fout.open("perf_output", std::ios_base::app);
 
   json j_obj;
   j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
