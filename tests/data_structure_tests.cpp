@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
   auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get() ,localARows));
 
-  cout << " rank " << rank << " async started  " << endl;
+
 
   unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
       embedding_algo =
@@ -152,6 +152,7 @@ int main(int argc, char **argv) {
 ////  dense_mat.get()->print_cache(0);
 ////
   MPI_Barrier(MPI_COMM_WORLD);
+  cout << " rank " << rank << "  algo started  " << endl;
   embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
   cout << " rank " << rank << " async completed  " << endl;
 //
