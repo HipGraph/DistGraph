@@ -22,7 +22,7 @@ namespace distblas::core {
 template <typename T> class SpMat : public DistributedMat {
 
 private:
-  unique_ptr<CSRLocal<T>> csr_local_data;
+
 
 public:
   uint64_t gRows, gCols, gNNz;
@@ -31,6 +31,7 @@ public:
   int proc_col_width, proc_row_width;
   bool transpose = false;
   bool col_partitioned = false;
+  unique_ptr<CSRLocal<T>> csr_local_data;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix

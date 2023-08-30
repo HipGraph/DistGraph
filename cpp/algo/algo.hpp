@@ -136,7 +136,7 @@ public:
 
         // negative samples generation
         vector<uint64_t> random_number_vec =
-            generate_random_numbers(0, (this->sp_local)->gRows, seed, ns);
+            generate_random_numbers(0, (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
@@ -147,7 +147,7 @@ public:
         }
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
-        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data;
+        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
         int considering_batch_size = batch_size;
 
@@ -206,12 +206,8 @@ public:
                                      this->sp_local_receiver->proc_row_width) -
                             1;
 
-    auto dst_start_index =
-        this->sp_local_receiver->proc_row_width * this->grid->global_rank;
-    auto dst_end_index = std::min(this->sp_local_receiver->proc_row_width *
-                                      (this->grid->global_rank + 1),
-                                  this->sp_local_receiver->gCols) -
-                         1;
+    auto dst_start_index = this->sp_local_receiver->proc_row_width * this->grid->global_rank;
+    auto dst_end_index = std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width *(this->grid->global_rank + 1)),this->sp_local_receiver->gCols) -1;
 
     if (local) {
       calc_embedding(source_start_index, source_end_index, dst_start_index,
@@ -306,7 +302,7 @@ public:
         uint64_t local_col_id =
             global_col_id -
             static_cast<uint64_t>(
-                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
+                ((this->grid)->global_rank * (this->sp_local_receiver)->proc_row_width));
         bool fetch_from_cache = false;
 
         int owner_rank =
