@@ -106,12 +106,14 @@ public:
     vector<int> offset_vector(grid->world_size, 0);
     for (const auto &pair : send_indices_to_proc_map) {
       auto col_id = pair.first;
+      bool already_fetched = false;
       vector<int> proc_list = pair.second;
-      std::array<DENT, embedding_dim> dense_vector = nullptr;
+      std::array<DENT, embedding_dim> dense_vector;
       for (int i = 0; i < proc_list.size(); i++) {
         if (proc_list[i] == 1) {
-          if (dense_vector == nullptr) {
+          if (!already_fetched) {
             dense_vector = (this->dense_local)->fetch_local_data(col_id);
+            already_fetched = true;
           }
           int offset = sdispls[i];
           int index = offset_vector[i] + offset;
