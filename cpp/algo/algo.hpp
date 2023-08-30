@@ -141,6 +141,7 @@ public:
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
+          cout << " global rank " << grid->global_rank<<"  repulsive force transfer starting  " << endl;
           negative_update_com.get()->transfer_data(random_number_vec);
           cout << " global rank " << grid->global_rank<<"  repulsive force transfer done  " << endl;
           stop_clock_and_add(t, "Communication Time");
