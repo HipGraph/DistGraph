@@ -180,7 +180,7 @@ public:
 //                                        false);
           stop_clock_and_add(t, "Computation Time");
         }
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
