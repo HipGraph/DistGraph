@@ -243,7 +243,7 @@ public:
                              int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-
+      vector<vector<DENT>> temp_vec(batch_size);
       //#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
@@ -288,7 +288,7 @@ public:
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-            vector<vector<DENT>> temp_vec(batch_size);
+
 
             for (int d = 0; d < embedding_dim; d++) {
                  DENT  l = scale(forceDiff[d]*d1);
