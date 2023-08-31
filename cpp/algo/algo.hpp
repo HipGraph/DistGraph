@@ -351,29 +351,28 @@ public:
           DENT attrc = 0;
           for (int d = 0; d < embedding_dim; d++) {
             if (!fetch_from_cache) {
-              forceDiff[d] =
-                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-                  (this->dense_local)
-                      ->nCoordinates[local_dst * embedding_dim + d];
+              forceDiff[d] = 0.2345
+//                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+//                  (this->dense_local)
+//                      ->nCoordinates[local_dst * embedding_dim + d];
             } else {
-              forceDiff[d] =
-                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-                  array_ptr[d];
+              forceDiff[d] = 0.001;
+//                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+//                  array_ptr[d];
             }
             attrc += forceDiff[d] * forceDiff[d];
           }
           DENT d1 = -2.0 / (1.0 + attrc);
 
-          if (d1<-100000){
-            cout<<" awesome"<<endl;
-          }
-
-//          for (int d = 0; d < embedding_dim; d++) {
-//            DENT l = scale(forceDiff[d] * d1);
-////            prevCoordinates[index * embedding_dim + d] =
-////                prevCoordinates[index * embedding_dim + d] + (lr)*l;
-//            prevCoordinates[index * embedding_dim + d] =  (lr)*l;
+//          if (d1<-100000){
+//            cout<<" awesome"<<endl;
 //          }
+
+          for (int d = 0; d < embedding_dim; d++) {
+            DENT l = scale(forceDiff[d] * d1);
+            prevCoordinates[index * embedding_dim + d] =
+                prevCoordinates[index * embedding_dim + d] + (lr)*l;
+          }
         }
       }
     }
