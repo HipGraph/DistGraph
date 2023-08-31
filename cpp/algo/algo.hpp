@@ -244,7 +244,6 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
@@ -291,7 +290,7 @@ public:
 
             for (int d = 0; d < embedding_dim; d++) {
               DENT l = scale(forceDiff[d] * d1);
-              prevCoordinates[index * embedding_dim + d] =
+              prevCoordinates[0 * embedding_dim + d] =
                   prevCoordinates[index * embedding_dim + d] + (lr)*l;
             }
             //            cout<< endl;
