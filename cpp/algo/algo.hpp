@@ -291,6 +291,7 @@ public:
             for (int d = 0; d < embedding_dim; d++) {
                  DENT  l = scale(forceDiff[d]*d1);
                  DENT fl = prevCoordinates[index * embedding_dim + d] +(lr)*l;
+                 prevCoordinates[index * embedding_dim + d] = fl;
             }
 //            cout<< endl;
           }
