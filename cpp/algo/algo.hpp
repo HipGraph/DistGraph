@@ -288,10 +288,11 @@ public:
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-            #pragma omp simd
+            vector<vector<DENT>>(batch_size);
+
             for (int d = 0; d < embedding_dim; d++) {
                  DENT  l = scale(forceDiff[d]*d1);
-                 prevCoordinates[index * embedding_dim + d] += (lr)*l;
+                 vector[index].push_back(prevCoordinates[index * embedding_dim + d]+(lr)*l);
             }
 //            cout<< endl;
           }
