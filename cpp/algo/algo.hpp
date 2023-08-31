@@ -142,7 +142,7 @@ public:
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-//          negative_update_com.get()->transfer_data(random_number_vec);
+          negative_update_com.get()->transfer_data(random_number_vec);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -151,14 +151,13 @@ public:
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-//                                        j, batch_size, considering_batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
 
         CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
-
-//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size, true);
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, true);
 
 
         if (this->grid->world_size > 1) {
@@ -171,12 +170,12 @@ public:
             t = start_clock();
           }
 
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        false);
           stop_clock_and_add(t, "Computation Time");
         }
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
