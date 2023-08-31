@@ -103,7 +103,7 @@ public:
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid,i ));
+              sp_local_receiver, sp_local_sender, dense_local, grid, i));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
@@ -134,8 +134,8 @@ public:
         }
 
         // negative samples generation
-        vector<uint64_t> random_number_vec =
-            generate_random_numbers(0, (this->sp_local_receiver)->gRows, seed, ns);
+        vector<uint64_t> random_number_vec = generate_random_numbers(
+            0, (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
@@ -152,11 +152,11 @@ public:
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
 
-        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+        CSRLocal<SPT> *csr_block =
+            (this->sp_local_receiver)->csr_local_data.get();
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
-
 
         if (this->grid->world_size > 1) {
           if (!(i == 0 and j == 0)) {
@@ -184,8 +184,8 @@ public:
                                                   request_batch_update);
           mpi_requests[i * batches + j] = request_batch_update;
           if (i == iterations - 1 and j == batches - 1) {
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                     request_batch_update, false);
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), request_batch_update, false);
           }
           stop_clock_and_add(t, "Communication Time");
         }
@@ -202,10 +202,17 @@ public:
                                       int block_size, bool local) {
 
     auto source_start_index = batch_id * batch_size;
-    auto source_end_index = std::min((batch_id + 1) * batch_size,this->sp_local_receiver->proc_row_width) -1;
+    auto source_end_index = std::min((batch_id + 1) * batch_size,
+                                     this->sp_local_receiver->proc_row_width) -
+                            1;
 
-    auto dst_start_index = this->sp_local_receiver->proc_row_width * this->grid->global_rank;
-    auto dst_end_index = std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width *(this->grid->global_rank + 1)),this->sp_local_receiver->gCols) -1;
+    auto dst_start_index =
+        this->sp_local_receiver->proc_row_width * this->grid->global_rank;
+    auto dst_end_index =
+        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width *
+                                       (this->grid->global_rank + 1)),
+                 this->sp_local_receiver->gCols) -
+        1;
 
     if (local) {
       calc_embedding(source_start_index, source_end_index, dst_start_index,
@@ -216,7 +223,8 @@ public:
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
-              std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width * (r + 1)),
+              std::min(static_cast<uint64_t>(
+                           this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
           calc_embedding(source_start_index, source_end_index, dst_start_index,
@@ -236,7 +244,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-//#pragma omp parallel for schedule(static)
+      //#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         DENT forceDiff[embedding_dim];
@@ -251,32 +259,41 @@ public:
         bool matched = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          if (csr_handle->col_idx[j] >= source_start_index and csr_handle->col_idx[j] <= source_end_index) {
+          if (csr_handle->col_idx[j] >= source_start_index and
+              csr_handle->col_idx[j] <= source_end_index) {
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
 
             if (!matched) {
               if (fetch_from_cache) {
-//                colvec = (this->dense_local)
-//                             ->fetch_data_vector_from_cache(target_rank, i);
+                //                colvec = (this->dense_local)
+                //                             ->fetch_data_vector_from_cache(target_rank,
+                //                             i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               } else {
-//                colvec = (this->dense_local)->fetch_local_data(local_dst);
+                //                colvec =
+                //                (this->dense_local)->fetch_local_data(local_dst);
+
+                for (int d = 0; d < embedding_dim; d++) {
+                  forceDiff[d] = (this->dense_local) ->nCoordinates[source_id * embedding_dim + d]
+                }
               }
             }
-//            DENT attrc = 0;
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = (this->dense_local)
-//                                 ->nCoordinates[source_id * embedding_dim + d] -
-//                             colvec[d];
-//              attrc += forceDiff[d] * forceDiff[d];
-//            }
-//            DENT d1 = -2.0 / (1.0 + attrc);
-//            for (int d = 0; d < embedding_dim; d++) {
-//              forceDiff[d] = scale(forceDiff[d] * d1);
-//              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
-//            }
+            //            DENT attrc = 0;
+            //            for (int d = 0; d < embedding_dim; d++) {
+            //              forceDiff[d] = (this->dense_local)
+            //                                 ->nCoordinates[source_id *
+            //                                 embedding_dim + d] -
+            //                             colvec[d];
+            //              attrc += forceDiff[d] * forceDiff[d];
+            //            }
+            //            DENT d1 = -2.0 / (1.0 + attrc);
+            //            for (int d = 0; d < embedding_dim; d++) {
+            //              forceDiff[d] = scale(forceDiff[d] * d1);
+            //              prevCoordinates[index * embedding_dim + d] +=
+            //              (lr)*forceDiff[d];
+            //            }
           }
         }
       }
@@ -290,7 +307,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-//#pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
@@ -298,12 +315,12 @@ public:
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
             global_col_id -
-            static_cast<uint64_t>(
-                ((this->grid)->global_rank * (this->sp_local_receiver)->proc_row_width));
+            static_cast<uint64_t>(((this->grid)->global_rank *
+                                   (this->sp_local_receiver)->proc_row_width));
         bool fetch_from_cache = false;
 
-        int owner_rank =
-            static_cast<int>(global_col_id / (this->sp_local_receiver)->proc_row_width);
+        int owner_rank = static_cast<int>(
+            global_col_id / (this->sp_local_receiver)->proc_row_width);
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
@@ -348,7 +365,7 @@ public:
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
                            ((this->sp_local_receiver)->proc_row_width));
-//#pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)
