@@ -266,6 +266,9 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
+                if (grid->global_rank==0){
+                  cout<<" col id "<<i<<
+                }
                 colvec = (this->dense_local)->fetch_data_vector_from_cache(target_rank,i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
@@ -276,7 +279,9 @@ public:
                 for (int d = 0; d < embedding_dim; d++) {
                   forceDiff[d] = (this->dense_local) ->nCoordinates[local_dst * embedding_dim + d];
                 }
+
               }
+              matched = true;
             }
 
                         for (int d = 0; d < embedding_dim; d++) {
