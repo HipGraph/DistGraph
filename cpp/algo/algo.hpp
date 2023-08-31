@@ -123,15 +123,13 @@ public:
 
     vector<MPI_Request> mpi_requests(iterations * batches);
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations; i++) {
       cout << " global rank " << grid->global_rank << endl;
       for (int j = 0; j < batches; j++) {
 
-
         int seed = j + i;
-
-        for (int i = 0; i < batch_size; i += 1) {
-          int IDIM = i * embedding_dim;
+        for (int k = 0; k < batch_size; k += 1) {
+          int IDIM = k * embedding_dim;
           for (int d = 0; d < embedding_dim; d++) {
             prevCoordinates[IDIM + d] = 0;
           }
@@ -187,13 +185,11 @@ public:
           t = start_clock();
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   request_batch_update);
-          data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-                                                   request_batch_update, false);
-//          mpi_requests[i * batches + j] = request_batch_update;
-//          if (i == iterations - 1 and j == batches - 1) {
-//            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
-//                                                     request_batch_update, false);
-//          }
+          mpi_requests[i * batches + j] = request_batch_update;
+          if (i == iterations - 1 and j == batches - 1) {
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(),
+                                                     request_batch_update, false);
+          }
           stop_clock_and_add(t, "Communication Time");
         }
       }
