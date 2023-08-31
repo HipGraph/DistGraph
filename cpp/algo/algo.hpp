@@ -321,8 +321,7 @@ calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
                            int batch_size, int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-      DENT *temp_coords = static_cast<DENT *>(
-          ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+
       std::unordered_map<uint64_t, vector<uint64_t>> source_dst_map;
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
@@ -356,13 +355,11 @@ calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
           }
           DENT d1 = -2.0 / (1.0 + attrc);
 
-          for (int d = 0; d < embedding_dim; d++) {
-            DENT l = scale(forceDiff[d] * d1);
+//          for (int d = 0; d < embedding_dim; d++) {
+//            DENT l = scale(forceDiff[d] * d1);
 //            prevCoordinates[index * embedding_dim + d] =
 //                prevCoordinates[index * embedding_dim + d] + (lr)*l;
-            temp_coords[index * embedding_dim + d] =
-                prevCoordinates[index * embedding_dim + d] + (lr)*l;
-          }
+//          }
         }
       }
     }
