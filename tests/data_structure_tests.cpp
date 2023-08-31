@@ -82,6 +82,11 @@ int main(int argc, char **argv) {
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, false, true);
 
+  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<int>>(
+      copiedVector, shared_sparseMat.get()->gRows,
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, true, false);
+
+
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
 
@@ -89,15 +94,9 @@ int main(int argc, char **argv) {
 
 
 
-  partitioner.get()->partition_data(shared_sparseMat.get());
   partitioner.get()->partition_data(shared_sparseMat_sender.get());
-
-  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<int>>(
-      copiedVector, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, true, false);
-//  partitioner.get()->partition_data(shared_sparseMat_receiver.get());
-
-
+  partitioner.get()->partition_data(shared_sparseMat_receiver.get());
+  partitioner.get()->partition_data(shared_sparseMat.get());
 
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
