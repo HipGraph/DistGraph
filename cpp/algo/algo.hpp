@@ -257,15 +257,16 @@ public:
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
               csr_handle->col_idx[j] <= source_end_index) {
+            DENT forceDiff[embedding_dim];
+            auto source_id = csr_handle->col_idx[j];
+            auto index = source_id - batch_id * batch_size;
 
             for (int d = 0; d < embedding_dim; d++) {
                           DENT l = 0.0123;
                           prevCoordinates[index * embedding_dim + d] =
                               prevCoordinates[index * embedding_dim + d] + (lr)*l;
             }
-            DENT forceDiff[embedding_dim];
-            auto source_id = csr_handle->col_idx[j];
-            auto index = source_id - batch_id * batch_size;
+
             if (!matched) {
               if (fetch_from_cache) {
                 array_ptr =
