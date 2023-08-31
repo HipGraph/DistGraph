@@ -158,19 +158,19 @@ int main(int argc, char **argv) {
 //
 //
 //  cout << " rank " << rank << " training completed  " << endl;
-//  ofstream fout;
-//  fout.open("perf_output", std::ios_base::app);
-//
-//  json j_obj;
-//  j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
-//  if(rank == 0) {
-//    fout << j_obj.dump(4) << "," << endl;
-//  }
-//
-//  fout.close();
+  ofstream fout;
+  fout.open("perf_output", std::ios_base::app);
+
+  json j_obj;
+  j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
+  if(rank == 0) {
+    fout << j_obj.dump(4) << "," << endl;
+  }
+
+  fout.close();
 
 
-//  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
+  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
 //    dense_mat.get()->print_matrix_rowptr(0);
 
 
