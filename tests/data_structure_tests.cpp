@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
 
   //To enable full batch size
-  batch_size = localARows;
+//  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 ////
   MPI_Barrier(MPI_COMM_WORLD);
   cout << " rank " << rank << "  algo started  " << endl;
-  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
   cout << " rank " << rank << " async completed  " << endl;
 //
 //
