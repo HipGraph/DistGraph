@@ -257,13 +257,13 @@ public:
         std::array<DENT, embedding_dim> colvec;
 
         bool matched = false;
+        DENT *array_ptr = nullptr;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
               csr_handle->col_idx[j] <= source_end_index) {
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
-            DENT *array_ptr = nullptr;
             if (!matched) {
               if (fetch_from_cache) {
                 array_ptr =
