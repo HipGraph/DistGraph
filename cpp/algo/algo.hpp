@@ -276,7 +276,7 @@ public:
                 //                (this->dense_local)->fetch_local_data(local_dst);
 
                 for (int d = 0; d < embedding_dim; d++) {
-                  forceDiff[d] = (this->dense_local) ->nCoordinates[source_id * embedding_dim + d]
+                  forceDiff[d] = (this->dense_local) ->nCoordinates[local_dst * embedding_dim + d]
                 }
               }
             }
