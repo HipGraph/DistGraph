@@ -215,9 +215,12 @@ public:
         1;
 
     if (local) {
-      calc_embedding(source_start_index, source_end_index, dst_start_index,
-                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                     batch_size, block_size);
+//      calc_embedding(source_start_index, source_end_index, dst_start_index,
+//                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+//                     batch_size, block_size);
+calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
+                         dst_end_index, csr_block, prevCoordinates, lr,
+                         batch_id, batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -227,7 +230,10 @@ public:
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-          calc_embedding(source_start_index, source_end_index, dst_start_index,
+//          calc_embedding(source_start_index, source_end_index, dst_start_index,
+//                         dst_end_index, csr_block, prevCoordinates, lr,
+//                         batch_id, batch_size, block_size);
+          calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
                          dst_end_index, csr_block, prevCoordinates, lr,
                          batch_id, batch_size, block_size);
         }
@@ -289,78 +295,12 @@ public:
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-//            for (int d = 0; d < embedding_dim; d++) {
-////              DENT l = scale(forceDiff[d] * d1);
-//              DENT l = 0.123;
-//              prevCoordinates[index * embedding_dim + d]=
-//                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
-//            }
-            //            cout<< endl;
-          }
-        }
-      }
-    }
-  }
-
-
-  inline void calc_embedding_row_major(uint64_t source_start_index,
-                             uint64_t source_end_index,
-                             uint64_t dst_start_index, uint64_t dst_end_index,
-                             CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
-                             DENT lr, int batch_id, int batch_size,
-                             int block_size) {
-    if (csr_block->handler != nullptr) {
-      CSRHandle *csr_handle = csr_block->handler.get();
-
-      for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
-
-        uint64_t local_dst = i - (this->grid)->global_rank *
-                                     (this->sp_local_receiver)->proc_row_width;
-        int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
-        bool fetch_from_cache =
-            target_rank == (this->grid)->global_rank ? false : true;
-        bool matched = false;
-        DENT *array_ptr = nullptr;
-        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          if (csr_handle->col_idx[j] >= source_start_index and
-              csr_handle->col_idx[j] <= source_end_index) {
-            DENT forceDiff[embedding_dim];
-            auto source_id = csr_handle->col_idx[j];
-            auto index = source_id - batch_id * batch_size;
-
-            if (!matched) {
-              if (fetch_from_cache) {
-                array_ptr =
-                    (this->dense_local)
-                        ->fetch_data_vector_from_cache_ptr(target_rank, i);
-                // If not in cache we should fetch that from remote for limited
-                // cache
-              }
-              matched = true;
-            }
-            DENT attrc = 0;
-            for (int d = 0; d < embedding_dim; d++) {
-              if (!fetch_from_cache) {
-                forceDiff[d] =
-                    (this->dense_local)
-                        ->nCoordinates[source_id * embedding_dim + d] -
-                    (this->dense_local)
-                        ->nCoordinates[local_dst * embedding_dim + d];
-              } else {
-                forceDiff[d] =
-                    (this->dense_local)
-                        ->nCoordinates[source_id * embedding_dim + d] -
-                    array_ptr[d];
-              }
-              attrc += forceDiff[d] * forceDiff[d];
-            }
-            DENT d1 = -2.0 / (1.0 + attrc);
-
             //            for (int d = 0; d < embedding_dim; d++) {
-            //              DENT l = scale(forceDiff[d] * d1);
-            //              DENT fl =
-            //                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
+            ////              DENT l = scale(forceDiff[d] * d1);
+            //              DENT l = 0.123;
+            //              prevCoordinates[index * embedding_dim + d]=
+            //                  prevCoordinates[index * embedding_dim + d] +
+            //                  (lr)*l;
             //            }
             //            cout<< endl;
           }
@@ -369,8 +309,70 @@ public:
     }
   }
 
+  inline void calc_embedding_row_major(uint64_t source_start_index,
+                           uint64_t source_end_index, uint64_t dst_start_index,
+                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
+                           DENT *prevCoordinates, DENT lr, int batch_id,
+                           int batch_size, int block_size) {
+    if (csr_block->handler != nullptr) {
+      CSRHandle *csr_handle = csr_block->handler.get();
 
+      std::unordered_map<uint64_t, vector<uint64_t>> source_dst_map;
+      for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
+        uint64_t local_dst = i - (this->grid)->global_rank *
+                                     (this->sp_local_receiver)->proc_row_width;
+        int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
+        bool fetch_from_cache =
+            target_rank == (this->grid)->global_rank ? false : true;
+        bool matched = false;
+        DENT *array_ptr = nullptr;
+        uint64_t index = i - batch_id * batch_size;
+        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
+             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+          auto dst_id = csr_handle->col_idx[j];
+          uint64_t local_dst =
+              dst_id - (this->grid)->global_rank *
+                           (this->sp_local_receiver)->proc_row_width;
+          int target_rank =
+              (int)(dst_id / (this->sp_local_receiver)->proc_row_width);
+          bool fetch_from_cache =
+              target_rank == (this->grid)->global_rank ? false : true;
+          bool matched = false;
+          DENT forceDiff[embedding_dim];
+          if (fetch_from_cache) {
+            array_ptr =
+                (this->dense_local)
+                    ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+            // If not in cache we should fetch that from remote for limited
+            // cache
+          }
+
+          DENT attrc = 0;
+          for (int d = 0; d < embedding_dim; d++) {
+            if (!fetch_from_cache) {
+              forceDiff[d] =
+                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                  (this->dense_local)
+                      ->nCoordinates[local_dst * embedding_dim + d];
+            } else {
+              forceDiff[d] =
+                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                  array_ptr[d];
+            }
+            attrc += forceDiff[d] * forceDiff[d];
+          }
+          DENT d1 = -2.0 / (1.0 + attrc);
+
+          for (int d = 0; d < embedding_dim; d++) {
+            DENT l = scale(forceDiff[d] * d1);
+            prevCoordinates[index * embedding_dim + d] =
+                prevCoordinates[index * embedding_dim + d] + (lr)*l;
+          }
+        }
+      }
+    }
+  }
 
   inline void calc_t_dist_replus_rowptr(DENT *prevCoordinates,
                                         vector<uint64_t> &col_ids, DENT lr,

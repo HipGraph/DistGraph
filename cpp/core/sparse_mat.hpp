@@ -32,6 +32,7 @@ public:
   bool transpose = false;
   bool col_partitioned = false;
   unique_ptr<CSRLocal<T>> csr_local_data;
+  unique_ptr<CSRLocal<T>> csr_local_data_native;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -78,6 +79,8 @@ public:
       csr_local_data =
           make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
                                    coords_ptr, coords.size(), transpose);
+      csr_local_data_native = make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
+                                                       coords_ptr, coords.size(), false);
     }
   }
 
