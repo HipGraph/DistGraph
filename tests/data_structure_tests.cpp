@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
   fout.close();
 
 
-  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
+//  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
 //    dense_mat.get()->print_matrix_rowptr(0);
 
 
