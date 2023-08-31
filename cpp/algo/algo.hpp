@@ -247,21 +247,20 @@ public:
       //#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
-        DENT forceDiff[embedding_dim];
+
 
         uint64_t local_dst = i - (this->grid)->global_rank *
                                      (this->sp_local_receiver)->proc_row_width;
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;
-        std::array<DENT, embedding_dim> colvec;
-
         bool matched = false;
         DENT *array_ptr = nullptr;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
               csr_handle->col_idx[j] <= source_end_index) {
+            DENT forceDiff[embedding_dim];
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
             if (!matched) {
@@ -291,8 +290,7 @@ public:
 
             for (int d = 0; d < embedding_dim; d++) {
                  DENT  l = forceDiff[d]*d1;
-//                   cout<< forceDiff[d] * d1<<" ";
-//              forceDiff[d] = scale(forceDiff[d] * d1);
+               forceDiff[d] = scale(l);
 //              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
             }
 //            cout<< endl;
