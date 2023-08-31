@@ -207,9 +207,9 @@ public:
                             1;
 
     auto dst_start_index =
-        this->sp_local_receiver->proc_row_width * this->grid->global_rank;
+        this->sp_local_receiver->proc_col_width * this->grid->global_rank;
     auto dst_end_index =
-        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width *
+        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
                                        (this->grid->global_rank + 1)),
                  this->sp_local_receiver->gCols) -
         1;
@@ -266,9 +266,9 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                //                colvec = (this->dense_local)
-                //                             ->fetch_data_vector_from_cache(target_rank,
-                //                             i);
+//                colvec = (this->dense_local)
+//                                             ->fetch_data_vector_from_cache(target_rank,
+//                                             i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               } else {
@@ -280,6 +280,8 @@ public:
                 }
               }
             }
+            (this->dense_local)->nCoordinates[source_id *embedding_dim + d];
+
             //            DENT attrc = 0;
             //            for (int d = 0; d < embedding_dim; d++) {
             //              forceDiff[d] = (this->dense_local)
