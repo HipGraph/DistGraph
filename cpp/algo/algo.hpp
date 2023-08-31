@@ -128,6 +128,8 @@ public:
     for (int i = 0; i < 1; i++) {
       cout << " global rank " << grid->global_rank << endl;
       for (int j = 0; j < batches; j++) {
+        data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,
+                                                fetch_all);
 
         int seed = j + i;
 
@@ -186,8 +188,7 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,
-                                                  fetch_all);
+
 //          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
 //                                                  request_batch_update);
 //          mpi_requests[i * batches + j] = request_batch_update;
