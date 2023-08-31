@@ -266,7 +266,14 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                colvec = (this->dense_local)->fetch_data_vector_from_cache(target_rank,i);
+                DENT* array_ptr  = (this->dense_local)->fetch_data_vector_from_cache_ptr(target_rank,i);
+                for (int d = 0; d < embedding_dim; d++) {
+                  array_ptr[d]
+                  if (grid->global_rank== 0) {
+                    cout << " value of "<< " col " << i << " " << array_ptr[d] << endl;
+                  }
+                }
+                cout<<endl;
                 // If not in cache we should fetch that from remote for limited
                 // cache
               } else {
@@ -281,9 +288,9 @@ public:
               matched = true;
             }
 
-                        for (int d = 0; d < embedding_dim; d++) {
-                          (this->dense_local)->nCoordinates[source_id *embedding_dim + d];
-                        }
+            for (int d = 0; d < embedding_dim; d++) {
+              (this->dense_local)->nCoordinates[source_id *embedding_dim + d];
+            }
 
 
             //            DENT attrc = 0;

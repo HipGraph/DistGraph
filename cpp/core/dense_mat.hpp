@@ -70,6 +70,20 @@ public:
     return (*this->cachePtr)[rank][key];
   }
 
+  DENT *fetch_data_vector_from_cache_ptr(int rank, uint64_t key) {
+    //    return (*this->cachePtr)[rank][key];
+
+    // Access the array using the provided rank and key
+    auto &arrayMap = cachePtr[rank];
+    auto it = arrayMap.find(key);
+
+    if (it != arrayMap.end()) {
+      return it->second.data(); // Pointer to the array's data
+    } else {
+      return nullptr; // Key not found
+    }
+  }
+
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
     std::array<DENT, embedding_dim> stdArray;
 
