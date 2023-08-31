@@ -262,7 +262,7 @@ public:
                 // If not in cache we should fetch that from remote for limited
                 // cache
               } else {
-                colvec = (this->dense_local)->fetch_local_data(local_dst);
+//                colvec = (this->dense_local)->fetch_local_data(local_dst);
               }
             }
 //            DENT attrc = 0;
