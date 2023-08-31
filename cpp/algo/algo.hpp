@@ -288,11 +288,11 @@ public:
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-            vector<vector<DENT>>(batch_size);
+            vector<vector<DENT>> temp_vec(batch_size);
 
             for (int d = 0; d < embedding_dim; d++) {
                  DENT  l = scale(forceDiff[d]*d1);
-                 vector[index].push_back(prevCoordinates[index * embedding_dim + d]+(lr)*l);
+                 temp_vec[index].push_back(prevCoordinates[index * embedding_dim + d]+(lr)*l);
             }
 //            cout<< endl;
           }
