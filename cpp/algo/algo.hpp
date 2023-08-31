@@ -243,11 +243,9 @@ public:
                              int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
-      vector<vector<DENT>> temp_vec(batch_size);
-      //#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
-
-
 
         uint64_t local_dst = i - (this->grid)->global_rank *
                                      (this->sp_local_receiver)->proc_row_width;
@@ -276,25 +274,27 @@ public:
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-                forceDiff[d] = (this->dense_local)
-                                   ->nCoordinates[source_id * embedding_dim + d] -
-                               (this->dense_local)
-                                   ->nCoordinates[local_dst * embedding_dim + d];
-              }else {
-                forceDiff[d] = (this->dense_local)
-                                   ->nCoordinates[source_id * embedding_dim + d] -array_ptr[d];
+                forceDiff[d] =
+                    (this->dense_local)
+                        ->nCoordinates[source_id * embedding_dim + d] -
+                    (this->dense_local)
+                        ->nCoordinates[local_dst * embedding_dim + d];
+              } else {
+                forceDiff[d] =
+                    (this->dense_local)
+                        ->nCoordinates[source_id * embedding_dim + d] -
+                    array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-
-
             for (int d = 0; d < embedding_dim; d++) {
-                 DENT  l = scale(forceDiff[d]*d1);
-                 temp_vec[index].push_back(prevCoordinates[index * embedding_dim + d]+(lr)*l);
+              DENT l = scale(forceDiff[d] * d1);
+              prevCoordinates[index * embedding_dim + d] =
+                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
             }
-//            cout<< endl;
+            //            cout<< endl;
           }
         }
       }
