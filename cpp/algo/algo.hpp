@@ -368,6 +368,7 @@ public:
             DENT l = scale(forceDiff[d] * d1);
 //            prevCoordinates[index * embedding_dim + d] =
 //                prevCoordinates[index * embedding_dim + d] + (lr)*l;
+            DENT fl = prevCoordinates[index * embedding_dim + d] + (lr)*l;
           }
         }
       }
