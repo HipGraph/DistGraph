@@ -322,45 +322,31 @@ calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
       std::unordered_map<uint64_t, vector<uint64_t>> source_dst_map;
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
-        uint64_t local_dst = i - (this->grid)->global_rank *
-                                     (this->sp_local_receiver)->proc_row_width;
-        int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
-        bool fetch_from_cache =
-            target_rank == (this->grid)->global_rank ? false : true;
-        bool matched = false;
-        DENT *array_ptr = nullptr;
         uint64_t index = i - batch_id * batch_size;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
           uint64_t local_dst =
               dst_id - (this->grid)->global_rank *
-                           (this->sp_local_receiver)->proc_row_width;
+                           (this->sp_local_receiver)->proc_col_width;
           int target_rank =
-              (int)(dst_id / (this->sp_local_receiver)->proc_row_width);
+              (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
           bool fetch_from_cache =
               target_rank == (this->grid)->global_rank ? false : true;
           bool matched = false;
           DENT forceDiff[embedding_dim];
+          DENT *array_ptr = nullptr;
           if (fetch_from_cache) {
-            array_ptr =
-                (this->dense_local)
-                    ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+            array_ptr = (this->dense_local)->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
             // If not in cache we should fetch that from remote for limited
             // cache
           }
-
           DENT attrc = 0;
           for (int d = 0; d < embedding_dim; d++) {
             if (!fetch_from_cache) {
-              forceDiff[d] =
-                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-                  (this->dense_local)
-                      ->nCoordinates[local_dst * embedding_dim + d];
+              forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] - (this->dense_local)->nCoordinates[local_dst * embedding_dim + d];
             } else {
-              forceDiff[d] =
-                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-                  array_ptr[d];
+              forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] - array_ptr[d];
             }
             attrc += forceDiff[d] * forceDiff[d];
           }
