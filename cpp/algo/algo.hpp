@@ -154,8 +154,10 @@ public:
 
         CSRLocal<SPT> *csr_block =
             (this->sp_local_receiver)->csr_local_data.get();
+        CSRLocal<SPT> *csr_block_native =
+            (this->sp_local_receiver)->csr_local_data_native.get();
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
@@ -168,7 +170,7 @@ public:
             t = start_clock();
           }
 
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
                                         false);
           stop_clock_and_add(t, "Computation Time");
