@@ -125,8 +125,7 @@ public:
 
     vector<MPI_Request> mpi_requests(iterations * batches);
 
-    data_comm_cache[0].get()->transfer_data(fetch_all_ptr.get(), false,
-                                            fetch_all);
+
 
     for (int i = 0; i < 1; i++) {
       cout << " global rank " << grid->global_rank << endl;
