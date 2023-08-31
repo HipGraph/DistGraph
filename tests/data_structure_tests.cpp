@@ -125,12 +125,6 @@ int main(int argc, char **argv) {
 //  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
 
 
-  auto ini_csr_duration = std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end - ini_csr_start).count();
-  auto ini_csr_duration1 =
-      std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end1 -ini_csr_start).count();
-  auto ini_csr_duration2 =
-      std::chrono::duration_cast<std::chrono::microseconds>(ini_csr_end2 -ini_csr_end1).count();
-
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get() ,localARows));

@@ -291,7 +291,7 @@ public:
 
             for (int d = 0; d < embedding_dim; d++) {
 //              forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
+//              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
             }
           }
         }
