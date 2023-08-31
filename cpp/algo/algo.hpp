@@ -140,7 +140,7 @@ public:
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          negative_update_com.get()->transfer_data(random_number_vec);
+//          negative_update_com.get()->transfer_data(random_number_vec);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
