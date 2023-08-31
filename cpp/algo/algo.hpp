@@ -324,8 +324,6 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      vector<DENT> data_array(block_size*embedding_dim);
-
       #pragma omp parallel for schedule(static) // enable for full batch training or batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
@@ -370,12 +368,7 @@ public:
             DENT l = scale(forceDiff[d] * d1);
 //            prevCoordinates[index * embedding_dim + d] =
 //                prevCoordinates[index * embedding_dim + d] + (lr)*l;
-            DENT fl = prevCoordinates[index * embedding_dim + d] + (lr)*l;
-//            data_array[index * embedding_dim + d]= fl;
-            DENT fl_mod = fl* 3.4;
-            if (fl_mod<-100000){
-              cout<<" this is not good"<<endl;
-            }
+            prevCoordinates[index * embedding_dim + d] =  (lr)*l;
           }
         }
       }
