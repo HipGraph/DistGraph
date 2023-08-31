@@ -270,7 +270,7 @@ public:
                 for (int d = 0; d < embedding_dim; d++) {
                   array_ptr[d];
                   if (grid->global_rank== 0) {
-                    cout << " value of "<< " col " << i << " " << array_ptr[d] << endl;
+                    cout << " value of "<< " col " << i << " " << array_ptr[d] << ;
                   }
                 }
                 cout<<endl;
