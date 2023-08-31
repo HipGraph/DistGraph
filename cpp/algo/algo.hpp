@@ -140,7 +140,7 @@ public:
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-//          negative_update_com.get()->transfer_data(random_number_vec);
+          negative_update_com.get()->transfer_data(random_number_vec);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -149,13 +149,13 @@ public:
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-//                                        j, batch_size, considering_batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
 
         CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
-//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size, true);
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, true);
 
 
         if (this->grid->world_size > 1) {
@@ -168,12 +168,12 @@ public:
             t = start_clock();
           }
 
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        false);
           stop_clock_and_add(t, "Computation Time");
         }
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         update_ptr.get()->clear();
 
         if (this->grid->world_size > 1) {
@@ -236,7 +236,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         DENT forceDiff[embedding_dim];
@@ -290,7 +290,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
@@ -348,7 +348,7 @@ public:
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
                            ((this->sp_local_receiver)->proc_row_width));
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)
