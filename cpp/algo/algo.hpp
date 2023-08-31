@@ -90,14 +90,14 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
 
     MPI_Request fetch_all;
-//    negative_update_com.get()->onboard_data();
+    negative_update_com.get()->onboard_data();
     cout << " rank " << this->grid->global_rank << " onboard_data completed "
          << batches << endl;
     stop_clock_and_add(t, "Computation Time");
 
     t = start_clock();
-//    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
-//                                             fetch_all);
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
+                                             fetch_all);
     stop_clock_and_add(t, "Communication Time");
 
     t = start_clock();
@@ -105,10 +105,10 @@ public:
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
               sp_local_receiver, sp_local_sender, dense_local, grid,-1 ));
-      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
-      data_comm_cache[i].get()->onboard_data();
-      data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,
-                                                   fetch_all);
+//      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+//      data_comm_cache[i].get()->onboard_data();
+//      data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,
+//                                                   fetch_all);
     }
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
