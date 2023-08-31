@@ -110,7 +110,7 @@ public:
       data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,
                                                    fetch_all);
       data_comm_cache[i].get()->populate_cache(
-          update_ptr.get(), fetch_all, false);
+          fetch_all_ptr.get(), fetch_all, false);
     }
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
