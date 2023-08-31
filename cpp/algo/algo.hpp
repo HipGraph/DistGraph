@@ -289,7 +289,7 @@ public:
             DENT d1 = -2.0 / (1.0 + attrc);
 
             for (int d = 0; d < embedding_dim; d++) {
-                 DENT  l = forceDiff[d]*d1;
+                 DENT  l = scale(forceDiff[d]*d1);
 //               forceDiff[d] = l;
 //              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
             }
