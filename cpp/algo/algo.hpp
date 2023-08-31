@@ -272,29 +272,29 @@ public:
               matched = true;
             }
             DENT attrc = 0;
-//            for (int d = 0; d < embedding_dim; d++) {
-//              if (!fetch_from_cache) {
-//                forceDiff[d] =
-//                    (this->dense_local)
-//                        ->nCoordinates[source_id * embedding_dim + d] -
-//                    (this->dense_local)
-//                        ->nCoordinates[local_dst * embedding_dim + d];
-//              } else {
-//                forceDiff[d] =
-//                    (this->dense_local)
-//                        ->nCoordinates[source_id * embedding_dim + d] -
-//                    array_ptr[d];
-//              }
-//              attrc += forceDiff[d] * forceDiff[d];
-//            }
+            for (int d = 0; d < embedding_dim; d++) {
+              if (!fetch_from_cache) {
+                forceDiff[d] =
+                    (this->dense_local)
+                        ->nCoordinates[source_id * embedding_dim + d] -
+                    (this->dense_local)
+                        ->nCoordinates[local_dst * embedding_dim + d];
+              } else {
+                forceDiff[d] =
+                    (this->dense_local)
+                        ->nCoordinates[source_id * embedding_dim + d] -
+                    array_ptr[d];
+              }
+              attrc += forceDiff[d] * forceDiff[d];
+            }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-            for (int d = 0; d < embedding_dim; d++) {
-//              DENT l = scale(forceDiff[d] * d1);
-              DENT l = 0.123;
-              prevCoordinates[index * embedding_dim + d]=
-                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
-            }
+//            for (int d = 0; d < embedding_dim; d++) {
+////              DENT l = scale(forceDiff[d] * d1);
+//              DENT l = 0.123;
+//              prevCoordinates[index * embedding_dim + d]=
+//                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
+//            }
             //            cout<< endl;
           }
         }
