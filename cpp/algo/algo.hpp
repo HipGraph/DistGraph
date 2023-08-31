@@ -126,6 +126,8 @@ public:
     vector<MPI_Request> mpi_requests(iterations * batches);
 
     for (int i = 0; i < iterations; i++) {
+      if (this->grid->global_rank == 0) cout << " iteration "<<i<<endl;
+
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
@@ -322,7 +324,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      std::unordered_map<uint64_t, vector<uint64_t>> source_dst_map;
+      #pragma omp parallel for schedule(static) // enable for full batch training or batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -379,7 +381,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-    //#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
@@ -437,7 +439,7 @@ public:
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
                            ((this->sp_local_receiver)->proc_row_width));
-    //#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)
