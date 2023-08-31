@@ -292,7 +292,7 @@ public:
                  DENT  l = scale(forceDiff[d]*d1);
                  DENT fl = prevCoordinates[index * embedding_dim + d] +(lr)*l;
                  DENT* pt = &prevCoordinates[index * embedding_dim];
-//                            *(pt+d) = fl;
+                 *(pt+d) = fl;
             }
 //            cout<< endl;
           }
