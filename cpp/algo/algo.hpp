@@ -266,11 +266,7 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-//                colvec = (this->dense_local)
-//                                             ->fetch_data_vector_from_cache(target_rank,
-//                                             i);
-
-
+                colvec = (this->dense_local)->fetch_data_vector_from_cache(target_rank,i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               } else {
