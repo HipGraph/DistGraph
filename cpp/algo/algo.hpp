@@ -173,8 +173,8 @@ public:
             t = start_clock();
           }
 
-          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
-                                        batch_size, considering_batch_size,
+          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr,
+                                        j, batch_size, considering_batch_size,
                                         false);
           stop_clock_and_add(t, "Computation Time");
         }
@@ -220,12 +220,13 @@ public:
         1;
 
     if (local) {
-//      calc_embedding(source_start_index, source_end_index, dst_start_index,
-//                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-//                     batch_size, block_size);
-calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
-                         dst_end_index, csr_block, prevCoordinates, lr,
-                         batch_id, batch_size, block_size);
+      //      calc_embedding(source_start_index, source_end_index,
+      //      dst_start_index,
+      //                     dst_end_index, csr_block, prevCoordinates, lr,
+      //                     batch_id, batch_size, block_size);
+      calc_embedding_row_major(
+          source_start_index, source_end_index, dst_start_index, dst_end_index,
+          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -235,12 +236,14 @@ calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-//          calc_embedding(source_start_index, source_end_index, dst_start_index,
-//                         dst_end_index, csr_block, prevCoordinates, lr,
-//                         batch_id, batch_size, block_size);
-          calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
-                         dst_end_index, csr_block, prevCoordinates, lr,
-                         batch_id, batch_size, block_size);
+          //          calc_embedding(source_start_index, source_end_index,
+          //          dst_start_index,
+          //                         dst_end_index, csr_block, prevCoordinates,
+          //                         lr, batch_id, batch_size, block_size);
+          calc_embedding_row_major(source_start_index, source_end_index,
+                                   dst_start_index, dst_end_index, csr_block,
+                                   prevCoordinates, lr, batch_id, batch_size,
+                                   block_size);
         }
       }
     }
@@ -300,14 +303,11 @@ calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
-            //            for (int d = 0; d < embedding_dim; d++) {
-            ////              DENT l = scale(forceDiff[d] * d1);
-            //              DENT l = 0.123;
-            //              prevCoordinates[index * embedding_dim + d]=
-            //                  prevCoordinates[index * embedding_dim + d] +
-            //                  (lr)*l;
-            //            }
-            //            cout<< endl;
+            for (int d = 0; d < embedding_dim; d++) {
+              DENT l = scale(forceDiff[d] * d1);
+              prevCoordinates[index * embedding_dim + d] =
+                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
+            }
           }
         }
       }
@@ -340,16 +340,23 @@ calc_embedding_row_major(source_start_index, source_end_index, dst_start_index,
           DENT forceDiff[embedding_dim];
           DENT *array_ptr = nullptr;
           if (fetch_from_cache) {
-            array_ptr = (this->dense_local)->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+            array_ptr =
+                (this->dense_local)
+                    ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
             // If not in cache we should fetch that from remote for limited
             // cache
           }
           DENT attrc = 0;
           for (int d = 0; d < embedding_dim; d++) {
             if (!fetch_from_cache) {
-              forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] - (this->dense_local)->nCoordinates[local_dst * embedding_dim + d];
+              forceDiff[d] =
+                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                  (this->dense_local)
+                      ->nCoordinates[local_dst * embedding_dim + d];
             } else {
-              forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] - array_ptr[d];
+              forceDiff[d] =
+                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                  array_ptr[d];
             }
             attrc += forceDiff[d] * forceDiff[d];
           }

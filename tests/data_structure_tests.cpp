@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   cout << " file_path " << file_path << endl;
 
   int batch_size = 256 ;
-   const  int dimension = 2;
+   const  int dimension = 128;
 
 
   MPI_Init(&argc, &argv);
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
 
   //To enable full batch size
-//  batch_size = localARows;
+  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
@@ -86,11 +86,6 @@ int main(int argc, char **argv) {
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, true, false);
 
-//
-//  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
-//  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
-//      copiedVectorTwo, shared_sparseMat.get()->gRows,
-//      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,localARows, localBRows, true, false);
 
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
@@ -106,37 +101,13 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
-
-  auto ini_csr_start = std::chrono::high_resolution_clock::now();
   shared_sparseMat.get()->initialize_CSR_blocks();
-
-  auto ini_csr_end1 = std::chrono::high_resolution_clock::now();
-//  shared_sparseMat.get()->print_blocks_and_cols(false);
-
-//  cout << " rank " << rank << " initialize_CSR_blocks  completed  " << endl;
-
   shared_sparseMat_sender.get()->initialize_CSR_blocks();
   shared_sparseMat_receiver.get()->initialize_CSR_blocks();
-// shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
-
-//  cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
-  auto ini_csr_end2 = std::chrono::high_resolution_clock::now();
-//  shared_sparseMat_combined.get()->initialize_CSR_blocks();
-
-//  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
-
-//  cout << " rank " << rank << " initialize_CSR_block   completed  " << endl;
-
-  auto ini_csr_end = std::chrono::high_resolution_clock::now();
-
-//  shared_sparseMat_combined.get()->print_blocks_and_cols(false);
-
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<int,double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get() ,localARows));
-
-
 
   unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
       embedding_algo =
@@ -148,14 +119,10 @@ int main(int argc, char **argv) {
                                                                      grid.get(),
                                                                      5,
                                                                      -5));
-//
-//  auto end_init = std::chrono::high_resolution_clock::now();
-////  dense_mat.get()->print_matrix();
-////  dense_mat.get()->print_cache(0);
-////
+
   MPI_Barrier(MPI_COMM_WORLD);
   cout << " rank " << rank << "  algo started  " << endl;
-  embedding_algo.get()->algo_force2_vec_ns(1200, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
   cout << " rank " << rank << " async completed  " << endl;
 //
 //
@@ -171,7 +138,7 @@ int main(int argc, char **argv) {
 
   fout.close();
 //
-  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
+//  reader->parallel_write("embedding.txt", dense_mat.get()->nCoordinates,localARows, dimension);
 //    dense_mat.get()->print_matrix_rowptr(0);
 
 
