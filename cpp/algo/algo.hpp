@@ -290,11 +290,12 @@ public:
             DENT d1 = -2.0 / (1.0 + attrc);
 
             for (int d = 0; d < embedding_dim; d++) {
-                   cout<< forceDiff[d] * d1<<" ";
+                 int i = d + 1;
+//                   cout<< forceDiff[d] * d1<<" ";
 //              forceDiff[d] = scale(forceDiff[d] * d1);
 //              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
             }
-            cout<< endl;
+//            cout<< endl;
           }
         }
       }
