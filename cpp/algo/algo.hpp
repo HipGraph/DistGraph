@@ -277,22 +277,21 @@ public:
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-//                forceDiff[d] = (this->dense_local)
-//                                   ->nCoordinates[source_id * embedding_dim + d] -
-//                               (this->dense_local)
-//                                   ->nCoordinates[local_dst * embedding_dim + d];
-              }else {
                 forceDiff[d] = (this->dense_local)
                                    ->nCoordinates[source_id * embedding_dim + d] -
-                               array_ptr[d];
+                               (this->dense_local)
+                                   ->nCoordinates[local_dst * embedding_dim + d];
+              }else {
+                forceDiff[d] = (this->dense_local)
+                                   ->nCoordinates[source_id * embedding_dim + d] -array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
-            DENT d1 = -2.0 / (1.0 + attrc);
-            for (int d = 0; d < embedding_dim; d++) {
-              forceDiff[d] = scale(forceDiff[d] * d1);
-              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
-            }
+//            DENT d1 = -2.0 / (1.0 + attrc);
+//            for (int d = 0; d < embedding_dim; d++) {
+//              forceDiff[d] = scale(forceDiff[d] * d1);
+//              prevCoordinates[index * embedding_dim + d] += (lr)*forceDiff[d];
+//            }
           }
         }
       }
