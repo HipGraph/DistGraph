@@ -270,7 +270,6 @@ public:
                 for (int d = 0; d < embedding_dim; d++) {
                   array_ptr[d];
                 }
-                cout<<endl;
                 // If not in cache we should fetch that from remote for limited
                 // cache
               } else {
