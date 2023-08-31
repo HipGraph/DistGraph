@@ -29,6 +29,7 @@ private:
   DenseMat<SPT, DENT, embedding_dim> *dense_local;
   distblas::core::SpMat<SPT> *sp_local_receiver;
   distblas::core::SpMat<SPT> *sp_local_sender;
+  distblas::core::SpMat<SPT> *sp_local_native;
   Process3DGrid *grid;
   DENT MAX_BOUND, MIN_BOUND;
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
@@ -40,7 +41,8 @@ private:
   map<string, double> total_time;
 
 public:
-  EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_receiver,
+  EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
+                distblas::core::SpMat<SPT> *sp_local_receiver,
                 distblas::core::SpMat<SPT> *sp_local_sender,
                 DenseMat<SPT, DENT, embedding_dim> *dense_local,
                 Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
@@ -48,6 +50,7 @@ public:
     this->dense_local = dense_local;
     this->sp_local_sender = sp_local_sender;
     this->sp_local_receiver = sp_local_receiver;
+    this->sp_local_native = sp_local_native;
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
 
@@ -155,7 +158,7 @@ public:
         CSRLocal<SPT> *csr_block =
             (this->sp_local_receiver)->csr_local_data.get();
         CSRLocal<SPT> *csr_block_native =
-            (this->sp_local_receiver)->csr_local_data_native.get();
+            (this->sp_local_native)->csr_local_data.get();
 
         this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);

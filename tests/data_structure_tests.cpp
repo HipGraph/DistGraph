@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   shared_sparseMat.get()->batch_size = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
   shared_sparseMat.get()->proc_col_width = localBRows;
-  shared_sparseMat.get()->transpose = true;
+
 
   cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
        << "gCols" << shared_sparseMat.get()->gCols << endl;
@@ -81,6 +81,11 @@ int main(int argc, char **argv) {
   auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<int>>(
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, false, true);
+
+  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<int>>(
+      copiedVector, shared_sparseMat.get()->gRows,
+      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size, localARows, localBRows, true, false);
+
 //
 //  vector<Tuple<int>> copiedVectorTwo(shared_sparseMat.get()->coords);
 //  auto shared_sparseMat_combined = make_shared<distblas::core::SpMat<int>>(
@@ -95,8 +100,9 @@ int main(int argc, char **argv) {
 
 
   partitioner.get()->partition_data(shared_sparseMat_sender.get());
+  partitioner.get()->partition_data(shared_sparseMat_receiver.get());
   partitioner.get()->partition_data(shared_sparseMat.get());
-//  partitioner.get()->partition_data(shared_sparseMat_combined.get());
+
 
   cout << " rank " << rank << " partitioning data completed  " << endl;
 
@@ -110,6 +116,7 @@ int main(int argc, char **argv) {
 //  cout << " rank " << rank << " initialize_CSR_blocks  completed  " << endl;
 
   shared_sparseMat_sender.get()->initialize_CSR_blocks();
+  shared_sparseMat_receiver.get()->initialize_CSR_blocks();
 // shared_sparseMat_Trans.get()->print_blocks_and_cols(true);
 
 //  cout << " rank " << rank << " initialize_CSR_blocks trans  completed  " << endl;
@@ -135,6 +142,7 @@ int main(int argc, char **argv) {
       embedding_algo =
           unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
               new distblas::algo::EmbeddingAlgo<int, double, dimension>(shared_sparseMat.get(),
+                                                                     shared_sparseMat_receiver.get(),
                                                                      shared_sparseMat_sender.get(),
                                                                      dense_mat.get(),
                                                                      grid.get(),
