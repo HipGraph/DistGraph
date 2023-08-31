@@ -217,7 +217,7 @@ public:
     if (local) {
       calc_embedding(source_start_index, source_end_index, dst_start_index,
                      dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                     batch_size, block_size,local);
+                     batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -229,7 +229,7 @@ public:
               1;
           calc_embedding(source_start_index, source_end_index, dst_start_index,
                          dst_end_index, csr_block, prevCoordinates, lr,
-                         batch_id, batch_size, block_size,local);
+                         batch_id, batch_size, block_size);
         }
       }
     }
@@ -240,7 +240,7 @@ public:
                              uint64_t dst_start_index, uint64_t dst_end_index,
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
-                             int block_size, bool local) {
+                             int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -271,6 +271,7 @@ public:
                         ->fetch_data_vector_from_cache_ptr(target_rank, i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
+                local = false;
               }
               matched = true;
             }
@@ -281,7 +282,7 @@ public:
 
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-              if (local) {
+              if (!fetch_from_cache) {
                 forceDiff[d] = (this->dense_local)
                                    ->nCoordinates[source_id * embedding_dim + d] -
                                (this->dense_local)
