@@ -68,6 +68,7 @@ public:
       }
     }
     Tuple<T> *coords_ptr = coords.data();
+    Tuple<T> *coords_ptr_native = coords.data();
 
     if (col_partitioned) {
       // This is always non-transpose col partitioned
@@ -80,7 +81,7 @@ public:
           make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
                                    coords_ptr, coords.size(), transpose);
       csr_local_data_native = make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
-                                                       coords_ptr, coords.size(), false);
+                                                       coords_ptr_native, coords.size(), false);
     }
   }
 
