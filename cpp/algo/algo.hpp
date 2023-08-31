@@ -112,8 +112,8 @@ public:
     }
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
-//    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-//                                              false);
+    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
+                                              false);
     stop_clock_and_add(t, "Communication Time");
     t = start_clock();
     DENT *prevCoordinates = static_cast<DENT *>(
