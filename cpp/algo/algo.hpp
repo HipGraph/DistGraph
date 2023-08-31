@@ -162,8 +162,8 @@ public:
         CSRLocal<SPT> *csr_block_native =
             (this->sp_local_native)->csr_local_data.get();
 
-//        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size, true);
+        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
           if (!(i == 0 and j == 0)) {
