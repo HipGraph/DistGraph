@@ -125,8 +125,6 @@ public:
 
     vector<MPI_Request> mpi_requests(iterations * batches);
 
-
-
     for (int i = 0; i < 1; i++) {
       cout << " global rank " << grid->global_rank << endl;
       for (int j = 0; j < batches; j++) {
