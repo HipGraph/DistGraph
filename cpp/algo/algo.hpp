@@ -73,7 +73,6 @@ public:
     } else {
       batches =
           static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-      // TODO:Error prone
       last_batch_size =
           sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
@@ -96,8 +95,8 @@ public:
     stop_clock_and_add(t, "Computation Time");
 
     t = start_clock();
-//    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
-//                                             fetch_all);
+    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
+                                             fetch_all);
     stop_clock_and_add(t, "Communication Time");
 
     t = start_clock();
@@ -110,8 +109,8 @@ public:
     }
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
-//    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-//                                              false);
+    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
+                                              false);
     stop_clock_and_add(t, "Communication Time");
     t = start_clock();
     DENT *prevCoordinates = static_cast<DENT *>(
