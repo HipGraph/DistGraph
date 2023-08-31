@@ -271,8 +271,6 @@ public:
                         ->fetch_data_vector_from_cache_ptr(target_rank, i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
-              } else {
-                array_ptr = &(this->dense_local)->nCoordinates[local_dst];
               }
               matched = true;
             }
@@ -283,9 +281,16 @@ public:
 
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
-              forceDiff[d] = (this->dense_local)
-                                 ->nCoordinates[source_id * embedding_dim + d] -
-                             array_ptr[d];
+              if (local) {
+                forceDiff[d] = (this->dense_local)
+                                   ->nCoordinates[source_id * embedding_dim + d] -
+                               (this->dense_local)
+                                   ->nCoordinates[local_dst * embedding_dim + d];
+              }else {
+                forceDiff[d] = (this->dense_local)
+                                   ->nCoordinates[source_id * embedding_dim + d] -
+                               array_ptr[d];
+              }
               attrc += forceDiff[d] * forceDiff[d];
             }
             DENT d1 = -2.0 / (1.0 + attrc);
