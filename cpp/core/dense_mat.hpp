@@ -74,7 +74,7 @@ public:
     //    return (*this->cachePtr)[rank][key];
 
     // Access the array using the provided rank and key
-    auto &arrayMap = cachePtr[rank];
+    auto &arrayMap = (*cachePtr)[rank];
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
