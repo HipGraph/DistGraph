@@ -191,23 +191,13 @@ public:
 
     receivebuf_ptr.get()->resize(total_receive_count);
 
-    for (int i = 0; i < grid->world_size; i++) {
-      for (int j = 0; j < send_col_ids_list.size(); j++) {
-        int index = sdispls[i] + j;
-        ((sendbuf)[index]).col = send_col_ids_list[j];
-        int local_key =
-            ((sendbuf)[index]).col -
-            (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
-        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-      }
-    }
 
     for (int j = 0; j < send_col_ids_list.size(); j++) {
-      ((sendbuf)[index]).col = send_col_ids_list[j];
-      int local_key = ((sendbuf)[index]).col - (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
+      int local_key = send_col_ids_list[j] - (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
       std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_key);
       for (int i = 0; i < grid->world_size; i++) {
         int index = sdispls[i] + j;
+        ((sendbuf)[index]).col = send_col_ids_list[j];
         sendbuf[index].value = val_arr;
       }
     }
@@ -227,7 +217,6 @@ public:
       MPI_Wait(&request, &status);
     }
 
-    //    #pragma omp parallel for
     for (int i = 0; i < this->grid->world_size; i++) {
       int base_index = this->rdispls[i];
       int count = this->receivecounts[i];
