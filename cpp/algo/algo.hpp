@@ -175,10 +175,9 @@ public:
             t = start_clock();
           }
 
-//          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr,
-//                                        j, batch_size, considering_batch_size,
-//                                        false);
-          stop_clock_and_add(t, "Computation Time");
+          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr,
+                                        j, batch_size, considering_batch_size,
+                                        false);
         }
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         update_ptr.get()->clear();
@@ -195,12 +194,11 @@ public:
                 update_ptr.get(), request_batch_update, false);
           }
           stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
         }
       }
     }
-    if (this->grid->world_size == 1) {
       stop_clock_and_add(t, "Computation Time");
-    }
   }
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
