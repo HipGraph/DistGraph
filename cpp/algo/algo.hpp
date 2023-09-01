@@ -182,17 +182,13 @@ public:
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         update_ptr.get()->clear();
 
-        if (this->grid->world_size > 1) {
+        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1)) {
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   request_batch_update);
           mpi_requests[i * batches + j] = request_batch_update;
-          if (i == iterations - 1 and j == batches - 1) {
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false);
-          }
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -220,13 +216,13 @@ public:
         1;
 
     if (local) {
-      //      calc_embedding(source_start_index, source_end_index,
-      //      dst_start_index,
-      //                     dst_end_index, csr_block, prevCoordinates, lr,
-      //                     batch_id, batch_size, block_size);
-      calc_embedding_row_major(
-          source_start_index, source_end_index, dst_start_index, dst_end_index,
-          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
+            calc_embedding(source_start_index, source_end_index,
+            dst_start_index,
+                           dst_end_index, csr_block, prevCoordinates, lr,
+                           batch_id, batch_size, block_size);
+//      calc_embedding_row_major(
+//          source_start_index, source_end_index, dst_start_index, dst_end_index,
+//          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -236,14 +232,14 @@ public:
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-          //          calc_embedding(source_start_index, source_end_index,
-          //          dst_start_index,
-          //                         dst_end_index, csr_block, prevCoordinates,
-          //                         lr, batch_id, batch_size, block_size);
-          calc_embedding_row_major(source_start_index, source_end_index,
-                                   dst_start_index, dst_end_index, csr_block,
-                                   prevCoordinates, lr, batch_id, batch_size,
-                                   block_size);
+                    calc_embedding(source_start_index, source_end_index,
+                    dst_start_index,
+                                   dst_end_index, csr_block, prevCoordinates,
+                                   lr, batch_id, batch_size, block_size);
+//          calc_embedding_row_major(source_start_index, source_end_index,
+//                                   dst_start_index, dst_end_index, csr_block,
+//                                   prevCoordinates, lr, batch_id, batch_size,
+//                                   block_size);
         }
       }
     }
