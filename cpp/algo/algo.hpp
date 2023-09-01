@@ -290,10 +290,10 @@ public:
                     (this->dense_local)
                         ->nCoordinates[local_dst * embedding_dim + d];
               } else {
-                forceDiff[d] =
-                    (this->dense_local)
-                        ->nCoordinates[source_id * embedding_dim + d] -
-                    array_ptr[d];
+                forceDiff[d] = 0.01234;
+//                    (this->dense_local)
+//                        ->nCoordinates[source_id * embedding_dim + d] -
+//                    array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
