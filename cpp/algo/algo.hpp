@@ -126,7 +126,8 @@ public:
     vector<MPI_Request> mpi_requests(iterations * batches);
 
     for (int i = 0; i < iterations; i++) {
-      if (this->grid->global_rank == 0) cout << " iteration "<<i<<endl;
+      if (this->grid->global_rank == 0)
+        cout << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {
 
@@ -162,7 +163,7 @@ public:
         CSRLocal<SPT> *csr_block_native =
             (this->sp_local_native)->csr_local_data.get();
 
-        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
@@ -175,14 +176,15 @@ public:
             t = start_clock();
           }
 
-          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr,
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size,
                                         false);
         }
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         update_ptr.get()->clear();
 
-        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1)) {
+        if (this->grid->world_size > 1 and
+            !(i == iterations - 1 and j == batches - 1)) {
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
@@ -194,7 +196,7 @@ public:
         }
       }
     }
-      stop_clock_and_add(t, "Computation Time");
+    stop_clock_and_add(t, "Computation Time");
   }
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
@@ -216,13 +218,13 @@ public:
         1;
 
     if (local) {
-//            calc_embedding(source_start_index, source_end_index,
-//            dst_start_index,
-//                           dst_end_index, csr_block, prevCoordinates, lr,
-//                           batch_id, batch_size, block_size);
-      calc_embedding_row_major(
-          source_start_index, source_end_index, dst_start_index, dst_end_index,
-          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
+      calc_embedding(source_start_index, source_end_index, dst_start_index,
+                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+                     batch_size, block_size);
+      //      calc_embedding_row_major(
+      //          source_start_index, source_end_index, dst_start_index,
+      //          dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+      //          batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -232,14 +234,15 @@ public:
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-//                    calc_embedding(source_start_index, source_end_index,
-//                    dst_start_index,
-//                                   dst_end_index, csr_block, prevCoordinates,
-//                                   lr, batch_id, batch_size, block_size);
-          calc_embedding_row_major(source_start_index, source_end_index,
-                                   dst_start_index, dst_end_index, csr_block,
-                                   prevCoordinates, lr, batch_id, batch_size,
-                                   block_size);
+          calc_embedding(source_start_index, source_end_index, dst_start_index,
+                         dst_end_index, csr_block, prevCoordinates, lr,
+                         batch_id, batch_size, block_size);
+          //          calc_embedding_row_major(source_start_index,
+          //          source_end_index,
+          //                                   dst_start_index, dst_end_index,
+          //                                   csr_block, prevCoordinates, lr,
+          //                                   batch_id, batch_size,
+          //                                   block_size);
         }
       }
     }
@@ -310,7 +313,8 @@ public:
     }
   }
 
-  inline void calc_embedding_row_major(uint64_t source_start_index,
+  inline void
+  calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
                            DENT *prevCoordinates, DENT lr, int batch_id,
@@ -318,7 +322,8 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      #pragma omp parallel for schedule(static) // enable for full batch training or batch size larger than 1000000
+#pragma omp parallel for schedule(static) // enable for full batch training or
+                                          // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -338,20 +343,22 @@ public:
             DENT forceDiff[embedding_dim];
             DENT *array_ptr = nullptr;
             if (fetch_from_cache) {
-                          array_ptr =
-                              (this->dense_local)
-                                  ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+              array_ptr =
+                  (this->dense_local)
+                      ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
               // If not in cache we should fetch that from remote for limited
               // cache
             }
             DENT attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-                forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-                                  (this->dense_local)
-                                      ->nCoordinates[local_dst * embedding_dim + d];
+                forceDiff[d] =
+                    (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                    (this->dense_local)
+                        ->nCoordinates[local_dst * embedding_dim + d];
               } else {
-                (this->dense_local)->nCoordinates[i * embedding_dim + d] - array_ptr[d];
+                (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                    array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
@@ -375,7 +382,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
@@ -433,7 +440,7 @@ public:
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
                            ((this->sp_local_receiver)->proc_row_width));
-//    #pragma omp parallel for schedule(static)
+    //    #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
         (this->dense_local)
