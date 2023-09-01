@@ -273,9 +273,9 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                array_ptr =
-                    (this->dense_local)
-                        ->fetch_data_vector_from_cache_ptr(target_rank, i);
+//                array_ptr =
+//                    (this->dense_local)
+//                        ->fetch_data_vector_from_cache_ptr(target_rank, i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               }
