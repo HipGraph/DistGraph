@@ -273,9 +273,9 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-//                array_ptr =
-//                    (this->dense_local)
-//                        ->fetch_data_vector_from_cache_ptr(target_rank, i);
+                array_ptr =
+                    (this->dense_local)
+                        ->fetch_data_vector_from_cache_ptr(target_rank, i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               }
@@ -290,10 +290,10 @@ public:
                     (this->dense_local)
                         ->nCoordinates[local_dst * embedding_dim + d];
               } else {
-                forceDiff[d] = 0.01234;
-//                    (this->dense_local)
-//                        ->nCoordinates[source_id * embedding_dim + d] -
-//                    array_ptr[d];
+                forceDiff[d] =
+                    (this->dense_local)
+                        ->nCoordinates[source_id * embedding_dim + d] -
+                    array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
@@ -336,9 +336,9 @@ public:
           DENT forceDiff[embedding_dim];
           DENT *array_ptr = nullptr;
           if (fetch_from_cache) {
-            array_ptr =
-                (this->dense_local)
-                    ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+//            array_ptr =
+//                (this->dense_local)
+//                    ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
             // If not in cache we should fetch that from remote for limited
             // cache
           }
