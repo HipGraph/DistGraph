@@ -325,43 +325,43 @@ public:
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
-          uint64_t local_dst =
-              dst_id - (this->grid)->global_rank *
-                           (this->sp_local_receiver)->proc_col_width;
-          int target_rank =
-              (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
-          bool fetch_from_cache =
-              target_rank == (this->grid)->global_rank ? false : true;
-          bool matched = false;
-          DENT forceDiff[embedding_dim];
-          DENT *array_ptr = nullptr;
-          if (fetch_from_cache) {
-//            array_ptr =
-//                (this->dense_local)
-//                    ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
-            // If not in cache we should fetch that from remote for limited
-            // cache
-          }
-          DENT attrc = 0;
-          for (int d = 0; d < embedding_dim; d++) {
-            if (!fetch_from_cache) {
-//              forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-//                  (this->dense_local)
-//                      ->nCoordinates[local_dst * embedding_dim + d];
-             forceDiff[d] = 0.001;
-            } else {
-              forceDiff[d] = 0.001;
-//                  (this->dense_local)->nCoordinates[i * embedding_dim + d] -
-//                  array_ptr[d];
-            }
-            attrc += forceDiff[d] * forceDiff[d];
-          }
-          DENT d1 = -2.0 / (1.0 + attrc);
 
-          for (int d = 0; d < embedding_dim; d++) {
-            DENT l = scale(forceDiff[d] * d1);
-            prevCoordinates[index * embedding_dim + d] =
-                prevCoordinates[index * embedding_dim + d] + (lr)*l;
+          if (dst_id >= dst_start_index and dst_id <= dst_end_index) {
+            uint64_t local_dst =
+                dst_id - (this->grid)->global_rank *
+                             (this->sp_local_receiver)->proc_col_width;
+            int target_rank =
+                (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
+            bool fetch_from_cache =
+                target_rank == (this->grid)->global_rank ? false : true;
+            bool matched = false;
+            DENT forceDiff[embedding_dim];
+            DENT *array_ptr = nullptr;
+            if (fetch_from_cache) {
+                          array_ptr =
+                              (this->dense_local)
+                                  ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+              // If not in cache we should fetch that from remote for limited
+              // cache
+            }
+            DENT attrc = 0;
+            for (int d = 0; d < embedding_dim; d++) {
+              if (!fetch_from_cache) {
+                forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                                  (this->dense_local)
+                                      ->nCoordinates[local_dst * embedding_dim + d];
+              } else {
+                (this->dense_local)->nCoordinates[i * embedding_dim + d] - array_ptr[d];
+              }
+              attrc += forceDiff[d] * forceDiff[d];
+            }
+            DENT d1 = -2.0 / (1.0 + attrc);
+
+            for (int d = 0; d < embedding_dim; d++) {
+              DENT l = scale(forceDiff[d] * d1);
+              prevCoordinates[index * embedding_dim + d] =
+                  prevCoordinates[index * embedding_dim + d] + (lr)*l;
+            }
           }
         }
       }
