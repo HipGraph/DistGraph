@@ -55,7 +55,7 @@ public:
       auto base_index = batch_id * sp_local_sender->batch_size;
       for (int i = 0; i < sp_local_sender->batch_size; i++) {
         send_indices_to_proc_map.emplace(base_index + i,
-                                        vector<int>(grid->world_size, 0));
+                                         vector<int>(grid->world_size, 0));
       }
     } else {
       for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
@@ -97,7 +97,7 @@ public:
         send_indices_to_proc_map[local_key][i] = 1;
       }
     }
-    if (total_send_count>0){
+    if (total_send_count > 0) {
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
     }
   }
@@ -119,9 +119,9 @@ public:
           }
           int offset = sdispls[i];
           int index = offset_vector[i] + offset;
-          sendbuf[index].col =
-              col_id + (this->sp_local_sender->proc_col_width *this->grid->global_rank);
-          sendbuf[index].value =dense_vector;
+          sendbuf[index].col = col_id + (this->sp_local_sender->proc_col_width *
+                                         this->grid->global_rank);
+          sendbuf[index].value = dense_vector;
           offset_vector[i]++;
         }
       }
@@ -195,19 +195,30 @@ public:
       for (int j = 0; j < send_col_ids_list.size(); j++) {
         int index = sdispls[i] + j;
         ((sendbuf)[index]).col = send_col_ids_list[j];
-        int local_key = ((sendbuf)[index]).col -
-                        (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
+        int local_key =
+            ((sendbuf)[index]).col -
+            (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
         sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
       }
     }
 
+    for (int j = 0; j < send_col_ids_list.size(); j++) {
+      ((sendbuf)[index]).col = send_col_ids_list[j];
+      int local_key = ((sendbuf)[index]).col - (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
+      std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_key);
+      for (int i = 0; i < grid->world_size; i++) {
+        int index = sdispls[i] + j;
+        sendbuf[index].value = val_arr;
+      }
+    }
+
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                  (*receivebuf_ptr.get()).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD);
+                  (*receivebuf_ptr.get()).data(), receivecounts.data(),
+                  rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
     this->populate_cache(receivebuf_ptr.get(), dumy, true);
 
-//    delete[] sendbuf;
+    //    delete[] sendbuf;
   }
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request, bool synchronous) {
@@ -228,7 +239,8 @@ public:
   }
 
   void cross_validate_batch_from_metadata(int batch_id) {
-    int total_nodes = this->sp_local_receiver->gCols / this->sp_local_receiver->block_col_width;
+    int total_nodes = this->sp_local_receiver->gCols /
+                      this->sp_local_receiver->block_col_width;
     for (int i = 0; i < total_nodes; i++) {
       vector<uint64_t> col_ids;
       this->sp_local_receiver->fill_col_ids(batch_id, i, col_ids, false, true);
@@ -240,8 +252,8 @@ public:
                 ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
         bool fetch_from_cache = false;
 
-        int owner_rank =
-            static_cast<int>(global_col_id / (this->sp_local_receiver)->proc_row_width);
+        int owner_rank = static_cast<int>(
+            global_col_id / (this->sp_local_receiver)->proc_row_width);
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
