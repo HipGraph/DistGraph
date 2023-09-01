@@ -162,7 +162,7 @@ public:
         CSRLocal<SPT> *csr_block_native =
             (this->sp_local_native)->csr_local_data.get();
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
@@ -175,7 +175,7 @@ public:
             t = start_clock();
           }
 
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
+          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr,
                                         j, batch_size, considering_batch_size,
                                         false);
         }
@@ -216,13 +216,13 @@ public:
         1;
 
     if (local) {
-            calc_embedding(source_start_index, source_end_index,
-            dst_start_index,
-                           dst_end_index, csr_block, prevCoordinates, lr,
-                           batch_id, batch_size, block_size);
-//      calc_embedding_row_major(
-//          source_start_index, source_end_index, dst_start_index, dst_end_index,
-//          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
+//            calc_embedding(source_start_index, source_end_index,
+//            dst_start_index,
+//                           dst_end_index, csr_block, prevCoordinates, lr,
+//                           batch_id, batch_size, block_size);
+      calc_embedding_row_major(
+          source_start_index, source_end_index, dst_start_index, dst_end_index,
+          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -232,14 +232,14 @@ public:
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-                    calc_embedding(source_start_index, source_end_index,
-                    dst_start_index,
-                                   dst_end_index, csr_block, prevCoordinates,
-                                   lr, batch_id, batch_size, block_size);
-//          calc_embedding_row_major(source_start_index, source_end_index,
-//                                   dst_start_index, dst_end_index, csr_block,
-//                                   prevCoordinates, lr, batch_id, batch_size,
-//                                   block_size);
+//                    calc_embedding(source_start_index, source_end_index,
+//                    dst_start_index,
+//                                   dst_end_index, csr_block, prevCoordinates,
+//                                   lr, batch_id, batch_size, block_size);
+          calc_embedding_row_major(source_start_index, source_end_index,
+                                   dst_start_index, dst_end_index, csr_block,
+                                   prevCoordinates, lr, batch_id, batch_size,
+                                   block_size);
         }
       }
     }
@@ -318,7 +318,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      #pragma omp parallel for schedule(static) // enable for full batch training or batch size larger than 1000000
+//      #pragma omp parallel for schedule(static) // enable for full batch training or batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
