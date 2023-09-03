@@ -63,8 +63,8 @@ public:
   void insert_cache(int rank, uint64_t key, int batch_id, int iteration,
                     std::array<DENT, embedding_dim> &arr) {
     distblas::core::CacheEntry<DENT, embedding_dim> entry;
-    entry.batch_id = batch_id;
-    entry.iteration = iteration;
+    entry.inserted_batch_id = batch_id;
+    entry.inserted_itr = iteration;
     entry.value = arr;
     (*this->cachePtr)[rank].insert_or_assign(key, entry);
   }
