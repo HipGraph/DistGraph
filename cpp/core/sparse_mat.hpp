@@ -155,13 +155,33 @@ public:
 
     distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
 
+    auto batches = (proc_row_width / batch_size);
+
+    if (!(proc_row_width % batch_size == 0)) {
+      batches = proc_row_width / batch_size) + 1;
+    }
+
     if (col_partitioned) {
+      // calculation of sender col_ids
 #pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index = proc_row_width * r;
         auto end_index =
             std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows) -
             1;
+
+        auto per_batch_nnz = 0;
+        int count = 0;
+        if (0 < alpha < 1.0) {
+          auto total_nnz = handle->rowStart[end_index + 1] -
+                           handle->rowStart[starting_index];
+          auto effective_nnz = alpha * total_nnz;
+          per_batch_nnz = effective_nnz / batches;
+          starting_index =
+              (batch_id < batches - 1)
+                  ? (batch_id + 1) * batch_size + proc_row_width * r
+                  : proc_row_width * r;
+        }
 
         for (auto i = starting_index; i <= (end_index); i++) {
 
@@ -181,14 +201,19 @@ public:
                   col_val < eligible_col_id_end) {
                 // calculation of sender col_ids
                 { proc_to_id_mapping[r].push_back(col_val); }
+
+                if (alpha < 1.0)
+                  count++;
               }
             }
           }
+          if (count >= per_batch_nnz)
+            break;
         }
       }
     } else if (transpose) {
 
-      // calculation of sender col_ids
+      // calculation of receiver col_ids
 #pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index =
@@ -205,10 +230,38 @@ public:
                            gCols) -
                       1;
 
+        auto per_batch_nnz = 0;
+        int count = 0;
+        auto considered_range_start =
+            (batch_id < batches - 1) ? (batch_id + 1) * batch_size : 0;
+        if (0 < alpha < 1.0) {
+          auto starting_index_co = proc_col_width * r;
+          auto end_index_co =
+              std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols);
+          auto total_nnz = handle->rowStart[end_index_co] -
+                           handle->rowStart[starting_index_co];
+          auto effective_nnz = alpha * total_nnz;
+          per_batch_nnz = effective_nnz / batches;
+        }
+
         for (auto i = starting_index; i <= (end_index); i++) {
           if (rank != r and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            { proc_to_id_mapping[r].push_back(i); }
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 and
+              alpha == 1.0) {
+            proc_to_id_mapping[r].push_back(i);
+          } else if (rank != r and
+                     (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 and
+                     alpha < 1.0) {
+            for (int j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
+              if (considered_range_start >= handle->col_idx[j]) {
+                proc_to_id_mapping[r].push_back(i);
+                count++;
+              }
+            }
+
+            if (count >= per_batch_nnz)
+              break;
           }
         }
       }
