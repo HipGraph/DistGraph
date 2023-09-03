@@ -158,7 +158,7 @@ public:
     auto batches = (proc_row_width / batch_size);
 
     if (!(proc_row_width % batch_size == 0)) {
-      batches = proc_row_width / batch_size) + 1;
+      batches = (proc_row_width / batch_size) + 1;
     }
 
     if (col_partitioned) {
