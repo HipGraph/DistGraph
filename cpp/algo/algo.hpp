@@ -40,12 +40,15 @@ private:
   map<string, int> call_count;
   map<string, double> total_time;
 
+  //cache size controlling hyper parameter
+  double alpha = 1.0;
+
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
                 distblas::core::SpMat<SPT> *sp_local_receiver,
                 distblas::core::SpMat<SPT> *sp_local_sender,
                 DenseMat<SPT, DENT, embedding_dim> *dense_local,
-                Process3DGrid *grid, DENT MAX_BOUND, DENT MIN_BOUND) {
+                Process3DGrid *grid, double alpha, DENT MAX_BOUND, DENT MIN_BOUND) {
     this->grid = grid;
     this->dense_local = dense_local;
     this->sp_local_sender = sp_local_sender;
@@ -53,6 +56,7 @@ public:
     this->sp_local_native = sp_local_native;
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
+    this->alpha = alpha;
 
     perf_counter_keys = {"Computation Time", "Communication Time"};
   }
@@ -85,7 +89,7 @@ public:
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(
-            sp_local_receiver, sp_local_sender, dense_local, grid, -1));
+            sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
 
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> fetch_all_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -106,7 +110,7 @@ public:
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid, i));
+              sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
@@ -213,9 +217,7 @@ public:
         this->sp_local_receiver->proc_col_width * this->grid->global_rank;
     auto dst_end_index =
         std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
-                                       (this->grid->global_rank + 1)),
-                 this->sp_local_receiver->gCols) -
-        1;
+                                       (this->grid->global_rank + 1)),this->sp_local_receiver->gCols) - 1;
 
     if (local) {
 //      calc_embedding(source_start_index, source_end_index, dst_start_index,
@@ -231,10 +233,8 @@ public:
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
-              std::min(static_cast<uint64_t>(
-                           this->sp_local_receiver->proc_row_width * (r + 1)),
-                       this->sp_local_receiver->gCols) -
-              1;
+              std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width * (r + 1)),
+                       this->sp_local_receiver->gCols) - 1;
 //          calc_embedding(source_start_index, source_end_index, dst_start_index,
 //                         dst_end_index, csr_block, prevCoordinates, lr,
 //                         batch_id, batch_size, block_size);

@@ -33,13 +33,15 @@ private:
   unordered_map<uint64_t, vector<int>> send_indices_to_proc_map;
   int batch_id;
 
+  double alpha;
+
   //  DataTuple<DENT, embedding_dim> *receivebuf;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local_receiver,
            distblas::core::SpMat<SPT> *sp_local_sender,
            DenseMat<SPT, DENT, embedding_dim> *dense_local, Process3DGrid *grid,
-           int batch_id) {
+           int batch_id, double alpha) {
     this->sp_local_receiver = sp_local_receiver;
     this->sp_local_sender = sp_local_sender;
     this->dense_local = dense_local;
@@ -51,6 +53,7 @@ public:
     this->receive_col_ids_list = vector<vector<uint64_t>>(grid->world_size);
     this->send_col_ids_list = vector<vector<uint64_t>>(grid->world_size);
     this->batch_id = batch_id;
+    this->alpha = alpha;
     if (batch_id >= 0) {
       auto base_index = batch_id * sp_local_sender->batch_size;
       for (int i = 0; i < sp_local_sender->batch_size; i++) {
@@ -71,10 +74,10 @@ public:
     int total_send_count = 0;
     // processing chunks
     // calculating receiving data cols
-    this->sp_local_receiver->fill_col_ids(batch_id, receive_col_ids_list);
+    this->sp_local_receiver->fill_col_ids(batch_id, receive_col_ids_list, alpha);
 
     // calculating sending data cols
-    this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list);
+    this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list,alpha);
     for (int i = 0; i < grid->world_size; i++) {
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());

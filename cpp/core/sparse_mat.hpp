@@ -22,8 +22,6 @@ namespace distblas::core {
 template <typename T> class SpMat : public DistributedMat {
 
 private:
-
-
 public:
   uint64_t gRows, gCols, gNNz;
   vector<Tuple<T>> coords;
@@ -58,7 +56,7 @@ public:
 
   void initialize_CSR_blocks() {
 
-    # pragma omp parallel for
+#pragma omp parallel for
     for (uint64_t i = 0; i < coords.size(); i++) {
       if (col_partitioned) {
         coords[i].col %= proc_col_width;
@@ -67,7 +65,6 @@ public:
       }
     }
     Tuple<T> *coords_ptr = coords.data();
-
 
     if (col_partitioned) {
       // This is always non-transpose col partitioned
@@ -83,8 +80,42 @@ public:
   }
 
   // if batch_id<0 it will fetch all the batches
-  void fill_col_ids(int batch_id,
-                    vector<vector<uint64_t>> &proc_to_id_mapping) {
+  void fill_col_ids(int batch_id, vector<vector<uint64_t>> &proc_to_id_mapping,
+                    double alpha) {
+
+    if (alpha == 0) {
+      fill_col_ids_for_pulling(batch_id, proc_to_id_mapping);
+    } else {
+
+      fill_col_ids_for_pushing(batch_id, proc_to_id_mapping, alpha);
+    }
+  }
+
+  void fill_col_ids_for_pulling(int batch_id,
+                                vector<vector<uint64_t>> &proc_to_id_mapping) {
+
+    int rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank); //TODO convert this is flexible grid indexes
+
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+
+
+    if (col_partitioned) {
+
+    }else {
+
+    }
+
+
+
+
+  }
+
+  void fill_col_ids_for_pushing(int batch_id,
+                                vector<vector<uint64_t>> &proc_to_id_mapping,
+                                double alpha) {
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -109,8 +140,10 @@ public:
                   ? std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),
                              static_cast<uint64_t>(proc_col_width))
                   : proc_col_width;
-          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
               auto col_val = handle->col_idx[j];
               if (col_val >= eligible_col_id_start and
                   col_val < eligible_col_id_end) {
@@ -131,20 +164,24 @@ public:
                             : proc_col_width * r;
         auto end_index =
             (batch_id >= 0)
-                ? std::min(starting_index + batch_size,
-                      std::min(static_cast<uint64_t>((r + 1) * proc_col_width),gCols)) -1
-                : std::min(static_cast<uint64_t>((r + 1) * proc_col_width),gCols) -1;
+                ? std::min(
+                      starting_index + batch_size,
+                      std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
+                               gCols)) -
+                      1
+                : std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
+                           gCols) -
+                      1;
 
         for (auto i = starting_index; i <= (end_index); i++) {
-          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             { proc_to_id_mapping[r].push_back(i); }
           }
         }
       }
     }
   }
-
-
 
   void print_coords(bool trans) {
     int rank;
