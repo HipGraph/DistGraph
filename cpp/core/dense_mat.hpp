@@ -77,7 +77,7 @@ public:
 
     if (it != arrayMap.end()) {
        auto temp = it->second;
-       return temp.value.data(); // Pointer to the array's data
+       return temp.value; // Pointer to the array's data
     } else {
       return nullptr; // Key not found
     }
