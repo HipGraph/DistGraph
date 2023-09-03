@@ -98,7 +98,7 @@ public:
         distblas::core::CacheEntry<DENT, embedding_dim> cache_ent = it->second;
         if (cache_ent.inserted_itr < current_itr and
             cache_ent.inserted_batch_id <= current_batch) {
-          it = myMap.erase(it);
+          it = arrayMap.erase(it);
         } else {
           // Move to the next item
           ++it;
