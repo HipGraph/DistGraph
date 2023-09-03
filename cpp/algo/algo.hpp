@@ -413,7 +413,7 @@ public:
         }
         if (fetch_from_cache) {
           DENT repuls = 0;
-          std::array<DENT, embedding_dim> colvec =
+          DENT* colvec =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(owner_rank, global_col_id);
           for (int d = 0; d < embedding_dim; d++) {
