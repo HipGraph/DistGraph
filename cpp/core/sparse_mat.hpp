@@ -85,6 +85,7 @@ public:
 
     if (alpha == 0) {
       fill_col_ids_for_pulling(batch_id, proc_to_id_mapping);
+
     } else {
 
       fill_col_ids_for_pushing(batch_id, proc_to_id_mapping, alpha);
@@ -95,22 +96,53 @@ public:
                                 vector<vector<uint64_t>> &proc_to_id_mapping) {
 
     int rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank); //TODO convert this is flexible grid indexes
+    MPI_Comm_rank(MPI_COMM_WORLD,
+                  &rank); // TODO convert this is flexible grid indexes
 
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
 
-
     if (col_partitioned) {
 
-    }else {
+      for (int r = 0; r < world_size; r++) {
+        uint64_t starting_index = batch_id * batch_size + proc_row_width * r;
+        auto end_index =
+            std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows);
 
+        for (int i = starting_index; i < end_index; i++) {
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
+              auto col_val = handle->col_idx[j];
+              { proc_to_id_mapping[r].push_back(col_val); }
+            }
+          }
+        }
+      }
+    } else if (transpose) {
+      for (int r = 0; r < world_size; r++) {
+        uint64_t starting_index = proc_row_width * r;
+        auto end_index =
+            std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows);
+        for (int i = starting_index; i < end_index; i++) {
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
+              auto col_val = handle->col_idx[j];
+              uint64_t dst_start = batch_id * batch_size;
+              uint64_t dst_end_index =
+                  std::min((batch_id + 1) * batch_size, proc_row_width);
+              if (col_val >= dst_start and col_val < dst_end_index) {
+                { proc_to_id_mapping[r].push_back(col_val); }
+              }
+            }
+          }
+        }
+      }
     }
-
-
-
-
   }
 
   void fill_col_ids_for_pushing(int batch_id,

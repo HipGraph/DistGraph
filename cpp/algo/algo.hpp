@@ -96,18 +96,20 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    MPI_Request fetch_all;
-    negative_update_com.get()->onboard_data();
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
-    stop_clock_and_add(t, "Computation Time");
+    if (alpha > 0) {
+      MPI_Request fetch_all;
+      negative_update_com.get()->onboard_data();
+      cout << " rank " << this->grid->global_rank << " onboard_data completed "
+           << batches << endl;
+      stop_clock_and_add(t, "Computation Time");
 
-    t = start_clock();
-    negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
-                                             fetch_all,0,0);
-    stop_clock_and_add(t, "Communication Time");
+      t = start_clock();
+      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
+                                               fetch_all, 0, 0);
+      stop_clock_and_add(t, "Communication Time");
+      t = start_clock();
+    }
 
-    t = start_clock();
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
@@ -115,13 +117,17 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
-    MPI_Barrier(MPI_COMM_WORLD);
-    stop_clock_and_add(t, "Computation Time");
-    t = start_clock();
-    negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-                                              false,0,0);
-    stop_clock_and_add(t, "Communication Time");
-    t = start_clock();
+
+    if (alpha > 0) {
+      MPI_Barrier(MPI_COMM_WORLD);
+      stop_clock_and_add(t, "Computation Time");
+      t = start_clock();
+      negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
+                                                false, 0, 0);
+      stop_clock_and_add(t, "Communication Time");
+      t = start_clock();
+    }
+
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
@@ -154,7 +160,7 @@ public:
           MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          negative_update_com.get()->transfer_data(random_number_vec,i,j);
+          negative_update_com.get()->transfer_data(random_number_vec, i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -171,39 +177,55 @@ public:
         CSRLocal<SPT> *csr_block_native =
             (this->sp_local_native)->csr_local_data.get();
 
-        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, true);
-
-        if (this->grid->world_size > 1) {
-          if (!(i == 0 and j == 0)) {
-            MPI_Barrier(MPI_COMM_WORLD);
-            stop_clock_and_add(t, "Computation Time");
-            t = start_clock();
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), mpi_requests[i * batches + j - 1], false, i, j);
-            stop_clock_and_add(t, "Communication Time");
-            t = start_clock();
-          }
-
-          this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr,
-                                        j, batch_size, considering_batch_size,
-                                        false);
-        }
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        update_ptr.get()->clear();
-
-        if (this->grid->world_size > 1 and
-            !(i == iterations - 1 and j == batches - 1)) {
+        if (alpha == 0) {
+          update_ptr.get()->clear();
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  request_batch_update,i,j);
+                                                  request_batch_update, i, j);
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-        dense_local->invalidate_cache(i,j);
+
+        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, true);
+
+        if (this->grid->world_size > 1) {
+          MPI_Barrier(MPI_COMM_WORLD);
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          if (!(i == 0 and j == 0) and alpha > 0) {
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
+                j);
+          } else if (alpha == 0) {
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), mpi_requests[i * batches + j], false, i, j);
+          }
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
+        }
+
+        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size,
+                                      false);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
+        if (this->grid->world_size > 1 and
+            !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
+          update_ptr.get()->clear();
+          MPI_Request request_batch_update;
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+                                                  request_batch_update, i, j);
+          mpi_requests[i * batches + j] = request_batch_update;
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
+        }
+        dense_local->invalidate_cache(i, j);
       }
     }
     stop_clock_and_add(t, "Computation Time");
@@ -289,9 +311,8 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                array_ptr =
-                    (this->dense_local)
-                        ->fetch_data_vector_from_cache(target_rank, i);
+                array_ptr = (this->dense_local)
+                                ->fetch_data_vector_from_cache(target_rank, i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               }
@@ -414,7 +435,7 @@ public:
         }
         if (fetch_from_cache) {
           DENT repuls = 0;
-          DENT* colvec =
+          DENT *colvec =
               (this->dense_local)
                   ->fetch_data_vector_from_cache(owner_rank, global_col_id);
           for (int d = 0; d < embedding_dim; d++) {
