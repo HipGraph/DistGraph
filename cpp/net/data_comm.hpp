@@ -223,6 +223,7 @@ public:
     for (int i = 0; i < this->grid->world_size; i++) {
       int base_index = this->rdispls[i];
       int count = this->receivecounts[i];
+
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
         (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
