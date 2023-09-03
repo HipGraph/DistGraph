@@ -27,7 +27,7 @@ class DenseMat : DistributedMat {
 private:
 public:
   uint64_t rows;
-  unique_ptr<vector<unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>
+  unique_ptr<vector<unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>
       cachePtr;
   DENT *nCoordinates;
   Process3DGrid *grid;
@@ -60,25 +60,23 @@ public:
 
   ~DenseMat() {}
 
-  void insert_cache(int rank, uint64_t key,
+  void insert_cache(int rank, uint64_t key, int batch_id, int iteration,
                     std::array<DENT, embedding_dim> &arr) {
-    (*this->cachePtr)[rank].insert_or_assign(key, arr);
+    distblas::core::CacheEntry<DENT, embedding_dim> entry;
+    entry.batch_id = batch_id;
+    entry.iteration = iteration;
+    entry.value = arr;
+    (*this->cachePtr)[rank].insert_or_assign(key, entry);
   }
 
-  std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank,
-                                                               uint64_t key) {
-    return (*this->cachePtr)[rank][key];
-  }
-
-  DENT *fetch_data_vector_from_cache_ptr(int rank, uint64_t key) {
-    //    return (*this->cachePtr)[rank][key];
+  DENT *fetch_data_vector_from_cache(int rank, uint64_t key) {
 
     // Access the array using the provided rank and key
     auto &arrayMap = (*cachePtr)[rank];
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
-      return it->second.data(); // Pointer to the array's data
+      return it->second.value.data(); // Pointer to the array's data
     } else {
       return nullptr; // Key not found
     }
@@ -91,6 +89,22 @@ public:
     std::copy(nCoordinates + base_index,
               nCoordinates + base_index + embedding_dim, stdArray.data());
     return stdArray;
+  }
+
+  void invalidate_cache(int current_itr, int current_batch) {
+    for (int i = 0; i < grid->world_size; i++) {
+      auto &arrayMap = (*cachePtr)[i];
+      for (auto it = arrayMap.begin(); it != arrayMap.end();) {
+        distblas::core::CacheEntry<DENT, embedding_dim> cache_ent = it->second;
+        if (cache_ent.inserted_itr < current_itr and
+            cache_ent.inserted_batch_id <= current_batch) {
+          it = myMap.erase(it);
+        } else {
+          // Move to the next item
+          ++it;
+        }
+      }
+    }
   }
 
   // Utitly methods

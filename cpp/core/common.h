@@ -43,6 +43,12 @@ template <typename T, size_t size> struct DataTuple {
   std::array<T, size> value;
 };
 
+template <typename T, size_t size> struct CacheEntry {
+  std::array<T, size> value;
+  int inserted_batch_id;
+  int inserted_itr;
+};
+
 struct CSRHandle {
   vector<double> values;
   vector<MKL_INT> col_idx;

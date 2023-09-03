@@ -106,7 +106,7 @@ public:
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous, MPI_Request &request) {
+                     bool synchronous, MPI_Request &request, int iteration, int batch_id) {
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
     for (const auto &pair : send_indices_to_proc_map) {
@@ -140,7 +140,7 @@ public:
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(),
                     DENSETUPLE, MPI_COMM_WORLD);
       MPI_Request dumy;
-      this->populate_cache(receivebuf, dumy, true);
+      this->populate_cache(receivebuf, dumy, true,iteration, batch_id);
     } else {
       MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                      (*receivebuf).data(), receivecounts.data(), rdispls.data(),
@@ -148,7 +148,7 @@ public:
     }
   }
 
-  void transfer_data(vector<uint64_t> &col_ids) {
+  void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
 
     vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
     vector<uint64_t> send_col_ids_list;
@@ -209,12 +209,12 @@ public:
                   (*receivebuf_ptr.get()).data(), receivecounts.data(),
                   rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
-    this->populate_cache(receivebuf_ptr.get(), dumy, true);
+    this->populate_cache(receivebuf_ptr.get(), dumy, true,iteration,batch_id); // we should not do this
 
     //    delete[] sendbuf;
   }
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request &request, bool synchronous) {
+                      MPI_Request &request, bool synchronous, int iteration, int batch_id) {
     if (!synchronous) {
       MPI_Status status;
       MPI_Wait(&request, &status);
@@ -225,7 +225,7 @@ public:
       int count = this->receivecounts[i];
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        (this->dense_local)->insert_cache(i, t.col, t.value);
+        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
       }
     }
   }

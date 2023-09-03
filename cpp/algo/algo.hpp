@@ -40,7 +40,7 @@ private:
   map<string, int> call_count;
   map<string, double> total_time;
 
-  //cache size controlling hyper parameter
+  // cache size controlling hyper parameter
   double alpha = 1.0;
 
 public:
@@ -48,7 +48,8 @@ public:
                 distblas::core::SpMat<SPT> *sp_local_receiver,
                 distblas::core::SpMat<SPT> *sp_local_sender,
                 DenseMat<SPT, DENT, embedding_dim> *dense_local,
-                Process3DGrid *grid, double alpha, DENT MAX_BOUND, DENT MIN_BOUND) {
+                Process3DGrid *grid, double alpha, DENT MAX_BOUND,
+                DENT MIN_BOUND) {
     this->grid = grid;
     this->dense_local = dense_local;
     this->sp_local_sender = sp_local_sender;
@@ -114,10 +115,11 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
+    MPI_Barrier(MPI_COMM_WORLD);
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
     negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-                                              false);
+                                              false,0,0);
     stop_clock_and_add(t, "Communication Time");
     t = start_clock();
     DENT *prevCoordinates = static_cast<DENT *>(
@@ -128,7 +130,8 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
 
     vector<MPI_Request> mpi_requests(iterations * batches);
-
+    stop_clock_and_add(t, "Computation Time");
+    t = start_clock();
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " iteration " << i << endl;
@@ -162,8 +165,8 @@ public:
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
 
-//        CSRLocal<SPT> *csr_block =
-//            (this->sp_local_receiver)->csr_local_data.get();
+        //        CSRLocal<SPT> *csr_block =
+        //            (this->sp_local_receiver)->csr_local_data.get();
         CSRLocal<SPT> *csr_block_native =
             (this->sp_local_native)->csr_local_data.get();
 
@@ -172,10 +175,11 @@ public:
 
         if (this->grid->world_size > 1) {
           if (!(i == 0 and j == 0)) {
+            MPI_Barrier(MPI_COMM_WORLD);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), mpi_requests[i * batches + j - 1], false);
+                update_ptr.get(), mpi_requests[i * batches + j - 1], false, i, j);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -198,6 +202,7 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
+        dense_local->invalidate_cache(i,j);
       }
     }
     stop_clock_and_add(t, "Computation Time");
@@ -217,34 +222,38 @@ public:
         this->sp_local_receiver->proc_col_width * this->grid->global_rank;
     auto dst_end_index =
         std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
-                                       (this->grid->global_rank + 1)),this->sp_local_receiver->gCols) - 1;
+                                       (this->grid->global_rank + 1)),
+                 this->sp_local_receiver->gCols) -
+        1;
 
     if (local) {
-//      calc_embedding(source_start_index, source_end_index, dst_start_index,
-//                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-//                     batch_size, block_size);
+      //      calc_embedding(source_start_index, source_end_index,
+      //      dst_start_index,
+      //                     dst_end_index, csr_block, prevCoordinates, lr,
+      //                     batch_id, batch_size, block_size);
 
-            calc_embedding_row_major(
-                source_start_index, source_end_index, dst_start_index,
-                dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                batch_size, block_size);
+      calc_embedding_row_major(
+          source_start_index, source_end_index, dst_start_index, dst_end_index,
+          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
-              std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_row_width * (r + 1)),
-                       this->sp_local_receiver->gCols) - 1;
-//          calc_embedding(source_start_index, source_end_index, dst_start_index,
-//                         dst_end_index, csr_block, prevCoordinates, lr,
-//                         batch_id, batch_size, block_size);
 
-                    calc_embedding_row_major(source_start_index,
-                    source_end_index,
-                                             dst_start_index, dst_end_index,
-                                             csr_block, prevCoordinates, lr,
-                                             batch_id, batch_size,
-                                             block_size);
+              std::min(static_cast<uint64_t>(
+                           this->sp_local_receiver->proc_row_width * (r + 1)),
+                       this->sp_local_receiver->gCols) -
+              1;
+          //          calc_embedding(source_start_index, source_end_index,
+          //          dst_start_index,
+          //                         dst_end_index, csr_block, prevCoordinates,
+          //                         lr, batch_id, batch_size, block_size);
+
+          calc_embedding_row_major(source_start_index, source_end_index,
+                                   dst_start_index, dst_end_index, csr_block,
+                                   prevCoordinates, lr, batch_id, batch_size,
+                                   block_size);
         }
       }
     }
@@ -281,7 +290,7 @@ public:
               if (fetch_from_cache) {
                 array_ptr =
                     (this->dense_local)
-                        ->fetch_data_vector_from_cache_ptr(target_rank, i);
+                        ->fetch_data_vector_from_cache(target_rank, i);
                 // If not in cache we should fetch that from remote for limited
                 // cache
               }
@@ -348,7 +357,7 @@ public:
             if (fetch_from_cache) {
               array_ptr =
                   (this->dense_local)
-                      ->fetch_data_vector_from_cache_ptr(target_rank, dst_id);
+                      ->fetch_data_vector_from_cache(target_rank, dst_id);
               // If not in cache we should fetch that from remote for limited
               // cache
             }
