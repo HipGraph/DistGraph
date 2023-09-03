@@ -110,6 +110,7 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
+    MPI_Barrier(MPI_COMM_WORLD);
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
     negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
@@ -169,6 +170,7 @@ public:
 
         if (this->grid->world_size > 1) {
           if (!(i == 0 and j == 0)) {
+            MPI_Barrier(MPI_COMM_WORLD);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             data_comm_cache[j].get()->populate_cache(
@@ -324,7 +326,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or
+#pragma omp parallel for schedule(static) // enable for full batch training or
                                           // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
