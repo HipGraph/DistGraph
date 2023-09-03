@@ -124,7 +124,8 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
 
     vector<MPI_Request> mpi_requests(iterations * batches);
-
+    stop_clock_and_add(t, "Computation Time");
+    t = start_clock();
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " iteration " << i << endl;
@@ -163,8 +164,8 @@ public:
         CSRLocal<SPT> *csr_block_native =
             (this->sp_local_native)->csr_local_data.get();
 
-//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size, true);
+        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
           if (!(i == 0 and j == 0)) {
@@ -218,13 +219,13 @@ public:
         1;
 
     if (local) {
-      calc_embedding(source_start_index, source_end_index, dst_start_index,
-                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                     batch_size, block_size);
-      //      calc_embedding_row_major(
-      //          source_start_index, source_end_index, dst_start_index,
-      //          dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-      //          batch_size, block_size);
+//      calc_embedding(source_start_index, source_end_index, dst_start_index,
+//                     dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+//                     batch_size, block_size);
+            calc_embedding_row_major(
+                source_start_index, source_end_index, dst_start_index,
+                dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+                batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -234,15 +235,15 @@ public:
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-          calc_embedding(source_start_index, source_end_index, dst_start_index,
-                         dst_end_index, csr_block, prevCoordinates, lr,
-                         batch_id, batch_size, block_size);
-          //          calc_embedding_row_major(source_start_index,
-          //          source_end_index,
-          //                                   dst_start_index, dst_end_index,
-          //                                   csr_block, prevCoordinates, lr,
-          //                                   batch_id, batch_size,
-          //                                   block_size);
+//          calc_embedding(source_start_index, source_end_index, dst_start_index,
+//                         dst_end_index, csr_block, prevCoordinates, lr,
+//                         batch_id, batch_size, block_size);
+                    calc_embedding_row_major(source_start_index,
+                    source_end_index,
+                                             dst_start_index, dst_end_index,
+                                             csr_block, prevCoordinates, lr,
+                                             batch_id, batch_size,
+                                             block_size);
         }
       }
     }
