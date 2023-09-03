@@ -151,6 +151,7 @@ public:
             0, (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
+          MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           negative_update_com.get()->transfer_data(random_number_vec,i,j);
