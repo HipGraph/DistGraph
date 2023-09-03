@@ -96,8 +96,8 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
+    MPI_Request fetch_all;
     if (alpha > 0) {
-      MPI_Request fetch_all;
       negative_update_com.get()->onboard_data();
       cout << " rank " << this->grid->global_rank << " onboard_data completed "
            << batches << endl;
