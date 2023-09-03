@@ -104,7 +104,7 @@ public:
 
     t = start_clock();
     negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
-                                             fetch_all);
+                                             fetch_all,0,0);
     stop_clock_and_add(t, "Communication Time");
 
     t = start_clock();
@@ -153,7 +153,7 @@ public:
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          negative_update_com.get()->transfer_data(random_number_vec);
+          negative_update_com.get()->transfer_data(random_number_vec,i,j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -197,7 +197,7 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  request_batch_update);
+                                                  request_batch_update,i,j);
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();

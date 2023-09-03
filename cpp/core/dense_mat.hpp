@@ -45,7 +45,7 @@ public:
     this->rows = rows;
     this->grid = grid;
     this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, std::array<DENT, embedding_dim>>>>(
+        std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
         grid->world_size);
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
@@ -76,7 +76,8 @@ public:
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
-      return it->second.value.data(); // Pointer to the array's data
+       auto temp = it->second;
+       return temp.value.data(); // Pointer to the array's data
     } else {
       return nullptr; // Key not found
     }
