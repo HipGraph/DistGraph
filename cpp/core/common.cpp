@@ -111,7 +111,13 @@ void distblas::core::print_performance_statistics() {
   // so that all processors enter and leave the call at the same time. Also,
   // I'm taking an average over several calls by all processors; might want to
   // compute the variance as well.
-  if (grid->global_rank == 0) {
+
+  int rank;
+  int world_size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+  if (rank == 0) {
     cout << endl;
     cout << "================================" << endl;
     cout << "==== Performance Statistics ====" << endl;
@@ -121,13 +127,17 @@ void distblas::core::print_performance_statistics() {
 
   cout << this->json_perf_statistics().dump(4);
 
-  if (grid->global_rank == 0) {
+  if (rank == 0) {
     cout << "=================================" << endl;
   }
 }
 
 json distblas::core::json_perf_statistics() {
   json j_obj;
+  int rank;
+  int world_size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
   for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
        it++) {
@@ -136,9 +146,9 @@ json distblas::core::json_perf_statistics() {
     MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     // We also have the call count for each statistic timed
-    val /= grid->world_size;
+    val /= world_size;
 
-    if (grid->global_rank == 0) {
+    if (rank == 0) {
       j_obj[*it] = val;
     }
   }
