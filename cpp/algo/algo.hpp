@@ -169,8 +169,8 @@ public:
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
 
         //        CSRLocal<SPT> *csr_block =
         //            (this->sp_local_receiver)->csr_local_data.get();
@@ -211,7 +211,7 @@ public:
 //        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
 //                                      batch_size, considering_batch_size,
 //                                      false);
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
