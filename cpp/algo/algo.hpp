@@ -14,7 +14,6 @@
 #include <random>
 #include <unordered_map>
 
-using json = nlohmann::json;
 using namespace std;
 using namespace distblas::core;
 using namespace distblas::net;

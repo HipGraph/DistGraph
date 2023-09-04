@@ -18,6 +18,7 @@
 
 using namespace std;
 using namespace std::chrono;
+using json = nlohmann::json;
 
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
