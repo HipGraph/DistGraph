@@ -119,7 +119,6 @@ public:
     }
 
     if (alpha > 0) {
-      MPI_Barrier(MPI_COMM_WORLD);
       stop_clock_and_add(t, "Computation Time");
       t = start_clock();
       negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
@@ -180,7 +179,6 @@ public:
                                       batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
-          MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           if (!(i == 0 and j == 0) and alpha > 0) {
