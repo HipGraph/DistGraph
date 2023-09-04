@@ -99,6 +99,7 @@ public:
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
       }
+      cout<<" rank "<<grid->global_rank<<" sending "<<sendcounts[i]<< " to process "<<i<<" receiving data "<<receivecounts[i]<<" from "<<i<<endl;
     }
     if (total_send_count > 0) {
       sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
