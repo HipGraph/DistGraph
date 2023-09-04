@@ -111,10 +111,8 @@ public:
             std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows);
 
         for (int i = starting_index; i < end_index; i++) {
-          if (rank != r and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
-                 j++) {
+          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
               auto col_val = handle->col_idx[j];
               { proc_to_id_mapping[r].push_back(col_val); }
             }
@@ -123,9 +121,9 @@ public:
       }
     } else if (transpose) {
       for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = proc_row_width * r;
+        uint64_t starting_index = proc_col_width * r;
         auto end_index =
-            std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows);
+            std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols);
         for (int i = starting_index; i < end_index; i++) {
           if (rank != r and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
@@ -136,7 +134,7 @@ public:
               uint64_t dst_end_index =
                   std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
-                { proc_to_id_mapping[r].push_back(col_val); }
+                { proc_to_id_mapping[r].push_back(i); }
               }
             }
           }
