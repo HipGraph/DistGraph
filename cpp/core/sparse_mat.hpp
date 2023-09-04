@@ -172,7 +172,7 @@ public:
         auto total_nnz = 0;
         auto effective_nnz = 0;
         int count = 0;
-        if (0 < alpha < 1.0) {
+        if ( alpha >0  and  alpha < 1.0) {
            total_nnz = handle->rowStart[end_index + 1] -
                            handle->rowStart[starting_index];
            effective_nnz = alpha * total_nnz;
