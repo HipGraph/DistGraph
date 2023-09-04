@@ -8,8 +8,8 @@ MPI_Datatype distblas::core::DENSETUPLE;
 
 vector<string> distblas::core::perf_counter_keys = {"Computation Time", "Communication Time","Memory usage", "Data transfers"};
 
-extern map<string, int> distblas::core::call_count;
-extern map<string, double> distblas::core::total_time;
+ map<string, int> distblas::core::call_count;
+ map<string, double> distblas::core::total_time;
 
 int distblas::core::divide_and_round_up(uint64_t num, int denom){
   if (num % denom > 0) {
