@@ -207,7 +207,7 @@ public:
               }
             }
           }
-          if (count >= per_batch_nnz)
+          if (alpha < 1.0 and count >= per_batch_nnz)
             break;
         }
       }
