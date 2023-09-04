@@ -152,25 +152,12 @@ public:
           }
         }
 
-        // negative samples generation
-        vector<uint64_t> random_number_vec = generate_random_numbers(
-            0, (this->sp_local_receiver)->gRows, seed, ns);
-
-        if (this->grid->world_size > 1) {
-          MPI_Barrier(MPI_COMM_WORLD);
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          negative_update_com.get()->transfer_data(random_number_vec, i, j);
-          stop_clock_and_add(t, "Communication Time");
-          t = start_clock();
-        }
         int considering_batch_size = batch_size;
 
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
+
 
                 CSRLocal<SPT> *csr_block =
                     (this->sp_local_receiver)->csr_local_data.get();
@@ -211,6 +198,23 @@ public:
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size,
                                       false);
+
+        // negative samples generation
+        vector<uint64_t> random_number_vec = generate_random_numbers(
+            0, (this->sp_local_receiver)->gRows, seed, ns);
+
+        if (this->grid->world_size > 1) {
+          MPI_Barrier(MPI_COMM_WORLD);
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          negative_update_com.get()->transfer_data(random_number_vec, i, j);
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
+        }
+
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
+
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
