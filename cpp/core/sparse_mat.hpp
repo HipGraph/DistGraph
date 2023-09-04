@@ -210,7 +210,7 @@ public:
           if (alpha < 1.0 and count >= per_batch_nnz)
             break;
         }
-        cout<<" rank "<< rank <<" sending nnz "<< count <<" to rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
+//        cout<<" rank "<< rank <<" sending nnz "<< count <<" to rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
       }
     } else if (transpose) {
 
@@ -266,7 +266,7 @@ public:
               break;
           }
         }
-        cout<<" rank "<< rank <<" receiving nnz "<< count <<" from rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
+//        cout<<" rank "<< rank <<" receiving nnz "<< count <<" from rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
       }
     }
   }
