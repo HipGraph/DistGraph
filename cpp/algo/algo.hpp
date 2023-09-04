@@ -172,10 +172,10 @@ public:
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
 
-        //        CSRLocal<SPT> *csr_block =
-        //            (this->sp_local_receiver)->csr_local_data.get();
-        CSRLocal<SPT> *csr_block_native =
-            (this->sp_local_native)->csr_local_data.get();
+                CSRLocal<SPT> *csr_block =
+                    (this->sp_local_receiver)->csr_local_data.get();
+//        CSRLocal<SPT> *csr_block_native =
+//            (this->sp_local_native)->csr_local_data.get();
 
         if (alpha == 0) {
           update_ptr.get()->clear();
@@ -189,7 +189,7 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
@@ -208,9 +208,9 @@ public:
           t = start_clock();
         }
 
-//        this->calc_t_dist_grad_rowptr(csr_block_native, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size,
-//                                      false);
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size,
+                                      false);
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
@@ -250,14 +250,14 @@ public:
         1;
 
     if (local) {
-      //      calc_embedding(source_start_index, source_end_index,
-      //      dst_start_index,
-      //                     dst_end_index, csr_block, prevCoordinates, lr,
-      //                     batch_id, batch_size, block_size);
+            calc_embedding(source_start_index, source_end_index,
+            dst_start_index,
+                           dst_end_index, csr_block, prevCoordinates, lr,
+                           batch_id, batch_size, block_size);
 
-      calc_embedding_row_major(
-          source_start_index, source_end_index, dst_start_index, dst_end_index,
-          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
+//      calc_embedding_row_major(
+//          source_start_index, source_end_index, dst_start_index, dst_end_index,
+//          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
@@ -268,15 +268,15 @@ public:
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-          //          calc_embedding(source_start_index, source_end_index,
-          //          dst_start_index,
-          //                         dst_end_index, csr_block, prevCoordinates,
-          //                         lr, batch_id, batch_size, block_size);
+                    calc_embedding(source_start_index, source_end_index,
+                    dst_start_index,
+                                   dst_end_index, csr_block, prevCoordinates,
+                                   lr, batch_id, batch_size, block_size);
 
-          calc_embedding_row_major(source_start_index, source_end_index,
-                                   dst_start_index, dst_end_index, csr_block,
-                                   prevCoordinates, lr, batch_id, batch_size,
-                                   block_size);
+//          calc_embedding_row_major(source_start_index, source_end_index,
+//                                   dst_start_index, dst_end_index, csr_block,
+//                                   prevCoordinates, lr, batch_id, batch_size,
+//                                   block_size);
         }
       }
     }
