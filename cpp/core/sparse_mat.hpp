@@ -210,6 +210,7 @@ public:
           if (alpha < 1.0 and count >= per_batch_nnz)
             break;
         }
+        cout<<" rank "<< rank <<" sending nnz "<< count <<" to rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
       }
     } else if (transpose) {
 
@@ -231,16 +232,15 @@ public:
                       1;
 
         auto per_batch_nnz = 0;
+        auto effective_nnz =0;
+        auto total_nnz = 0;
         int count = 0;
         auto considered_range_start =
             (batch_id < batches - 1) ? (batch_id + 1) * batch_size : 0;
         if (alpha >0  and  alpha < 1.0) {
-          auto starting_index_co = proc_col_width * r;
-          auto end_index_co =
-              std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols);
-          auto total_nnz = handle->rowStart[end_index_co] -
-                           handle->rowStart[starting_index_co];
-          auto effective_nnz = alpha * total_nnz;
+           total_nnz = handle->rowStart[end_index +1] -
+                           handle->rowStart[starting_index];
+           effective_nnz = alpha * total_nnz;
           per_batch_nnz = effective_nnz / batches;
         }
 
@@ -264,6 +264,7 @@ public:
               break;
           }
         }
+        cout<<" rank "<< rank <<" receiving nnz "<< count <<" from rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
       }
     }
   }
