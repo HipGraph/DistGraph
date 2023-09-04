@@ -210,7 +210,6 @@ public:
           if (alpha < 1.0 and count >= per_batch_nnz)
             break;
         }
-        cout<<" rank "<<rank <<" sending calc  "<<count<<" to process "<<r<<" total nnz"<<total_nnz<<" effective "<<effective_nnz<<" for per batch nnz "<<per_batch_nnz<<endl;
       }
     } else if (transpose) {
 
@@ -235,7 +234,7 @@ public:
         int count = 0;
         auto considered_range_start =
             (batch_id < batches - 1) ? (batch_id + 1) * batch_size : 0;
-        if (0 < alpha < 1.0) {
+        if (alpha >0  and  alpha < 1.0) {
           auto starting_index_co = proc_col_width * r;
           auto end_index_co =
               std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols);
