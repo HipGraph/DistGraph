@@ -56,8 +56,8 @@ size_t distblas::core::get_memory_usage(){
     size_t virtualMemUsed = size * pageSize;
     size_t residentSetSize = resident * pageSize;
 
-    size_t = virtualMemUsed/(1024*1024);
-    return size_t;
+    size_t mem_usage = virtualMemUsed/(1024*1024);
+    return mem_usage;
   }
   return 0;
 }
@@ -125,7 +125,7 @@ void distblas::core::print_performance_statistics() {
     //      print_algorithm_info();
   }
 
-  cout << this->json_perf_statistics().dump(4);
+  cout << json_perf_statistics().dump(4);
 
   if (rank == 0) {
     cout << "=================================" << endl;

@@ -15,6 +15,7 @@
 #include <fstream>
 #include "json.hpp"
 #include <unordered_map>
+#include <unistd.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -102,7 +103,7 @@ extern MPI_Datatype SPTUPLE;
 extern MPI_Datatype DENSETUPLE;
 
 
-extern vector<string> perf_counter_keys = {"Computation Time", "Communication Time","Memory usage", "Data transfers"};
+extern vector<string> perf_counter_keys;
 
 extern map<string, int> call_count;
 extern map<string, double> total_time;
