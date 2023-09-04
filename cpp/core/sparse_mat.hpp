@@ -238,7 +238,7 @@ public:
         auto considered_range_start =
             (batch_id < batches - 1) ? (batch_id + 1) * batch_size : 0;
         if (alpha >0  and  alpha < 1.0) {
-          auto end_index_co = std::min(std::min(static_cast<uint64_t>((r + 1) * proc_col_width),gCols)) -1;
+          auto end_index_co = std::min(static_cast<uint64_t>((r + 1) * proc_col_width),gCols) -1;
           auto start_index_co = proc_col_width*r;
            total_nnz = handle->rowStart[end_index_co +1] -
                            handle->rowStart[start_index_co];
