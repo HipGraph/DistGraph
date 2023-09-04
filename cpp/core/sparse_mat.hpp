@@ -161,7 +161,7 @@ public:
 
     if (col_partitioned) {
       // calculation of sender col_ids
-#pragma omp parallel for
+//#pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index = proc_row_width * r;
         auto end_index =
@@ -208,11 +208,12 @@ public:
           if (alpha < 1.0 and count >= per_batch_nnz)
             break;
         }
+        cout<<" rank "<<rank <<" sending calc  "<<count<<" to process "<<r<<" for effective nnz "<<per_batch_nnz<<endl;
       }
     } else if (transpose) {
 
       // calculation of receiver col_ids
-#pragma omp parallel for
+//#pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index =
             (batch_id >= 0) ? batch_id * batch_size + proc_col_width * r
