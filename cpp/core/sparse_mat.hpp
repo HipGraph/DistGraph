@@ -256,7 +256,7 @@ public:
                      alpha < 1.0) {
             for (int j = handle->rowStart[i]; j < handle->rowStart[i + 1];
                  j++) {
-              if (considered_range_start >= handle->col_idx[j]) {
+              if (handle->col_idx[j] >= considered_range_start) {
                 proc_to_id_mapping[r].push_back(i);
                 count++;
               }
