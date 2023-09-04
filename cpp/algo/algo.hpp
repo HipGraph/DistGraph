@@ -225,7 +225,7 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-//        dense_local->invalidate_cache(i, j);
+        dense_local->invalidate_cache(i, j);
       }
     }
     stop_clock_and_add(t, "Computation Time");
