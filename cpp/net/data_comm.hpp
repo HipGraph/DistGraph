@@ -135,6 +135,8 @@ public:
 
     receivebuf->resize(total_receive_count);
 
+    add_datatransfers(total_receive_count,"Data transfers");
+
     if (synchronous) {
       MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
                     (*receivebuf).data(), receivecounts.data(), rdispls.data(),

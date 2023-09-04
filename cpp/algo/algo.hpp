@@ -35,11 +35,6 @@ private:
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
       data_comm_cache;
 
-  // Related to performance counting
-  vector<string> perf_counter_keys;
-  map<string, int> call_count;
-  map<string, double> total_time;
-
   // cache size controlling hyper parameter
   double alpha = 1.0;
 
@@ -58,8 +53,6 @@ public:
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
     this->alpha = alpha;
-
-    perf_counter_keys = {"Computation Time", "Communication Time"};
   }
 
   DENT scale(DENT v) {
@@ -228,6 +221,12 @@ public:
           t = start_clock();
         }
         dense_local->invalidate_cache(i, j);
+
+        if (i= iterations/2) {
+          size_t mem = get_memory_usage();
+          add_memory(mem,"Memory usage");
+        }
+
       }
     }
     stop_clock_and_add(t, "Computation Time");
@@ -486,71 +485,6 @@ public:
     }
   }
 
-  void reset_performance_timers() {
-    for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
-         it++) {
-      call_count[*it] = 0;
-      total_time[*it] = 0.0;
-    }
-  }
 
-  void stop_clock_and_add(my_timer_t &start, string counter_name) {
-    if (find(perf_counter_keys.begin(), perf_counter_keys.end(),
-             counter_name) != perf_counter_keys.end()) {
-      call_count[counter_name]++;
-      total_time[counter_name] += stop_clock_get_elapsed(start);
-    } else {
-      cout << "Error, performance counter " << counter_name
-           << " not registered." << endl;
-      exit(1);
-    }
-  }
-
-  void print_performance_statistics() {
-    // This is going to assume that all timing starts and ends with a barrier,
-    // so that all processors enter and leave the call at the same time. Also,
-    // I'm taking an average over several calls by all processors; might want to
-    // compute the variance as well.
-    if (grid->global_rank == 0) {
-      cout << endl;
-      cout << "================================" << endl;
-      cout << "==== Performance Statistics ====" << endl;
-      cout << "================================" << endl;
-      //      print_algorithm_info();
-    }
-
-    cout << this->json_perf_statistics().dump(4);
-
-    if (grid->global_rank == 0) {
-      cout << "=================================" << endl;
-    }
-  }
-
-  json json_perf_statistics() {
-    json j_obj;
-
-    for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
-         it++) {
-      double val = total_time[*it];
-
-      MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
-      // We also have the call count for each statistic timed
-      val /= grid->world_size;
-
-      if (grid->global_rank == 0) {
-        j_obj[*it] = val;
-      }
-    }
-    return j_obj;
-  }
-
-  my_timer_t start_clock() { return std::chrono::steady_clock::now(); }
-
-  double stop_clock_get_elapsed(my_timer_t &start) {
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> diff = end - start;
-    return diff.count();
-  }
 };
 } // namespace distblas::algo

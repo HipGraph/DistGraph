@@ -11,6 +11,8 @@
 #include <random>
 #include <vector>
 #include <chrono>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace std::chrono;
@@ -26,7 +28,25 @@ vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int s
 
 void prefix_sum(vector<int> &values, vector<int> &offsets);
 
-template <typename T> struct Tuple {
+size_t get_memory_usage();
+
+void reset_performance_timers();
+
+void stop_clock_and_add(my_timer_t &start, string counter_name);
+
+void add_memory(size_t mem, string counter_name);
+
+void add_datatransfers(uint64_t count, string counter_name);
+
+void print_performance_statistics();
+
+my_timer_t start_clock();
+
+double stop_clock_get_elapsed(my_timer_t &start);
+
+json json_perf_statistics();
+
+    template <typename T> struct Tuple {
   int64_t row;
   int64_t col;
   T value;
@@ -78,6 +98,12 @@ extern MPI_Datatype SPTUPLE;
 
 extern MPI_Datatype DENSETUPLE;
 
+
+extern vector<string> perf_counter_keys = {"Computation Time", "Communication Time","Memory usage", "Data transfers"};
+
+extern map<string, int> call_count;
+extern map<string, double> total_time;
+
 template <typename T> void initialize_mpi_datatype_SPTUPLE() {
   const int nitems = 3;
   int blocklengths[3] = {1, 1, 1};
@@ -121,6 +147,10 @@ DENT  scale(DENT v){
   else if(v < -MAXBOUND) return -MAXBOUND;
   else return v;
 }
+
+
+
+
 
 }; // namespace distblas::core
 

@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
   fout.open("perf_output", std::ios_base::app);
 
   json j_obj;
-  j_obj["perf_stats"] = embedding_algo.get()->json_perf_statistics();
+  j_obj["perf_stats"] = json_perf_statistics();
   if(rank == 0) {
     fout << j_obj.dump(4) << "," << endl;
   }
