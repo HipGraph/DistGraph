@@ -221,7 +221,7 @@ public:
         }
         dense_local->invalidate_cache(i, j);
 
-        if (i= iterations/2) {
+        if (i== iterations/2) {
           size_t mem = get_memory_usage();
           add_memory(mem,"Memory usage");
         }
