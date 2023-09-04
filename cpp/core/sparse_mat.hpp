@@ -169,11 +169,13 @@ public:
             1;
 
         auto per_batch_nnz = 0;
+        auto total_nnz = 0;
+        auto effective_nnz = 0;
         int count = 0;
         if (0 < alpha < 1.0) {
-          auto total_nnz = handle->rowStart[end_index + 1] -
+           total_nnz = handle->rowStart[end_index + 1] -
                            handle->rowStart[starting_index];
-          auto effective_nnz = alpha * total_nnz;
+           effective_nnz = alpha * total_nnz;
           per_batch_nnz = effective_nnz / batches;
           starting_index =
               (batch_id < batches - 1)
@@ -208,7 +210,7 @@ public:
           if (alpha < 1.0 and count >= per_batch_nnz)
             break;
         }
-        cout<<" rank "<<rank <<" sending calc  "<<count<<" to process "<<r<<" for effective nnz "<<per_batch_nnz<<endl;
+        cout<<" rank "<<rank <<" sending calc  "<<count<<" to process "<<r<<" total nnz"<<total_nnz<<" effective "<<effective_nnz<<" for per batch nnz "<<per_batch_nnz<<endl;
       }
     } else if (transpose) {
 
