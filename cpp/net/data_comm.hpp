@@ -270,6 +270,8 @@ public:
                   DENSETUPLE,(*receive_missing_cols_ptr.get()).data(),receivecounts_misses.data()
                                                                ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
 
+    add_datatransfers(total_receive_count,"Data transfers");
+
     for(int i=0;i<grid->world_size;i++){
       int base_index = rdisples_misses[i];
       for(int j=0;j<receivecounts_misses[i];j++){
