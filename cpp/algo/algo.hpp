@@ -303,7 +303,7 @@ public:
   inline void calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
                                     DENT *prevCoordinates, int batch_id,int batch_size, double lr) {
     for (int i = 0; i < grid->world_size; i++) {
-       #pragma  omp parallel for
+//       #pragma  omp parallel for
       for (int k = 0; k < (*cache_misses)[i].size(); k++) {
         uint64_t col_id = (*cache_misses)[i][k].col;
         uint64_t source_id = (*cache_misses)[i][k].row;
