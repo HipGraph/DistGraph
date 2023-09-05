@@ -149,11 +149,10 @@ public:
           considering_batch_size = last_batch_size;
         }
 
-
-                CSRLocal<SPT> *csr_block =
-                    (this->sp_local_receiver)->csr_local_data.get();
-//        CSRLocal<SPT> *csr_block_native =
-//            (this->sp_local_native)->csr_local_data.get();
+        CSRLocal<SPT> *csr_block =
+            (this->sp_local_receiver)->csr_local_data.get();
+        //        CSRLocal<SPT> *csr_block_native =
+        //            (this->sp_local_native)->csr_local_data.get();
 
         if (alpha == 0) {
           update_ptr.get()->clear();
@@ -167,8 +166,10 @@ public:
           t = start_clock();
         }
 
-//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size, true);
+        //        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
+        //        j,
+        //                                      batch_size,
+        //                                      considering_batch_size, true);
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
@@ -185,9 +186,10 @@ public:
           t = start_clock();
         }
 
-//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                      batch_size, considering_batch_size,
-//                                      false);
+        //        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
+        //        j,
+        //                                      batch_size,
+        //                                      considering_batch_size, false);
 
         // negative samples generation
         vector<uint64_t> random_number_vec = generate_random_numbers(
@@ -202,10 +204,13 @@ public:
           t = start_clock();
         }
 
-//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-//                                        j, batch_size, considering_batch_size);
-//
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        //        this->calc_t_dist_replus_rowptr(prevCoordinates,
+        //        random_number_vec, lr,
+        //                                        j, batch_size,
+        //                                        considering_batch_size);
+        //
+        //        this->update_data_matrix_rowptr(prevCoordinates, j,
+        //        batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
@@ -221,11 +226,10 @@ public:
         }
         dense_local->invalidate_cache(i, j);
 
-        if (i== iterations/2) {
+        if (i == iterations / 2) {
           size_t mem = get_memory_usage();
-          add_memory(mem,"Memory usage");
+          add_memory(mem, "Memory usage");
         }
-
       }
     }
     stop_clock_and_add(t, "Computation Time");
@@ -234,7 +238,8 @@ public:
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
                                       DENT *prevCoordinates, DENT lr,
                                       int batch_id, int batch_size,
-                                      int block_size, bool local) {
+                                      int block_size, bool local,
+                                      bool col_major) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -250,33 +255,37 @@ public:
         1;
 
     if (local) {
-            calc_embedding(source_start_index, source_end_index,
-            dst_start_index,
-                           dst_end_index, csr_block, prevCoordinates, lr,
-                           batch_id, batch_size, block_size);
-
-//      calc_embedding_row_major(
-//          source_start_index, source_end_index, dst_start_index, dst_end_index,
-//          csr_block, prevCoordinates, lr, batch_id, batch_size, block_size);
+      if (col_major) {
+        calc_embedding(source_start_index, source_end_index, dst_start_index,
+                       dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+                       batch_size, block_size);
+      } else {
+        calc_embedding_row_major(source_start_index, source_end_index,
+                                 dst_start_index, dst_end_index, csr_block,
+                                 prevCoordinates, lr, batch_id, batch_size,
+                                 block_size);
+      }
     } else {
       for (int r = 0; r < grid->world_size; r++) {
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
-
               std::min(static_cast<uint64_t>(
                            this->sp_local_receiver->proc_row_width * (r + 1)),
                        this->sp_local_receiver->gCols) -
               1;
-                    calc_embedding(source_start_index, source_end_index,
-                    dst_start_index,
-                                   dst_end_index, csr_block, prevCoordinates,
-                                   lr, batch_id, batch_size, block_size);
 
-//          calc_embedding_row_major(source_start_index, source_end_index,
-//                                   dst_start_index, dst_end_index, csr_block,
-//                                   prevCoordinates, lr, batch_id, batch_size,
-//                                   block_size);
+          if (col_major) {
+            calc_embedding(source_start_index, source_end_index,
+                           dst_start_index, dst_end_index, csr_block,
+                           prevCoordinates, lr, batch_id, batch_size,
+                           block_size);
+          } else {
+            calc_embedding_row_major(source_start_index, source_end_index,
+                                     dst_start_index, dst_end_index, csr_block,
+                                     prevCoordinates, lr, batch_id, batch_size,
+                                     block_size);
+          }
         }
       }
     }
@@ -313,8 +322,10 @@ public:
               if (fetch_from_cache) {
                 array_ptr = (this->dense_local)
                                 ->fetch_data_vector_from_cache(target_rank, i);
-                // If not in cache we should fetch that from remote for limited
-                // cache
+
+                if (array_ptr == nullptr) {
+                  continue;
+                }
               }
               matched = true;
             }
@@ -483,7 +494,5 @@ public:
       }
     }
   }
-
-
 };
 } // namespace distblas::algo
