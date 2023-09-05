@@ -252,7 +252,7 @@ public:
        sdisples_misses[i] = (i>0)?sdisples_misses[i-1]+sendcounts_misses[i-1]:sdisples_misses[i];
       for(int k=0;k<cache_misses[i].size();k++){
         DataTuple<DENT, embedding_dim> temp;
-        temp.col = static_cast<uint64_t>cache_misses[i][k];
+        temp.col = static_cast<uint64_t>(cache_misses[i][k]);
         sending_missing_cols.push_back(temp);
       }
     }
