@@ -87,8 +87,8 @@ public:
                                                    send_col_ids_list[i].end());
 
       if (alpha > 0 and alpha < 1.0){
-        uint64_t considered_count_send = alpha*ordered_sending.size();
-        uint64_t considered_count_receive = alpha*ordered_receiving.size();
+        uint64_t considered_count_send = alpha*unique_set_send.size();
+        uint64_t considered_count_receive = alpha*unique_set_receiv.size();
 
         unique_set_receiv = random_select(unique_set_receiv, considered_count_receive);
         unique_set_send = random_select(unique_set_send, considered_count_send);
