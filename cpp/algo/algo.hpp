@@ -199,7 +199,7 @@ public:
           data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,lr);
+          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
         }
 
         // negative samples generation
@@ -300,8 +300,7 @@ public:
   }
 
   inline void calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
-                                    DENT *prevCoordinates, int batch_id,
-                                    double lr, ) {
+                                    DENT *prevCoordinates, int batch_id,int batch_size, double lr) {
     for (int i = 0; i < grid->world_size; i++) {
        #pragma  omp parallel for
       for (int k = 0; k < (*cache_misses)[i].size(); k++) {
@@ -309,6 +308,7 @@ public:
         uint64_t source_id = (*cache_misses)[i][k].row;
         auto index = source_id - batch_id * batch_size;
         DENT forceDiff[embedding_dim];
+        DENT attrc = 0;
         DENT *array_ptr =
             (this->dense_local)->fetch_data_vector_from_cache(i, col_id);
         for (int d = 0; d < embedding_dim; d++) {
