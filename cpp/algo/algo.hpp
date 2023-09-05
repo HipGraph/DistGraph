@@ -130,9 +130,9 @@ public:
 //        unique_ptr<vector<vector<Tuple<DENT>>>>(
 //            new vector<vector<Tuple<DENT>>>(grid->world_size));
 
-    unique_ptr<vector<vector<double>>> cache_misses_ptr =
-        unique_ptr<vector<vector<double>>>(
-            new vector<vector<double>>(grid->world_size));
+    unique_ptr<vector<vector<uint64_t>>> cache_misses_ptr =
+        unique_ptr<vector<vector<uint64_t>>>(
+            new vector<vector<uint64_t>>(grid->world_size));
 
     vector<MPI_Request> mpi_requests(iterations * batches);
     stop_clock_and_add(t, "Computation Time");
@@ -249,7 +249,7 @@ public:
                                       DENT *prevCoordinates, DENT lr,
                                       int batch_id, int batch_size,
                                       int block_size, bool local,
-                                      bool col_major,vector<vector<double>> *cache_misses) {
+                                      bool col_major,vector<vector<uint64_t>> *cache_misses) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -306,7 +306,7 @@ public:
                              uint64_t dst_start_index, uint64_t dst_end_index,
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
-                             int block_size, vector<vector<double>> * cache_misses) {
+                             int block_size, vector<vector<uint64_t>> * cache_misses) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
