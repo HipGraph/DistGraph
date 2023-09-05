@@ -276,9 +276,9 @@ public:
         DataTuple<DENT, embedding_dim> t = receive_missing_cols[base_index+j];
         uint64_t global_id = t.col;
         uint64_t  local_id = t.col - grid->global_rank* this->sp_local_receiver->proc_row_width;
-        std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
-        t.value = val_arr;
-        receive_missing_cols[base_index+j]=t;
+//        std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
+//        t.value = val_arr;
+//        receive_missing_cols[base_index+j]=t;
       }
     }
 
