@@ -274,6 +274,8 @@ public:
 
     for(int i=0;i<grid->world_size;i++){
       int base_index = rdisples_misses[i];
+
+      #pragma omp parallel for
       for(int j=0;j<receivecounts_misses[i];j++){
         DataTuple<DENT, embedding_dim> t = (*receive_missing_cols_ptr.get())[base_index+j];
         uint64_t global_id = t.col;
@@ -291,13 +293,11 @@ public:
     for (int i = 0; i < this->grid->world_size; i++) {
       int base_index = sdisples_misses[i];
       int count = sendcounts_misses[i];
-
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr.get())[j];
         (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
       }
     }
-
   }
 
 

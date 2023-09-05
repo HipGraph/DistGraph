@@ -170,9 +170,9 @@ public:
           t = start_clock();
         }
 
-
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,j,batch_size,
-                                              considering_batch_size, true,true,cache_misses_ptr.get());
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, true,
+                                      true, cache_misses_ptr.get());
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
@@ -189,15 +189,17 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
-                j,batch_size,considering_batch_size, false,true,cache_misses_ptr.get());
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                      batch_size, considering_batch_size, false,
+                                      true, cache_misses_ptr.get());
 
-        if (alpha>0 and alpha < 1.0){
+        if (alpha > 0 and alpha < 1.0) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-         data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
+          data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
+          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,lr);
         }
 
         // negative samples generation
@@ -213,10 +215,10 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_replus_rowptr(prevCoordinates,random_number_vec, lr,j, batch_size,
-                                                considering_batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
 
-        this->update_data_matrix_rowptr(prevCoordinates, j,batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
@@ -241,11 +243,11 @@ public:
     stop_clock_and_add(t, "Computation Time");
   }
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
-                                      DENT *prevCoordinates, DENT lr,
-                                      int batch_id, int batch_size,
-                                      int block_size, bool local,
-                                      bool col_major,vector<vector<Tuple<DENT>>> *cache_misses) {
+  inline void
+  calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+                          DENT lr, int batch_id, int batch_size, int block_size,
+                          bool local, bool col_major,
+                          vector<vector<Tuple<DENT>>> *cache_misses) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -264,7 +266,7 @@ public:
       if (col_major) {
         calc_embedding(source_start_index, source_end_index, dst_start_index,
                        dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                       batch_size, block_size,cache_misses);
+                       batch_size, block_size, cache_misses);
       } else {
         calc_embedding_row_major(source_start_index, source_end_index,
                                  dst_start_index, dst_end_index, csr_block,
@@ -285,7 +287,7 @@ public:
             calc_embedding(source_start_index, source_end_index,
                            dst_start_index, dst_end_index, csr_block,
                            prevCoordinates, lr, batch_id, batch_size,
-                           block_size,cache_misses);
+                           block_size, cache_misses);
           } else {
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
@@ -297,12 +299,43 @@ public:
     }
   }
 
+  inline void calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
+                                    DENT *prevCoordinates, int batch_id,
+                                    double lr, ) {
+    for (int i = 0; i < grid->world_size; i++) {
+       #pragma  omp parallel for
+      for (int k = 0; k < (*cache_misses)[i].size(); k++) {
+        uint64_t col_id = (*cache_misses)[i][k].col;
+        uint64_t source_id = (*cache_misses)[i][k].row;
+        auto index = source_id - batch_id * batch_size;
+        DENT forceDiff[embedding_dim];
+        DENT *array_ptr =
+            (this->dense_local)->fetch_data_vector_from_cache(i, col_id);
+        for (int d = 0; d < embedding_dim; d++) {
+          forceDiff[d] =
+              (this->dense_local)->nCoordinates[source_id * embedding_dim + d] -
+              array_ptr[d];
+
+          attrc += forceDiff[d] * forceDiff[d];
+        }
+        DENT d1 = -2.0 / (1.0 + attrc);
+
+        for (int d = 0; d < embedding_dim; d++) {
+          DENT l = scale(forceDiff[d] * d1);
+          prevCoordinates[index * embedding_dim + d] =
+              prevCoordinates[index * embedding_dim + d] + (lr)*l;
+        }
+      }
+    }
+  }
+
   inline void calc_embedding(uint64_t source_start_index,
                              uint64_t source_end_index,
                              uint64_t dst_start_index, uint64_t dst_end_index,
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
-                             int block_size, vector<vector<Tuple<DENT>>> * cache_misses) {
+                             int block_size,
+                             vector<vector<Tuple<DENT>>> *cache_misses) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -333,10 +366,8 @@ public:
                   Tuple<DENT> cacheRef;
                   cacheRef.row = source_id;
                   cacheRef.col = i;
-                  #pragma omp critical
-                  {
-                  (*cache_misses)[target_rank].push_back(cacheRef);
-                  }
+#pragma omp critical
+                  { (*cache_misses)[target_rank].push_back(cacheRef); }
                   continue;
                 }
               }
