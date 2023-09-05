@@ -134,6 +134,8 @@ public:
         unique_ptr<vector<vector<uint64_t>>>(
             new vector<vector<uint64_t>>(grid->world_size));
 
+    (*cache_misses_ptr.get())[0].push_back(0.12345);
+
     vector<MPI_Request> mpi_requests(iterations * batches);
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
@@ -310,7 +312,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
@@ -337,7 +339,8 @@ public:
 //                  Tuple<DENT> cacheRef;
 //                  cacheRef.row = source_id;
 //                  cacheRef.col = i;
-                  (*cache_misses)[target_rank].push_back(0.1234);
+                  cout<<" target rank "<<target_rank<<endl;
+                  (*cache_misses)[target_rank].push_back(i);
                   continue;
                 }
               }
