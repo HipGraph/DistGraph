@@ -250,7 +250,7 @@ public:
       sendcounts_misses[i]= (*cache_misses)[i].size();
       total_send_count +=sendcounts_misses[i];
        sdisples_misses[i] = (i>0)?sdisples_misses[i-1]+sendcounts_misses[i-1]:sdisples_misses[i];
-      for(int k=0;k<cache_misses[i].size();k++){
+      for(int k=0;k<(*cache_misses)[i].size();k++){
         DataTuple<DENT, embedding_dim> temp;
         temp.col = static_cast<uint64_t>((*cache_misses)[i][k].col);
         sending_missing_cols.push_back(temp);
@@ -260,41 +260,41 @@ public:
     //sending number of misses for each rank
     MPI_Alltoall(sendcounts_misses.data(),1,MPI_INT,receivecounts_misses.data(),1,MPI_INT,MPI_COMM_WORLD);
 
-    for (int i = 0; i < grid->world_size; i++) {
-      total_receive_count +=receivecounts_misses[i];
-      rdisples_misses[i]= (i>0)?rdisples_misses[i-1]+receivecounts_misses[i-1]:rdisples_misses[i];
-    }
-
-    //sending actual Ids
-    MPI_Alltoallv(sending_missing_cols.data(),sendcounts_misses.data(),sdisples_misses.data(),
-                  DENSETUPLE,receive_missing_cols.data(),receivecounts_misses.data()
-                                                               ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
-
-    for(int i=0;i<grid->world_size;i++){
-      int base_index = rdisples_misses[i];
-      for(int j=0;j<receivecounts_misses[i];j++){
-        DataTuple<DENT, embedding_dim> t = receive_missing_cols[base_index+j];
-        uint64_t global_id = t.col;
-        uint64_t  local_id = t.col - grid->global_rank* this->sp_local_receiver->proc_row_width;
-        std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
-        t.value = val_arr;
-        receive_missing_cols[base_index+j]=t;
-      }
-    }
-
-    MPI_Alltoallv(receive_missing_cols.data(),receivecounts_misses.data(),rdisples_misses.data(),
-                  DENSETUPLE,sending_missing_cols.data(),sendcounts_misses.data()
-                                                               ,sdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
-
-    for (int i = 0; i < this->grid->world_size; i++) {
-      int base_index = sdisples_misses[i];
-      int count = sendcounts_misses[i];
-
-      for (int j = base_index; j < base_index + count; j++) {
-        DataTuple<DENT, embedding_dim> t = sending_missing_cols[j];
-//        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
-      }
-    }
+//    for (int i = 0; i < grid->world_size; i++) {
+//      total_receive_count +=receivecounts_misses[i];
+//      rdisples_misses[i]= (i>0)?rdisples_misses[i-1]+receivecounts_misses[i-1]:rdisples_misses[i];
+//    }
+//
+//    //sending actual Ids
+//    MPI_Alltoallv(sending_missing_cols.data(),sendcounts_misses.data(),sdisples_misses.data(),
+//                  DENSETUPLE,receive_missing_cols.data(),receivecounts_misses.data()
+//                                                               ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
+//
+//    for(int i=0;i<grid->world_size;i++){
+//      int base_index = rdisples_misses[i];
+//      for(int j=0;j<receivecounts_misses[i];j++){
+//        DataTuple<DENT, embedding_dim> t = receive_missing_cols[base_index+j];
+//        uint64_t global_id = t.col;
+//        uint64_t  local_id = t.col - grid->global_rank* this->sp_local_receiver->proc_row_width;
+//        std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
+//        t.value = val_arr;
+//        receive_missing_cols[base_index+j]=t;
+//      }
+//    }
+//
+//    MPI_Alltoallv(receive_missing_cols.data(),receivecounts_misses.data(),rdisples_misses.data(),
+//                  DENSETUPLE,sending_missing_cols.data(),sendcounts_misses.data()
+//                                                               ,sdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
+//
+//    for (int i = 0; i < this->grid->world_size; i++) {
+//      int base_index = sdisples_misses[i];
+//      int count = sendcounts_misses[i];
+//
+//      for (int j = base_index; j < base_index + count; j++) {
+//        DataTuple<DENT, embedding_dim> t = sending_missing_cols[j];
+////        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
+//      }
+//    }
 
   }
 
