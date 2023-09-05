@@ -166,7 +166,7 @@ public:
           t = start_clock();
         }
 
-        vector<vector<Tuple<DENT>>> &cache_misses;
+        vector<vector<Tuple<DENT>>> cache_misses;
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,j,batch_size,
                                               considering_batch_size, true,true,cache_misses);

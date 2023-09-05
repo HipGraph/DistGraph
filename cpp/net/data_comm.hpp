@@ -252,7 +252,7 @@ public:
        sdisples_misses[i] = (i>0)?sdisples_misses[i-1]+sendcounts_misses[i-1]:sdisples_misses[i];
       for(int k=0;k<cache_misses[i].size();k++){
         DataTuple<DENT, embedding_dim> temp;
-        temp.col = cache_misses[i][k];
+        temp.col = static_cast<uint64_t>cache_misses[i][k];
         sending_missing_cols.push_back(temp);
       }
     }
@@ -267,8 +267,8 @@ public:
 
     //sending actual Ids
     MPI_Alltoallv(sending_missing_cols.data(),sendcounts_misses.data(),sdisples_misses.data(),
-                  DENSETUPLE,receivecounts_misses.data(),receivecounts_misses.data()
-                                                               ,rdisples_misses,DENSETUPLE,MPI_COMM_WORLD);
+                  DENSETUPLE,receive_missing_cols.data(),receivecounts_misses.data()
+                                                               ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
 
     for(int i=0;i<grid->world_size;i++){
       int base_index = this->rdisples_misses[i];
