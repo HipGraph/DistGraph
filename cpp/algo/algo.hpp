@@ -195,7 +195,7 @@ public:
         if (alpha>0 and alpha < 1.0){
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-         data_comm_cache[j].get()->transfer_data(cache_misses, i, j);
+         data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
