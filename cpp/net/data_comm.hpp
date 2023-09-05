@@ -229,7 +229,7 @@ public:
     //    delete[] sendbuf;
   }
 
-  void transfer_data(vector<vector<Tuple>> &cache_misses, int iteration, int batch_id) {
+  void transfer_data(vector<vector<Tuple<DENT>>> &cache_misses, int iteration, int batch_id) {
 
     vector<int> sendcounts_misses(grid->world_size,0);
     vector<int> receivecounts_misses(grid->world_size,0);
@@ -237,8 +237,8 @@ public:
     vector<int> sdisples_misses(grid->world_size,0);
     vector<int> rdisples_misses(grid->world_size,0);
 
-    vector<DataTuple> sending_missing_cols;
-    vector<DataTuple> receive_missing_cols;
+    vector<DataTuple<DENT, embedding_dim>> sending_missing_cols;
+    vector<DataTuple<DENT, embedding_dim>> receive_missing_cols;
 
 
 
@@ -251,7 +251,7 @@ public:
       total_send_count +=sendcounts_misses[i];
        sdisples_misses[i] = (i>0)?sdisples_misses[i-1]+sendcounts_misses[i-1]:sdisples_misses[i];
       for(int k=0;k<cache_misses[i].size();k++){
-        DataTuple temp;
+        DataTuple<DENT, embedding_dim> temp;
         temp.col = cache_misses[i][k];
         sending_missing_cols.push_back(temp);
       }
