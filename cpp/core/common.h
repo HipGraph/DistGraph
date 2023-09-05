@@ -51,7 +51,7 @@ double stop_clock_get_elapsed(my_timer_t &start);
 
 json json_perf_statistics();
 
-std::unordered_set<uint64_t> distblas::core::random_select(const std::unordered_set<uint64_t>& originalSet, int count);
+std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& originalSet, int count);
 
     template <typename T> struct Tuple {
   int64_t row;
