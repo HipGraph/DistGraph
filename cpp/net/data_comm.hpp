@@ -271,7 +271,7 @@ public:
                                                                ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
 
     for(int i=0;i<grid->world_size;i++){
-      int base_index = this->rdisples_misses[i];
+      int base_index = rdisples_misses[i];
       for(int j=0;j<receivecounts_misses[i];j++){
         DataTuple<DENT, embedding_dim> t = receive_missing_cols[base_index+j];
         uint64_t global_id = t.col;
