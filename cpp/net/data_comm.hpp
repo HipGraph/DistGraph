@@ -262,10 +262,6 @@ public:
     for (int i = 0; i < grid->world_size; i++) {
       total_receive_count +=receivecounts_misses[i];
       rdisples_misses[i]= (i>0)?rdisples_misses[i-1]+receivecounts_misses[i-1]:rdisples_misses[i];
-//      if (grid->world_size==0){
-        cout<<" rank "<<grid->global_rank<<" receiving count  from rank"<<i<<receivecounts_misses[i]<<endl;
-//      }
-
     }
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>> receive_missing_cols_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>(total_receive_count));
@@ -296,7 +292,7 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr.get())[j];
-//        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
+        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
       }
     }
 
