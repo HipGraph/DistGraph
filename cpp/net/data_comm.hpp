@@ -241,7 +241,6 @@ public:
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
 
-
     int total_send_count = 0;
     int total_receive_count = 0;
 
