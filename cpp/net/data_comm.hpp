@@ -278,7 +278,7 @@ public:
         uint64_t  local_id = t.col - grid->global_rank* this->sp_local_receiver->proc_row_width;
         std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
         t.value = val_arr;
-        receive_missing_cols[count]=t;
+        receive_missing_cols[base_index+j]=t;
       }
     }
 
@@ -287,8 +287,8 @@ public:
                                                                ,sdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
 
     for (int i = 0; i < this->grid->world_size; i++) {
-      int base_index = this->sdisples_misses[i];
-      int count = this->sendcounts_misses[i];
+      int base_index = sdisples_misses[i];
+      int count = sendcounts_misses[i];
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = sending_missing_cols[j];
