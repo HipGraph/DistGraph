@@ -228,6 +228,78 @@ public:
 
     //    delete[] sendbuf;
   }
+
+  void transfer_data(vector<vector<Tuple>> &cache_misses, int iteration, int batch_id) {
+
+    vector<int> sendcounts_misses(grid->world_size,0);
+    vector<int> receivecounts_misses(grid->world_size,0);
+
+    vector<int> sdisples_misses(grid->world_size,0);
+    vector<int> rdisples_misses(grid->world_size,0);
+
+    vector<DataTuple> sending_missing_cols;
+    vector<DataTuple> receive_missing_cols;
+
+
+
+    int total_send_count = 0;
+    int total_receive_count = 0;
+
+
+    for (int i = 0; i < grid->world_size; i++) {
+      sendcounts_misses[i]= cache_misses[i].size();
+      total_send_count +=sendcounts_misses[i];
+       sdisples_misses[i] = (i>0)?sdisples_misses[i-1]+sendcounts_misses[i-1]:sdisples_misses[i];
+      for(int k=0;k<cache_misses[i].size();k++){
+        DataTuple temp;
+        temp.col = cache_misses[i][k];
+        sending_missing_cols.push_back(temp);
+      }
+    }
+
+    //sending number of misses for each rank
+    MPI_Alltoall(sendcounts_misses.data(),1,MPI_INT,receivecounts_misses.data(),1,MPI_INT,MPI_COMM_WORLD);
+
+    for (int i = 0; i < grid->world_size; i++) {
+      total_receive_count +=receivecounts_misses[i];
+      rdisples_misses[i]= (i>0)?rdisples_misses[i-1]+receivecounts_misses[i-1]:rdisples_misses[i];
+    }
+
+    //sending actual Ids
+    MPI_Alltoallv(sending_missing_cols.data(),sendcounts_misses.data(),sdisples_misses.data(),
+                  DENSETUPLE,receivecounts_misses.data(),receivecounts_misses.data()
+                                                               ,rdisples_misses,DENSETUPLE,MPI_COMM_WORLD);
+
+    for(int i=0;i<grid->world_size;i++){
+      int base_index = this->rdisples_misses[i];
+      for(int j=0;j<receivecounts_misses[i];j++){
+        DataTuple<DENT, embedding_dim> t = receive_missing_cols[base_index+j];
+        uint64_t global_id = t.col;
+        uint64_t  local_id = t.col - grid->global_rank* this->sp_local_receiver->proc_row_width;
+        std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
+        t.value = val_arr;
+        receive_missing_cols[count]=t;
+      }
+    }
+
+    MPI_Alltoallv(receive_missing_cols.data(),receivecounts_misses.data(),rdisples_misses.data(),
+                  DENSETUPLE,sending_missing_cols.data(),sendcounts_misses.data()
+                                                               ,sdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
+
+    for (int i = 0; i < this->grid->world_size; i++) {
+      int base_index = this->sdisples_misses[i];
+      int count = this->sendcounts_misses[i];
+
+      for (int j = base_index; j < base_index + count; j++) {
+        DataTuple<DENT, embedding_dim> t = sending_missing_cols[j];
+        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
+      }
+    }
+
+  }
+
+
+
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request &request, bool synchronous, int iteration, int batch_id) {
     if (!synchronous) {

@@ -53,7 +53,7 @@ json json_perf_statistics();
 
 std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& originalSet, int count);
 
-    template <typename T> struct Tuple {
+template <typename T> struct Tuple {
   int64_t row;
   int64_t col;
   T value;
@@ -75,6 +75,7 @@ template <typename T, size_t size> struct CacheEntry {
   int inserted_batch_id;
   int inserted_itr;
 };
+
 
 struct CSRHandle {
   vector<double> values;
