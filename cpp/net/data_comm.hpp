@@ -237,10 +237,13 @@ public:
     vector<int> sdisples_misses(grid->world_size,0);
     vector<int> rdisples_misses(grid->world_size,0);
 
-    vector<DataTuple<DENT, embedding_dim>> sending_missing_cols;
-    vector<DataTuple<DENT, embedding_dim>> receive_missing_cols;
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>> sending_missing_cols_ptr =
+        unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
 
-
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>> receive_missing_cols_ptr =
+        unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
 
     int total_send_count = 0;
     int total_receive_count = 0;
@@ -253,7 +256,7 @@ public:
       for(int k=0;k<(*cache_misses)[i].size();k++){
         DataTuple<DENT, embedding_dim> temp;
         temp.col = static_cast<uint64_t>((*cache_misses)[i][k].col);
-        sending_missing_cols.push_back(temp);
+        (*sending_missing_cols_ptr.get()).push_back(temp);
       }
     }
 
@@ -266,8 +269,8 @@ public:
     }
 
     //sending actual Ids
-    MPI_Alltoallv(sending_missing_cols.data(),sendcounts_misses.data(),sdisples_misses.data(),
-                  DENSETUPLE,receive_missing_cols.data(),receivecounts_misses.data()
+    MPI_Alltoallv(sending_missing_cols_ptr.get(),sendcounts_misses.data(),sdisples_misses.data(),
+                  DENSETUPLE,receive_missing_cols_ptr.get(),receivecounts_misses.data()
                                                                ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
 //
 //    for(int i=0;i<grid->world_size;i++){
