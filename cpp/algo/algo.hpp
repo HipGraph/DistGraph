@@ -166,7 +166,7 @@ public:
           t = start_clock();
         }
 
-        vector<vector<Tuple<DENT>> &cache_misses
+        vector<vector<Tuple<DENT>>> &cache_misses;
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,j,batch_size,
                                               considering_batch_size, true,true,cache_misses);
@@ -299,7 +299,7 @@ public:
                              uint64_t dst_start_index, uint64_t dst_end_index,
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
-                             int block_size, vector<vector<Tuple<DENT>> &cache_misses) {
+                             int block_size, vector<vector<Tuple<DENT>>> &cache_misses) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
