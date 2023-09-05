@@ -166,8 +166,6 @@ public:
           t = start_clock();
         }
 
-        vector<vector<Tuple<DENT>>> cache_misses = new ;
-
         unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr =
             unique_ptr<vector<vector<Tuple<DENT>>>>(
                 new vector<vector<Tuple<DENT>>>(grid->world_size));
