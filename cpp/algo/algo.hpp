@@ -329,10 +329,10 @@ public:
                                 ->fetch_data_vector_from_cache(target_rank, i);
 
                 if (array_ptr == nullptr) {
-                  Tuple<DENT> cacheRef;
-                  cacheRef.row = source_id;
-                  cacheRef.col = i;
-                  (*cache_misses)[0].push_back(cacheRef);
+//                  Tuple<DENT> cacheRef;
+//                  cacheRef.row = source_id;
+//                  cacheRef.col = i;
+//                  (*cache_misses)[0].push_back(cacheRef);
                   continue;
                 }
               }
