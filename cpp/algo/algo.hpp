@@ -166,10 +166,14 @@ public:
           t = start_clock();
         }
 
-        vector<vector<Tuple<DENT>>> cache_misses(grid->world_size);
+        vector<vector<Tuple<DENT>>> cache_misses = new ;
+
+        unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr =
+            unique_ptr<vector<vector<Tuple<DENT>>>>(
+                new vector<vector<Tuple<DENT>>>(grid->world_size));
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,j,batch_size,
-                                              considering_batch_size, true,true,cache_misses);
+                                              considering_batch_size, true,true,cache_misses_ptr.get());
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
@@ -187,7 +191,7 @@ public:
         }
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
-                j,batch_size,considering_batch_size, false,true,cache_misses);
+                j,batch_size,considering_batch_size, false,true,cache_misses_ptr.get());
 
         if (alpha>0 and alpha < 1.0){
           stop_clock_and_add(t, "Computation Time");
@@ -242,7 +246,7 @@ public:
                                       DENT *prevCoordinates, DENT lr,
                                       int batch_id, int batch_size,
                                       int block_size, bool local,
-                                      bool col_major,vector<vector<Tuple<DENT>>> &cache_misses) {
+                                      bool col_major,vector<vector<Tuple<DENT>>> *cache_misses) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -299,7 +303,7 @@ public:
                              uint64_t dst_start_index, uint64_t dst_end_index,
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
-                             int block_size, vector<vector<Tuple<DENT>>> &cache_misses) {
+                             int block_size, vector<vector<Tuple<DENT>>> * cache_misses) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -330,8 +334,7 @@ public:
                   Tuple<DENT> cacheRef;
                   cacheRef.row = source_id;
                   cacheRef.col = i;
-                  cache_misses[target_rank];
-//                  cache_misses[target_rank].push_back(cacheRef);
+                  (*cache_misses[target_rank]).push_back(cacheRef);
                   continue;
                 }
               }
