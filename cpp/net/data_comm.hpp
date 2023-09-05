@@ -270,8 +270,8 @@ public:
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>> receive_missing_cols_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>(total_receive_count));
     //sending actual Ids
-    MPI_Alltoallv(sending_missing_cols_ptr.get(),sendcounts_misses.data(),sdisples_misses.data(),
-                  DENSETUPLE,receive_missing_cols_ptr.get(),receivecounts_misses.data()
+    MPI_Alltoallv((*sending_missing_cols_ptr.get()).data(),sendcounts_misses.data(),sdisples_misses.data(),
+                  DENSETUPLE,(*receive_missing_cols_ptr.get()).data(),receivecounts_misses.data()
                                                                ,rdisples_misses.data(),DENSETUPLE,MPI_COMM_WORLD);
 //
 //    for(int i=0;i<grid->world_size;i++){
