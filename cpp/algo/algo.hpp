@@ -333,9 +333,10 @@ public:
                   Tuple<DENT> cacheRef;
                   cacheRef.row = source_id;
                   cacheRef.col = i;
-                  #pragma omp critical {
+                  #pragma omp critical
+                  {
                   (*cache_misses)[target_rank].push_back(cacheRef);
-                }
+                  }
                   continue;
                 }
               }
