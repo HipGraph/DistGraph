@@ -11,6 +11,7 @@
 #include <parallel/algorithm>
 #include <unordered_set>
 #include <vector>
+#include "common.h"
 
 using namespace std;
 
@@ -88,12 +89,11 @@ public:
 
     } else {
 
-      fill_col_ids_for_pushing(batch_id, proc_to_id_mapping, alpha);
+      fill_col_ids_for_pushing(batch_id, proc_to_id_mapping);
     }
   }
 
-  void fill_col_ids_for_pulling(int batch_id,
-                                vector<vector<uint64_t>> &proc_to_id_mapping) {
+  void fill_col_ids_for_pulling(int batch_id, vector<vector<uint64_t>> &proc_to_id_mapping) {
 
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD,
@@ -111,8 +111,10 @@ public:
             std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows);
 
         for (int i = starting_index; i < end_index; i++) {
-          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+          if (rank != r and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
               auto col_val = handle->col_idx[j];
               { proc_to_id_mapping[r].push_back(col_val); }
             }
@@ -143,9 +145,7 @@ public:
     }
   }
 
-  void fill_col_ids_for_pushing(int batch_id,
-                                vector<vector<uint64_t>> &proc_to_id_mapping,
-                                double alpha) {
+  void fill_col_ids_for_pushing(int batch_id, vector<vector<uint64_t>> &proc_to_id_mapping) {
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -161,37 +161,21 @@ public:
 
     if (col_partitioned) {
       // calculation of sender col_ids
-//#pragma omp parallel for
+      #pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index = proc_row_width * r;
-        auto end_index =
-            std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows) -
-            1;
+        auto end_index = std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows) -1;
 
-        auto per_batch_nnz = 0;
-        auto total_nnz = 0;
-        auto effective_nnz = 0;
-        int count = 0;
-        if ( alpha >0  and  alpha < 1.0) {
-           total_nnz = handle->rowStart[end_index + 1] -
-                           handle->rowStart[starting_index];
-           effective_nnz = alpha * total_nnz;
-          per_batch_nnz = effective_nnz / batches;
-          starting_index =
-              (batch_id < batches - 1)
-                  ? (batch_id + 1) * batch_size + proc_row_width * r
-                  : proc_row_width * r;
-        }
+        auto eligible_col_id_start =
+            (batch_id >= 0) ? batch_id * batch_size : 0;
+        auto eligible_col_id_end =
+            (batch_id >= 0)
+                ? std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),
+                           static_cast<uint64_t>(proc_col_width))
+                : proc_col_width;
 
         for (auto i = starting_index; i <= (end_index); i++) {
 
-          auto eligible_col_id_start =
-              (batch_id >= 0) ? batch_id * batch_size : 0;
-          auto eligible_col_id_end =
-              (batch_id >= 0)
-                  ? std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),
-                             static_cast<uint64_t>(proc_col_width))
-                  : proc_col_width;
           if (rank != r and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
@@ -201,21 +185,14 @@ public:
                   col_val < eligible_col_id_end) {
                 // calculation of sender col_ids
                 { proc_to_id_mapping[r].push_back(col_val); }
-
-                if (alpha < 1.0)
-                  count++;
               }
             }
           }
-          if (alpha < 1.0 and count >= per_batch_nnz)
-            break;
         }
-//        cout<<" rank "<< rank <<" sending nnz "<< count <<" to rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
       }
     } else if (transpose) {
-
       // calculation of receiver col_ids
-//#pragma omp parallel for
+#pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index =
             (batch_id >= 0) ? batch_id * batch_size + proc_col_width * r
@@ -230,43 +207,11 @@ public:
                 : std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
                            gCols) -
                       1;
-
-        auto per_batch_nnz = 0;
-        auto effective_nnz =0;
-        auto total_nnz = 0;
-        int count = 0;
-        auto considered_range_start =
-            (batch_id < batches - 1) ? (batch_id + 1) * batch_size : 0;
-        if (alpha >0  and  alpha < 1.0) {
-          auto end_index_co = std::min(static_cast<uint64_t>((r + 1) * proc_col_width),gCols) -1;
-          auto start_index_co = proc_col_width*r;
-           total_nnz = handle->rowStart[end_index_co +1] -
-                           handle->rowStart[start_index_co];
-           effective_nnz = alpha * total_nnz;
-          per_batch_nnz = effective_nnz / batches;
-        }
-
         for (auto i = starting_index; i <= (end_index); i++) {
-          if (rank != r and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 and
-              alpha == 1.0) {
+          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 ) {
             proc_to_id_mapping[r].push_back(i);
-          } else if (rank != r and
-                     (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 and
-                     alpha < 1.0) {
-            for (int j = handle->rowStart[i]; j < handle->rowStart[i + 1];
-                 j++) {
-              if (handle->col_idx[j] >= considered_range_start) {
-                proc_to_id_mapping[r].push_back(i);
-                count++;
-              }
-            }
-
-            if (count >= per_batch_nnz)
-              break;
           }
         }
-//        cout<<" rank "<< rank <<" receiving nnz "<< count <<" from rank "<<r<<" total_nnz "<<total_nnz<<" effective_nnz  "<<effective_nnz<<" per_batch_nnz "<<per_batch_nnz<<endl;
       }
     }
   }

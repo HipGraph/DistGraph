@@ -164,3 +164,25 @@ double distblas::core::stop_clock_get_elapsed(my_timer_t &start) {
 }
 
 
+std::unordered_set<uint64_t> distblas::core::random_select(const std::unordered_set<uint64_t>& originalSet, int count) {
+  std::unordered_set<int> result;
+
+  // Check if the count is greater than the size of the original set
+  if (count >= originalSet.size()) {
+    return originalSet; // Return the original set as-is
+  }
+
+  std::random_device rd;  // Random device for seed
+  std::mt19937 gen(rd()); // Mersenne Twister PRNG
+  std::uniform_int_distribution<int> dis(0, originalSet.size() - 1);
+
+  while (result.size() < count) {
+    auto it = originalSet.begin();
+    std::advance(it, dis(gen)); // Advance the iterator to a random position
+    result.insert(*it);        // Insert the selected element into the result set
+  }
+
+  return result;
+}
+
+

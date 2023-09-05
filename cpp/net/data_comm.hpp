@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include <unordered_map>
 #include <vector>
+#include "../core/common.h"
 
 using namespace distblas::core;
 
@@ -81,13 +82,24 @@ public:
     for (int i = 0; i < grid->world_size; i++) {
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
+
+      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
+                                                   send_col_ids_list[i].end());
+
+      if (alpha > 0 and alpha < 1.0){
+        uint64_t considered_count_send = alpha*ordered_sending.size();
+        uint64_t considered_count_receive = alpha*ordered_receiving.size();
+
+        unique_set_receiv = random_select(unique_set_receiv, considered_count_receive);
+        unique_set_send = random_select(unique_set_send, considered_count_send);
+
+      }
+
       receive_col_ids_list[i] =
           vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
 
       receivecounts[i] = receive_col_ids_list[i].size();
 
-      std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
-                                                   send_col_ids_list[i].end());
       send_col_ids_list[i] =
           vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
 
