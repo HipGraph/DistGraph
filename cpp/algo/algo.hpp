@@ -337,7 +337,7 @@ public:
 //                  Tuple<DENT> cacheRef;
 //                  cacheRef.row = source_id;
 //                  cacheRef.col = i;
-                  (*cache_misses)[target_rank].push_back(i);
+                  (*cache_misses)[target_rank].push_back(0.1234);
                   continue;
                 }
               }
