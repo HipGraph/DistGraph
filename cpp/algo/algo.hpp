@@ -174,7 +174,7 @@ public:
             cout<<"  rank "<<grid->global_rank<<" processing k "<<k<<" transfer completed "<<prev_start<<" end_process "<<end_process<<endl;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
-            if (k=0) {
+            if (k==0) {
               //local computation
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                             batch_size, considering_batch_size, true,
