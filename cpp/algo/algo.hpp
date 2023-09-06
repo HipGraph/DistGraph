@@ -162,7 +162,7 @@ public:
         if (alpha == 0) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          int proc_length = get_proc_length(beta,world_size);
+          int proc_length = get_proc_length(beta,grid->world_size);
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
             update_ptr.get()->clear();

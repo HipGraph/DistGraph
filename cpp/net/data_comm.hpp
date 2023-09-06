@@ -189,8 +189,7 @@ public:
       }
 
       if (total_send_count > 0) {
-        DataTuple<DENT, embedding_dim> *sendbuf_cyclic;
-        = new DataTuple<DENT, embedding_dim>[total_send_count];
+        DataTuple<DENT, embedding_dim> *sendbuf_cyclic = new DataTuple<DENT, embedding_dim>[total_send_count];
         for (const auto &pair : send_indices_to_proc_map) {
           auto col_id = pair.first;
           bool already_fetched = false;
