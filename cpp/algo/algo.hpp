@@ -187,6 +187,7 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
+            cout<<"  rank "<<grid->global_rank<<" processing k "<<k<<" populate_cache "<<endl;
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
