@@ -192,7 +192,7 @@ public:
 
         int proc_length = beta*grid->world_size;
 
-        for(k=0;k<grid->world_size;k +=proc_length) {
+        for(int k=0;k<grid->world_size;k +=proc_length) {
           int end_process = std::min((k+proc_length),grid->world_size);
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
