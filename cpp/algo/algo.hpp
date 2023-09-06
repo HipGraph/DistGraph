@@ -170,9 +170,9 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, true,
-                                      true, cache_misses_ptr.get());
+//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                      batch_size, considering_batch_size, true,
+//                                      true, cache_misses_ptr.get());
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
@@ -189,9 +189,9 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, false,
-                                      true, cache_misses_ptr.get());
+//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                      batch_size, considering_batch_size, false,
+//                                      true, cache_misses_ptr.get());
 
         if (alpha > 0 and alpha < 1.0) {
           MPI_Barrier(MPI_COMM_WORLD);
@@ -200,7 +200,7 @@ public:
           data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
+//          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
         }
 
         // negative samples generation
@@ -216,10 +216,10 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
-
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
+//
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
