@@ -215,7 +215,7 @@ public:
             }
           }
         }
-
+        cout<<" rank "<<grid->global_rank<<" data loading completed "<<endl;
         receivebuf->resize(total_receive_count);
 
         add_datatransfers(total_receive_count, "Data transfers");
