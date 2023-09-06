@@ -1,6 +1,5 @@
 #pragma once
 #include "common.h"
-#include "csr_linked_list.hpp"
 #include "csr_local.hpp"
 #include "distributed_mat.hpp"
 #include <algorithm>
