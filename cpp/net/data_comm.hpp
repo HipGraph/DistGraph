@@ -205,7 +205,7 @@ public:
                 dense_vector = (this->dense_local)->fetch_local_data(col_id);
                 already_fetched = true;
               }
-              int offset = send_counts_cyclic[i];
+              int offset = sdispls_cyclic[i];
               int index = offset_vector[i] + offset;
               sendbuf_cyclic[index].col =
                   col_id + (this->sp_local_sender->proc_col_width *
