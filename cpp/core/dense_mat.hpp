@@ -82,9 +82,8 @@ public:
   DENT *fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
-    auto &arrayMap;
 
-    auto &arrayMap =(temp)?(*this->tempCachePtr)[rank]:(*cachePtr)[rank];
+    auto &arrayMap =(temp)?(*tempCachePtr)[rank]:(*cachePtr)[rank];
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
