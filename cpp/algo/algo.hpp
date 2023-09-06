@@ -164,11 +164,11 @@ public:
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
             update_ptr.get()->clear();
-            MPI_Request request_batch_update;
+            MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k,beta,grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update, i, j,k,end_process);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k=0) {
@@ -185,7 +185,7 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j,true);
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -250,8 +250,7 @@ public:
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
-        if (this->grid->world_size > 1 and
-            !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
+        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
           update_ptr.get()->clear();
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");

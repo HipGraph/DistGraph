@@ -224,8 +224,7 @@ public:
           MPI_Request dumy;
           this->populate_cache(receivebuf, dumy, true, iteration, batch_id,true);
         } else {
-          MPI_Ialltoallv(
-              sendbuf_cyclic, send_counts_cyclic.data(), sdispls_cyclic.data(),
+          MPI_Ialltoallv(sendbuf_cyclic, send_counts_cyclic.data(), sdispls_cyclic.data(),
               DENSETUPLE, (*receivebuf).data(), receive_counts_cyclic.data(),
               rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
         }
