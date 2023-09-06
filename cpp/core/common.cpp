@@ -56,7 +56,7 @@ size_t distblas::core::get_memory_usage(){
     size_t virtualMemUsed = size * pageSize;
     size_t residentSetSize = resident * pageSize;
 
-    size_t mem_usage = virtualMemUsed/(1024*1024);
+    size_t mem_usage = residentSetSize/(1024*1024);
     return mem_usage;
   }
   return 0;
