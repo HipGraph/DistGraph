@@ -133,7 +133,7 @@ public:
     vector<MPI_Request> mpi_requests(iterations * batches);
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
-    size_t total_memory=0;
+    size_t total_memory = 0;
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " iteration " << i << endl;
@@ -200,8 +200,7 @@ public:
           MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          //          data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(),
-          //          i, j);
+          data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
           this->calc_t_dist_grad_for_cache_misses(
@@ -246,7 +245,7 @@ public:
         }
       }
     }
-    total_memory = total_memory/(iterations*batches);
+    total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Computation Time");
   }
@@ -312,31 +311,30 @@ public:
                                     DENT *prevCoordinates, int batch_id,
                                     int batch_size, double lr) {
     for (int i = 0; i < grid->world_size; i++) {
-      //       #pragma  omp parallel for
-      //      for (int k = 0; k < (*cache_misses)[i].size(); k++) {
-      //        uint64_t col_id = (*cache_misses)[i][k].col;
-      //        uint64_t source_id = (*cache_misses)[i][k].row;
-      //        auto index = source_id - batch_id * batch_size;
-      //        DENT forceDiff[embedding_dim];
-      //        DENT attrc = 0;
-      //        DENT *array_ptr =
-      //            (this->dense_local)->fetch_data_vector_from_cache(i,
-      //            col_id);
-      //        for (int d = 0; d < embedding_dim; d++) {
-      //          forceDiff[d] =
-      //              (this->dense_local)->nCoordinates[source_id *
-      //              embedding_dim + d] - array_ptr[d];
-      //
-      //          attrc += forceDiff[d] * forceDiff[d];
-      //        }
-      //        DENT d1 = -2.0 / (1.0 + attrc);
-      //
-      //        for (int d = 0; d < embedding_dim; d++) {
-      //          DENT l = scale(forceDiff[d] * d1);
-      //          prevCoordinates[index * embedding_dim + d] =
-      //              prevCoordinates[index * embedding_dim + d] + (lr)*l;
-      //        }
-      //      }
+#pragma omp parallel for
+      for (int k = 0; k < (*cache_misses)[i].size(); k++) {
+        uint64_t col_id = (*cache_misses)[i][k].col;
+        uint64_t source_id = (*cache_misses)[i][k].row;
+        auto index = source_id - batch_id * batch_size;
+        DENT forceDiff[embedding_dim];
+        DENT attrc = 0;
+        DENT *array_ptr =
+            (this->dense_local)->fetch_data_vector_from_cache(i, col_id);
+        for (int d = 0; d < embedding_dim; d++) {
+          forceDiff[d] =
+              (this->dense_local)->nCoordinates[source_id * embedding_dim + d] -
+              array_ptr[d];
+
+          attrc += forceDiff[d] * forceDiff[d];
+        }
+        DENT d1 = -2.0 / (1.0 + attrc);
+
+        for (int d = 0; d < embedding_dim; d++) {
+          DENT l = scale(forceDiff[d] * d1);
+          prevCoordinates[index * embedding_dim + d] =
+              prevCoordinates[index * embedding_dim + d] + (lr)*l;
+        }
+      }
       (*cache_misses)[i].clear();
     }
   }
