@@ -205,7 +205,7 @@ public:
           data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
+//          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
         }
 
         // negative samples generation
