@@ -160,15 +160,17 @@ public:
 
 
         if (alpha == 0) {
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
           int proc_length = get_proc_length(beta,grid->world_size);
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
             update_ptr.get()->clear();
             MPI_Request request_batch_update;
             int end_process = get_end_proc(k,beta,grid->world_size);
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
             data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update, i, j,k,end_process);
+            stop_clock_and_add(t, "Communication Time");
+            t = start_clock();
             if (k=0) {
               //local computation
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
@@ -179,18 +181,20 @@ public:
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                             batch_size, considering_batch_size, false,
                                             true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+              dense_local->invalidate_cache(i,j,true);
             }
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j,true);
             prev_start=k;
-
+            stop_clock_and_add(t, "Communication Time");
+            t = start_clock();
           }
           int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size, false,
                                         true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
-
-          stop_clock_and_add(t, "Communication Time");
-          t = start_clock();
+          dense_local->invalidate_cache(i,j,true);
         } else if (alpha>0) {
           // local computation
           this->calc_t_dist_grad_rowptr(
@@ -257,7 +261,7 @@ public:
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          dense_local->invalidate_cache(i, j);
+          dense_local->invalidate_cache(i, j,false);
         }
 
       }

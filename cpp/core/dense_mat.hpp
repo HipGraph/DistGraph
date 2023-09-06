@@ -103,17 +103,21 @@ public:
     return stdArray;
   }
 
-  void invalidate_cache(int current_itr, int current_batch) {
-    for (int i = 0; i < grid->world_size; i++) {
-      auto &arrayMap = (*cachePtr)[i];
-      for (auto it = arrayMap.begin(); it != arrayMap.end();) {
-        distblas::core::CacheEntry<DENT, embedding_dim> cache_ent = it->second;
-        if (cache_ent.inserted_itr < current_itr and
-            cache_ent.inserted_batch_id <= current_batch) {
-          it = arrayMap.erase(it);
-        } else {
-          // Move to the next item
-          ++it;
+  void invalidate_cache(int current_itr, int current_batch, bool temp) {
+    if (temp ){
+      purge_temp_cache();
+    }else {
+      for (int i = 0; i < grid->world_size; i++) {
+        auto &arrayMap = (*cachePtr)[i];
+        for (auto it = arrayMap.begin(); it != arrayMap.end();) {
+          distblas::core::CacheEntry<DENT, embedding_dim> cache_ent = it->second;
+          if (cache_ent.inserted_itr < current_itr and
+              cache_ent.inserted_batch_id <= current_batch) {
+            it = arrayMap.erase(it);
+          } else {
+            // Move to the next item
+            ++it;
+          }
         }
       }
     }
