@@ -51,6 +51,10 @@ double stop_clock_get_elapsed(my_timer_t &start);
 
 json json_perf_statistics();
 
+int get_proc_length(double beta, int world_size);
+
+int get_end_proc(int  starting_index, double beta, int world_size)
+
 std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& originalSet, int count);
 
 template <typename T> struct Tuple {

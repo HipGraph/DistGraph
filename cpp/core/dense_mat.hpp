@@ -29,6 +29,8 @@ public:
   uint64_t rows;
   unique_ptr<vector<unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>
       cachePtr;
+  unique_ptr<vector<unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>
+      tempCachePtr;
   DENT *nCoordinates;
   Process3DGrid *grid;
 
@@ -47,6 +49,9 @@ public:
     this->cachePtr = std::make_unique<std::vector<
         std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
         grid->world_size);
+    this->tempCachePtr = std::make_unique<std::vector<
+        std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
+        grid->world_size);
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
     std::srand(this->grid->global_rank);
@@ -61,18 +66,25 @@ public:
   ~DenseMat() {}
 
   void insert_cache(int rank, uint64_t key, int batch_id, int iteration,
-                    std::array<DENT, embedding_dim> &arr) {
+                    std::array<DENT, embedding_dim> &arr, bool temp) {
     distblas::core::CacheEntry<DENT, embedding_dim> entry;
     entry.inserted_batch_id = batch_id;
     entry.inserted_itr = iteration;
     entry.value = arr;
-    (*this->cachePtr)[rank].insert_or_assign(key, entry);
+    if (temp){
+      (*this->tempCachePtr)[rank].insert_or_assign(key, entry);
+    }else {
+      (*this->cachePtr)[rank].insert_or_assign(key, entry);
+    }
   }
 
-  DENT *fetch_data_vector_from_cache(int rank, uint64_t key) {
+
+  DENT *fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
-    auto &arrayMap = (*cachePtr)[rank];
+    auto &arrayMap;
+
+    auto &arrayMap =(temp)?(*this->tempCachePtr)[rank]:(*cachePtr)[rank];
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
@@ -105,6 +117,13 @@ public:
           ++it;
         }
       }
+    }
+  }
+
+  void purge_temp_cache(){
+    for (int i = 0; i < grid->world_size; i++) {
+      (*this->tempCachePtr)[i].clear();
+      std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>().swap((*this->tempCachePtr)[i]);
     }
   }
 

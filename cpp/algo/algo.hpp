@@ -100,7 +100,7 @@ public:
       stop_clock_and_add(t, "Computation Time");
 
       t = start_clock();
-      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false, fetch_all, 0, 0);
+      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,false, fetch_all, 0, 0,0,0);
       stop_clock_and_add(t, "Communication Time");
       t = start_clock();
     }
@@ -117,7 +117,7 @@ public:
       stop_clock_and_add(t, "Computation Time");
       t = start_clock();
       negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-                                                false, 0, 0);
+                                                false, 0, 0,false);
       stop_clock_and_add(t, "Communication Time");
       t = start_clock();
     }
@@ -160,50 +160,69 @@ public:
 
 
         if (alpha == 0) {
-          update_ptr.get()->clear();
-          MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j);
-          mpi_requests[i * batches + j] = request_batch_update;
-          stop_clock_and_add(t, "Communication Time");
-          t = start_clock();
-        }
+          int proc_length = get_proc_length(beta,world_size);
+          int prev_start=0;
+          for(int k=0;k<grid->world_size;k +=proc_length) {
+            update_ptr.get()->clear();
+            MPI_Request request_batch_update;
+            int end_process = get_end_proc(k,beta,grid->world_size);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update, i, j,k,end_process);
+            if (k=0) {
+              //local computation
+              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                            batch_size, considering_batch_size, true,
+                                            true, cache_misses_ptr.get(),0,0,false);
+            } else if (k>0) {
+              int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
+              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                            batch_size, considering_batch_size, false,
+                                            true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+            }
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j,true);
+            prev_start=k;
 
-        //local computation
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, true,
-                                      true, cache_misses_ptr.get(),0,0);
-
-        if (this->grid->world_size > 1) {
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          if (!(i == 0 and j == 0) and alpha > 0) {
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,j);
-          } else if (alpha == 0) {
-
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j], false, i, j);
           }
+          int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size, false,
+                                        true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-        }
+        } else if (alpha>0) {
+          // local computation
+          this->calc_t_dist_grad_rowptr(
+              csr_block, prevCoordinates, lr, j, batch_size,
+              considering_batch_size, true, true, cache_misses_ptr.get(), 0, 0);
 
-        total_memory += get_memory_usage();
+          if (this->grid->world_size > 1) {
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
+            if (!(i == 0 and j == 0)) {
+              data_comm_cache[j].get()->populate_cache(
+                  update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
+                  j, false);
+            }
+            stop_clock_and_add(t, "Communication Time");
+            t = start_clock();
+          }
 
-        int proc_length = beta*grid->world_size;
-
-        for(int k=0;k<grid->world_size;k +=proc_length) {
-          int end_process = std::min((k+proc_length),grid->world_size);
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
-                                        false, true, cache_misses_ptr.get(),k,end_process);
+                                        false, true,
+                                        cache_misses_ptr.get(),
+                                        0,grid->world_size);
         }
+        total_memory += get_memory_usage();
+
 
         if (alpha > 0 and alpha < 1.0) {
           MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
+          data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j,true);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
           this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, j, batch_size, lr);
@@ -233,18 +252,14 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  request_batch_update, i, j);
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,false,
+                                                  request_batch_update, i, j,0,0);
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
+          dense_local->invalidate_cache(i, j);
         }
-        dense_local->invalidate_cache(i, j);
 
-        if (i == iterations / 2) {
-          size_t mem = get_memory_usage();
-          add_memory(mem, "Memory usage");
-        }
       }
     }
     total_memory = total_memory / (iterations * batches);
@@ -256,7 +271,7 @@ public:
   calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, bool col_major,
-                          vector<vector<Tuple<DENT>>> *cache_misses, int start_process, int end_process) {
+                          vector<vector<Tuple<DENT>>> *cache_misses, int start_process, int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -275,7 +290,7 @@ public:
       if (col_major) {
         calc_embedding(source_start_index, source_end_index, dst_start_index,
                        dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                       batch_size, block_size, cache_misses);
+                       batch_size, block_size, cache_misses,fetch_from_temp_cache);
       } else {
         calc_embedding_row_major(source_start_index, source_end_index,
                                  dst_start_index, dst_end_index, csr_block,
@@ -296,7 +311,7 @@ public:
             calc_embedding(source_start_index, source_end_index,
                            dst_start_index, dst_end_index, csr_block,
                            prevCoordinates, lr, batch_id, batch_size,
-                           block_size, cache_misses);
+                           block_size, cache_misses,fetch_from_temp_cache);
           } else {
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
@@ -321,7 +336,7 @@ public:
         DENT forceDiff[embedding_dim];
         DENT attrc = 0;
         DENT *array_ptr =
-            (this->dense_local)->fetch_data_vector_from_cache(i, col_id);
+            (this->dense_local)->fetch_data_vector_from_cache(i, col_id,true);
         for (int d = 0; d < embedding_dim; d++) {
           forceDiff[d] =
               (this->dense_local)->nCoordinates[source_id * embedding_dim + d] -
@@ -347,7 +362,7 @@ public:
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
                              int block_size,
-                             vector<vector<Tuple<DENT>>> *cache_misses) {
+                             vector<vector<Tuple<DENT>>> *cache_misses, bool temp_cache) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -372,7 +387,7 @@ public:
             if (!matched) {
               if (fetch_from_cache) {
                 array_ptr = (this->dense_local)
-                                ->fetch_data_vector_from_cache(target_rank, i);
+                                ->fetch_data_vector_from_cache(target_rank, i,temp_cache);
 
                 if (array_ptr == nullptr) {
                   Tuple<DENT> cacheRef;
@@ -446,7 +461,7 @@ public:
             if (fetch_from_cache) {
               array_ptr =
                   (this->dense_local)
-                      ->fetch_data_vector_from_cache(target_rank, dst_id);
+                      ->fetch_data_vector_from_cache(target_rank, dst_id,false);
               // If not in cache we should fetch that from remote for limited
               // cache
             }
@@ -504,7 +519,7 @@ public:
           DENT repuls = 0;
           DENT *colvec =
               (this->dense_local)
-                  ->fetch_data_vector_from_cache(owner_rank, global_col_id);
+                  ->fetch_data_vector_from_cache(owner_rank, global_col_id,true);
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] =
                 (this->dense_local)->nCoordinates[row_id * embedding_dim + d] -
