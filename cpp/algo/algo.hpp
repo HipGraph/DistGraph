@@ -133,7 +133,7 @@ public:
     vector<MPI_Request> mpi_requests(iterations * batches);
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
-    size_t total_memory;
+    size_t total_memory=0;
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " iteration " << i << endl;
@@ -246,7 +246,8 @@ public:
         }
       }
     }
-    add_memory(total_memory/iterations, "Memory usage");
+    total_memory = total_memory/(iterations*batches);
+    add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Computation Time");
   }
 
