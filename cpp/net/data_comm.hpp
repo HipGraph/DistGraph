@@ -315,7 +315,7 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
+//        (this->dense_local)->insert_cache(i, t.col,batch_id,iteration, t.value);
       }
     }
   }

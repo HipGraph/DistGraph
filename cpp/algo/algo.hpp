@@ -189,9 +189,9 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, false,
-                                      true, cache_misses_ptr.get());
+//        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                      batch_size, considering_batch_size, false,
+//                                      true, cache_misses_ptr.get());
 
         if (alpha > 0 and alpha < 1.0) {
           MPI_Barrier(MPI_COMM_WORLD);
@@ -216,10 +216,10 @@ public:
           t = start_clock();
         }
 
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
 
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
