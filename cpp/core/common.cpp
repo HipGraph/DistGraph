@@ -189,7 +189,7 @@ distblas::core::random_select(const std::unordered_set<uint64_t> &originalSet, i
 }
 
 int distblas::core::get_proc_length(double beta, int world_size) {
-  return std::max(beta * world_size, 1);
+  return std::max((beta * world_size), 1);
 }
 
 int distblas::core::get_end_proc(int starting_index, double beta, int world_size) {
