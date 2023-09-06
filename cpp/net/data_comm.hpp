@@ -181,6 +181,8 @@ public:
         receive_counts_cyclic[i] = receivecounts[i];
         send_counts_cyclic[i] = sendcounts[i];
         total_send_count += send_counts_cyclic[i];
+      }
+      for(int i=0;i<grid->world_size;i++){
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
                     : sdispls_cyclic[i];
