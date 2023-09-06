@@ -191,6 +191,7 @@ public:
                     : rdispls_cyclic[i];
       }
 
+      cout<<" rank "<<grid->global_rank<<" total transferring "<<total_send_count<<" total receive "<<total_receive_count<<endl;
       if (total_send_count > 0) {
         DataTuple<DENT, embedding_dim> *sendbuf_cyclic = new DataTuple<DENT, embedding_dim>[total_send_count];
         for (const auto &pair : send_indices_to_proc_map) {
