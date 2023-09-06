@@ -37,12 +37,14 @@ private:
   // cache size controlling hyper parameter
   double alpha = 1.0;
 
+  double beta = 1.0;
+
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
                 distblas::core::SpMat<SPT> *sp_local_receiver,
                 distblas::core::SpMat<SPT> *sp_local_sender,
                 DenseMat<SPT, DENT, embedding_dim> *dense_local,
-                Process3DGrid *grid, double alpha, DENT MAX_BOUND,
+                Process3DGrid *grid, double alpha, double beta, DENT MAX_BOUND,
                 DENT MIN_BOUND) {
     this->grid = grid;
     this->dense_local = dense_local;
@@ -52,6 +54,7 @@ public:
     this->MAX_BOUND = MAX_BOUND;
     this->MIN_BOUND = MIN_BOUND;
     this->alpha = alpha;
+    this-> beta = beta;
   }
 
   DENT scale(DENT v) {
@@ -67,6 +70,7 @@ public:
     auto t = start_clock();
     int batches = 0;
     int last_batch_size = batch_size;
+
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
       batches =
           static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
@@ -96,8 +100,7 @@ public:
       stop_clock_and_add(t, "Computation Time");
 
       t = start_clock();
-      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
-                                               fetch_all, 0, 0);
+      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false, fetch_all, 0, 0);
       stop_clock_and_add(t, "Communication Time");
       t = start_clock();
     }
@@ -119,21 +122,19 @@ public:
       t = start_clock();
     }
 
-    DENT *prevCoordinates = static_cast<DENT *>(
-        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+    DENT *prevCoordinates = static_cast<DENT *>( ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
-    unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr =
-        unique_ptr<vector<vector<Tuple<DENT>>>>(
+    unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr = unique_ptr<vector<vector<Tuple<DENT>>>>(
             new vector<vector<Tuple<DENT>>>(grid->world_size));
 
     vector<MPI_Request> mpi_requests(iterations * batches);
     stop_clock_and_add(t, "Computation Time");
     t = start_clock();
     size_t total_memory = 0;
+
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " iteration " << i << endl;
@@ -141,6 +142,7 @@ public:
       for (int j = 0; j < batches; j++) {
 
         int seed = j + i;
+
         for (int k = 0; k < batch_size; k += 1) {
           int IDIM = k * embedding_dim;
           for (int d = 0; d < embedding_dim; d++) {
@@ -154,37 +156,33 @@ public:
           considering_batch_size = last_batch_size;
         }
 
-        CSRLocal<SPT> *csr_block =
-            (this->sp_local_receiver)->csr_local_data.get();
-        //        CSRLocal<SPT> *csr_block_native =
-        //            (this->sp_local_native)->csr_local_data.get();
+        CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+
 
         if (alpha == 0) {
           update_ptr.get()->clear();
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                  request_batch_update, i, j);
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j);
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
 
+        //local computation
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                       batch_size, considering_batch_size, true,
-                                      true, cache_misses_ptr.get());
+                                      true, cache_misses_ptr.get(),0,0);
 
         if (this->grid->world_size > 1) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           if (!(i == 0 and j == 0) and alpha > 0) {
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
-                j);
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,j);
           } else if (alpha == 0) {
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), mpi_requests[i * batches + j], false, i, j);
+
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j], false, i, j);
           }
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
@@ -192,9 +190,14 @@ public:
 
         total_memory += get_memory_usage();
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                      batch_size, considering_batch_size, false,
-                                      true, cache_misses_ptr.get());
+        int proc_length = beta*grid->world_size;
+
+        for(k=0;k<grid->world_size;k +=proc_length) {
+          int end_process = std::min((k+proc_length),grid->world_size);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        false, true, cache_misses_ptr.get(),k,end_process);
+        }
 
         if (alpha > 0 and alpha < 1.0) {
           MPI_Barrier(MPI_COMM_WORLD);
@@ -203,8 +206,7 @@ public:
           data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          this->calc_t_dist_grad_for_cache_misses(
-              cache_misses_ptr.get(), prevCoordinates, j, batch_size, lr);
+          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, j, batch_size, lr);
         }
 
         // negative samples generation
@@ -254,7 +256,7 @@ public:
   calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, bool col_major,
-                          vector<vector<Tuple<DENT>>> *cache_misses) {
+                          vector<vector<Tuple<DENT>>> *cache_misses, int start_process, int end_process) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -281,7 +283,7 @@ public:
                                  block_size);
       }
     } else {
-      for (int r = 0; r < grid->world_size; r++) {
+      for (int r = start_process; r < end_process; r++) {
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
