@@ -121,7 +121,7 @@ public:
     }
   }
 
-  void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+  bool transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous, bool cyclic, MPI_Request &request,
                      int iteration, int batch_id, int starting_proc,
                      int end_proc) {
@@ -167,6 +167,7 @@ public:
                        (*receivebuf).data(), receivecounts.data(),
                        rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
       }
+      return true;
     } else if (cyclic) {
       vector<int> send_counts_cyclic(grid->world_size, 0);
       vector<int> receive_counts_cyclic(grid->world_size, 0);
@@ -228,8 +229,10 @@ public:
               DENSETUPLE, (*receivebuf).data(), receive_counts_cyclic.data(),
               rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
         }
+        return true;
       }
     }
+    return false;
   }
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {

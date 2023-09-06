@@ -169,7 +169,7 @@ public:
             int end_process = get_end_proc(k,beta,grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
+            bool transferred = data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
             cout<<"  rank "<<grid->global_rank<<" processing k "<<k<<" transfer completed "<<endl;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -188,7 +188,8 @@ public:
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             cout<<"  rank "<<grid->global_rank<<" processing k "<<k<<" populate_cache "<<endl;
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
+            if (transferred)
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
