@@ -200,7 +200,7 @@ public:
           data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-//          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
+          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),prevCoordinates,j,batch_size,lr);
         }
 
         // negative samples generation
@@ -218,8 +218,8 @@ public:
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
-//
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
@@ -327,6 +327,7 @@ public:
               prevCoordinates[index * embedding_dim + d] + (lr)*l;
         }
       }
+      (*cache_misses)[i].clear();
     }
   }
 
