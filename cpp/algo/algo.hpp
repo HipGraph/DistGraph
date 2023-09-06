@@ -163,6 +163,7 @@ public:
           int proc_length = get_proc_length(beta,grid->world_size);
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
+            cout<<" processing k "<<k<<endl;
             update_ptr.get()->clear();
             MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k,beta,grid->world_size);
