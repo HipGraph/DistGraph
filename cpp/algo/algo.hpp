@@ -195,7 +195,7 @@ public:
           // local computation
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
-              considering_batch_size, true, true, cache_misses_ptr.get(), 0, 0);
+              considering_batch_size, true, true, cache_misses_ptr.get(), 0, 0,false);
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
@@ -213,7 +213,7 @@ public:
                                         batch_size, considering_batch_size,
                                         false, true,
                                         cache_misses_ptr.get(),
-                                        0,grid->world_size);
+                                        0,grid->world_size,false);
         }
         total_memory += get_memory_usage();
 
