@@ -163,13 +163,14 @@ public:
           int proc_length = get_proc_length(beta,grid->world_size);
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
-            cout<<" processing k "<<k<<endl;
+            cout<<"  rank "<<grid->global_rank<<" processing k "<<k<<endl;
             update_ptr.get()->clear();
             MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k,beta,grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
+            cout<<"  rank "<<grid->global_rank<<" processing k "<<k<<" transfer completed "<<endl;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k=0) {
