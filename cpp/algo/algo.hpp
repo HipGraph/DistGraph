@@ -242,7 +242,7 @@ public:
         // negative samples generation
         vector<uint64_t> random_number_vec = generate_random_numbers(
             0, (this->sp_local_receiver)->gRows, seed, ns);
-
+        cout<<grid->global_rank << " rand number transferring started"<<endl;
         if (this->grid->world_size > 1) {
           MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
@@ -251,11 +251,13 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-
+        cout<<grid->global_rank << " rand number transferring completed"<<endl;
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
+        cout<<grid->global_rank << " repulsive calculation  completed"<<endl;
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        cout<<grid->global_rank << " update   completed"<<endl;
 
         if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
           update_ptr.get()->clear();
