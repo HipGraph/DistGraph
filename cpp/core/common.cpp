@@ -107,6 +107,9 @@ void distblas::core::add_datatransfers(uint64_t count, string counter_name) {
       perf_counter_keys.end()) {
     call_count[counter_name]++;
     total_time[counter_name] += count;
+    if( rank ==0) {
+      cout<<" Data transfers "<<total_time[counter_name]<<endl;
+    }
   } else {
     cout << "Error, performance counter " << counter_name << " not registered."
          << endl;
@@ -152,6 +155,10 @@ json distblas::core::json_perf_statistics() {
     double val = total_time[*it];
 
     MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+    if( rank ==0) {
+      cout<< (*it) <<val<<endl;
+    }
 
     // We also have the call count for each statistic timed
     val /= world_size;
