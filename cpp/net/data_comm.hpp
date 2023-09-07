@@ -197,9 +197,11 @@ public:
             (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                     : rdispls_cyclic[i];
       }
-
-      if (total_send_count > 0) {
-        DataTuple<DENT, embedding_dim> *sendbuf_cyclic = new DataTuple<DENT, embedding_dim>[total_send_count];
+      unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
+          unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+              new vector<DataTuple<DENT, embedding_dim>>());
+      if (total_send_count>0) {
+        sendbuf_cyclic->resize(total_send_count);
         for (const auto &pair : send_indices_to_proc_map) {
           auto col_id = pair.first;
           bool already_fetched = false;
@@ -213,35 +215,34 @@ public:
               }
               int offset = sdispls_cyclic[i];
               int index = offset_vector[i] + offset;
-              sendbuf_cyclic[index].col =
+              (*sendbuf_cyclic)[index].col =
                   col_id + (this->sp_local_sender->proc_col_width *
                             this->grid->global_rank);
-              sendbuf_cyclic[index].value = dense_vector;
+              (*sendbuf_cyclic)[index].value = dense_vector;
               offset_vector[i]++;
             }
           }
         }
+      }
         receivebuf->resize(total_receive_count);
 
         add_datatransfers(total_receive_count, "Data transfers");
 
         if (synchronous) {
-          MPI_Alltoallv(sendbuf_cyclic, send_counts_cyclic.data(),
+          MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                         sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                         receive_counts_cyclic.data(), rdispls_cyclic.data(),
                         DENSETUPLE, MPI_COMM_WORLD);
           MPI_Request dumy;
           this->populate_cache(receivebuf, dumy, true, iteration, batch_id,true);
         } else {
-          MPI_Ialltoallv(sendbuf_cyclic, send_counts_cyclic.data(), sdispls_cyclic.data(),
+          MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(), sdispls_cyclic.data(),
               DENSETUPLE, (*receivebuf).data(), receive_counts_cyclic.data(),
               rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
         }
-        return true;
       }
     }
-    return false;
-  }
+
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
 
