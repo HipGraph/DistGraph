@@ -187,21 +187,21 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache start"<<endl;
+//            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache start"<<endl;
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
-            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache  end"<<endl;
+//            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache  end"<<endl;
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
           int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
-          cout<<grid->global_rank << " processing  last " <<"population cache"<<prev_start<<" "<<prev_end_process<<endl;
+//          cout<<grid->global_rank << " processing  last " <<"population cache"<<prev_start<<" "<<prev_end_process<<endl;
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size, false,
                                         true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
-          cout<<grid->global_rank << " processing  last " <<"population cache completed"<<endl;
+//          cout<<grid->global_rank << " processing  last " <<"population cache completed"<<endl;
           dense_local->invalidate_cache(i,j,true);
-          cout<<grid->global_rank << " cache  clearance completed"<<endl;
+//          cout<<grid->global_rank << " cache  clearance completed"<<endl;
         } else if (alpha>0) {
           // local computation
           this->calc_t_dist_grad_rowptr(
@@ -242,7 +242,7 @@ public:
         // negative samples generation
         vector<uint64_t> random_number_vec = generate_random_numbers(
             0, (this->sp_local_receiver)->gRows, seed, ns);
-        cout<<grid->global_rank << " rand number transferring started"<<endl;
+//        cout<<grid->global_rank << " rand number transferring started"<<endl;
         if (this->grid->world_size > 1) {
           MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
@@ -251,13 +251,14 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-        cout<<grid->global_rank << " rand number transferring completed"<<endl;
+//        cout<<grid->global_rank << " rand number transferring completed"<<endl;
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
-        cout<<grid->global_rank << " repulsive calculation  completed"<<endl;
+        dense_local->invalidate_cache(i,j,true);
+//        cout<<grid->global_rank << " repulsive calculation  completed"<<endl;
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        cout<<grid->global_rank << " update   completed"<<endl;
+//        cout<<grid->global_rank << " update   completed"<<endl;
 
         if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
           update_ptr.get()->clear();
