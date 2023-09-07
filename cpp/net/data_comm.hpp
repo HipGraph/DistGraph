@@ -198,8 +198,8 @@ public:
       for (int i = 0 ; i < sending_procs.size(); i++) {
         send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
         receive_counts_cyclic[receiving_procs[i]] = receivecounts[receiving_procs[i]];
-        total_send_count += send_counts_cyclic[i];
-        total_receive_count += receive_counts_cyclic[i];
+        total_send_count += send_counts_cyclic[sending_procs[i]];
+        total_receive_count += receive_counts_cyclic[receiving_procs[i]];
       }
 
       cout <<" rank "<<grid->global_rank<<" total send count "<<total_send_count<< " total receive count "<< total_receive_count<<endl;
