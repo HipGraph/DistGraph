@@ -103,6 +103,10 @@ void distblas::core::add_memory(size_t mem, string counter_name) {
 }
 
 void distblas::core::add_datatransfers(uint64_t count, string counter_name) {
+  int rank;
+  int world_size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   if (find(perf_counter_keys.begin(), perf_counter_keys.end(), counter_name) !=
       perf_counter_keys.end()) {
     call_count[counter_name]++;
