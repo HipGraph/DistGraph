@@ -314,8 +314,8 @@ public:
     }
 
     MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                  (*receivebuf_ptr.get()).data(), receivecounts.data(),
-                  rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
+                  (*receivebuf_ptr.get()).data(), receive_counts_cyclic.data(),
+                  rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD);
     MPI_Request dumy;
     this->populate_cache(receivebuf_ptr.get(), dumy, true, iteration,
                          batch_id,true); // we should not do this
