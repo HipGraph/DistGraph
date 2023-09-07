@@ -134,7 +134,7 @@ public:
     size_t total_memory = 0;
 
     for (int i = 0; i < iterations; i++) {
-      if (this->grid->global_rank == 0)
+//      if (this->grid->global_rank == 0)
         cout << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {

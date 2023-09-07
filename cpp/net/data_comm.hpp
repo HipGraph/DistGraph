@@ -201,8 +201,8 @@ public:
         total_send_count += send_counts_cyclic[i];
         total_receive_count += receive_counts_cyclic[i];
       }
-      if (grid->global_rank==0)
-        cout <<" rank "<<grid->global_rank<<" total send count "<<total_send_count<< " total receive count "<< total_receive_count<<endl;
+
+      cout <<" rank "<<grid->global_rank<<" total send count "<<total_send_count<< " total receive count "<< total_receive_count<<endl;
       for(int i=0;i<grid->world_size;i++){
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
