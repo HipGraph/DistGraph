@@ -201,6 +201,7 @@ public:
                                         true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
           cout<<grid->global_rank << " processing  last " <<"population cache completed"<<endl;
           dense_local->invalidate_cache(i,j,true);
+          cout<<grid->global_rank << " cache  clearance completed"<<endl;
         } else if (alpha>0) {
           // local computation
           this->calc_t_dist_grad_rowptr(
