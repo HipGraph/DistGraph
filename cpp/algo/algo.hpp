@@ -178,16 +178,16 @@ public:
                                             batch_size, considering_batch_size, true,
                                             true, cache_misses_ptr.get(),0,0,false);
             } else if (k>1) {
-              int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                            batch_size, considering_batch_size, false,
-                                            true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
-              dense_local->invalidate_cache(i,j,true);
+//              int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
+//              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                            batch_size, considering_batch_size, false,
+//                                            true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+//              dense_local->invalidate_cache(i,j,true);
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache start"<<endl;
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
+//            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
             cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache  end"<<endl;
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
