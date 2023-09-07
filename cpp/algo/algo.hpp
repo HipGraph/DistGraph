@@ -135,7 +135,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
 //      if (this->grid->global_rank == 0)
-        cout << " iteration " << i << endl;
+        cout<<" rank "<<grid->global_rank << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {
 
@@ -161,8 +161,8 @@ public:
           int proc_length = get_proc_length(beta,grid->world_size);
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
-//            if (this->grid->global_rank == 0)
-//              cout << " processing  " << k << " out of "<<grid->world_size<<endl;
+
+            cout << " processing  " << k << " out of "<<grid->world_size<<endl;
             update_ptr.get()->clear();
             MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k,beta,grid->world_size);
