@@ -190,7 +190,7 @@ public:
 
       for (int i = starting_proc; i < end_proc; i++) {
         int sending_rank = (grid->global_rank + i)%grid->world_size;
-        int receiving_rank = (grid->global_rank> i)? (grid->global_rank - i)%grid->world_size:(i- grid->global_rank)%grid->world_size;
+        int receiving_rank = (grid->global_rank> i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i)%grid->world_size;
         sending_procs.push_back(sending_rank);
         receiving_procs.push_back(receiving_rank);
       }
