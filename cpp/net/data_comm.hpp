@@ -28,6 +28,10 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
+  vector<int> send_counts_cyclic;
+  vector<int> receive_counts_cyclic;
+  vector<int> sdispls_cyclic;
+  vector<int> rdispls_cyclic;
   vector<vector<uint64_t>> receive_col_ids_list;
   vector<vector<uint64_t>> send_col_ids_list;
   DataTuple<DENT, embedding_dim> *sendbuf;
@@ -51,6 +55,10 @@ public:
     this->sendcounts = vector<int>(grid->world_size, 0);
     this->rdispls = vector<int>(grid->world_size, 0);
     this->receivecounts = vector<int>(grid->world_size, 0);
+    this->send_counts_cyclic = vector<int>(grid->world_size, 0);
+    this->receive_counts_cyclic =  vector<int>(grid->world_size, 0);
+    this->sdispls_cyclic =   vector<int>(grid->world_size, 0);
+    this->rdispls_cyclic =   vector<int>(grid->world_size, 0);
     this->receive_col_ids_list = vector<vector<uint64_t>>(grid->world_size);
     this->send_col_ids_list = vector<vector<uint64_t>>(grid->world_size);
     this->batch_id = batch_id;
@@ -169,13 +177,12 @@ public:
       }
       return true;
     } else if (cyclic) {
-      vector<int> send_counts_cyclic(grid->world_size, 0);
-      vector<int> receive_counts_cyclic(grid->world_size, 0);
-      vector<int> sdispls_cyclic(grid->world_size, 0);
-      vector<int> rdispls_cyclic(grid->world_size, 0);
-
       int total_receive_count = 0;
       int total_send_count = 0;
+      this->send_counts_cyclic = vector<int>(grid->world_size, 0);
+      this->receive_counts_cyclic =  vector<int>(grid->world_size, 0);
+      this->sdispls_cyclic =   vector<int>(grid->world_size, 0);
+      this->rdispls_cyclic =   vector<int>(grid->world_size, 0);
       for (int i = starting_proc; i < end_proc; i++) {
         total_receive_count += receivecounts[i];
         receive_counts_cyclic[i] = receivecounts[i];
@@ -404,8 +411,8 @@ public:
     }
 
     for (int i = 0; i < this->grid->world_size; i++) {
-      int base_index = this->rdispls[i];
-      int count = this->receivecounts[i];
+      int base_index = (temp)?this->rdispls_cyclic[i]:this->rdispls[i];
+      int count = (temp)?this->receive_counts_cyclic[i]:this->receivecounts[i];
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
