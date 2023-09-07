@@ -169,6 +169,7 @@ public:
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
+            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<" transfer completed"<<endl;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k==1) {
