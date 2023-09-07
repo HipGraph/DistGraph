@@ -278,17 +278,17 @@ public:
       } else {
         sendcounts[i] = 0;
       }
-      receivecounts_cyclic[i] = receive_col_ids_list[i].size();
+      receive_counts_cyclic[i] = receive_col_ids_list[i].size();
     }
     sdispls[0] = 0;
     rdispls_cyclic[0] =0;
     for (int i = 0; i < grid->world_size; i++) {
 
       sdispls[i] = 0;
-      rdispls_cyclic[i] = (i > 0) ? rdispls_cyclic[i - 1] + receivecounts_cyclic[i - 1] : rdispls_cyclic[i];
+      rdispls_cyclic[i] = (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1] : rdispls_cyclic[i];
 
       total_send_count = total_send_count + sendcounts[i];
-      total_receive_count = total_receive_count + receivecounts_cyclic[i];
+      total_receive_count = total_receive_count + receive_counts_cyclic[i];
     }
 
     DataTuple<DENT, embedding_dim> *sendbuf =
