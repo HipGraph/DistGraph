@@ -184,12 +184,12 @@ public:
       this->sdispls_cyclic =   vector<int>(grid->world_size, 0);
       this->rdispls_cyclic =   vector<int>(grid->world_size, 0);
       for (int i = starting_proc; i < end_proc; i++) {
-        total_receive_count += receivecounts[i];
-        receive_counts_cyclic[i] = receivecounts[i];
         send_counts_cyclic[i] = sendcounts[i];
         total_send_count += send_counts_cyclic[i];
       }
       for(int i=0;i<grid->world_size;i++){
+        total_receive_count += receivecounts[i];
+        receive_counts_cyclic[i] = receivecounts[i];
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
                     : sdispls_cyclic[i];
@@ -198,7 +198,6 @@ public:
                     : rdispls_cyclic[i];
       }
 
-      cout<<" rank "<<grid->global_rank<<" total transferring "<<total_send_count<<" total receive "<<total_receive_count<<endl;
       if (total_send_count > 0) {
         DataTuple<DENT, embedding_dim> *sendbuf_cyclic = new DataTuple<DENT, embedding_dim>[total_send_count];
         for (const auto &pair : send_indices_to_proc_map) {
@@ -222,7 +221,6 @@ public:
             }
           }
         }
-        cout<<" rank "<<grid->global_rank<<" data loading completed "<<endl;
         receivebuf->resize(total_receive_count);
 
         add_datatransfers(total_receive_count, "Data transfers");
