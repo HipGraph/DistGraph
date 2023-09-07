@@ -170,7 +170,7 @@ public:
             int end_process = get_end_proc(k,beta,grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            bool transferred = data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k==0) {
@@ -187,8 +187,7 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            if (transferred)
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();

@@ -129,7 +129,7 @@ public:
     }
   }
 
-  bool transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+  void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous, bool cyclic, MPI_Request &request,
                      int iteration, int batch_id, int starting_proc,
                      int end_proc) {
@@ -175,7 +175,6 @@ public:
                        (*receivebuf).data(), receivecounts.data(),
                        rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
       }
-      return true;
     } else if (cyclic) {
       int total_receive_count = 0;
       int total_send_count = 0;
