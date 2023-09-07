@@ -182,13 +182,24 @@ public:
       this->receive_counts_cyclic =  vector<int>(grid->world_size, 0);
       this->sdispls_cyclic =   vector<int>(grid->world_size, 0);
       this->rdispls_cyclic =   vector<int>(grid->world_size, 0);
+
+      vector<int> sending_procs;
+      vector<int> receiving_procs;
+
       for (int i = starting_proc; i < end_proc; i++) {
-        send_counts_cyclic[i] = sendcounts[i];
+        int sending_rank = (grid->global_rank + i)%grid->world_size;
+        int receiving_rank = (grid->global_rank> i)? (grid->global_rank - i)%grid->world_size:(i- grid->global_rank)%grid->world_size;
+        sending_procs.push_back(sending_rank);
+        receiving_procs.push_back(receiving_rank);
+      }
+
+      for (int i = starting_proc; i < sending_procs.size() i++) {
+        send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
+        receive_counts_cyclic[receiving_procs[i]] = receivecounts[receiving_procs[i]];
         total_send_count += send_counts_cyclic[i];
+        total_receive_count += receive_counts_cyclic[i];
       }
       for(int i=0;i<grid->world_size;i++){
-        total_receive_count += receivecounts[i];
-        receive_counts_cyclic[i] = receivecounts[i];
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
                     : sdispls_cyclic[i];
