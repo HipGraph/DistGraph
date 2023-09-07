@@ -202,7 +202,7 @@ public:
         total_receive_count += receive_counts_cyclic[receiving_procs[i]];
       }
 
-      cout <<" rank "<<grid->global_rank<<" total send count "<<total_send_count<< " total receive count "<< total_receive_count<<endl;
+//      cout <<" rank "<<grid->global_rank<<" total send count "<<total_send_count<< " total receive count "<< total_receive_count<<endl;
       for(int i=0;i<grid->world_size;i++){
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
@@ -211,7 +211,7 @@ public:
             (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                     : rdispls_cyclic[i];
 //        if (grid->global_rank==0)
-          cout <<" rank "<<grid->global_rank<<" send counts to rank "<<i<< " " <<send_counts_cyclic[i]<<" receiving from rank "<< i <<" receive counts "<<receive_counts_cyclic[i]<<endl;
+//          cout <<" rank "<<grid->global_rank<<" send counts to rank "<<i<< " " <<send_counts_cyclic[i]<<" receiving from rank "<< i <<" receive counts "<<receive_counts_cyclic[i]<<endl;
       }
       unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -252,9 +252,9 @@ public:
           MPI_Request dumy;
           this->populate_cache(receivebuf, dumy, true, iteration, batch_id,true);
         } else {
-//          MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(), sdispls_cyclic.data(),
-//              DENSETUPLE, (*receivebuf).data(), receive_counts_cyclic.data(),
-//              rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
+          MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(), sdispls_cyclic.data(),
+              DENSETUPLE, (*receivebuf).data(), receive_counts_cyclic.data(),
+              rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
         }
       }
     }
