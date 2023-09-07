@@ -131,8 +131,6 @@ public:
             new vector<vector<Tuple<DENT>>>(grid->world_size));
 
     vector<MPI_Request> mpi_requests(iterations * batches);
-    stop_clock_and_add(t, "Computation Time");
-    t = start_clock();
     size_t total_memory = 0;
 
     for (int i = 0; i < iterations; i++) {
@@ -163,8 +161,8 @@ public:
           int proc_length = get_proc_length(beta,grid->world_size);
           int prev_start=0;
           for(int k=0;k<grid->world_size;k +=proc_length) {
-            if (this->grid->global_rank == 0)
-              cout << " processing  " << k << " out of "<<grid->world_size<<endl;
+//            if (this->grid->global_rank == 0)
+//              cout << " processing  " << k << " out of "<<grid->world_size<<endl;
             update_ptr.get()->clear();
             MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k,beta,grid->world_size);
