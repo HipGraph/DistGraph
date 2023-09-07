@@ -117,7 +117,7 @@ public:
       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
       rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
       if (grid->global_rank==0)
-        cout <<" rank "<<grid->global_rank<<" send counts to rank "<<i<< " " <<sendcounts[i]<<" receiving from rank "<< i <<" receive counts "<<receivecounts[i]<<endl;
+        cout <<" rank "<<grid->global_rank<<" initial send counts to rank "<<i<< " " <<sendcounts[i]<<" initial receiving from rank "<< i <<" receive counts "<<receivecounts[i]<<endl;
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
@@ -180,10 +180,10 @@ public:
     } else if (cyclic) {
       int total_receive_count = 0;
       int total_send_count = 0;
-      this->send_counts_cyclic = vector<int>(grid->world_size, 0);
-      this->receive_counts_cyclic =  vector<int>(grid->world_size, 0);
-      this->sdispls_cyclic =   vector<int>(grid->world_size, 0);
-      this->rdispls_cyclic =   vector<int>(grid->world_size, 0);
+      send_counts_cyclic = vector<int>(grid->world_size, 0);
+      receive_counts_cyclic =  vector<int>(grid->world_size, 0);
+      sdispls_cyclic =   vector<int>(grid->world_size, 0);
+      rdispls_cyclic =   vector<int>(grid->world_size, 0);
 
       vector<int> sending_procs;
       vector<int> receiving_procs;
@@ -201,6 +201,8 @@ public:
         total_send_count += send_counts_cyclic[i];
         total_receive_count += receive_counts_cyclic[i];
       }
+      if (grid->global_rank==0)
+        cout <<" rank "<<grid->global_rank<<" total send count "<<total_send_count<< " total receive count "<< total_receive_count<<endl;
       for(int i=0;i<grid->world_size;i++){
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
@@ -209,7 +211,7 @@ public:
             (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                     : rdispls_cyclic[i];
         if (grid->global_rank==0)
-          cout <<" rank "<<grid->global_rank<<" send counts to rank "<<i<< " " <<sdispls_cyclic[i]<<" receiving from rank "<< i <<" receive counts "<<rdispls_cyclic[i]<<endl;
+          cout <<" rank "<<grid->global_rank<<" send counts to rank "<<i<< " " <<send_counts_cyclic[i]<<" receiving from rank "<< i <<" receive counts "<<receive_counts_cyclic[i]<<endl;
       }
       unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
