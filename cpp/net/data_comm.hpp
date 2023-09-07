@@ -216,30 +216,30 @@ public:
       unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
               new vector<DataTuple<DENT, embedding_dim>>());
-      if (total_send_count>0) {
-        sendbuf_cyclic->resize(total_send_count);
-        for (const auto &pair : send_indices_to_proc_map) {
-          auto col_id = pair.first;
-          bool already_fetched = false;
-          vector<int> proc_list = pair.second;
-          std::array<DENT, embedding_dim> dense_vector;
-          for (int i = starting_proc; i < end_proc; i++) {
-            if (proc_list[i] == 1) {
-              if (!already_fetched) {
-                dense_vector = (this->dense_local)->fetch_local_data(col_id);
-                already_fetched = true;
-              }
-              int offset = sdispls_cyclic[i];
-              int index = offset_vector[i] + offset;
-              (*sendbuf_cyclic)[index].col =
-                  col_id + (this->sp_local_sender->proc_col_width *
-                            this->grid->global_rank);
-              (*sendbuf_cyclic)[index].value = dense_vector;
-              offset_vector[i]++;
-            }
-          }
-        }
-      }
+//      if (total_send_count>0) {
+//        sendbuf_cyclic->resize(total_send_count);
+//        for (const auto &pair : send_indices_to_proc_map) {
+//          auto col_id = pair.first;
+//          bool already_fetched = false;
+//          vector<int> proc_list = pair.second;
+//          std::array<DENT, embedding_dim> dense_vector;
+//          for (int i = starting_proc; i < end_proc; i++) {
+//            if (proc_list[i] == 1) {
+//              if (!already_fetched) {
+//                dense_vector = (this->dense_local)->fetch_local_data(col_id);
+//                already_fetched = true;
+//              }
+//              int offset = sdispls_cyclic[i];
+//              int index = offset_vector[i] + offset;
+//              (*sendbuf_cyclic)[index].col =
+//                  col_id + (this->sp_local_sender->proc_col_width *
+//                            this->grid->global_rank);
+//              (*sendbuf_cyclic)[index].value = dense_vector;
+//              offset_vector[i]++;
+//            }
+//          }
+//        }
+//      }
         receivebuf->resize(total_receive_count);
 
         add_datatransfers(total_receive_count, "Data transfers");
