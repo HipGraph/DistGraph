@@ -162,8 +162,8 @@ public:
           int prev_start=0;
           for(int k=1;k<grid->world_size;k +=proc_length) {
 
-            cout <<"rank "<<grid->global_rank<< " processing  " << k << " out of "<<grid->world_size<<endl;
-            update_ptr.get()->clear();
+//            cout <<"rank "<<grid->global_rank<< " processing  " << k << " out of "<<grid->world_size<<endl;
+
             MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k,beta,grid->world_size);
             stop_clock_and_add(t, "Computation Time");
@@ -190,6 +190,7 @@ public:
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
 //            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache  end"<<endl;
             prev_start=k;
+            update_ptr.get()->clear();
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -200,6 +201,7 @@ public:
                                         true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
 //          cout<<grid->global_rank << " processing  last " <<"population cache completed"<<endl;
           dense_local->invalidate_cache(i,j,true);
+           update_ptr.get()->resize(0);
 //          cout<<grid->global_rank << " cache  clearance completed"<<endl;
         } else if (alpha>0) {
           // local computation
