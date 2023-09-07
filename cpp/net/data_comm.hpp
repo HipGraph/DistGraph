@@ -193,7 +193,7 @@ public:
         receiving_procs.push_back(receiving_rank);
       }
 
-      for (int i = starting_proc; i < sending_procs.size() i++) {
+      for (int i = starting_proc; i < sending_procs.size(); i++) {
         send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
         receive_counts_cyclic[receiving_procs[i]] = receivecounts[receiving_procs[i]];
         total_send_count += send_counts_cyclic[i];
