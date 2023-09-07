@@ -195,6 +195,7 @@ public:
             t = start_clock();
           }
           int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
+          cout<<grid->global_rank << " processing  last " <<"population cache"<<prev_start<<" "<<prev_end_process<<endl;
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size, false,
                                         true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
