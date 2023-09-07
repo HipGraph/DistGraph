@@ -199,6 +199,7 @@ public:
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size, false,
                                         true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+          cout<<grid->global_rank << " processing  last " <<"population cache completed"<<endl;
           dense_local->invalidate_cache(i,j,true);
         } else if (alpha>0) {
           // local computation
@@ -282,17 +283,10 @@ public:
                           vector<vector<Tuple<DENT>>> *cache_misses, int start_process, int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
-    auto source_end_index = std::min((batch_id + 1) * batch_size,
-                                     this->sp_local_receiver->proc_row_width) -
-                            1;
+    auto source_end_index = std::min((batch_id + 1) * batch_size, this->sp_local_receiver->proc_row_width) -1;
 
-    auto dst_start_index =
-        this->sp_local_receiver->proc_col_width * this->grid->global_rank;
-    auto dst_end_index =
-        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
-                                       (this->grid->global_rank + 1)),
-                 this->sp_local_receiver->gCols) -
-        1;
+    auto dst_start_index = this->sp_local_receiver->proc_col_width * this->grid->global_rank;
+    auto dst_end_index = std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *(this->grid->global_rank + 1)),this->sp_local_receiver->gCols) -1;
 
     if (local) {
       if (col_major) {
@@ -312,8 +306,7 @@ public:
           dst_end_index =
               std::min(static_cast<uint64_t>(
                            this->sp_local_receiver->proc_row_width * (r + 1)),
-                       this->sp_local_receiver->gCols) -
-              1;
+                       this->sp_local_receiver->gCols) -1;
 
           if (col_major) {
             calc_embedding(source_start_index, source_end_index,
