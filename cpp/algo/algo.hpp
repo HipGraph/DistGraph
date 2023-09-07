@@ -174,9 +174,9 @@ public:
             t = start_clock();
             if (k==1) {
               //local computation
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                            batch_size, considering_batch_size, true,
-                                            true, cache_misses_ptr.get(),0,0,false);
+//              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                            batch_size, considering_batch_size, true,
+//                                            true, cache_misses_ptr.get(),0,0,false);
             } else if (k>1) {
 //              int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
 //              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
