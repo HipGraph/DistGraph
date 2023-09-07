@@ -187,9 +187,9 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            cout << " processing  " << k << " out of "<<grid->world_size<<"population cache start"<<endl;
+            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache start"<<endl;
             data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
-            cout << " processing  " << k << " out of "<<grid->world_size<<"population cache  end"<<endl;
+            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<"population cache  end"<<endl;
             prev_start=k;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
