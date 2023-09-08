@@ -238,8 +238,8 @@ public:
               data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i,j,k,end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
-              this->calc_t_dist_grad_for_cache_misses(
-                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,k,end_process);
+//              this->calc_t_dist_grad_for_cache_misses(
+//                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,k,end_process);
             }
           }
 
@@ -287,11 +287,10 @@ public:
     stop_clock_and_add(t, "Computation Time");
   }
 
-  inline void
-  calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
-                          bool local, bool col_major,
-                          vector<vector<Tuple<DENT>>> *cache_misses, int start_process, int end_process, bool fetch_from_temp_cache) {
+                          bool local, bool col_major, vector<vector<Tuple<DENT>>> *cache_misses,
+                                      int start_process, int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size, this->sp_local_receiver->proc_row_width) -1;
@@ -335,8 +334,7 @@ public:
     }
   }
 
-  inline void
-  calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
+  inline void calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
                                     DENT *prevCoordinates, int iteration, int batch_id,
                                     int batch_size, double lr, int starting_proc, int end_proc ) {
 
@@ -452,8 +450,7 @@ public:
     }
   }
 
-  inline void
-  calc_embedding_row_major(uint64_t source_start_index,
+  inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
                            DENT *prevCoordinates, DENT lr, int batch_id,
