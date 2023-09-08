@@ -420,16 +420,16 @@ public:
         }
         std::array<DENT, embedding_dim> val_arr =
             (this->dense_local)->fetch_local_data(local_id);
-//        t.value = val_arr;
+        t.value = val_arr;
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
-//
-//    MPI_Alltoallv((*receive_missing_cols_ptr.get()).data(),
-//                  receivecounts_misses.data(), rdisples_misses.data(),
-//                  DENSETUPLE, (*sending_missing_cols_ptr.get()).data(),
-//                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
-//                  MPI_COMM_WORLD);
+
+    MPI_Alltoallv((*receive_missing_cols_ptr).data(),
+                  receivecounts_misses.data(), rdisples_misses.data(),
+                  DENSETUPLE, (*sending_missing_cols_ptr).data(),
+                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
+                  MPI_COMM_WORLD);
 //
 //    for (int i = 0; i < this->grid->world_size; i++) {
 //      int base_index = sdisples_misses[i];
