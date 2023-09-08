@@ -417,7 +417,7 @@ public:
             t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
 //        std::array<DENT, embedding_dim> val_arr =
 //            (this->dense_local)->fetch_local_data(local_id);
-        t.value = val_arr;
+//        t.value = val_arr;
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
