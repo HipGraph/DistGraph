@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
                                                                      shared_sparseMat_receiver.get(),
                                                                      shared_sparseMat_sender.get(),
                                                                      dense_mat.get(),
-                                                                     grid.get(),0,0.2,
+                                                                     grid.get(),0.25,0.25
                                                                      5,
                                                                      -5));
 
