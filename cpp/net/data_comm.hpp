@@ -405,7 +405,7 @@ public:
 //
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdisples_misses[i];
-      //      #pragma omp parallel for
+      #pragma omp parallel for
       for (int j = 0; j < receivecounts_misses[i]; j++) {
         DataTuple<DENT, embedding_dim> t =
             (*receive_missing_cols_ptr)[base_index + j];
