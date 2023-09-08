@@ -366,18 +366,24 @@ public:
     //
     for (int i = 0 ; i < sending_procs.size(); i++) {
       sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]].size();
-      total_send_count += sendcounts_misses[sending_procs[i]];
-      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
-        DataTuple<DENT, embedding_dim> temp;
-        temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
-        (*sending_missing_cols_ptr).push_back(temp);
-      }
-    }
-
-    for (int i = 0; i < grid->world_size; i++) {
       sdisples_misses[i] =
           (i > 0) ? sdisples_misses[i - 1] + sendcounts_misses[i - 1]
                   : sdisples_misses[i];
+      total_send_count += sendcounts_misses[sending_procs[i]];
+    }
+
+    (*sending_missing_cols_ptr)->resize(total_send_count);
+
+
+    for (int i = 0 ; i < sending_procs.size(); i++) {
+      int base_index = sdisples_misses[sending_procs[i]];
+      #pragma omp parallel for
+      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
+        int index= base_index+k;
+        DataTuple<DENT, embedding_dim> temp;
+        temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
+        (*sending_missing_cols_ptr)[index]=temp;
+      }
     }
 
     // sending number of misses for each rank
