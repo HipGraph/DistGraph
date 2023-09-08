@@ -394,11 +394,12 @@ public:
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
         receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
     receive_missing_cols_ptr->resize(total_receive_count);
+    cout<<" rank "<<grid->global_rank<<" receiving total "<<total_receive_count<<endl;
 
     // sending actual Ids
-    MPI_Alltoallv((*sending_missing_cols_ptr.get()).data(),
+    MPI_Alltoallv((*sending_missing_cols_ptr).data(),
                   sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
-                  (*receive_missing_cols_ptr.get()).data(),
+                  (*receive_missing_cols_ptr).data(),
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, MPI_COMM_WORLD);
 
