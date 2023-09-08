@@ -360,7 +360,7 @@ public:
     }
 
     for (int i = 0 ; i < sending_procs.size(); i++) {
-      sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]];
+      sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]].size();
       total_send_count += sendcounts_misses[sending_procs[i]];
       for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
         DataTuple<DENT, embedding_dim> temp;
