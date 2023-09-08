@@ -239,8 +239,8 @@ public:
               data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i,j,k,end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
-//              this->calc_t_dist_grad_for_cache_misses(
-//                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,k,end_process);
+              this->calc_t_dist_grad_for_cache_misses(
+                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,k,end_process);
             }
           }
 
@@ -357,7 +357,7 @@ public:
         DENT forceDiff[embedding_dim];
         DENT attrc = 0;
         DENT *array_ptr =
-            (this->dense_local)->fetch_data_vector_from_cache(i, col_id,true);
+            (this->dense_local)->fetch_data_vector_from_cache(sending_procs[i], col_id,true);
         for (int d = 0; d < embedding_dim; d++) {
           forceDiff[d] =
               (this->dense_local)->nCoordinates[source_id * embedding_dim + d] -
