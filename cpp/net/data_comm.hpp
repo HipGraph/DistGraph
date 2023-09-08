@@ -428,9 +428,9 @@ public:
       int base_index = sdisples_misses[i];
       int count = sendcounts_misses[i];
       for (int j = base_index; j < base_index + count; j++) {
-        DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr.get())[j];
-        (this->dense_local)
-            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
+        DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr)[j];
+//        (this->dense_local)
+//            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
       }
     }
   }

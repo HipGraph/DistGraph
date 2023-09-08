@@ -80,9 +80,6 @@ void distblas::core::stop_clock_and_add(my_timer_t &start,
       perf_counter_keys.end()) {
     call_count[counter_name]++;
     total_time[counter_name] += stop_clock_get_elapsed(start);
-    if(counter_name == "Computation Time" and rank ==0) {
-      cout<<" communitcation "<<total_time[counter_name]<<endl;
-    }
   } else {
     cout << "Error, performance counter " << counter_name << " not registered."
          << endl;
@@ -111,9 +108,6 @@ void distblas::core::add_datatransfers(uint64_t count, string counter_name) {
       perf_counter_keys.end()) {
     call_count[counter_name]++;
     total_time[counter_name] += count;
-    if( rank ==0) {
-      cout<<" Data transfers "<<total_time[counter_name]<<endl;
-    }
   } else {
     cout << "Error, performance counter " << counter_name << " not registered."
          << endl;
