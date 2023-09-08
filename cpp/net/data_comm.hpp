@@ -372,7 +372,7 @@ public:
       total_send_count += sendcounts_misses[sending_procs[i]];
     }
 
-    (*sending_missing_cols_ptr)->resize(total_send_count);
+    (sending_missing_cols_ptr)->resize(total_send_count);
 
 
     for (int i = 0 ; i < sending_procs.size(); i++) {
