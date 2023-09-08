@@ -392,10 +392,9 @@ public:
       cout<<" rank "<<grid->global_rank<<" receiving from "<<i<<" count "<<receivecounts_misses[i]<<endl;
     }
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
-        receive_missing_cols_ptr =
-            unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
-                new vector<DataTuple<DENT, embedding_dim>>(
-                    total_receive_count));
+        receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
+    receive_missing_cols_ptr->resize(total_receive_count);
+
     // sending actual Ids
     MPI_Alltoallv((*sending_missing_cols_ptr.get()).data(),
                   sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
@@ -407,7 +406,7 @@ public:
 //
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdisples_misses[i];
-
+      cout<<" rank "<<grid->global_rank<<" rdisples_misses "<<i<<" base_index "<<base_index<<endl;
       //      #pragma omp parallel for
       for (int j = 0; j < receivecounts_misses[i]; j++) {
         DataTuple<DENT, embedding_dim> t =
@@ -416,7 +415,9 @@ public:
         uint64_t local_id =
             t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
         if (global_id< grid->global_rank*sp_local_receiver->proc_row_width and global_id >= (grid->global_rank+1)*sp_local_receiver->proc_row_width) {
-          cout<<" rank  "<<grid->global_rank <<" accessing "<<global_id<< "my range ("<<grid->global_rank*sp_local_receiver->proc_row_width <<","<<(grid->global_rank+1)*sp_local_receiver->proc_row_width<<")"<<endl;
+          cout<<" rank  "<<grid->global_rank <<" accessing "<<global_id<< "my range ("<<
+              grid->global_rank*sp_local_receiver->proc_row_width <<","<<
+              (grid->global_rank+1)*sp_local_receiver->proc_row_width<<")"<<endl;
         }
         std::array<DENT, embedding_dim> val_arr =
             (this->dense_local)->fetch_local_data(local_id);
@@ -424,7 +425,7 @@ public:
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
-    cout<<" rank  "<<grid->global_rank <<"successfully executed data filling"<<endl;
+    cout<<" rank  "<<grid->global_rank <<"/"<<endl;
     MPI_Alltoallv((*receive_missing_cols_ptr).data(),
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, (*sending_missing_cols_ptr).data(),
