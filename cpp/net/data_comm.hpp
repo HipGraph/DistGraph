@@ -424,7 +424,7 @@ public:
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
-
+    cout<<" rank  "<<grid->global_rank <<"successfully executed data filling"<<endl;
     MPI_Alltoallv((*receive_missing_cols_ptr).data(),
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, (*sending_missing_cols_ptr).data(),
