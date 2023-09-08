@@ -415,8 +415,10 @@ public:
             (*receive_missing_cols_ptr)[base_index + j];
         cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<endl;
         uint64_t global_id = t.col;
+        cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<" col "<<t.col<<endl;
         uint64_t local_id =
             t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
+        cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<" col "<<t.col<<"local id"<<local_id<<endl;
         if (global_id< grid->global_rank*sp_local_receiver->proc_row_width and global_id >= (grid->global_rank+1)*sp_local_receiver->proc_row_width) {
           cout<<" rank  "<<grid->global_rank <<" accessing "<<global_id<< "my range ("<<
               grid->global_rank*sp_local_receiver->proc_row_width <<","<<
