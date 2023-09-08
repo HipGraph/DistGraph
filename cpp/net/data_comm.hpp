@@ -354,22 +354,23 @@ public:
     int total_receive_count = 0;
 
     vector<int> sending_procs;
-    vector<int> receiving_procs;
 
     for (int i = starting_proc; i < end_proc; i++) {
       int sending_rank = (grid->global_rank + i)%grid->world_size;
       int receiving_rank = (grid->global_rank>= i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i+grid->global_rank)%grid->world_size;
       sending_procs.push_back(sending_rank);
-      receiving_procs.push_back(receiving_rank);
     }
 
+    std::sort((sending_procs).begin(), (sending_procs).end());
+
+    //
     for (int i = 0 ; i < sending_procs.size(); i++) {
       sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]].size();
       total_send_count += sendcounts_misses[sending_procs[i]];
       for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
         DataTuple<DENT, embedding_dim> temp;
         temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
-        (*sending_missing_cols_ptr.get()).push_back(temp);
+        (*sending_missing_cols_ptr).push_back(temp);
       }
     }
 
