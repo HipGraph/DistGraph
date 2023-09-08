@@ -375,27 +375,27 @@ public:
                   : sdisples_misses[i];
     }
 
-//    // sending number of misses for each rank
-//    MPI_Alltoall(sendcounts_misses.data(), 1, MPI_INT,
-//                 receivecounts_misses.data(), 1, MPI_INT, MPI_COMM_WORLD);
-//
-//    for (int i = 0; i < grid->world_size; i++) {
-//      total_receive_count += receivecounts_misses[i];
-//      rdisples_misses[i] =
-//          (i > 0) ? rdisples_misses[i - 1] + receivecounts_misses[i - 1]
-//                  : rdisples_misses[i];
-//    }
-//    unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
-//        receive_missing_cols_ptr =
-//            unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
-//                new vector<DataTuple<DENT, embedding_dim>>(
-//                    total_receive_count));
-//    // sending actual Ids
-//    MPI_Alltoallv((*sending_missing_cols_ptr.get()).data(),
-//                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
-//                  (*receive_missing_cols_ptr.get()).data(),
-//                  receivecounts_misses.data(), rdisples_misses.data(),
-//                  DENSETUPLE, MPI_COMM_WORLD);
+    // sending number of misses for each rank
+    MPI_Alltoall(sendcounts_misses.data(), 1, MPI_INT,
+                 receivecounts_misses.data(), 1, MPI_INT, MPI_COMM_WORLD);
+
+    for (int i = 0; i < grid->world_size; i++) {
+      total_receive_count += receivecounts_misses[i];
+      rdisples_misses[i] =
+          (i > 0) ? rdisples_misses[i - 1] + receivecounts_misses[i - 1]
+                  : rdisples_misses[i];
+    }
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
+        receive_missing_cols_ptr =
+            unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
+                new vector<DataTuple<DENT, embedding_dim>>(
+                    total_receive_count));
+    // sending actual Ids
+    MPI_Alltoallv((*sending_missing_cols_ptr.get()).data(),
+                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
+                  (*receive_missing_cols_ptr.get()).data(),
+                  receivecounts_misses.data(), rdisples_misses.data(),
+                  DENSETUPLE, MPI_COMM_WORLD);
 //
 //    add_datatransfers(total_receive_count, "Data transfers");
 //
