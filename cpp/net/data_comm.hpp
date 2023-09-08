@@ -378,7 +378,6 @@ public:
       sdisples_misses[i] =
           (i > 0) ? sdisples_misses[i - 1] + sendcounts_misses[i - 1]
                   : sdisples_misses[i];
-      cout<<" rank "<<grid->global_rank<<" sending to "<<i<<" count "<<sendcounts_misses[i]<<endl;
     }
 
     // sending number of misses for each rank
@@ -390,12 +389,10 @@ public:
       rdisples_misses[i] =
           (i > 0) ? rdisples_misses[i - 1] + receivecounts_misses[i - 1]
                   : rdisples_misses[i];
-      cout<<" rank "<<grid->global_rank<<" receiving from "<<i<<" count "<<receivecounts_misses[i]<<endl;
     }
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
         receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
     receive_missing_cols_ptr->resize(total_receive_count);
-    cout<<" rank "<<grid->global_rank<<" receiving total "<<total_receive_count<<endl;
 
     // sending actual Ids
     MPI_Alltoallv((*sending_missing_cols_ptr).data(),
@@ -408,45 +405,34 @@ public:
 //
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdisples_misses[i];
-      if (grid->global_rank == 0 )  cout<<" rank "<<grid->global_rank<<" rdisples_misses "<<i<<" base_index "<<base_index<<endl;
       //      #pragma omp parallel for
       for (int j = 0; j < receivecounts_misses[i]; j++) {
-        if (grid->global_rank == 0 )     cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j  "<<base_index + j<<endl;
         DataTuple<DENT, embedding_dim> t =
             (*receive_missing_cols_ptr)[base_index + j];
-        if (grid->global_rank == 0 )    cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<endl;
         uint64_t global_id = t.col;
-        if (grid->global_rank == 0 )   cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<" col "<<t.col<<endl;
         uint64_t local_id =
             t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
-        if (grid->global_rank == 0 )    cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<" col "<<t.col<<"local id"<<local_id<<endl;
-        if (global_id< grid->global_rank*sp_local_receiver->proc_row_width and global_id >= (grid->global_rank+1)*sp_local_receiver->proc_row_width) {
-          cout<<" rank  "<<grid->global_rank <<" accessing "<<global_id<< "my range ("<<
-              grid->global_rank*sp_local_receiver->proc_row_width <<","<<
-              (grid->global_rank+1)*sp_local_receiver->proc_row_width<<")"<<endl;
-        }
         std::array<DENT, embedding_dim> val_arr =
             (this->dense_local)->fetch_local_data(local_id);
         t.value = val_arr;
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
-    cout<<" rank  "<<grid->global_rank <<" completed"<<endl;
     MPI_Alltoallv((*receive_missing_cols_ptr).data(),
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, (*sending_missing_cols_ptr).data(),
                   sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
                   MPI_COMM_WORLD);
-//
-//    for (int i = 0; i < this->grid->world_size; i++) {
-//      int base_index = sdisples_misses[i];
-//      int count = sendcounts_misses[i];
-//      for (int j = base_index; j < base_index + count; j++) {
-//        DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr.get())[j];
-//        (this->dense_local)
-//            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
-//      }
-//    }
+
+    for (int i = 0; i < this->grid->world_size; i++) {
+      int base_index = sdisples_misses[i];
+      int count = sendcounts_misses[i];
+      for (int j = base_index; j < base_index + count; j++) {
+        DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr.get())[j];
+        (this->dense_local)
+            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
+      }
+    }
   }
 
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
