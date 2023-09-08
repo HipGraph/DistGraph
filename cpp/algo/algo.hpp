@@ -100,7 +100,7 @@ public:
       stop_clock_and_add(t, "Computation Time");
 
       t = start_clock();
-      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,false, fetch_all, 0, 0,0,0);
+      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false, fetch_all, 0, 0,0,0);
       stop_clock_and_add(t, "Communication Time");
       t = start_clock();
     }
@@ -168,7 +168,7 @@ public:
             int end_process = get_end_proc(k,beta,grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, true, request_batch_update_cyclic, i, j,k,end_process);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j,k,end_process);
 //            cout<<grid->global_rank << " processing  " << k << " out of "<<grid->world_size<<" transfer completed"<<endl;
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -273,7 +273,7 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,false,
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                   request_batch_update, i, j,0,0);
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
