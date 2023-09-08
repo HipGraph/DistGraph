@@ -34,7 +34,7 @@ private:
   vector<int> rdispls_cyclic;
   vector<vector<uint64_t>> receive_col_ids_list;
   vector<vector<uint64_t>> send_col_ids_list;
-  DataTuple<DENT, embedding_dim> *sendbuf;
+  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf;
   unordered_map<uint64_t, vector<int>> send_indices_to_proc_map;
   int batch_id;
 
@@ -126,18 +126,19 @@ public:
       //      to process "<<i<<" receiving data "<<receivecounts[i]<<" from
       //      "<<i<<endl;
     }
-    if (total_send_count > 0) {
-      sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
+    if (total_send_count > 0 and alpha>0) {
+         sendbuf= unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
+         sendbuf->resize(total_send_count);
     }
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous, bool cyclic, MPI_Request &request,
+                     bool synchronous,  MPI_Request &request,
                      int iteration, int batch_id, int starting_proc,
                      int end_proc) {
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
-    if (!cyclic) {
+    if (alpha>0) {
       for (const auto &pair : send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
@@ -151,10 +152,10 @@ public:
             }
             int offset = sdispls[i];
             int index = offset_vector[i] + offset;
-            sendbuf[index].col =
+            (*sendbuf)[index].col =
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
-            sendbuf[index].value = dense_vector;
+            (*sendbuf)[index].value = dense_vector;
             offset_vector[i]++;
           }
         }
@@ -167,17 +168,18 @@ public:
       add_datatransfers(total_receive_count, "Data transfers");
 
       if (synchronous) {
-        MPI_Alltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+        MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(), DENSETUPLE,
                       (*receivebuf).data(), receivecounts.data(),
                       rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
         MPI_Request dumy;
         this->populate_cache(receivebuf, dumy, true, iteration, batch_id,false);
       } else {
-        MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
+        MPI_Ialltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(), DENSETUPLE,
                        (*receivebuf).data(), receivecounts.data(),
                        rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
       }
-    } else if (cyclic) {
+
+    } else if (alpha==0) {
       int total_receive_count = 0;
       int total_send_count = 0;
       send_counts_cyclic = vector<int>(grid->world_size, 0);
@@ -256,6 +258,8 @@ public:
               DENSETUPLE, (*receivebuf).data(), receive_counts_cyclic.data(),
               rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
         }
+        sendbuf_cyclic-clear();
+        sendbuf_cyclic->shrink_to_fit();
       }
     }
 
@@ -329,7 +333,7 @@ public:
     this->populate_cache(receivebuf_ptr.get(), dumy, true, iteration,
                          batch_id,true); // we should not do this
     sendbuf->clear();
-    sendbuf->resize(0);
+    sendbuf->shrink_to_fit();
     //    delete[] sendbuf;
   }
 
