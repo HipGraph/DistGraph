@@ -415,6 +415,9 @@ public:
         uint64_t global_id = t.col;
         uint64_t local_id =
             t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
+        if (global_id< grid->global_rank*sp_local_receiver->proc_row_width and global_id >= (grid->global_rank+1)*sp_local_receiver->proc_row_width) {
+          cout<<" rank  "<<grid->global_rank <<" accessing "<<global_id<<endl;
+        }
 //        std::array<DENT, embedding_dim> val_arr =
 //            (this->dense_local)->fetch_local_data(local_id);
 //        t.value = val_arr;
