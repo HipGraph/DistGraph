@@ -334,7 +334,7 @@ public:
   }
 
   void transfer_data(vector<vector<Tuple<DENT>>> *cache_misses, int iteration,
-                     int batch_id) {
+                     int batch_id, int starting_proc, int end_proc) {
 
     vector<int> sendcounts_misses(grid->world_size, 0);
     vector<int> receivecounts_misses(grid->world_size, 0);
@@ -342,25 +342,37 @@ public:
     vector<int> sdisples_misses(grid->world_size, 0);
     vector<int> rdisples_misses(grid->world_size, 0);
 
-    unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
-        sending_missing_cols_ptr =
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>> sending_missing_cols_ptr =
             unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
                 new vector<DataTuple<DENT, embedding_dim>>());
 
     int total_send_count = 0;
     int total_receive_count = 0;
 
+    vector<int> sending_procs;
+    vector<int> receiving_procs;
+
+    for (int i = starting_proc; i < end_proc; i++) {
+      int sending_rank = (grid->global_rank + i)%grid->world_size;
+      int receiving_rank = (grid->global_rank>= i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i+grid->global_rank)%grid->world_size;
+      sending_procs.push_back(sending_rank);
+      receiving_procs.push_back(receiving_rank);
+    }
+
+    for (int i = 0 ; i < sending_procs.size(); i++) {
+      sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]];
+      total_send_count += sendcounts_misses[sending_procs[i]];
+      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
+        DataTuple<DENT, embedding_dim> temp;
+        temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
+        (*sending_missing_cols_ptr.get()).push_back(temp);
+      }
+    }
+
     for (int i = 0; i < grid->world_size; i++) {
-      sendcounts_misses[i] = (*cache_misses)[i].size();
-      total_send_count += sendcounts_misses[i];
       sdisples_misses[i] =
           (i > 0) ? sdisples_misses[i - 1] + sendcounts_misses[i - 1]
                   : sdisples_misses[i];
-      for (int k = 0; k < (*cache_misses)[i].size(); k++) {
-        DataTuple<DENT, embedding_dim> temp;
-        temp.col = static_cast<uint64_t>((*cache_misses)[i][k].col);
-        (*sending_missing_cols_ptr.get()).push_back(temp);
-      }
     }
 
     // sending number of misses for each rank

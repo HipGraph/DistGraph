@@ -226,19 +226,25 @@ public:
                                         false, true,
                                         cache_misses_ptr.get(),
                                         0,grid->world_size,false);
+
+          if (alpha < 1.0) {
+            MPI_Barrier(MPI_COMM_WORLD);
+            stop_clock_and_add(t, "Computation Time");
+            int proc_length = get_proc_length(beta,grid->world_size);
+            int prev_start=0;
+            for(int k=1;k<grid->world_size;k +=proc_length) {
+              int end_process = get_end_proc(k,beta,grid->world_size);
+              t = start_clock();
+              data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i,j,k,end_process);
+              stop_clock_and_add(t, "Communication Time");
+              t = start_clock();
+              this->calc_t_dist_grad_for_cache_misses(
+                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,k,end_process);
+            }
+          }
+
         }
         total_memory += get_memory_usage();
-
-
-        if (alpha > 0 and alpha < 1.0) {
-          MPI_Barrier(MPI_COMM_WORLD);
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
-          data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i, j);
-          stop_clock_and_add(t, "Communication Time");
-          t = start_clock();
-          this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, j, batch_size, lr);
-        }
 
         // negative samples generation
         vector<uint64_t> random_number_vec = generate_random_numbers(
@@ -331,13 +337,23 @@ public:
 
   inline void
   calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
-                                    DENT *prevCoordinates, int batch_id,
-                                    int batch_size, double lr) {
-    for (int i = 0; i < grid->world_size; i++) {
-#pragma omp parallel for
-      for (int k = 0; k < (*cache_misses)[i].size(); k++) {
-        uint64_t col_id = (*cache_misses)[i][k].col;
-        uint64_t source_id = (*cache_misses)[i][k].row;
+                                    DENT *prevCoordinates, int iteration, int batch_id,
+                                    int batch_size, double lr, int starting_proc, int end_proc ) {
+
+    vector<int> sending_procs;
+    vector<int> receiving_procs;
+
+    for (int i = starting_proc; i < end_proc; i++) {
+      int sending_rank = (grid->global_rank + i)%grid->world_size;
+      int receiving_rank = (grid->global_rank>= i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i+grid->global_rank)%grid->world_size;
+      sending_procs.push_back(sending_rank);
+      receiving_procs.push_back(receiving_rank);
+    }
+
+    for (int i = 0; i < sending_procs.size(); i++) {
+      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
+        uint64_t col_id = (*cache_misses)[sending_procs[i]][k].col;
+        uint64_t source_id = (*cache_misses)[sending_procs[i]][k].row;
         auto index = source_id - batch_id * batch_size;
         DENT forceDiff[embedding_dim];
         DENT attrc = 0;
@@ -358,8 +374,9 @@ public:
               prevCoordinates[index * embedding_dim + d] + (lr)*l;
         }
       }
-      (*cache_misses)[i].clear();
+      (*cache_misses)[sending_procs[i]].clear();
     }
+    dense_local->invalidate_cache(iteration,batch_id,true);
   }
 
   inline void calc_embedding(uint64_t source_start_index,
