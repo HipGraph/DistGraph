@@ -395,16 +395,16 @@ public:
           (i > 0) ? rdisples_misses[i - 1] + receivecounts_misses[i - 1]
                   : rdisples_misses[i];
     }
-//    unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
-//        receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
-//    receive_missing_cols_ptr->resize(total_receive_count);
+    unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
+        receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
+    receive_missing_cols_ptr->resize(total_receive_count);
 //
 //    // sending actual Ids
-//    MPI_Alltoallv((*sending_missing_cols_ptr).data(),
-//                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
-//                  (*receive_missing_cols_ptr).data(),
-//                  receivecounts_misses.data(), rdisples_misses.data(),
-//                  DENSETUPLE, MPI_COMM_WORLD);
+    MPI_Alltoallv((*sending_missing_cols_ptr).data(),
+                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
+                  (*receive_missing_cols_ptr).data(),
+                  receivecounts_misses.data(), rdisples_misses.data(),
+                  DENSETUPLE, MPI_COMM_WORLD);
 //
 //    add_datatransfers(total_receive_count, "Data transfers");
 ////
