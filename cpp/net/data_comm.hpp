@@ -357,7 +357,6 @@ public:
 
     for (int i = starting_proc; i < end_proc; i++) {
       int sending_rank = (grid->global_rank + i)%grid->world_size;
-      int receiving_rank = (grid->global_rank>= i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i+grid->global_rank)%grid->world_size;
       sending_procs.push_back(sending_rank);
     }
 
@@ -375,16 +374,16 @@ public:
     (sending_missing_cols_ptr)->resize(total_send_count);
 
 
-//    for (int i = 0 ; i < sending_procs.size(); i++) {
-//      int base_index = sdisples_misses[sending_procs[i]];
-//      #pragma omp parallel for
-//      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
-//        int index= base_index+k;
-//        DataTuple<DENT, embedding_dim> temp;
-//        temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
-//        (*sending_missing_cols_ptr)[index]=temp;
-//      }
-//    }
+    for (int i = 0 ; i < sending_procs.size(); i++) {
+      int base_index = sdisples_misses[sending_procs[i]];
+      #pragma omp parallel for
+      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
+        int index= base_index+k;
+        DataTuple<DENT, embedding_dim> temp;
+        temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
+        (*sending_missing_cols_ptr)[index]=temp;
+      }
+    }
 //
 //    // sending number of misses for each rank
 //    MPI_Alltoall(sendcounts_misses.data(), 1, MPI_INT,
