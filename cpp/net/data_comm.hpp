@@ -409,8 +409,10 @@ public:
       cout<<" rank "<<grid->global_rank<<" rdisples_misses "<<i<<" base_index "<<base_index<<endl;
       //      #pragma omp parallel for
       for (int j = 0; j < receivecounts_misses[i]; j++) {
+        cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j  "<<base_index + j<<endl;
         DataTuple<DENT, embedding_dim> t =
             (*receive_missing_cols_ptr)[base_index + j];
+        cout<<" rank "<<grid->global_rank<<" j "<<j<<" base_index +j sucessfully accessed "<<base_index + j<<endl;
         uint64_t global_id = t.col;
         uint64_t local_id =
             t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
