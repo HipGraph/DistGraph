@@ -355,6 +355,7 @@ public:
 
     vector<int> sending_procs;
 
+
     for (int i = starting_proc; i < end_proc; i++) {
       int sending_rank = (grid->global_rank + i)%grid->world_size;
       int receiving_rank = (grid->global_rank>= i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i+grid->global_rank)%grid->world_size;
@@ -364,8 +365,24 @@ public:
     std::sort((sending_procs).begin(), (sending_procs).end());
 
     //
+    vector<vector<uint64_t>> unique_col_ids(grid->world_size);
     for (int i = 0 ; i < sending_procs.size(); i++) {
-      sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]].size();
+      std::copy_if(
+          (*cache_misses)[sending_procs[i]].begin(),
+          (*cache_misses)[sending_procs[i]].end(),
+          std::back_inserter(unique_col_ids[sending_procs[i]]),
+          [&](const Tuple& obj) {
+            // Use the custom comparator to determine uniqueness
+            return std::none_of(
+                unique_col_ids[sending_procs[i]].begin(),
+                unique_col_ids[sending_procs[i]].end(),
+                [&](const int64_t& uniqueCol) {
+                  return CompareTuple(obj, {0, uniqueObj, 0});
+                }
+            );
+          }
+      ); // change this
+      sendcounts_misses[sending_procs[i]] = unique_col_ids[sending_procs[i]].size();
       total_send_count += sendcounts_misses[sending_procs[i]];
     }
 
@@ -380,7 +397,7 @@ public:
       for (int k = 0; k < sendcounts_misses[i]; k++) {
         int index = base_index + k;
         DataTuple<DENT, embedding_dim> temp;
-        temp.col = static_cast<uint64_t>((*cache_misses)[i][k].col);
+        temp.col = static_cast<uint64_t>(unique_col_ids[i][k].col);
         (*sending_missing_cols_ptr)[index]=temp;
       }
     }

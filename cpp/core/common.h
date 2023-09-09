@@ -90,6 +90,12 @@ struct CSRHandle {
   sparse_matrix_t mkl_handle;
 };
 
+template <typename T>
+bool CompareTuple(const Tuple<T>& obj1, const Tuple<T>& obj2) {
+  // Customize the comparison logic based on your requirements
+  return obj1.col == obj2.col;
+}
+
 // TODO: removed reference type due to binding issue
 template <typename T> bool column_major(Tuple<T> a, Tuple<T> b) {
   if (a.col == b.col) {
