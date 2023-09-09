@@ -435,10 +435,14 @@ public:
       int count = sendcounts_misses[i];
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr)[j];
-//        (this->dense_local)
-//            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
+        (this->dense_local)
+            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
       }
     }
+    sending_missing_cols_ptr->clear();
+    sending_missing_cols_ptr->shrink_to_fit();
+    receive_missing_cols_ptr->clear();
+    receive_missing_cols_ptr->shrink_to_fit();
   }
 
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
