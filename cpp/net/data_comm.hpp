@@ -357,6 +357,7 @@ public:
 
     for (int i = starting_proc; i < end_proc; i++) {
       int sending_rank = (grid->global_rank + i)%grid->world_size;
+      int receiving_rank = (grid->global_rank>= i)? (grid->global_rank - i)%grid->world_size:(grid->world_size-i+grid->global_rank)%grid->world_size;
       sending_procs.push_back(sending_rank);
     }
 
@@ -365,30 +366,30 @@ public:
     //
     for (int i = 0 ; i < sending_procs.size(); i++) {
       sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]].size();
-      sdisples_misses[i] =
-          (i > 0) ? sdisples_misses[i - 1] + sendcounts_misses[i - 1]
-                  : sdisples_misses[i];
       total_send_count += sendcounts_misses[sending_procs[i]];
     }
 
-    (sending_missing_cols_ptr)->resize(total_send_count);
+    (*sending_missing_cols_ptr)->resize(total_send_count);
 
-
-    for (int i = 0 ; i < sending_procs.size(); i++) {
-      int base_index = sdisples_misses[sending_procs[i]];
-      #pragma omp parallel for
-      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
-        int index= base_index+k;
+    for (int i = 0; i < grid->world_size; i++) {
+      sdisples_misses[i] =
+          (i > 0) ? sdisples_misses[i - 1] + sendcounts_misses[i - 1]
+                  : sdisples_misses[i];
+      int base_index = sdisples_misses[i];
+#pragma omp parallel for
+      for (int k = 0; k < sendcounts_misses[i]; k++) {
+        int index = base_index + k;
         DataTuple<DENT, embedding_dim> temp;
-        temp.col = static_cast<uint64_t>((*cache_misses)[sending_procs[i]][k].col);
+        temp.col = static_cast<uint64_t>((*cache_misses)[i][k].col);
         (*sending_missing_cols_ptr)[index]=temp;
       }
     }
-//
-//    // sending number of misses for each rank
+
+
+    // sending number of misses for each rank
     MPI_Alltoall(sendcounts_misses.data(), 1, MPI_INT,
                  receivecounts_misses.data(), 1, MPI_INT, MPI_COMM_WORLD);
-//
+
     for (int i = 0; i < grid->world_size; i++) {
       total_receive_count += receivecounts_misses[i];
       rdisples_misses[i] =
@@ -398,16 +399,16 @@ public:
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
         receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
     receive_missing_cols_ptr->resize(total_receive_count);
-//
-//    // sending actual Ids
+
+    // sending actual Ids
     MPI_Alltoallv((*sending_missing_cols_ptr).data(),
                   sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
                   (*receive_missing_cols_ptr).data(),
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, MPI_COMM_WORLD);
-//
+
     add_datatransfers(total_receive_count, "Data transfers");
-////
+//
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdisples_misses[i];
       #pragma omp parallel for
@@ -423,21 +424,21 @@ public:
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
-//    MPI_Alltoallv((*receive_missing_cols_ptr).data(),
-//                  receivecounts_misses.data(), rdisples_misses.data(),
-//                  DENSETUPLE, (*sending_missing_cols_ptr).data(),
-//                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
-//                  MPI_COMM_WORLD);
-//
-//    for (int i = 0; i < this->grid->world_size; i++) {
-//      int base_index = sdisples_misses[i];
-//      int count = sendcounts_misses[i];
-//      for (int j = base_index; j < base_index + count; j++) {
-//        DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr)[j];
-////        (this->dense_local)
-////            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
-//      }
-//    }
+    MPI_Alltoallv((*receive_missing_cols_ptr).data(),
+                  receivecounts_misses.data(), rdisples_misses.data(),
+                  DENSETUPLE, (*sending_missing_cols_ptr).data(),
+                  sendcounts_misses.data(), sdisples_misses.data(), DENSETUPLE,
+                  MPI_COMM_WORLD);
+
+    for (int i = 0; i < this->grid->world_size; i++) {
+      int base_index = sdisples_misses[i];
+      int count = sendcounts_misses[i];
+      for (int j = base_index; j < base_index + count; j++) {
+        DataTuple<DENT, embedding_dim> t = (*sending_missing_cols_ptr)[j];
+//        (this->dense_local)
+//            ->insert_cache(i, t.col, batch_id, iteration, t.value,true);
+      }
+    }
   }
 
   void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
