@@ -171,7 +171,7 @@ public:
               //local computation
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                             batch_size, considering_batch_size, true,
-                                            true, cache_misses_ptr.get(),cache_misses_col_ptr.get(),cache_misses_col_ptr.get(),0,0,false);
+                                            true, cache_misses_ptr.get(),cache_misses_col_ptr.get(),0,0,false);
             } else if (k>1) {
               int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
@@ -231,7 +231,7 @@ public:
 //              cout <<"rank "<<grid->global_rank<< " processing  " << k << " out of "<<grid->world_size<<endl;
               int end_process = get_end_proc(k,beta,grid->world_size);
               t = start_clock();
-              data_comm_cache[j].get()->transfer_data(cache_misses_col.get(), i,j,k,end_process);
+              data_comm_cache[j].get()->transfer_data(cache_misses_col_ptr.get(), i,j,k,end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
               this->calc_t_dist_grad_for_cache_misses(
@@ -298,7 +298,7 @@ public:
       if (col_major) {
         calc_embedding(source_start_index, source_end_index, dst_start_index,
                        dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-                       batch_size, block_size, cache_misses,fetch_from_temp_cache);
+                       batch_size, block_size, cache_misses,cache_misses_col,fetch_from_temp_cache);
       } else {
         calc_embedding_row_major(source_start_index, source_end_index,
                                  dst_start_index, dst_end_index, csr_block,
