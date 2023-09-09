@@ -123,6 +123,7 @@ public:
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr = unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
     unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr = unique_ptr<vector<vector<Tuple<DENT>>>>(new vector<vector<Tuple<DENT>>>(grid->world_size));
+    unique_ptr<vector<vector<uint64_t>>> cache_misses_col_ptr = unique_ptr<vector<vector<uint64_t>>>(new vector<vector<uint64_t>>(grid->world_size));
 
     vector<MPI_Request> mpi_requests(iterations * batches);
     size_t total_memory = 0;
@@ -170,12 +171,12 @@ public:
               //local computation
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                             batch_size, considering_batch_size, true,
-                                            true, cache_misses_ptr.get(),0,0,false);
+                                            true, cache_misses_ptr.get(),cache_misses_col_ptr.get(),cache_misses_col_ptr.get(),0,0,false);
             } else if (k>1) {
               int prev_end_process = get_end_proc(prev_start,beta,grid->world_size);
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                             batch_size, considering_batch_size, false,
-                                            true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+                                            true, cache_misses_ptr.get(),cache_misses_col_ptr.get(),prev_start,prev_end_process,true);
               dense_local->invalidate_cache(i,j,true);
             }
             stop_clock_and_add(t, "Computation Time");
@@ -192,7 +193,7 @@ public:
 //          cout<<grid->global_rank << " processing  last " <<"population cache"<<prev_start<<" "<<prev_end_process<<endl;
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size, false,
-                                        true, cache_misses_ptr.get(),prev_start,prev_end_process,true);
+                                        true, cache_misses_ptr.get(),cache_misses_col_ptr.get(),prev_start,prev_end_process,true);
 //          cout<<grid->global_rank << " processing  last " <<"population cache completed"<<endl;
           dense_local->invalidate_cache(i,j,true);
            update_ptr.get()->resize(0);
@@ -201,7 +202,7 @@ public:
           // local computation
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
-              considering_batch_size, true, true, cache_misses_ptr.get(), 0, 0,false);
+              considering_batch_size, true, true, cache_misses_ptr.get(), cache_misses_col_ptr.get(),0, 0,false);
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
@@ -218,7 +219,7 @@ public:
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
                                         false, true,
-                                        cache_misses_ptr.get(),
+                                        cache_misses_ptr.get(),cache_misses_col_ptr.get(),
                                         0,grid->world_size,false);
 
           if (alpha < 1.0) {
@@ -230,7 +231,7 @@ public:
 //              cout <<"rank "<<grid->global_rank<< " processing  " << k << " out of "<<grid->world_size<<endl;
               int end_process = get_end_proc(k,beta,grid->world_size);
               t = start_clock();
-              data_comm_cache[j].get()->transfer_data(cache_misses_ptr.get(), i,j,k,end_process);
+              data_comm_cache[j].get()->transfer_data(cache_misses_col.get(), i,j,k,end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
               this->calc_t_dist_grad_for_cache_misses(
@@ -284,7 +285,7 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
-                          bool local, bool col_major, vector<vector<Tuple<DENT>>> *cache_misses,
+                          bool local, bool col_major, vector<vector<Tuple<DENT>>> *cache_misses, vector<vector<uint64_t>> *cache_misses_col,
                                       int start_process, int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
@@ -317,7 +318,7 @@ public:
             calc_embedding(source_start_index, source_end_index,
                            dst_start_index, dst_end_index, csr_block,
                            prevCoordinates, lr, batch_id, batch_size,
-                           block_size, cache_misses,fetch_from_temp_cache);
+                           block_size, cache_misses,cache_misses_col,fetch_from_temp_cache);
           } else {
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
@@ -379,7 +380,7 @@ public:
                              CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                              DENT lr, int batch_id, int batch_size,
                              int block_size,
-                             vector<vector<Tuple<DENT>>> *cache_misses, bool temp_cache) {
+                             vector<vector<Tuple<DENT>>> *cache_misses, vector<vector<uint64_t>> *cache_misses_col, bool temp_cache) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -393,6 +394,7 @@ public:
             target_rank == (this->grid)->global_rank ? false : true;
         bool matched = false;
         DENT *array_ptr = nullptr;
+        bool  col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
@@ -411,7 +413,14 @@ public:
                   cacheRef.row = source_id;
                   cacheRef.col = i;
 #pragma omp critical
-                  { (*cache_misses)[target_rank].push_back(cacheRef); }
+                  {
+                    (*cache_misses)[target_rank].push_back(cacheRef);
+                    if (!col_inserted) {
+                      cache_misses_col[target_rank].push_back(i);
+                      col_inserted = true;
+                    }
+
+                  }
                   continue;
                 }
               }
