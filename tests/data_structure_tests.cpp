@@ -77,14 +77,13 @@ int main(int argc, char **argv) {
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
 
-  cout << " rank " << rank << " reading data from file path:  " << file_path << endl;
+  cout << " rank " << rank << " reading data from file path:  " << input_path << endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
   reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(),true);
   auto end_io = std::chrono::high_resolution_clock::now();
 
-  cout << " rank " << rank << " reading data from file path:  " << file_path
-       << " completed " << endl;
+  cout << " rank " << rank << " reading data from file path:  " << input_path << " completed " << endl;
 
   auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                         grid.get()->world_size);
