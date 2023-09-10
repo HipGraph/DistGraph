@@ -228,8 +228,9 @@ public:
             int proc_length = get_proc_length(beta,grid->world_size);
             int prev_start=0;
             for(int k=1;k<grid->world_size;k +=proc_length) {
-              cout <<"rank "<<grid->global_rank<< " processing  " << k << " out of "<<grid->world_size<<endl;
               int end_process = get_end_proc(k,beta,grid->world_size);
+              cout <<"rank "<<grid->global_rank<< " processing  " << k << " out of "<<grid->world_size<<" with proc length "<<proc_length<<" end process "<<end_process<<endl;
+
               t = start_clock();
               data_comm_cache[j].get()->transfer_data(cache_misses_col_ptr.get(), i,j,k,end_process);
               stop_clock_and_add(t, " Communication Time ");

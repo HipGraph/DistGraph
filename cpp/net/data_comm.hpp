@@ -406,7 +406,7 @@ public:
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, MPI_COMM_WORLD);
 
-    cout<<" rank  "<<grid->global_rank<<" total send count for starting_proc "<<starting_proc<<" end_proc "<<end_proc<<total_send_count<<endl;
+    cout<<" rank  "<<grid->global_rank<<" total send count for starting_proc "<<starting_proc<<" end_proc "<<end_proc<<" "<<total_send_count<<endl;
 
 //    add_datatransfers(total_send_count, "Data transfers");
 
