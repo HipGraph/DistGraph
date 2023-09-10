@@ -308,8 +308,8 @@ public:
       }
     } else {
       for (int r = start_process; r < end_process; r++) {
-        cache_misses[r].clear();
-        cache_misses_col[r].clear();
+        (*cache_misses)[r].clear();
+        (*cache_misses_col)[r].clear();
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
