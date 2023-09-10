@@ -99,8 +99,7 @@ public:
         uint64_t considered_count_send = alpha * unique_set_send.size();
         uint64_t considered_count_receive = alpha * unique_set_receiv.size();
 
-        unique_set_receiv =
-            random_select(unique_set_receiv, considered_count_receive);
+        unique_set_receiv = random_select(unique_set_receiv, considered_count_receive);
         unique_set_send = random_select(unique_set_send, considered_count_send);
       }
 
@@ -347,14 +346,12 @@ public:
     vector<int> rdisples_misses(grid->world_size, 0);
 
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>> sending_missing_cols_ptr =
-            unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
-                new vector<DataTuple<DENT, embedding_dim>>());
+        unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
     int total_send_count = 0;
     int total_receive_count = 0;
 
     vector<int> sending_procs;
-
 
     for (int i = starting_proc; i < end_proc; i++) {
       int sending_rank = (grid->global_rank + i)%grid->world_size;
@@ -364,8 +361,6 @@ public:
 
     std::sort((sending_procs).begin(), (sending_procs).end());
 
-    //
-    vector<uint64_t> unique_col_ids;
     for (int i = 0 ; i < sending_procs.size(); i++) {
       sendcounts_misses[sending_procs[i]] = (*cache_misses)[sending_procs[i]].size();
       total_send_count += sendcounts_misses[sending_procs[i]];
@@ -373,12 +368,13 @@ public:
 
     sending_missing_cols_ptr->resize(total_send_count);
 
+
     for (int i = 0; i < grid->world_size; i++) {
       sdisples_misses[i] =
           (i > 0) ? sdisples_misses[i - 1] + sendcounts_misses[i - 1]
                   : sdisples_misses[i];
       int base_index = sdisples_misses[i];
-#pragma omp parallel for
+//#pragma omp parallel for
       for (int k = 0; k < sendcounts_misses[i]; k++) {
         int index = base_index + k;
         DataTuple<DENT, embedding_dim> temp;
@@ -398,6 +394,7 @@ public:
           (i > 0) ? rdisples_misses[i - 1] + receivecounts_misses[i - 1]
                   : rdisples_misses[i];
     }
+
     unique_ptr<vector<DataTuple<DENT, embedding_dim>>>
         receive_missing_cols_ptr = unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
     receive_missing_cols_ptr->resize(total_receive_count);
@@ -409,11 +406,11 @@ public:
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, MPI_COMM_WORLD);
 
-    add_datatransfers(total_send_count, "Data transfers");
-//
+//    add_datatransfers(total_send_count, "Data transfers");
+
     for (int i = 0; i < grid->world_size; i++) {
       int base_index = rdisples_misses[i];
-      #pragma omp parallel for
+//      #pragma omp parallel for
       for (int j = 0; j < receivecounts_misses[i]; j++) {
         DataTuple<DENT, embedding_dim> t =
             (*receive_missing_cols_ptr)[base_index + j];
@@ -426,6 +423,7 @@ public:
         (*receive_missing_cols_ptr)[base_index + j] = t;
       }
     }
+
     MPI_Alltoallv((*receive_missing_cols_ptr).data(),
                   receivecounts_misses.data(), rdisples_misses.data(),
                   DENSETUPLE, (*sending_missing_cols_ptr).data(),
