@@ -22,13 +22,41 @@ using namespace distblas::partition;
 using namespace distblas::net;
 
 int main(int argc, char **argv) {
-  string file_path = argv[1];
 
-  cout << " file_path " << file_path << endl;
+  const  int dimension = 128;
+
+
+  string input_file ="";
+  string output_file="embedding.txt";
 
   int batch_size = 256 ;
-   const  int dimension = 128;
+  double alpha=0;
+  double beta=0.25;
+  int iterations=30;
+  int ns=5;
+  double lr=0.02;
 
+  for(int p = 0; p < argc; p++) {
+    if (strcmp(argv[p], "-input") == 0) {
+      input_file = argv[p + 1];
+    } else if (strcmp(argv[p], "-output") == 0) {
+      output_file = argv[p + 1];
+    } else if (strcmp(argv[p], "-batch") == 0) {
+      batch_size = atoi(argv[p + 1]);
+    } else if (strcmp(argv[p], "-iter") == 0) {
+      iterations = atoi(argv[p + 1]);
+    } else if (strcmp(argv[p], "-alpha") == 0) {
+      alpha = atof(argv[p + 1]);
+    } else if (strcmp(argv[p], "-bs") == 0) {
+      batch_size = atoi(argv[p + 1]);
+    } else if (strcmp(argv[p], "-lr") == 0) {
+      lr = atof(argv[p + 1]);
+    } else if (strcmp(argv[p], "-nsamples") == 0) {
+      ns = atoi(argv[p + 1]);
+    }else if (strcmp(argv[p], "-beta") == 0) {
+      beta = atoi(argv[p + 1]);
+    }
+  }
 
   MPI_Init(&argc, &argv);
   int rank;
@@ -52,7 +80,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " reading data from file path:  " << file_path << endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
-  reader.get()->parallel_read_MM<int>(file_path, shared_sparseMat.get(),true);
+  reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(),true);
   auto end_io = std::chrono::high_resolution_clock::now();
 
   cout << " rank " << rank << " reading data from file path:  " << file_path
@@ -116,13 +144,13 @@ int main(int argc, char **argv) {
                                                                      shared_sparseMat_receiver.get(),
                                                                      shared_sparseMat_sender.get(),
                                                                      dense_mat.get(),
-                                                                     grid.get(),0.25,0.5,
+                                                                     grid.get(),alpha,beta,
                                                                      5,
                                                                      -5));
 
   MPI_Barrier(MPI_COMM_WORLD);
   cout << " rank " << rank << "  algo started  " << endl;
-  embedding_algo.get()->algo_force2_vec_ns(30, batch_size, 5, 0.02);
+  embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
   cout << " rank " << rank << " async completed  " << endl;
 //
 //
@@ -131,6 +159,8 @@ int main(int argc, char **argv) {
   fout.open("perf_output", std::ios_base::app);
 
   json j_obj;
+  j_obj["alpha"]=alpha;
+  j_obj["beta"]=beta;
   j_obj["perf_stats"] = json_perf_statistics();
   if(rank == 0) {
     fout << j_obj.dump(4) << "," << endl;
