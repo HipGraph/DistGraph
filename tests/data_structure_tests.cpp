@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     } else if (strcmp(argv[p], "-nsamples") == 0) {
       ns = atoi(argv[p + 1]);
     }else if (strcmp(argv[p], "-beta") == 0) {
-      beta = atoi(argv[p + 1]);
+      beta = atof(argv[p + 1]);
     }
   }
 
