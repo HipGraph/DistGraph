@@ -141,21 +141,21 @@ int main(int argc, char **argv) {
       new DenseMat<int, double, dimension>(grid.get(), localARows));
 
   if (spmm) {
-    auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(
-        new DenseMat<int, double, dimension>(grid.get(), localARows));
-
-    unique_ptr<distblas::algo::SpMMAlgo<int, double, dimension>>
-
-        embedding_algo =
-            unique_ptr<distblas::algo::SpMMAlgo<int, double, dimension>>(
-                new distblas::algo::EmbeddingAlgo<int, double, dimension>(
-                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                    shared_sparseMat_sender.get(), dense_mat.get(),
-                    dense_mat_output.get(), grid.get(), alpha, beta, 5, -5));
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << "  algo started  " << endl;
-    embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
+//    auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(
+//        new DenseMat<int, double, dimension>(grid.get(), localARows));
+//
+//    unique_ptr<distblas::algo::SpMMAlgo<int, double, dimension>>
+//
+//        embedding_algo =
+//            unique_ptr<distblas::algo::SpMMAlgo<int, double, dimension>>(
+//                new distblas::algo::EmbeddingAlgo<int, double, dimension>(
+//                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+//                    shared_sparseMat_sender.get(), dense_mat.get(),
+//                    dense_mat_output.get(), grid.get(), alpha, beta, 5, -5));
+//
+//    MPI_Barrier(MPI_COMM_WORLD);
+//    cout << " rank " << rank << "  algo started  " << endl;
+//    embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
   } else {
 
