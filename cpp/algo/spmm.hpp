@@ -20,7 +20,7 @@ public:
            DenseMat<SPT, DENT, embedding_dim> *dense_local_input,
            DenseMat<SPT, DENT, embedding_dim> *dense_local_output,
            Process3DGrid *grid, double alpha, double beta, DENT MAX_BOUND,
-           DENT MIN_BOUND):EmbeddingAlgo(sp_local_native,sp_local_receiver,sp_local_sender,
+           DENT MIN_BOUND):EmbeddingAlgo<SPT,DENT,embedding_dim>(sp_local_native,sp_local_receiver,sp_local_sender,
                                            dense_local_input,grid,alpha,beta,MAX_BOUND,MIN_BOUND) {
     this->dense_local_output = dense_local_output;
 
