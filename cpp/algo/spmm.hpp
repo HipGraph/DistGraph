@@ -36,7 +36,7 @@ public:
 
 
     if (this->sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+      batches = static_cast<int>(this->sp_local_receiver->proc_row_width / batch_size);
     } else {
       batches = static_cast<int>(this->sp_local_receiver->proc_row_width / batch_size) + 1;
       last_batch_size = this->sp_local_receiver->proc_row_width - batch_size * (batches - 1);
@@ -74,7 +74,7 @@ public:
       this->data_comm_cache[i].get()->onboard_data();
     }
 
-    if (alpha > 0) {
+    if (this->alpha > 0) {
       stop_clock_and_add(t, "Computation Time");
       t = start_clock();
       negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
@@ -102,7 +102,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
-        cout << " rank " << grid->global_rank << " iteration " << i << endl;
+        cout << " rank " << this->grid->global_rank << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {
 
@@ -124,7 +124,7 @@ public:
         CSRLocal<SPT> *csr_block =
             (this->sp_local_receiver)->csr_local_data.get();
 
-        if (alpha == 0) {
+        if (this->alpha == 0) {
           int proc_length = get_proc_length(this->beta, this->grid->world_size);
           int prev_start = 0;
           for (int k = 1; k < this->grid->world_size; k += proc_length) {
@@ -152,7 +152,7 @@ public:
                   cache_misses_col_ptr.get(), 0, 0, false);
             } else if (k > 1) {
               int prev_end_process =
-                  get_end_proc(prev_start, beta, grid->world_size);
+                  get_end_proc(prev_start, this->beta, this->grid->world_size);
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                             batch_size, considering_batch_size,
                                             false, true, cache_misses_ptr.get(),
@@ -191,7 +191,7 @@ public:
           update_ptr.get()->resize(0);
           //          cout<<grid->global_rank << " cache  clearance
           //          completed"<<endl;
-        } else if (alpha > 0) {
+        } else if (this->alpha > 0) {
           // local computation
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
@@ -213,17 +213,17 @@ public:
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
               considering_batch_size, false, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, grid->world_size, false);
+              cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
 
-          if (alpha < 1.0) {
+          if (this->alpha < 1.0) {
             MPI_Barrier(MPI_COMM_WORLD);
             stop_clock_and_add(t, "Computation Time");
-            int proc_length = get_proc_length(beta, grid->world_size);
+            int proc_length = get_proc_length(this->beta, this->grid->world_size);
             int prev_start = 0;
-            for (int k = 1; k < grid->world_size; k += proc_length) {
-              int end_process = get_end_proc(k, beta, grid->world_size);
-              cout << "rank " << grid->global_rank << " processing  " << k
-                   << " out of " << grid->world_size << " with proc length "
+            for (int k = 1; k < this->grid->world_size; k += proc_length) {
+              int end_process = get_end_proc(k, this->beta, this->grid->world_size);
+              cout << "rank " << this->grid->global_rank << " processing  " << k
+                   << " out of " << this->grid->world_size << " with proc length "
                    << proc_length << " end process " << end_process << endl;
 
               t = start_clock();
@@ -247,7 +247,7 @@ public:
         //        cout<<grid->global_rank << " update   completed"<<endl;
 
         if (this->grid->world_size > 1 and
-            !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
+            !(i == iterations - 1 and j == batches - 1) and this->alpha > 0) {
           update_ptr.get()->clear();
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
@@ -319,17 +319,14 @@ public:
             }
 
             if (fetch_from_cache) {
-              DENT *colvec = (this->dense_local)
-                                 ->fetch_data_vector_from_cache(
-                                     owner_rank, global_col_id, true);
               for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[i * embedding_dim + d] += lr * colvec[d];
+                prevCoordinates[i * embedding_dim + d] += lr * array_ptr[d];
               }
             } else {
               for (int d = 0; d < embedding_dim; d++) {
                 prevCoordinates[i * embedding_dim + d] +=
                     (lr) * (this->dense_local)
-                               ->nCoordinates[local_col_id * embedding_dim + d];
+                               ->nCoordinates[local_dst * embedding_dim + d];
               }
             }
           }
