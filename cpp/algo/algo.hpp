@@ -24,7 +24,7 @@ template <typename SPT, typename DENT, size_t embedding_dim>
 
 class EmbeddingAlgo {
 
-private:
+protected:
   DenseMat<SPT, DENT, embedding_dim> *dense_local;
   distblas::core::SpMat<SPT> *sp_local_receiver;
   distblas::core::SpMat<SPT> *sp_local_sender;
@@ -56,6 +56,7 @@ public:
     this->alpha = alpha;
     this-> beta = beta;
   }
+
 
   DENT scale(DENT v) {
     if (v > MAX_BOUND)
@@ -347,6 +348,7 @@ public:
       receiving_procs.push_back(receiving_rank);
     }
 
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < sending_procs.size(); i++) {
       for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
         uint64_t col_id = (*cache_misses)[sending_procs[i]][k].col;
