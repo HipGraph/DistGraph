@@ -31,8 +31,7 @@ protected:
   distblas::core::SpMat<SPT> *sp_local_native;
   Process3DGrid *grid;
   DENT MAX_BOUND, MIN_BOUND;
-  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
-      data_comm_cache;
+  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache;
 
   // cache size controlling hyper parameter
   double alpha = 1.0;

@@ -34,7 +34,7 @@ public:
     int batches = 0;
     int last_batch_size = batch_size;
 
-    sp_local_receiver->proc_row_width;
+    alpha = alpha+1;
 
 //    if (sp_local_receiver->proc_row_width % batch_size == 0) {
 //      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
@@ -262,9 +262,9 @@ public:
 //        }
 //      }
 //    }
-    total_memory = total_memory / (iterations * batches);
-    add_memory(total_memory, "Memory usage");
-    stop_clock_and_add(t, "Computation Time");
+//    total_memory = total_memory / (iterations * batches);
+//    add_memory(total_memory, "Memory usage");
+//    stop_clock_and_add(t, "Computation Time");
   }
 
 //  inline void calc_embedding(uint64_t source_start_index, uint64_t source_end_index,
