@@ -6,6 +6,8 @@ using namespace distblas::core;
 using namespace distblas::net;
 using namespace Eigen;
 
+using namespace distblas::core;
+
 namespace distblas::algo {
 template <typename SPT, typename DENT, size_t embedding_dim>
 class SpMMAlgo : public EmbeddingAlgo<SPT, DENT, embedding_dim> {
