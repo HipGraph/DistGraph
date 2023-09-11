@@ -24,7 +24,7 @@ template <typename SPT, typename DENT, size_t embedding_dim>
 
 class EmbeddingAlgo {
 
-public:
+protected:
   DenseMat<SPT, DENT, embedding_dim> *dense_local;
   distblas::core::SpMat<SPT> *sp_local_receiver;
   distblas::core::SpMat<SPT> *sp_local_sender;
@@ -40,6 +40,8 @@ public:
   double beta = 1.0;
 
 
+
+public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
                 distblas::core::SpMat<SPT> *sp_local_receiver,
                 distblas::core::SpMat<SPT> *sp_local_sender,
