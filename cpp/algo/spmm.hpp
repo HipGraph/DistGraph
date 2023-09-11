@@ -26,7 +26,7 @@ public:
       : EmbeddingAlgo<SPT, DENT, embedding_dim>(
             sp_local_native, sp_local_receiver, sp_local_sender,
             dense_local_input, grid, alpha, beta, MAX_BOUND, MIN_BOUND) {
-    this->dense_local_output = dense_local_output;
+//    this->dense_local_output = dense_local_output;
   }
 
   void algo_spmm(int iterations, int batch_size, DENT lr) {
@@ -34,7 +34,7 @@ public:
     int batches = 0;
     int last_batch_size = batch_size;
 
-    alpha = alpha+1;
+    this->alpha = this->alpha+1;
 
 //    if (sp_local_receiver->proc_row_width % batch_size == 0) {
 //      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
