@@ -8,8 +8,7 @@ using namespace distblas::net;
 using namespace Eigen;
 
 namespace distblas::algo {
-template <typename SPT, typename DENT, size_t embedding_dim>
-class SpMMAlgo : public EmbeddingAlgo {
+template <typename SPT, typename DENT, size_t embedding_dim> class SpMMAlgo : public EmbeddingAlgo {
 
 private:
   DenseMat<SPT, DENT, embedding_dim> *dense_local_output;
