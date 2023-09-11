@@ -395,7 +395,7 @@ public:
       receiving_procs.push_back(receiving_rank);
     }
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (int i = 0; i < sending_procs.size(); i++) {
       for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
         uint64_t col_id = (*cache_misses)[sending_procs[i]][k].col;
