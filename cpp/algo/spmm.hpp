@@ -1,14 +1,14 @@
 #pragma once
 #include "algo.hpp"
 
-
 using namespace std;
 using namespace distblas::core;
 using namespace distblas::net;
 using namespace Eigen;
 
 namespace distblas::algo {
-template <typename SPT, typename DENT, size_t embedding_dim> class SpMMAlgo : public EmbeddingAlgo {
+template <typename SPT, typename DENT, size_t embedding_dim>
+class SpMMAlgo : public EmbeddingAlgo {
 
 private:
   DenseMat<SPT, DENT, embedding_dim> *dense_local_output;
@@ -267,7 +267,8 @@ public:
     stop_clock_and_add(t, "Computation Time");
   }
 
-  inline void calc_embedding(uint64_t source_start_index, uint64_t source_end_index,
+  inline void
+  calc_embedding(uint64_t source_start_index, uint64_t source_end_index,
                  uint64_t dst_start_index, uint64_t dst_end_index,
                  CSRLocal<SPT> *csr_block, DENT *prevCoordinates, DENT lr,
                  int batch_id, int batch_size, int block_size,
@@ -320,17 +321,19 @@ public:
             }
 
             if (fetch_from_cache) {
-              DENT *colvec =
-                  (this->dense_local)->fetch_data_vector_from_cache(owner_rank, global_col_id,true);
+              DENT *colvec = (this->dense_local)
+                                 ->fetch_data_vector_from_cache(
+                                     owner_rank, global_col_id, true);
               for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[i * embedding_dim + d] += lr*colvec[d];
+                prevCoordinates[i * embedding_dim + d] += lr * colvec[d];
               }
             } else {
               for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[i * embedding_dim + d] += (lr)* (this->dense_local)->nCoordinates[local_col_id * embedding_dim + d];
+                prevCoordinates[i * embedding_dim + d] +=
+                    (lr) * (this->dense_local)
+                               ->nCoordinates[local_col_id * embedding_dim + d];
               }
             }
-
           }
         }
       }
@@ -351,4 +354,5 @@ public:
       }
     }
   }
+}
 };
