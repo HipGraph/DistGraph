@@ -35,17 +35,13 @@ public:
     int last_batch_size = batch_size;
 
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
     } else {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-      last_batch_size =
-          sp_local_receiver->proc_row_width - batch_size * (batches - 1);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+      last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(
