@@ -57,6 +57,10 @@ public:
     this-> beta = beta;
   }
 
+  EmbeddingAlgo(){
+
+  }
+
 
   DENT scale(DENT v) {
     if (v > MAX_BOUND)
