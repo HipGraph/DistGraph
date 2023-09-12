@@ -176,8 +176,7 @@ public:
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
-          int prev_end_process =
-              get_end_proc(prev_start, beta, this->grid->world_size);
+          int prev_end_process = get_end_proc(prev_start, this->beta, this->grid->world_size);
           //          cout<<grid->global_rank << " processing  last "
           //          <<"population cache"<<prev_start<<"
           //          "<<prev_end_process<<endl;
