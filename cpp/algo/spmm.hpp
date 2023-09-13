@@ -367,17 +367,10 @@ public:
         1;
 
     if (local) {
-      if (col_major) {
         calc_embedding(source_start_index, source_end_index, dst_start_index,
                        dst_end_index, csr_block, prevCoordinates, lr, batch_id,
                        batch_size, block_size, cache_misses, cache_misses_col,
                        fetch_from_temp_cache);
-      } else {
-        calc_embedding_row_major(source_start_index, source_end_index,
-                                 dst_start_index, dst_end_index, csr_block,
-                                 prevCoordinates, lr, batch_id, batch_size,
-                                 block_size);
-      }
     } else {
       for (int r = start_process; r < end_process; r++) {
         (*cache_misses)[r].clear();
@@ -390,18 +383,12 @@ public:
                        this->sp_local_receiver->gCols) -
               1;
 
-          if (col_major) {
             calc_embedding(source_start_index, source_end_index,
                            dst_start_index, dst_end_index, csr_block,
                            prevCoordinates, lr, batch_id, batch_size,
                            block_size, cache_misses, cache_misses_col,
                            fetch_from_temp_cache);
-          } else {
-            calc_embedding_row_major(source_start_index, source_end_index,
-                                     dst_start_index, dst_end_index, csr_block,
-                                     prevCoordinates, lr, batch_id, batch_size,
-                                     block_size);
-          }
+
         }
       }
     }
