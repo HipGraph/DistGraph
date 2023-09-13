@@ -238,15 +238,16 @@ public:
         }
         total_memory += get_memory_usage();
 
-        this->dense_local->invalidate_cache(i, j, true);
+        if (alpha<1.0) {
+          this->dense_local->invalidate_cache(i, j, true);
+        }
         //        cout<<grid->global_rank << " repulsive calculation
         //        completed"<<endl;
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         //        cout<<grid->global_rank << " update   completed"<<endl;
 
-        if (this->grid->world_size > 1 and
-            !(i == iterations - 1 and j == batches - 1) and this->alpha > 0) {
+        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and this->alpha > 0) {
           update_ptr.get()->clear();
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
@@ -274,7 +275,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
@@ -303,7 +304,7 @@ public:
                   Tuple<DENT> cacheRef;
                   cacheRef.row = source_id;
                   cacheRef.col = i;
-#pragma omp critical
+//#pragma omp critical
                   {
                     (*cache_misses)[target_rank].push_back(cacheRef);
                     if (!col_inserted) {
