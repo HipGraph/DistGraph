@@ -192,10 +192,10 @@ public:
           //          completed"<<endl;
         } else if (this->alpha > 0) {
           // local computation
-//          this->calc_t_dist_grad_rowptr(
-//              csr_block, prevCoordinates, lr, j, batch_size,
-//              considering_batch_size, true, true, cache_misses_ptr.get(),
-//              cache_misses_col_ptr.get(), 0, 0, false);
+          this->calc_t_dist_grad_rowptr(
+              csr_block, prevCoordinates, lr, j, batch_size,
+              considering_batch_size, true, true, cache_misses_ptr.get(),
+              cache_misses_col_ptr.get(), 0, 0, false);
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
@@ -275,21 +275,18 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
+      cout<<"executing sppmm"<<endl;
 //#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
-        uint64_t local_dst = i - (this->grid)->global_rank *
-                                     (this->sp_local_receiver)->proc_row_width;
-        int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
-        bool fetch_from_cache =
-            target_rank == (this->grid)->global_rank ? false : true;
+        uint64_t local_dst = i - (this->grid)->global_rank * (this->sp_local_receiver)->proc_row_width;
+        int target_rank = (int) (i/(this->sp_local_receiver)->proc_row_width);
+        bool fetch_from_cache = target_rank == (this->grid)->global_rank ? false : true;
         bool matched = false;
         DENT *array_ptr = nullptr;
         bool col_inserted = false;
-        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-          if (csr_handle->col_idx[j] >= source_start_index and
-              csr_handle->col_idx[j] <= source_end_index) {
+        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]); j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+          if (csr_handle->col_idx[j] >= source_start_index and csr_handle->col_idx[j] <= source_end_index) {
             DENT forceDiff[embedding_dim];
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
