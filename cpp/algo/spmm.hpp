@@ -345,5 +345,66 @@ public:
       }
     }
   }
+
+  inline void calc_t_dist_grad_rowptr(
+      CSRLocal<SPT> *csr_block, DENT *prevCoordinates, DENT lr, int batch_id,
+      int batch_size, int block_size, bool local, bool col_major,
+      vector<vector<Tuple<DENT>>> *cache_misses,
+      vector<vector<uint64_t>> *cache_misses_col, int start_process,
+      int end_process, bool fetch_from_temp_cache) {
+
+    auto source_start_index = batch_id * batch_size;
+    auto source_end_index = std::min((batch_id + 1) * batch_size,
+                                     this->sp_local_receiver->proc_row_width) -
+                            1;
+
+    auto dst_start_index =
+        this->sp_local_receiver->proc_col_width * this->grid->global_rank;
+    auto dst_end_index =
+        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
+                                       (this->grid->global_rank + 1)),
+                 this->sp_local_receiver->gCols) -
+        1;
+
+    if (local) {
+      if (col_major) {
+        calc_embedding(source_start_index, source_end_index, dst_start_index,
+                       dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+                       batch_size, block_size, cache_misses, cache_misses_col,
+                       fetch_from_temp_cache);
+      } else {
+        calc_embedding_row_major(source_start_index, source_end_index,
+                                 dst_start_index, dst_end_index, csr_block,
+                                 prevCoordinates, lr, batch_id, batch_size,
+                                 block_size);
+      }
+    } else {
+      for (int r = start_process; r < end_process; r++) {
+        (*cache_misses)[r].clear();
+        (*cache_misses_col)[r].clear();
+        if (r != grid->global_rank) {
+          dst_start_index = this->sp_local_receiver->proc_row_width * r;
+          dst_end_index =
+              std::min(static_cast<uint64_t>(
+                           this->sp_local_receiver->proc_row_width * (r + 1)),
+                       this->sp_local_receiver->gCols) -
+              1;
+
+          if (col_major) {
+            calc_embedding(source_start_index, source_end_index,
+                           dst_start_index, dst_end_index, csr_block,
+                           prevCoordinates, lr, batch_id, batch_size,
+                           block_size, cache_misses, cache_misses_col,
+                           fetch_from_temp_cache);
+          } else {
+            calc_embedding_row_major(source_start_index, source_end_index,
+                                     dst_start_index, dst_end_index, csr_block,
+                                     prevCoordinates, lr, batch_id, batch_size,
+                                     block_size);
+          }
+        }
+      }
+    }
+  }
 };
 }
