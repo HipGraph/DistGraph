@@ -305,13 +305,13 @@ public:
                   cacheRef.row = source_id;
                   cacheRef.col = i;
 //#pragma omp critical
-                  {
+//                  {
                     (*cache_misses)[target_rank].push_back(cacheRef);
                     if (!col_inserted) {
                       (*cache_misses_col)[target_rank].push_back(i);
                       col_inserted = true;
                     }
-                  }
+//                  }
                   continue;
                 }
               }
