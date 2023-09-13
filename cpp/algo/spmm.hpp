@@ -315,17 +315,17 @@ public:
               matched = true;
             }
 
-            if (fetch_from_cache) {
-              for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[i * embedding_dim + d] += lr * array_ptr[d];
-              }
-            } else {
-              for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[i * embedding_dim + d] +=
-                    (lr) * (this->dense_local)
-                               ->nCoordinates[local_dst * embedding_dim + d];
-              }
-            }
+//            if (fetch_from_cache) {
+//              for (int d = 0; d < embedding_dim; d++) {
+//                prevCoordinates[i * embedding_dim + d] += lr * array_ptr[d];
+//              }
+//            } else {
+//              for (int d = 0; d < embedding_dim; d++) {
+//                prevCoordinates[i * embedding_dim + d] +=
+//                    (lr) * (this->dense_local)
+//                               ->nCoordinates[local_dst * embedding_dim + d];
+//              }
+//            }
           }
         }
       }
