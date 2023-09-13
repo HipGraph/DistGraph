@@ -209,10 +209,11 @@ public:
             t = start_clock();
           }
 
-//          this->calc_t_dist_grad_rowptr(
-//              csr_block, prevCoordinates, lr, j, batch_size,
-//              considering_batch_size, false, true, cache_misses_ptr.get(),
-//              cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
+          //remote computation
+          this->calc_t_dist_grad_rowptr(
+              csr_block, prevCoordinates, lr, j, batch_size,
+              considering_batch_size, false, true, cache_misses_ptr.get(),
+              cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
 
           if (this->alpha < 1.0) {
             MPI_Barrier(MPI_COMM_WORLD);
@@ -325,7 +326,7 @@ public:
 //                    (lr) * (this->dense_local)
 //                               ->nCoordinates[local_dst * embedding_dim + d];
 //              }
-//            }
+            }
           }
         }
       }
