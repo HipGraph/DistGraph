@@ -238,7 +238,7 @@ public:
         }
         total_memory += get_memory_usage();
 
-        if (alpha<1.0) {
+        if (this->alpha<1.0) {
           this->dense_local->invalidate_cache(i, j, true);
         }
         //        cout<<grid->global_rank << " repulsive calculation
