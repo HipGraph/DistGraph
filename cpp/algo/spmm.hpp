@@ -276,7 +276,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      cout<<"executing sppmm"<<endl;
+//      cout<<"executing sppmm"<<endl;
 //#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
