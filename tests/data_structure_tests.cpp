@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   int ns = 5;
   double lr = 0.02;
 
-  bool spmm = true;
+//  bool spmm = true;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
   json j_obj;
   j_obj["alpha"] = alpha;
   j_obj["beta"] = beta;
-  j_obj["algo"] = "SpMM";
+  j_obj["algo"] = "Embedding";
   j_obj["p"] = world_size;
   j_obj["data_set"] = data_set_name;
   j_obj["perf_stats"] = json_perf_statistics();

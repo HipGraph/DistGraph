@@ -129,8 +129,6 @@ public:
           int prev_start = 0;
           for (int k = 1; k < this->grid->world_size; k += proc_length) {
 
-            //            cout <<"rank "<<grid->global_rank<< " processing  " <<
-            //            k << " out of "<<grid->world_size<<endl;
 
             MPI_Request request_batch_update_cyclic;
             int end_process = get_end_proc(k, this->beta, this->grid->world_size);
@@ -139,9 +137,7 @@ public:
             this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                     request_batch_update_cyclic,
                                                     i, j, k, end_process);
-            //            cout<<grid->global_rank << " processing  " << k << "
-            //            out of "<<grid->world_size<<" transfer
-            //            completed"<<endl;
+
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k == 1) {
@@ -162,34 +158,26 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            //            cout<<grid->global_rank << " processing  " << k << "
-            //            out of "<<grid->world_size<<"population cache
-            //            start"<<endl;
+
             this->data_comm_cache[j].get()->populate_cache(
                 update_ptr.get(), request_batch_update_cyclic, false, i, j,
                 true);
-            //            cout<<grid->global_rank << " processing  " << k << "
-            //            out of "<<grid->world_size<<"population cache
-            //            end"<<endl;
+
             prev_start = k;
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
           int prev_end_process = get_end_proc(prev_start, this->beta, this->grid->world_size);
-          //          cout<<grid->global_rank << " processing  last "
-          //          <<"population cache"<<prev_start<<"
-          //          "<<prev_end_process<<endl;
+
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
               considering_batch_size, false, true, cache_misses_ptr.get(),
               cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
-          //          cout<<grid->global_rank << " processing  last "
-          //          <<"population cache completed"<<endl;
+
           this->dense_local->invalidate_cache(i, j, true);
           update_ptr.get()->resize(0);
-          //          cout<<grid->global_rank << " cache  clearance
-          //          completed"<<endl;
+
         } else if (this->alpha > 0) {
           // local computation
           this->calc_t_dist_grad_rowptr(
@@ -242,11 +230,8 @@ public:
         if (this->alpha<1.0) {
           this->dense_local->invalidate_cache(i, j, true);
         }
-        //        cout<<grid->global_rank << " repulsive calculation
-        //        completed"<<endl;
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        //        cout<<grid->global_rank << " update   completed"<<endl;
 
         if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and this->alpha > 0) {
           update_ptr.get()->clear();
