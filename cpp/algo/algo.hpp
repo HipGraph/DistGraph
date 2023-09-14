@@ -169,8 +169,7 @@ public:
             t = start_clock();
             data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
                                                     request_batch_update_cyclic,
-                                                    i, j, k, end_process);
-//            cout<<grid->global_rank << " processing  " << k << "out of "<<grid->world_size<<" transfer completed"<<endl;
+
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k == 1) {
@@ -191,15 +190,11 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            //            cout<<grid->global_rank << " processing  " << k << "
-            //            out of "<<grid->world_size<<"population cache
-            //            start"<<endl;
+
             data_comm_cache[j].get()->populate_cache(
                 update_ptr.get(), request_batch_update_cyclic, false, i, j,
                 true);
-            //            cout<<grid->global_rank << " processing  " << k << "
-            //            out of "<<grid->world_size<<"population cache
-            //            end"<<endl;
+
             prev_start = k;
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Communication Time");
@@ -207,25 +202,21 @@ public:
           }
           int prev_end_process =
               get_end_proc(prev_start, beta, grid->world_size);
-          //          cout<<grid->global_rank << " processing  last "
-          //          <<"population cache"<<prev_start<<"
-          //          "<<prev_end_process<<endl;
+
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
               considering_batch_size, false, true, cache_misses_ptr.get(),
               cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
-          //          cout<<grid->global_rank << " processing  last "
-          //          <<"population cache completed"<<endl;
+
           dense_local->invalidate_cache(i, j, true);
           update_ptr.get()->resize(0);
-          //          cout<<grid->global_rank << " cache  clearance
-          //          completed"<<endl;
+
         } else if (alpha > 0) {
           // local computation
-          this->calc_t_dist_grad_rowptr(
-              csr_block, prevCoordinates, lr, j, batch_size,
-              considering_batch_size, true, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, 0, false);
+//          this->calc_t_dist_grad_rowptr(
+//              csr_block, prevCoordinates, lr, j, batch_size,
+//              considering_batch_size, true, true, cache_misses_ptr.get(),
+//              cache_misses_col_ptr.get(), 0, 0, false);
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
@@ -239,10 +230,10 @@ public:
             t = start_clock();
           }
 
-          this->calc_t_dist_grad_rowptr(
-              csr_block, prevCoordinates, lr, j, batch_size,
-              considering_batch_size, false, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, grid->world_size, false);
+//          this->calc_t_dist_grad_rowptr(
+//              csr_block, prevCoordinates, lr, j, batch_size,
+//              considering_batch_size, false, true, cache_misses_ptr.get(),
+//              cache_misses_col_ptr.get(), 0, grid->world_size, false);
 
           if (alpha < 1.0) {
             MPI_Barrier(MPI_COMM_WORLD);
@@ -251,9 +242,7 @@ public:
             int prev_start = 0;
             for (int k = 1; k < grid->world_size; k += proc_length) {
               int end_process = get_end_proc(k, beta, grid->world_size);
-              cout << "rank " << grid->global_rank << " processing  " << k
-                   << " out of " << grid->world_size << " with proc length "
-                   << proc_length << " end process " << end_process << endl;
+
 
               t = start_clock();
               data_comm_cache[j].get()->transfer_data(
@@ -271,8 +260,7 @@ public:
         // negative samples generation
         vector<uint64_t> random_number_vec = generate_random_numbers(
             0, (this->sp_local_receiver)->gRows, seed, ns);
-        //        cout<<grid->global_rank << " rand number transferring
-        //        started"<<endl;
+
         if (this->grid->world_size > 1) {
           MPI_Barrier(MPI_COMM_WORLD);
           stop_clock_and_add(t, "Computation Time");
@@ -281,16 +269,12 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-        //        cout<<grid->global_rank << " rand number transferring
-        //        completed"<<endl;
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
-        dense_local->invalidate_cache(i, j, true);
-        //        cout<<grid->global_rank << " repulsive calculation
-        //        completed"<<endl;
 
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-        //        cout<<grid->global_rank << " update   completed"<<endl;
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
+        dense_local->invalidate_cache(i, j, true);
+
+//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         if (this->grid->world_size > 1 and
             !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
