@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   string output_file = "embedding.txt";
   string data_set_name = "";
 
-  int batch_size = 256;
+  int batch_size = 16384;
   double alpha = 0;
   double beta = 0.25;
   int iterations = 30;
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
 
   // To enable full batch size
-  batch_size = localARows;
+//  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
