@@ -434,7 +434,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
@@ -463,14 +463,14 @@ public:
                   Tuple<DENT> cacheRef;
                   cacheRef.row = source_id;
                   cacheRef.col = i;
-#pragma omp critical
-                  {
+//#pragma omp critical
+//                  {
                     (*cache_misses)[target_rank].push_back(cacheRef);
                     if (!col_inserted) {
                       (*cache_misses_col)[target_rank].push_back(i);
                       col_inserted = true;
                     }
-                  }
+//                  }
                   continue;
                 }
               }
@@ -574,7 +574,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
       DENT forceDiff[embedding_dim];
