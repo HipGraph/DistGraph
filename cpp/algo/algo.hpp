@@ -155,63 +155,63 @@ public:
         CSRLocal<SPT> *csr_block =
             (this->sp_local_receiver)->csr_local_data.get();
 
-        if (alpha == 0) {
-          int proc_length = get_proc_length(beta, grid->world_size);
-          int prev_start = 0;
-          for (int k = 1; k < grid->world_size; k += proc_length) {
-
-            cout <<"rank "<<grid->global_rank<< " processing  " <<k << " out of "<<grid->world_size<<endl;
-
-            MPI_Request request_batch_update_cyclic;
-            int end_process = get_end_proc(k, beta, grid->world_size);
-            stop_clock_and_add(t, "Computation Time");
-            t = start_clock();
-            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                          request_batch_update_cyclic,
-                                                          i, j, k, end_process);
-
-            stop_clock_and_add(t, "Communication Time");
-            t = start_clock();
-            if (k == 1) {
-              // local computation
-              this->calc_t_dist_grad_rowptr(
-                  csr_block, prevCoordinates, lr, j, batch_size,
-                  considering_batch_size, true, true, cache_misses_ptr.get(),
-                  cache_misses_col_ptr.get(), 0, 0, false);
-            } else if (k > 1) {
-              int prev_end_process =
-                  get_end_proc(prev_start, beta, grid->world_size);
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                            batch_size, considering_batch_size,
-                                            false, true, cache_misses_ptr.get(),
-                                            cache_misses_col_ptr.get(),
-                                            prev_start, prev_end_process, true);
-              dense_local->invalidate_cache(i, j, true);
-            }
-            stop_clock_and_add(t, "Computation Time");
-            t = start_clock();
-
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update_cyclic, false, i, j,
-                true);
-
-            prev_start = k;
-            update_ptr.get()->clear();
-            stop_clock_and_add(t, "Communication Time");
-            t = start_clock();
-          }
-          int prev_end_process =
-              get_end_proc(prev_start, beta, grid->world_size);
-
-          this->calc_t_dist_grad_rowptr(
-              csr_block, prevCoordinates, lr, j, batch_size,
-              considering_batch_size, false, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
-
-          dense_local->invalidate_cache(i, j, true);
-          update_ptr.get()->resize(0);
-
-        } else if (alpha > 0) {
+//        if (alpha == 0) {
+//          int proc_length = get_proc_length(beta, grid->world_size);
+//          int prev_start = 0;
+//          for (int k = 1; k < grid->world_size; k += proc_length) {
+//
+//            cout <<"rank "<<grid->global_rank<< " processing  " <<k << " out of "<<grid->world_size<<endl;
+//
+//            MPI_Request request_batch_update_cyclic;
+//            int end_process = get_end_proc(k, beta, grid->world_size);
+//            stop_clock_and_add(t, "Computation Time");
+//            t = start_clock();
+//            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+//                                                          request_batch_update_cyclic,
+//                                                          i, j, k, end_process);
+//
+//            stop_clock_and_add(t, "Communication Time");
+//            t = start_clock();
+//            if (k == 1) {
+//              // local computation
+//              this->calc_t_dist_grad_rowptr(
+//                  csr_block, prevCoordinates, lr, j, batch_size,
+//                  considering_batch_size, true, true, cache_misses_ptr.get(),
+//                  cache_misses_col_ptr.get(), 0, 0, false);
+//            } else if (k > 1) {
+//              int prev_end_process =
+//                  get_end_proc(prev_start, beta, grid->world_size);
+//              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                            batch_size, considering_batch_size,
+//                                            false, true, cache_misses_ptr.get(),
+//                                            cache_misses_col_ptr.get(),
+//                                            prev_start, prev_end_process, true);
+//              dense_local->invalidate_cache(i, j, true);
+//            }
+//            stop_clock_and_add(t, "Computation Time");
+//            t = start_clock();
+//
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), request_batch_update_cyclic, false, i, j,
+//                true);
+//
+//            prev_start = k;
+//            update_ptr.get()->clear();
+//            stop_clock_and_add(t, "Communication Time");
+//            t = start_clock();
+//          }
+//          int prev_end_process =
+//              get_end_proc(prev_start, beta, grid->world_size);
+//
+//          this->calc_t_dist_grad_rowptr(
+//              csr_block, prevCoordinates, lr, j, batch_size,
+//              considering_batch_size, false, true, cache_misses_ptr.get(),
+//              cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
+//
+//          dense_local->invalidate_cache(i, j, true);
+//          update_ptr.get()->resize(0);
+//
+//        } else if (alpha > 0) {
           // local computation
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
@@ -233,26 +233,26 @@ public:
               considering_batch_size, false, true, cache_misses_ptr.get(),
               cache_misses_col_ptr.get(), 0, grid->world_size, false);
 
-          if (alpha < 1.0) {
-            MPI_Barrier(MPI_COMM_WORLD);
-            stop_clock_and_add(t, "Computation Time");
-            int proc_length = get_proc_length(beta, grid->world_size);
-            int prev_start = 0;
-            for (int k = 1; k < grid->world_size; k += proc_length) {
-              int end_process = get_end_proc(k, beta, grid->world_size);
-
-
-              t = start_clock();
-              data_comm_cache[j].get()->transfer_data(
-                  cache_misses_col_ptr.get(), i, j, k, end_process);
-              stop_clock_and_add(t, "Communication Time");
-              t = start_clock();
-              this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),
-                                                      prevCoordinates, i,
-                                                      j, batch_size, lr,
-                                                      k, end_process);
-            }
-          }
+//          if (alpha < 1.0) {
+//            MPI_Barrier(MPI_COMM_WORLD);
+//            stop_clock_and_add(t, "Computation Time");
+//            int proc_length = get_proc_length(beta, grid->world_size);
+//            int prev_start = 0;
+//            for (int k = 1; k < grid->world_size; k += proc_length) {
+//              int end_process = get_end_proc(k, beta, grid->world_size);
+//
+//
+//              t = start_clock();
+//              data_comm_cache[j].get()->transfer_data(
+//                  cache_misses_col_ptr.get(), i, j, k, end_process);
+//              stop_clock_and_add(t, "Communication Time");
+//              t = start_clock();
+//              this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),
+//                                                      prevCoordinates, i,
+//                                                      j, batch_size, lr,
+//                                                      k, end_process);
+//            }
+//          }
         }
         total_memory += get_memory_usage();
 
@@ -286,7 +286,7 @@ public:
           dense_local->invalidate_cache(i, j, false);
         }
       }
-    }
+//    }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Computation Time");
