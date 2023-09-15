@@ -167,8 +167,9 @@ public:
             int end_process = get_end_proc(k, beta, grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                    request_batch_update_cyclic,
+            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
+                                                          request_batch_update_cyclic,
+                                                          i, j, k, end_process);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -258,8 +259,7 @@ public:
         total_memory += get_memory_usage();
 
         // negative samples generation
-        vector<uint64_t> random_number_vec = generate_random_numbers(
-            0, (this->sp_local_receiver)->gRows, seed, ns);
+        vector<uint64_t> random_number_vec = generate_random_numbers(0, (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
           MPI_Barrier(MPI_COMM_WORLD);
