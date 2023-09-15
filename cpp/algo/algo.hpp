@@ -146,15 +146,15 @@ public:
           }
         }
 
-//        int considering_batch_size = batch_size;
-//
-//        if (j == batches - 1) {
-//          considering_batch_size = last_batch_size;
-//        }
-//
-//        CSRLocal<SPT> *csr_block =
-//            (this->sp_local_receiver)->csr_local_data.get();
-//
+        int considering_batch_size = batch_size;
+
+        if (j == batches - 1) {
+          considering_batch_size = last_batch_size;
+        }
+
+        CSRLocal<SPT> *csr_block =
+            (this->sp_local_receiver)->csr_local_data.get();
+
 ////        if (alpha == 0) {
 ////          int proc_length = get_proc_length(beta, grid->world_size);
 ////          int prev_start = 0;
@@ -213,10 +213,10 @@ public:
 ////
 ////        } else if (alpha > 0) {
 //          // local computation
-//          this->calc_t_dist_grad_rowptr(
-//              csr_block, prevCoordinates, lr, j, batch_size,
-//              considering_batch_size, true, true, cache_misses_ptr.get(),
-//              cache_misses_col_ptr.get(), 0, 0, false);
+          this->calc_t_dist_grad_rowptr(
+              csr_block, prevCoordinates, lr, j, batch_size,
+              considering_batch_size, true, true, cache_misses_ptr.get(),
+              cache_misses_col_ptr.get(), 0, 0, false);
 //
 //          if (this->grid->world_size > 1) {
 //            stop_clock_and_add(t, "Computation Time");
