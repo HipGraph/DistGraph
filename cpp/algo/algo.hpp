@@ -270,7 +270,7 @@ public:
 //
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
-        dense_local->invalidate_cache(i, j, true);
+//        dense_local->invalidate_cache(i, j, true);
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
@@ -283,7 +283,7 @@ public:
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          dense_local->invalidate_cache(i, j, false);
+//          dense_local->invalidate_cache(i, j, false);
         }
       }
     }
