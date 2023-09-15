@@ -176,23 +176,23 @@ int main(int argc, char **argv) {
   //
   //
   //  cout << " rank " << rank << " training completed  " << endl;
-  ofstream fout;
-  fout.open("perf_output", std::ios_base::app);
-
-  json j_obj;
-  j_obj["alpha"] = alpha;
-  j_obj["beta"] = beta;
-  j_obj["algo"] = "Embedding";
-  j_obj["p"] = world_size;
-  j_obj["data_set"] = data_set_name;
-  j_obj["perf_stats"] = json_perf_statistics();
-  if (rank == 0) {
-    fout << j_obj.dump(4) << "," << endl;
-  }
-
-  fout.close();
+//  ofstream fout;
+//  fout.open("perf_output", std::ios_base::app);
+//
+//  json j_obj;
+//  j_obj["alpha"] = alpha;
+//  j_obj["beta"] = beta;
+//  j_obj["algo"] = "Embedding";
+//  j_obj["p"] = world_size;
+//  j_obj["data_set"] = data_set_name;
+//  j_obj["perf_stats"] = json_perf_statistics();
+//  if (rank == 0) {
+//    fout << j_obj.dump(4) << "," << endl;
+//  }
+//
+//  fout.close();
   //
-    reader->parallel_write("embedding.txt",
+  reader->parallel_write("embedding.txt",
     dense_mat.get()->nCoordinates,localARows, dimension);
 //      dense_mat.get()->print_matrix_rowptr(0);
 
