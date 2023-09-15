@@ -125,8 +125,8 @@ public:
       //      to process "<<i<<" receiving data "<<receivecounts[i]<<" from
       //      "<<i<<endl;
     }
+    sendbuf= unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
     if (total_send_count > 0 and alpha>0) {
-         sendbuf= unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
          sendbuf->resize(total_send_count);
     }
   }
@@ -151,18 +151,19 @@ public:
             }
             int offset = sdispls[i];
             int index = offset_vector[i] + offset;
-            (*sendbuf)[index].col =
-                col_id + (this->sp_local_sender->proc_col_width *
-                          this->grid->global_rank);
+            (*sendbuf)[index].col = col_id + (this->sp_local_sender->proc_col_width * this->grid->global_rank);
             (*sendbuf)[index].value = dense_vector;
             offset_vector[i]++;
           }
         }
       }
+
       for (int i = 0; i < grid->world_size; i++) {
         total_receive_count += receivecounts[i];
       }
-      receivebuf->resize(total_receive_count);
+      if (total_receive_count>0) {
+        receivebuf->resize(total_receive_count);
+      }
 
       add_datatransfers(total_receive_count, "Data transfers");
 
