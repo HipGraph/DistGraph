@@ -115,8 +115,7 @@ public:
       total_send_count += sendcounts[i];
       sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
       rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-      if (grid->global_rank==0)
-        cout <<" rank "<<grid->global_rank<<" initial send counts to rank "<<i<< " " <<sendcounts[i]<<" initial receiving from rank "<< i <<" receive counts "<<receivecounts[i]<<endl;
+
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
@@ -129,9 +128,7 @@ public:
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous,  MPI_Request &request,
-                     int iteration, int batch_id, int starting_proc,
-                     int end_proc) {
+                     bool synchronous,  MPI_Request &request, int iteration, int batch_id, int starting_proc,int end_proc) {
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
     if (alpha>0) {
@@ -458,7 +455,7 @@ public:
       int count = (temp)?this->receive_counts_cyclic[i]:this->receivecounts[i];
 
       for (int j = base_index; j < base_index + count; j++) {
-//        DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
+        DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
 //          (this->dense_local)
 //              ->insert_cache(i, t.col, batch_id, iteration, t.value,temp);
       }
