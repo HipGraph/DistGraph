@@ -129,7 +129,7 @@ public:
         unique_ptr<vector<vector<uint64_t>>>(
             new vector<vector<uint64_t>>(grid->world_size));
 
-    vector<MPI_Request> mpi_requests(iterations * batches);
+    vector<MPI_Request> mpi_requests(1);
     size_t total_memory = 0;
 
     for (int i = 0; i < 1; i++) {
@@ -221,17 +221,17 @@ public:
               considering_batch_size, true, true, cache_misses_ptr.get(),
               cache_misses_col_ptr.get(), 0, 0, false);
 
-//          if (this->grid->world_size > 1) {
-//            stop_clock_and_add(t, "Computation Time");
-//            t = start_clock();
-//            //
-//            if (!(i == 0 and j == 0)) {
-//              data_comm_cache[j - 1].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i, j, false);
-//            }
-//
-//            stop_clock_and_add(t, "Communication Time");
-//            t = start_clock();
-//          }
+          if (this->grid->world_size > 1) {
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
+            //
+            if (!(i == 0 and j == 0)) {
+              data_comm_cache[j - 1].get()->populate_cache(update_ptr.get(), mpi_requests[0], false, i-1, j-1, false);
+            }
+
+            stop_clock_and_add(t, "Communication Time");
+            t = start_clock();
+          }
 
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
@@ -283,9 +283,9 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
 
-          mpi_requests[i * batches + j] = request_batch_update;
-          data_comm_cache[j].get()->transfer_data( update_ptr.get(), false, mpi_requests[i * batches + j], i, j, 0, 0);
-          data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j], false, i, j, false);
+          mpi_requests[0] = request_batch_update;
+          data_comm_cache[j].get()->transfer_data( update_ptr.get(), false, mpi_requests[0], i, j, 0, 0);
+//          data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j], false, i, j, false);
 
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
