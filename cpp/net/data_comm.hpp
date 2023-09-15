@@ -121,9 +121,6 @@ public:
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
       }
-      //      cout<<" rank "<<grid->global_rank<<" sending "<<sendcounts[i]<< "
-      //      to process "<<i<<" receiving data "<<receivecounts[i]<<" from
-      //      "<<i<<endl;
     }
     sendbuf= unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
     if (total_send_count > 0 and alpha>0) {
@@ -461,9 +458,9 @@ public:
       int count = (temp)?this->receive_counts_cyclic[i]:this->receivecounts[i];
 
       for (int j = base_index; j < base_index + count; j++) {
-        DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-          (this->dense_local)
-              ->insert_cache(i, t.col, batch_id, iteration, t.value,temp);
+//        DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
+//          (this->dense_local)
+//              ->insert_cache(i, t.col, batch_id, iteration, t.value,temp);
       }
     }
     receivebuf->clear();
