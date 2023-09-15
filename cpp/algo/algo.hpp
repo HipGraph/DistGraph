@@ -214,10 +214,10 @@ public:
 
         } else if (alpha > 0) {
           // local computation
-//          this->calc_t_dist_grad_rowptr(
-//              csr_block, prevCoordinates, lr, j, batch_size,
-//              considering_batch_size, true, true, cache_misses_ptr.get(),
-//              cache_misses_col_ptr.get(), 0, 0, false);
+          this->calc_t_dist_grad_rowptr(
+              csr_block, prevCoordinates, lr, j, batch_size,
+              considering_batch_size, true, true, cache_misses_ptr.get(),
+              cache_misses_col_ptr.get(), 0, 0, false);
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
