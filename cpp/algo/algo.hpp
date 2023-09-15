@@ -132,12 +132,12 @@ public:
     vector<MPI_Request> mpi_requests(iterations * batches);
     size_t total_memory = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < 1; i++) {
       if (this->grid->global_rank == 0)
         cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {
-        cout << "rank " << grid->global_rank << " processing  " << j << endl;
+//        cout << "rank " << grid->global_rank << " processing  " << j << endl;
         int seed = j + i;
 
         for (int k = 0; k < batch_size; k += 1) {
