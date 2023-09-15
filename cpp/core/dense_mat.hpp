@@ -74,7 +74,7 @@ public:
     if (temp){
       (*this->tempCachePtr)[rank].insert_or_assign(key, entry);
     }else {
-      (*this->cachePtr)[rank].insert_or_assign(key, entry);
+//      (*this->cachePtr)[rank].insert_or_assign(key, entry);
     }
   }
 
