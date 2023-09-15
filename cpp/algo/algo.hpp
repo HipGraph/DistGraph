@@ -137,7 +137,7 @@ public:
         cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {
-
+        cout <<"rank "<<grid->global_rank<< " processing  " <<j << " batch  "<<grid->world_size<<endl;
         int seed = j + i;
 
         for (int k = 0; k < batch_size; k += 1) {
