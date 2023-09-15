@@ -137,7 +137,7 @@ public:
         cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
       for (int j = 0; j < batches; j++) {
-        cout <<"rank "<<grid->global_rank<< " processing  " <<j << " batch  "<<grid->world_size<<endl;
+        cout <<"rank "<<grid->global_rank<< " processing  " <<j <<endl;
         int seed = j + i;
 
         for (int k = 0; k < batch_size; k += 1) {
@@ -223,7 +223,7 @@ public:
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             if (!(i == 0 and j == 0)) {
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,j, false);
+//              data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,j, false);
             }
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();

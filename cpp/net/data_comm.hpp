@@ -161,9 +161,9 @@ public:
       for (int i = 0; i < grid->world_size; i++) {
         total_receive_count += receivecounts[i];
       }
-      if (total_receive_count>0) {
-        receivebuf->resize(total_receive_count);
-      }
+
+      receivebuf->resize(total_receive_count);
+
 
       add_datatransfers(total_receive_count, "Data transfers");
 
