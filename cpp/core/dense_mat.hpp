@@ -73,7 +73,7 @@ public:
 //    entry.value = arr;
     if (batch_id == 22 and rank == 2) {
       for (int i = 0; i < embedding_dim; i++) {
-        cout << &arr[i] << endl;
+        cout << arr[i] << endl;
       }
       cout << endl;
     }
