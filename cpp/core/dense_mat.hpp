@@ -70,11 +70,11 @@ public:
     distblas::core::CacheEntry<DENT, embedding_dim> entry;
     entry.inserted_batch_id = batch_id;
     entry.inserted_itr = iteration;
-    entry.value = arr;
+//    entry.value = arr;
     if (temp){
       (*this->tempCachePtr)[rank].insert_or_assign(key, entry);
     }else {
-      (*this->cachePtr)[0].insert_or_assign(key, entry);
+      (*this->cachePtr)[rank].insert_or_assign(key, entry);
     }
   }
 

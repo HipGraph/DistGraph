@@ -73,8 +73,7 @@ public:
           sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(
@@ -87,8 +86,7 @@ public:
     MPI_Request fetch_all;
     if (alpha > 0) {
       negative_update_com.get()->onboard_data();
-      cout << " rank " << this->grid->global_rank << " onboard_data completed "
-           << batches << endl;
+
       stop_clock_and_add(t, "Computation Time");
 
       t = start_clock();
@@ -105,7 +103,7 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
-
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
     if (alpha > 0) {
       stop_clock_and_add(t, "Computation Time");
       t = start_clock();
@@ -249,8 +247,9 @@ public:
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
               this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),
-                                                      prevCoordinates, i, j, batch_size, lr,
-                  k, end_process);
+                                                      prevCoordinates, i,
+                                                      j, batch_size, lr,
+                                                      k, end_process);
             }
           }
         }
