@@ -70,13 +70,13 @@ public:
     distblas::core::CacheEntry<DENT, embedding_dim> entry;
     entry.inserted_batch_id = batch_id;
     entry.inserted_itr = iteration;
-//    entry.value = arr;
-    if (batch_id == 22 and rank == 2) {
-      for (int i = 0; i < embedding_dim; i++) {
-        cout << arr[i] << endl;
-      }
-      cout << endl;
-    }
+    entry.value = arr;
+//    if (batch_id == 22 and rank == 2) {
+//      for (int i = 0; i < embedding_dim; i++) {
+//        cout << arr[i] << endl;
+//      }
+//      cout << endl;
+//    }
     if (temp){
       (*this->tempCachePtr)[rank].insert_or_assign(key, entry);
     }else {
