@@ -283,7 +283,7 @@ public:
           t = start_clock();
 
           data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
-//          mpi_requests[i * batches + j] = request_batch_update;
+          mpi_requests[i * batches + j] = request_batch_update;
 
           //TODO Remove
           if (this->grid->world_size > 1) {
@@ -291,7 +291,7 @@ public:
             t = start_clock();
 
 //            if (!(i == 0 and j == 0)) {
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i,j, false);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(),  mpi_requests[i * batches + j], false, i,j, false);
 //            }
 
             stop_clock_and_add(t, "Communication Time");
