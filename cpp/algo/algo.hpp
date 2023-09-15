@@ -217,7 +217,7 @@ public:
               csr_block, prevCoordinates, lr, j, batch_size,
               considering_batch_size, true, true, cache_misses_ptr.get(),
               cache_misses_col_ptr.get(), 0, 0, false);
-//
+
 //          if (this->grid->world_size > 1) {
 //            stop_clock_and_add(t, "Computation Time");
 //            t = start_clock();
@@ -272,19 +272,19 @@ public:
 //                                        j, batch_size, considering_batch_size);
 //        dense_local->invalidate_cache(i, j, true);
 //
-//        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-//
-//        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
-//          update_ptr.get()->clear();
-//          MPI_Request request_batch_update;
-//          stop_clock_and_add(t, "Computation Time");
-//          t = start_clock();
-//          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
-//          mpi_requests[i * batches + j] = request_batch_update;
-//          stop_clock_and_add(t, "Communication Time");
-//          t = start_clock();
-//          dense_local->invalidate_cache(i, j, false);
-//        }
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
+        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
+          update_ptr.get()->clear();
+          MPI_Request request_batch_update;
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
+          mpi_requests[i * batches + j] = request_batch_update;
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
+          dense_local->invalidate_cache(i, j, false);
+        }
       }
     }
     total_memory = total_memory / (iterations * batches);
