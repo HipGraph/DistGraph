@@ -74,8 +74,7 @@ public:
           sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(
@@ -105,8 +104,7 @@ public:
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
     if (alpha > 0) {
       stop_clock_and_add(t, "Computation Time");
       t = start_clock();
@@ -216,7 +214,8 @@ public:
           update_ptr.get()->resize(0);
 
         } else if (alpha > 0) {
-          //          // local computation
+
+          // local computation
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, j, batch_size,
               considering_batch_size, true, true, cache_misses_ptr.get(),
@@ -227,9 +226,7 @@ public:
             t = start_clock();
             //
             if (!(i == 0 and j == 0)) {
-              data_comm_cache[j - 1].get()->populate_cache(
-                  update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
-                  j, false);
+              data_comm_cache[j - 1].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i, j, false);
             }
 
             stop_clock_and_add(t, "Communication Time");
@@ -263,8 +260,7 @@ public:
         total_memory += get_memory_usage();
 
         // negative samples generation
-        vector<uint64_t> random_number_vec = generate_random_numbers(
-            0, (this->sp_local_receiver)->gRows, seed, ns);
+        vector<uint64_t> random_number_vec = generate_random_numbers(0, (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
           MPI_Barrier(MPI_COMM_WORLD);
@@ -274,23 +270,21 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-        //
+
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
         dense_local->invalidate_cache(i, j, true);
-        //
+
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
-        if (this->grid->world_size > 1 and
-            !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
+        if (this->grid->world_size > 1 and !(i == iterations - 1 and j == batches - 1) and alpha > 0) {
           update_ptr.get()->clear();
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
 
-          data_comm_cache[j].get()->transfer_data(
-              update_ptr.get(), false, request_batch_update, i, j, 0, 0);
           mpi_requests[i * batches + j] = request_batch_update;
+          data_comm_cache[j].get()->transfer_data( update_ptr.get(), false, mpi_requests[i * batches + j], i, j, 0, 0);
 
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
@@ -301,6 +295,7 @@ public:
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Computation Time");
+    mpi_requests.clear();
   }
 
   inline void calc_t_dist_grad_rowptr(
@@ -364,8 +359,7 @@ public:
     }
   }
 
-  inline void
-  calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
+  inline void calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
                                     DENT *prevCoordinates, int iteration,
                                     int batch_id, int batch_size, double lr,
                                     int starting_proc, int end_proc) {
@@ -415,8 +409,7 @@ public:
     dense_local->invalidate_cache(iteration, batch_id, true);
   }
 
-  inline void
-  calc_embedding(uint64_t source_start_index, uint64_t source_end_index,
+  inline void calc_embedding(uint64_t source_start_index, uint64_t source_end_index,
                  uint64_t dst_start_index, uint64_t dst_end_index,
                  CSRLocal<SPT> *csr_block, DENT *prevCoordinates, DENT lr,
                  int batch_id, int batch_size, int block_size,
