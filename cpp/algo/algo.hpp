@@ -123,6 +123,7 @@ public:
     unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr =
         unique_ptr<vector<vector<Tuple<DENT>>>>(
             new vector<vector<Tuple<DENT>>>(grid->world_size));
+
     unique_ptr<vector<vector<uint64_t>>> cache_misses_col_ptr =
         unique_ptr<vector<vector<uint64_t>>>(
             new vector<vector<uint64_t>>(grid->world_size));
@@ -212,10 +213,10 @@ public:
 
         } else if (alpha > 0) {
           // local computation
-          this->calc_t_dist_grad_rowptr(
-              csr_block, prevCoordinates, lr, j, batch_size,
-              considering_batch_size, true, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, 0, false);
+//          this->calc_t_dist_grad_rowptr(
+//              csr_block, prevCoordinates, lr, j, batch_size,
+//              considering_batch_size, true, true, cache_misses_ptr.get(),
+//              cache_misses_col_ptr.get(), 0, 0, false);
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
