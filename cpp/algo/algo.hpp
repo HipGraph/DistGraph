@@ -253,7 +253,7 @@ public:
 //                                                      k, end_process);
 //            }
 //          }
-        }
+//        }
         total_memory += get_memory_usage();
 
         // negative samples generation
