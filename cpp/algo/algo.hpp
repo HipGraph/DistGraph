@@ -132,7 +132,7 @@ public:
     vector<MPI_Request> mpi_requests(iterations * batches);
     size_t total_memory = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < 1; i++) {
       if (this->grid->global_rank == 0)
         cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
@@ -222,11 +222,9 @@ public:
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-//            if (!(i == 0 and j == 0)) {
-//              data_comm_cache[j].get()->populate_cache(
-//                  update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
-//                  j, false);
-//            }
+            if (!(i == 0 and j == 0)) {
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,j, false);
+            }
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -250,8 +248,8 @@ public:
                   cache_misses_col_ptr.get(), i, j, k, end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
-              this->calc_t_dist_grad_for_cache_misses(
-                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,
+              this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(),
+                                                      prevCoordinates, i, j, batch_size, lr,
                   k, end_process);
             }
           }
@@ -281,8 +279,7 @@ public:
           MPI_Request request_batch_update;
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
-//          data_comm_cache[j].get()->transfer_data(
-//              update_ptr.get(), false, request_batch_update, i, j, 0, 0);
+          data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
