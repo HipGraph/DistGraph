@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   string output_file = "embedding.txt";
   string data_set_name = "";
 
-  int batch_size = 256;
+  int batch_size = 16384;
   double alpha = 0;
   double beta = 0.25;
   int iterations = 30;
@@ -192,9 +192,9 @@ int main(int argc, char **argv) {
 
   fout.close();
   //
-//  reader->parallel_write("embedding.txt",
-//    dense_mat.get()->nCoordinates,localARows, dimension);
-//      dense_mat.get()->print_matrix_rowptr(0);
+  //  reader->parallel_write("embedding.txt",
+  //  dense_mat.get()->nCoordinates,localARows, dimension);
+  //    dense_mat.get()->print_matrix_rowptr(0);
 
   MPI_Finalize();
   return 0;
