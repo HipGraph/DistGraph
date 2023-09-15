@@ -222,11 +222,11 @@ public:
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            if (!(i == 0 and j == 0)) {
-              data_comm_cache[j].get()->populate_cache(
-                  update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
-                  j, false);
-            }
+//            if (!(i == 0 and j == 0)) {
+//              data_comm_cache[j].get()->populate_cache(
+//                  update_ptr.get(), mpi_requests[i * batches + j - 1], false, i,
+//                  j, false);
+//            }
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -272,7 +272,7 @@ public:
 //
 //        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
 //                                        j, batch_size, considering_batch_size);
-        dense_local->invalidate_cache(i, j, true);
+//        dense_local->invalidate_cache(i, j, true);
 
 //        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
@@ -286,7 +286,7 @@ public:
           mpi_requests[i * batches + j] = request_batch_update;
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
-          dense_local->invalidate_cache(i, j, false);
+//          dense_local->invalidate_cache(i, j, false);
         }
       }
     }
