@@ -131,8 +131,7 @@ public:
       }
     }
 
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
 
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
@@ -283,6 +282,7 @@ public:
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
+
         dense_local->invalidate_cache(i, j, true);
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
@@ -297,39 +297,42 @@ public:
 
         total_memory += get_memory_usage();
 
-        if (j < batches - 1 and alpha > 0) {
+        if (alpha > 0) {
           MPI_Request request_batch_update;
           if (this->grid->world_size > 1) {
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
 
-            data_comm_cache[j + 1].get()->transfer_data(
-                update_ptr.get(), false, request_batch_update, i, j + 1, 0, 0);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             dense_local->invalidate_cache(i, j, false);
           }
 
-          this->calc_t_dist_grad_rowptr(
-              csr_block, prevCoordinates, lr, j + 1, batch_size,
-              considering_batch_size, true, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, 0, false);
+          if (j < batches-1) {
+            this->calc_t_dist_grad_rowptr(
+                csr_block, prevCoordinates, lr, j + 1, batch_size,
+                considering_batch_size, true, true, cache_misses_ptr.get(),
+                cache_misses_col_ptr.get(), 0, 0, false);
+          }
 
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             //
-            data_comm_cache[j + 1].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j + 1, false);
+            data_comm_cache[j ].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j, false);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
-          this->calc_t_dist_grad_rowptr(
-              csr_block, prevCoordinates, lr, j + 1, batch_size,
-              considering_batch_size, false, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, grid->world_size, false);
+          if (j < batches -1) {
+            this->calc_t_dist_grad_rowptr(
+                csr_block, prevCoordinates, lr, j + 1, batch_size,
+                considering_batch_size, false, true, cache_misses_ptr.get(),
+                cache_misses_col_ptr.get(), 0, grid->world_size, false);
+          }
         }
       }
     }
