@@ -50,8 +50,6 @@ int main(int argc, char **argv) {
       iterations = atoi(argv[p + 1]);
     } else if (strcmp(argv[p], "-alpha") == 0) {
       alpha = atof(argv[p + 1]);
-    } else if (strcmp(argv[p], "-bs") == 0) {
-      batch_size = atoi(argv[p + 1]);
     } else if (strcmp(argv[p], "-lr") == 0) {
       lr = atof(argv[p + 1]);
     } else if (strcmp(argv[p], "-nsamples") == 0) {

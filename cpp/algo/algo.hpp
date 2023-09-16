@@ -81,29 +81,54 @@ public:
         new DataComm<SPT, DENT, embedding_dim>(
             sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
 
+    // first batch onboarding
+
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> fetch_all_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    MPI_Request fetch_all;
-    if (alpha > 0) {
-      negative_update_com.get()->onboard_data();
-
-      stop_clock_and_add(t, "Computation Time");
-
-      t = start_clock();
-      negative_update_com.get()->transfer_data(fetch_all_ptr.get(), false,
-                                               fetch_all, 0, 0, 0, 0);
-      stop_clock_and_add(t, "Communication Time");
-      t = start_clock();
-    }
+    vector<MPI_Request*> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-          new DataComm<SPT, DENT, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
-      data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
-      data_comm_cache[i].get()->onboard_data();
+      MPI_Request fetch_batch;
+      MPI_Request fetch_batch_next;
+      fetch_all_ptr.clear();
+      if (i == 0) {
+        auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+            new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver,
+                                                   sp_local_sender, dense_local,
+                                                   grid, i, alpha));
+        data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+        data_comm_cache[i].get()->onboard_data();
+        if (alpha > 0) {
+          stop_clock_and_add(t, "Computation Time");
+          t = start_clock();
+          mpi_requests[i]=&fetch_batch;
+          data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,mpi_requests[i], 0, i, 0, 0);
+          stop_clock_and_add(t, "Communication Time");
+          t = start_clock();
+        }
+      }
+      if (batches > 1 and i < batches - 1) {
+        auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+            new DataComm<SPT, DENT, embedding_dim>(
+                sp_local_receiver, sp_local_sender, dense_local, grid, i + 1,
+                alpha));
+        data_comm_cache.insert(
+            std::make_pair(i + 1, std::move(communicator)));
+        data_comm_cache[i + 1].get()->onboard_data();
+      }
+      if (alpha > 0) {
+        stop_clock_and_add(t, "Computation Time");
+        t = start_clock();
+        data_comm_cache[i].get()->populate_cache(fetch_all_ptr.get(), mpi_requests[i],false, 0, i, false);
+        if (batches>1 and i < batches -1) {
+            mpi_requests[i+1]= &fetch_batch_next;
+            data_comm_cache[i + 1].get()->transfer_data(fetch_all_ptr.get(), false, mpi_requests[i+1], 0, i, 0, 0);
+        }
+        stop_clock_and_add(t, "Communication Time");
+        t = start_clock();
+      }
     }
 
     cout << " rank " << this->grid->global_rank << " onboard_data completed "
@@ -124,44 +149,36 @@ public:
         unique_ptr<vector<vector<uint64_t>>>(
             new vector<vector<uint64_t>>(grid->world_size));
 
-    vector<MPI_Request> mpi_requests(1);
     size_t total_memory = 0;
 
     CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
     int considering_batch_size = batch_size;
 
-    if (alpha > 0) {
-      stop_clock_and_add(t, "Computation Time");
-      t = start_clock();
-      negative_update_com.get()->populate_cache(fetch_all_ptr.get(), fetch_all,
-                                                false, 0, 0, false);
-      stop_clock_and_add(t, "Communication Time");
-      t = start_clock();
-
-      for (int k = 0; k < batch_size; k += 1) {
-        int IDIM = k * embedding_dim;
-        for (int d = 0; d < embedding_dim; d++) {
-          prevCoordinates[IDIM + d] = 0;
-        }
-      }
-
-      // local computation for first batch
-      this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
-                                    batch_size, considering_batch_size, true,
-                                    true, cache_misses_ptr.get(),
-                                    cache_misses_col_ptr.get(), 0, 0, false);
-
-      // remote computation for first batch
-      this->calc_t_dist_grad_rowptr(
-          csr_block, prevCoordinates, lr, 0, batch_size, considering_batch_size,
-          false, true, cache_misses_ptr.get(), cache_misses_col_ptr.get(), 0,
-          grid->world_size, false);
-    }
-
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " rank " << grid->global_rank << " iteration " << i << endl;
+
+      if (alpha > 0) {
+        for (int k = 0; k < batch_size; k += 1) {
+          int IDIM = k * embedding_dim;
+          for (int d = 0; d < embedding_dim; d++) {
+            prevCoordinates[IDIM + d] = 0;
+          }
+        }
+
+        // local computation for first batch
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
+                                      batch_size, considering_batch_size, true,
+                                      true, cache_misses_ptr.get(),
+                                      cache_misses_col_ptr.get(), 0, 0, false);
+
+        // remote computation for first batch
+        this->calc_t_dist_grad_rowptr(
+            csr_block, prevCoordinates, lr, 0, batch_size,
+            considering_batch_size, false, true, cache_misses_ptr.get(),
+            cache_misses_col_ptr.get(), 0, grid->world_size, false);
+      }
 
       for (int j = 0; j < batches; j++) {
 
@@ -280,9 +297,9 @@ public:
 
         total_memory += get_memory_usage();
 
-        if (j < batches - 1) {
+        if (j < batches - 1 and alpha > 0) {
           MPI_Request request_batch_update;
-          if (this->grid->world_size > 1 and alpha > 0) {
+          if (this->grid->world_size > 1) {
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
