@@ -256,8 +256,8 @@ public:
               int end_process = get_end_proc(k, beta, grid->world_size);
 
               t = start_clock();
-              data_comm_cache[j].get()->transfer_data(
-                  cache_misses_col_ptr.get(), i, j, k, end_process);
+//              data_comm_cache[j].get()->transfer_data(
+//                  cache_misses_col_ptr.get(), i, j, k, end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
               this->calc_t_dist_grad_for_cache_misses(
