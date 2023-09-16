@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   int batch_size = 16384;
   double alpha = 0;
   double beta = 0.25;
-  int iterations = 10;
+  int iterations = 5;
   int ns = 5;
   double lr = 0.02;
 
