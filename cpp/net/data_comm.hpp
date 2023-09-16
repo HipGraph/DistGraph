@@ -361,7 +361,7 @@ public:
     //    delete[] sendbuf;
   }
 
-  void transfer_data(std::vector<DataTuple<DENT, embedding_dim>>> *results_ptr,
+  void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *results_ptr,
                      vector<vector<uint64_t>> *cache_misses, int iteration,
                      int batch_id, int starting_proc, int end_proc,
                      MPI_Request &request) {
