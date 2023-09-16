@@ -460,8 +460,8 @@ public:
               ->insert_cache(i, t.col, batch_id, iteration, t.value,temp);
       }
     }
-//    receivebuf->clear();
-//    receivebuf->shrink_to_fit();
+    receivebuf->clear();
+    receivebuf->shrink_to_fit();
   }
 
   void cross_validate_batch_from_metadata(int batch_id) {
