@@ -226,7 +226,7 @@ public:
             t = start_clock();
             //
             if (!(i == 0 and j == 0)) {
-              data_comm_cache[j - 1].get()->populate_cache(update_ptr.get(), mpi_requests[0], false, (j==0)?i-1:i, j-1, false);
+//              data_comm_cache[j - 1].get()->populate_cache(update_ptr.get(), mpi_requests[0], false, (j==0)?i-1:i, j-1, false);
             }
 
             stop_clock_and_add(t, "Communication Time");
@@ -251,9 +251,9 @@ public:
                   cache_misses_col_ptr.get(), i, j, k, end_process);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
-              this->calc_t_dist_grad_for_cache_misses(
-                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,
-                  k, end_process);
+              this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates,
+                                                      i, j, batch_size, lr,
+                                                      k, end_process);
             }
           }
         }
