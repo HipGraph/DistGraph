@@ -92,7 +92,7 @@ public:
     for (int i = 0; i < batches; i++) {
       MPI_Request fetch_batch;
       MPI_Request fetch_batch_next;
-      fetch_all_ptr.clear();
+      fetch_all_ptr.get()->clear();
       if (i == 0) {
         auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
             new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver,
@@ -104,7 +104,7 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           mpi_requests[i]=&fetch_batch;
-          data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,mpi_requests[i], 0, i, 0, 0);
+          data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false,(*mpi_requests[i]), 0, i, 0, 0);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -121,10 +121,10 @@ public:
       if (alpha > 0) {
         stop_clock_and_add(t, "Computation Time");
         t = start_clock();
-        data_comm_cache[i].get()->populate_cache(fetch_all_ptr.get(), mpi_requests[i],false, 0, i, false);
+        data_comm_cache[i].get()->populate_cache(fetch_all_ptr.get(), (*mpi_requests[i]),false, 0, i, false);
         if (batches>1 and i < batches -1) {
             mpi_requests[i+1]= &fetch_batch_next;
-            data_comm_cache[i + 1].get()->transfer_data(fetch_all_ptr.get(), false, mpi_requests[i+1], 0, i, 0, 0);
+            data_comm_cache[i + 1].get()->transfer_data(fetch_all_ptr.get(), false, (*mpi_requests[i+1]), 0, i, 0, 0);
         }
         stop_clock_and_add(t, "Communication Time");
         t = start_clock();
