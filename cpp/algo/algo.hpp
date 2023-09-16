@@ -159,7 +159,7 @@ public:
           grid->world_size, false);
     }
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
         cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
