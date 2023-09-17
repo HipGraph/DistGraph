@@ -102,8 +102,7 @@ public:
       }
     }
 
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
 
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
@@ -450,14 +449,14 @@ public:
               int proc_length = get_proc_length(this->beta, this->grid->world_size);
               for (int k = 1; k < this->grid->world_size; k += proc_length) {
                 if (i == 0) {
-                  auto communicator_cache_miss =
-                      unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-                          new DataComm<SPT, DENT, embedding_dim>(
-                              this->sp_local_receiver, this->sp_local_sender, this->dense_local, this->grid,
-                              i, this->alpha));
+                  auto communicator_cache_miss = unique_ptr<DataComm<SPT, DENT, embedding_dim>>
+                      (new DataComm<SPT, DENT, embedding_dim>(this->sp_local_receiver,
+                                                              this->sp_local_sender,
+                                                              this->dense_local,
+                                                              this->grid,i,
+                                                              this->alpha));
 
-                  this->data_comm_cache[j].get()->data_comm_cache_misses_update.insert(
-                      std::make_pair(k, std::move(communicator_cache_miss)));
+                  this->data_comm_cache[j].get()->data_comm_cache_misses_update.insert(std::make_pair(k, std::move(communicator_cache_miss)));
                 }
 
                 MPI_Request misses_update_request;
@@ -468,8 +467,8 @@ public:
                 this->data_comm_cache[j].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, j, k,end_process);
                 stop_clock_and_add(t, "Communication Time");
                 t = start_clock();
-                this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, j, batch_size,lr,
-                                                        k, end_process);
+//                this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, j, batch_size,lr,
+//                                                        k, end_process);
               }
             }
           }

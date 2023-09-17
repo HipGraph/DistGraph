@@ -472,6 +472,7 @@ public:
     } else {
 
       int total_receive_count = 0;
+
       for (int i = 0; i < grid->world_size; i++) {
         int base_index = sdispls_cyclic[i];
         for (int j = 0; j < send_counts_cyclic[i]; j++) {
@@ -479,10 +480,8 @@ public:
               (*sending_missing_cols_ptr)[base_index + j];
           uint64_t global_id = t.col;
           uint64_t local_id =
-              t.col -
-              grid->global_rank * this->sp_local_receiver->proc_row_width;
-          std::array<DENT, embedding_dim> val_arr =
-              (this->dense_local)->fetch_local_data(local_id);
+              t.col - grid->global_rank * this->sp_local_receiver->proc_row_width;
+          std::array<DENT, embedding_dim> val_arr = (this->dense_local)->fetch_local_data(local_id);
           t.value = val_arr;
           (*sending_missing_cols_ptr)[base_index + j] = t;
         }
