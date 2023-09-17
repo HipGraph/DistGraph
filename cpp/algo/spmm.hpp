@@ -326,6 +326,9 @@ public:
       }
 
       for (int j = 0; j < batches; j++) {
+
+        total_memory += get_memory_usage();
+
         int seed = j + i;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
@@ -475,7 +478,7 @@ public:
       }
     }
 
-    total_memory = total_memory / (iterations * batches);
+    total_memory = total_memory / (iterations * batches*2);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Computation Time");
   }
