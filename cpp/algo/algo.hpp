@@ -350,20 +350,19 @@ public:
 
             if (alpha < 1.0) {
 
-              if (i == 0) {
-                auto communicator_cache_miss =
-                    unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-                        new DataComm<SPT, DENT, embedding_dim>(
-                            sp_local_receiver, sp_local_sender, dense_local, grid,
-                            i, alpha));
-
-                data_comm_cache[j].get()->data_comm_cache_misses_update.insert(
-                    std::make_pair(k, std::move(communicator_cache_miss)));
-              }
-
-
               int proc_length = get_proc_length(beta, grid->world_size);
               for (int k = 1; k < grid->world_size; k += proc_length) {
+                if (i == 0) {
+                  auto communicator_cache_miss =
+                      unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+                          new DataComm<SPT, DENT, embedding_dim>(
+                              sp_local_receiver, sp_local_sender, dense_local, grid,
+                              i, alpha));
+
+                  data_comm_cache[j].get()->data_comm_cache_misses_update.insert(
+                      std::make_pair(k, std::move(communicator_cache_miss)));
+                }
+
                 MPI_Request misses_update_request;
                 int end_process = get_end_proc(k, beta, grid->world_size);
                 stop_clock_and_add(t, "Computation Time");
