@@ -505,6 +505,8 @@ public:
               ->insert_cache(i, t.col, batch_id, iteration, t.value, true);
         }
       }
+      receive_missing_cols_ptr->clear();
+      receive_missing_cols_ptr->shrink_to_fit();
     }
   }
 

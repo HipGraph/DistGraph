@@ -318,6 +318,7 @@ public:
             }
 
             int end_process = get_end_proc(k, this->beta, this->grid->world_size);
+            MPI_Barrier(MPI_COMM_WORLD);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
             this->data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
@@ -433,8 +434,7 @@ public:
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            this->data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false, i, j, false);
+            this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -462,6 +462,7 @@ public:
 
                 MPI_Request misses_update_request;
                 int end_process = get_end_proc(k, this->beta, this->grid->world_size);
+                MPI_Barrier(MPI_COMM_WORLD);
                 stop_clock_and_add(t, "Computation Time");
                 t = start_clock();
                 this->data_comm_cache[j].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, j, k,end_process);
