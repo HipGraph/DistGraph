@@ -31,7 +31,8 @@ protected:
   distblas::core::SpMat<SPT> *sp_local_native;
   Process3DGrid *grid;
   DENT MAX_BOUND, MIN_BOUND;
-  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache;
+  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
+      data_comm_cache;
 
   // cache size controlling hyper parameter
   double alpha = 1.0;
@@ -73,7 +74,8 @@ public:
           sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches
+         << endl;
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(
@@ -84,7 +86,7 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    vector<MPI_Request*> mpi_requests(batches);
+    vector<MPI_Request *> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
       MPI_Request fetch_batch;
@@ -181,7 +183,6 @@ public:
             considering_batch_size, false, true, cache_misses_ptr.get(),
             cache_misses_col_ptr.get(), 0, grid->world_size, false);
 
-
         if (alpha < 1.0) {
           int proc_length = get_proc_length(beta, grid->world_size);
           int prev_start = 0;
@@ -195,6 +196,7 @@ public:
                       new DataComm<SPT, DENT, embedding_dim>(
                           sp_local_receiver, sp_local_sender, dense_local, grid,
                           i, alpha));
+
               data_comm_cache[j].get()->data_comm_cache_misses_update.insert(
                   std::make_pair(k, std::move(communicator_cache_miss)));
             }
@@ -202,16 +204,16 @@ public:
             int end_process = get_end_proc(k, beta, grid->world_size);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j]
+            data_comm_cache[0]
                 .get()
                 ->data_comm_cache_misses_update[k]
                 .get()
-                ->transfer_data(cache_misses_col_ptr.get(), i, j, k,
+                ->transfer_data(cache_misses_col_ptr.get(), i, 0, k,
                                 end_process);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             this->calc_t_dist_grad_for_cache_misses(
-                cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,
+                cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,
                 k, end_process);
           }
         }
@@ -307,35 +309,9 @@ public:
             }
           }
 
-        } else if (alpha > 0 and alpha < 1.0) {
-            int proc_length = get_proc_length(beta, grid->world_size);
-            int prev_start = 0;
-
-            for (int k = 1; k < grid->world_size; k += proc_length) {
-              MPI_Request misses_update_request;
-
-
-              if (i==0){
-                auto communicator_cache_miss = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-                    new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver,
-                                                           sp_local_sender, dense_local,
-                                                           grid, i, alpha));
-                data_comm_cache[j].get()->data_comm_cache_misses_update.insert(std::make_pair(k, std::move(communicator_cache_miss)));
-              }
-
-              int end_process = get_end_proc(k, beta, grid->world_size);
-              stop_clock_and_add(t, "Computation Time");
-              t = start_clock();
-              data_comm_cache[j].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, j, k, end_process);
-              stop_clock_and_add(t, "Communication Time");
-              t = start_clock();
-              this->calc_t_dist_grad_for_cache_misses(
-                  cache_misses_ptr.get(), prevCoordinates, i, j, batch_size, lr,
-                  k, end_process);
-            }
-
         } else {
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
           // clear up data
           for (int k = 0; k < batch_size; k += 1) {
             int IDIM = k * embedding_dim;
@@ -350,7 +326,8 @@ public:
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
 
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
+            data_comm_cache[j].get()->transfer_data(
+                update_ptr.get(), false, request_batch_update, i, j, 0, 0);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -367,18 +344,19 @@ public:
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j, false);
+            data_comm_cache[j].get()->populate_cache(
+                update_ptr.get(), request_batch_update, false, i, j, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
 
           if (j < batches - 1) {
-            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j + 1, batch_size,
+            this->calc_t_dist_grad_rowptr(
+                csr_block, prevCoordinates, lr, j + 1, batch_size,
                 considering_batch_size, false, true, cache_misses_ptr.get(),
                 cache_misses_col_ptr.get(), 0, grid->world_size, false);
 
-
-            if (alpha<1.0) {
+            if (alpha < 1.0) {
               int proc_length = get_proc_length(beta, grid->world_size);
               int prev_start = 0;
 
@@ -390,7 +368,8 @@ public:
                 data_comm_cache[j].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, j, k,end_process);
                 stop_clock_and_add(t, "Communication Time");
                 t = start_clock();
-                this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, j, batch_size,lr, k, end_process);
+                this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, j, batch_size,lr,
+                                                        k, end_process);
               }
             }
           }
