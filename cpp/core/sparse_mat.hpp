@@ -160,7 +160,7 @@ public:
 
     if (col_partitioned) {
       // calculation of sender col_ids
-      #pragma omp parallel for
+//      #pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index = proc_row_width * r;
         auto end_index = std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows) -1;
@@ -191,7 +191,7 @@ public:
       }
     } else if (transpose) {
       // calculation of receiver col_ids
-#pragma omp parallel for
+//#pragma omp parallel for
       for (int r = 0; r < world_size; r++) {
         uint64_t starting_index =
             (batch_id >= 0) ? batch_id * batch_size + proc_col_width * r

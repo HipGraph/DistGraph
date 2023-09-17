@@ -44,9 +44,7 @@ public:
           this->sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
-
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     // first batch onboarding
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> fetch_all_ptr =
@@ -94,8 +92,7 @@ public:
             fetch_all_ptr.get(), (*mpi_requests[i]), false, 0, i, false);
         if (batches > 1 and i < batches - 1) {
           mpi_requests[i + 1] = &fetch_batch_next;
-          this->data_comm_cache[i + 1].get()->transfer_data(
-              fetch_all_ptr.get(), false, (*mpi_requests[i + 1]), 0, i, 0, 0);
+          this->data_comm_cache[i + 1].get()->transfer_data(fetch_all_ptr.get(), false, (*mpi_requests[i + 1]), 0, i, 0, 0);
         }
         stop_clock_and_add(t, "Communication Time");
         t = start_clock();
