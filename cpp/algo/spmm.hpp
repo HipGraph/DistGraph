@@ -80,9 +80,9 @@ public:
 
       if (batches > 1 and i < batches - 1) {
         auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-            new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver,
-                                                   sp_local_sender, dense_local,
-                                                   grid, i + 1, alpha));
+            new DataComm<SPT, DENT, embedding_dim>(this->sp_local_receiver,
+                                                   this->sp_local_sender, this->dense_local,
+                                                   this->grid, i + 1, this->alpha));
         this->data_comm_cache.insert(std::make_pair(i + 1, std::move(communicator)));
         this->data_comm_cache[i + 1].get()->onboard_data();
       }
@@ -114,11 +114,11 @@ public:
 
     unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr =
         unique_ptr<vector<vector<Tuple<DENT>>>>(
-            new vector<vector<Tuple<DENT>>>(grid->world_size));
+            new vector<vector<Tuple<DENT>>>(this->grid->world_size));
 
     unique_ptr<vector<vector<uint64_t>>> cache_misses_col_ptr =
         unique_ptr<vector<vector<uint64_t>>>(
-            new vector<vector<uint64_t>>(grid->world_size));
+            new vector<vector<uint64_t>>(this->grid->world_size));
 
     size_t total_memory = 0;
 
@@ -277,9 +277,9 @@ public:
 
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
-        cout << " rank " << grid->global_rank << " iteration " << i << endl;
+        cout << " rank " << this->grid->global_rank << " iteration " << i << endl;
 
-      if (alpha > 0) {
+      if (this->alpha > 0) {
         for (int k = 0; k < batch_size; k += 1) {
           int IDIM = k * embedding_dim;
           for (int d = 0; d < embedding_dim; d++) {
@@ -299,7 +299,7 @@ public:
             considering_batch_size, false, true, cache_misses_ptr.get(),
             cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
 
-        if (alpha < 1.0) {
+        if (this->alpha < 1.0) {
           int proc_length = get_proc_length(this->beta, this->grid->world_size);
           int prev_start = 0;
 
@@ -365,12 +365,12 @@ public:
                                             false, true, cache_misses_ptr.get(),
                                             cache_misses_col_ptr.get(),
                                             prev_start, prev_end_process, true);
-              dense_local->invalidate_cache(i, j, true);
+              this->dense_local->invalidate_cache(i, j, true);
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
 
-            data_comm_cache[j].get()->populate_cache(
+            this->data_comm_cache[j].get()->populate_cache(
                 update_ptr.get(), request_batch_update_cyclic, false, i, j,
                 true);
 
@@ -388,7 +388,7 @@ public:
               considering_batch_size, false, true, cache_misses_ptr.get(),
               cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
 
-          dense_local->invalidate_cache(i, j, true);
+          this->dense_local->invalidate_cache(i, j, true);
           update_ptr.get()->resize(0);
 
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
@@ -420,7 +420,7 @@ public:
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
-            dense_local->invalidate_cache(i, j, false);
+            this->dense_local->invalidate_cache(i, j, false);
           }
 
           if (j < batches - 1) {
