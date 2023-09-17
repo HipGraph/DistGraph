@@ -485,7 +485,7 @@ public:
           t.value = val_arr;
           (*sending_missing_cols_ptr)[base_index + j] = t;
         }
-        total_receive_count += rdispls_cyclic[i];
+        total_receive_count += receive_counts_cyclic[i];
       }
 
       receive_missing_cols_ptr->resize(total_receive_count);
