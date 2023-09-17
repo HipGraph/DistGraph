@@ -42,6 +42,9 @@ private:
   unique_ptr<vector<DataTuple<DENT, embedding_dim>>> sending_missing_cols_ptr;
   unique_ptr<vector<DataTuple<DENT, embedding_dim>>> receive_missing_cols_ptr;
 
+
+
+
   int batch_id;
 
   double alpha;
@@ -88,6 +91,9 @@ public:
     receive_missing_cols_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
+
+    // storing cache misses sending metadata
+    std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache_misses_update;
   }
 
   ~DataComm() {}
@@ -361,10 +367,8 @@ public:
     //    delete[] sendbuf;
   }
 
-  void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *results_ptr,
-                     vector<vector<uint64_t>> *cache_misses, int iteration,
-                     int batch_id, int starting_proc, int end_proc,
-                     MPI_Request &request) {
+  void transfer_data(vector<vector<uint64_t>> *cache_misses, int iteration,
+                     int batch_id, int starting_proc, int end_proc) {
 
     if (iteration == 0) {
       int total_send_count = 0;
@@ -482,13 +486,22 @@ public:
         total_receive_count += rdispls_cyclic[i];
       }
 
-      results_ptr->resize(total_receive_count);
+      receive_missing_cols_ptr->resize(total_receive_count);
 
-      MPI_Ialltoallv((*sending_missing_cols_ptr).data(),
+      MPI_Alltoallv((*sending_missing_cols_ptr).data(),
                     send_counts_cyclic.data(), sdispls_cyclic.data(),
-                    DENSETUPLE, (*results_ptr).data(),
+                    DENSETUPLE, (*receive_missing_cols_ptr).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                    DENSETUPLE, MPI_COMM_WORLD,&request);
+                    DENSETUPLE, MPI_COMM_WORLD);
+      for (int i = 0; i < this->grid->world_size; i++) {
+        int base_index = rdispls_cyclic[i];
+        int count = receive_counts_cyclic[i];
+        for (int j = base_index; j < base_index + count; j++) {
+          DataTuple<DENT, embedding_dim> t = (*receive_missing_cols_ptr)[j];
+          (this->dense_local)
+              ->insert_cache(i, t.col, batch_id, iteration, t.value, true);
+        }
+      }
     }
   }
 
