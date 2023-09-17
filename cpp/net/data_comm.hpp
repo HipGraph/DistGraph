@@ -92,9 +92,12 @@ public:
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    // storing cache misses sending metadata
-    std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache_misses_update;
+
+
   }
+
+  // storing cache misses sending metadata
+  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache_misses_update;
 
   ~DataComm() {}
 
