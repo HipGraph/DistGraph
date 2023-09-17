@@ -490,11 +490,11 @@ public:
 
       receive_missing_cols_ptr->resize(total_receive_count);
 
-      MPI_Alltoallv((*sending_missing_cols_ptr).data(),
-                    send_counts_cyclic.data(), sdispls_cyclic.data(),
-                    DENSETUPLE, (*receive_missing_cols_ptr).data(),
-                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                    DENSETUPLE, MPI_COMM_WORLD);
+//      MPI_Alltoallv((*sending_missing_cols_ptr).data(),
+//                    send_counts_cyclic.data(), sdispls_cyclic.data(),
+//                    DENSETUPLE, (*receive_missing_cols_ptr).data(),
+//                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
+//                    DENSETUPLE, MPI_COMM_WORLD);
 //      for (int i = 0; i < this->grid->world_size; i++) {
 //        int base_index = rdispls_cyclic[i];
 //        int count = receive_counts_cyclic[i];
