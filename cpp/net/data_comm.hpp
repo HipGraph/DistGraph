@@ -490,20 +490,20 @@ public:
 
       receive_missing_cols_ptr->resize(total_receive_count);
 
-      MPI_Alltoallv((*sending_missing_cols_ptr).data(),
-                    send_counts_cyclic.data(), sdispls_cyclic.data(),
-                    DENSETUPLE, (*receive_missing_cols_ptr).data(),
-                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                    DENSETUPLE, MPI_COMM_WORLD);
-      for (int i = 0; i < this->grid->world_size; i++) {
-        int base_index = rdispls_cyclic[i];
-        int count = receive_counts_cyclic[i];
-        for (int j = base_index; j < base_index + count; j++) {
-          DataTuple<DENT, embedding_dim> t = (*receive_missing_cols_ptr)[j];
-          (this->dense_local)
-              ->insert_cache(i, t.col, batch_id, iteration, t.value, true);
-        }
-      }
+//      MPI_Alltoallv((*sending_missing_cols_ptr).data(),
+//                    send_counts_cyclic.data(), sdispls_cyclic.data(),
+//                    DENSETUPLE, (*receive_missing_cols_ptr).data(),
+//                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
+//                    DENSETUPLE, MPI_COMM_WORLD);
+//      for (int i = 0; i < this->grid->world_size; i++) {
+//        int base_index = rdispls_cyclic[i];
+//        int count = receive_counts_cyclic[i];
+//        for (int j = base_index; j < base_index + count; j++) {
+//          DataTuple<DENT, embedding_dim> t = (*receive_missing_cols_ptr)[j];
+//          (this->dense_local)
+//              ->insert_cache(i, t.col, batch_id, iteration, t.value, true);
+//        }
+//      }
       receive_missing_cols_ptr->clear();
       receive_missing_cols_ptr->shrink_to_fit();
     }

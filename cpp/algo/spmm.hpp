@@ -35,21 +35,17 @@ public:
     int last_batch_size = batch_size;
 
     if (this->sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches =
-          static_cast<int>(this->sp_local_receiver->proc_row_width / batch_size);
+      batches = static_cast<int>(this->sp_local_receiver->proc_row_width / batch_size);
     } else {
-      batches =
-          static_cast<int>(this->sp_local_receiver->proc_row_width / batch_size) + 1;
-      last_batch_size =
-          this->sp_local_receiver->proc_row_width - batch_size * (batches - 1);
+      batches = static_cast<int>(this->sp_local_receiver->proc_row_width / batch_size) + 1;
+      last_batch_size = this->sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
     cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     // first batch onboarding
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> fetch_all_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
     vector<MPI_Request *> mpi_requests(batches);
 
@@ -317,7 +313,7 @@ public:
             MPI_Barrier(MPI_COMM_WORLD);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-//            this->data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
+            this->data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
 //            this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,k, end_process);
