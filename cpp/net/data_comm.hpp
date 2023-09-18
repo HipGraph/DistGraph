@@ -112,7 +112,7 @@ public:
     // calculating sending data cols
     this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list, alpha);
 
-    int cache_p =   std::max(alpha*grid->world_size,1);
+    int cache_p =   std::max(static_cast<int>(alpha*grid->world_size),1);
 
     int counter=0;
 
