@@ -111,21 +111,26 @@ public:
 
     // calculating sending data cols
     this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list, alpha);
+
+    int cache_p =   std::max(alpha*grid->world_size,1);
+
+    int counter=0;
+
     for (int i = 0; i < grid->world_size; i++) {
+      if (alpha > 0 and alpha < 1.0) {
+        if (counter>=cache_p) {
+          return;
+        }else {
+          counter++;
+        }
+      }
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
 
       std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
                                                    send_col_ids_list[i].end());
 
-//      if (alpha > 0 and alpha < 1.0) {
-//        uint64_t considered_count_send = alpha * unique_set_send.size();
-//        uint64_t considered_count_receive = alpha * unique_set_receiv.size();
-//
-//        unique_set_receiv =
-//            random_select(unique_set_receiv, considered_count_receive);
-//        unique_set_send = random_select(unique_set_send, considered_count_send);
-//      }
+
 
       receive_col_ids_list[i] =
           vector<uint64_t>(unique_set_receiv.begin(), unique_set_receiv.end());
