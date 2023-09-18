@@ -313,7 +313,7 @@ public:
             MPI_Barrier(MPI_COMM_WORLD);
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-//            this->data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
+            this->data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
 //            this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,k, end_process);
