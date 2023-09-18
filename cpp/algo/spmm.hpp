@@ -510,7 +510,7 @@ public:
                                 ->fetch_data_vector_from_cache(target_rank, i,
                                                                temp_cache);
 
-                if (array_ptr == nullptr) {
+//                if (array_ptr == nullptr) {
                   Tuple<DENT> cacheRef;
                   cacheRef.row = source_id;
                   cacheRef.col = i;
@@ -523,7 +523,7 @@ public:
                     }
 //                  }
                   continue;
-                }
+//                }
               }
               matched = true;
             }
