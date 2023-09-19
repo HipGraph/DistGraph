@@ -99,8 +99,7 @@ public:
         // local computation for first batch
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                       batch_size, considering_batch_size, true,
-                                      true, 0, this->grid->world_size, 0,
-                                      false);
+                                      true, 0, this->grid->world_size, false);
 
         stop_clock_and_add(t, "Computation Time");
         t = start_clock();
