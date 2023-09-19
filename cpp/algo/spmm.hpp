@@ -62,18 +62,17 @@ public:
 
       if (i == 0) {
         auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-            new DataComm<SPT, DENT, embedding_dim>(
-                this->sp_local_receiver, this->sp_local_sender,
-                this->dense_local, this->grid, i, this->alpha));
+            new DataComm<SPT, DENT, embedding_dim>(this->sp_local_receiver, this->sp_local_sender, this->dense_local, this->grid, i, this->alpha));
         this->data_comm_cache.insert(
             std::make_pair(i, std::move(communicator)));
         this->data_comm_cache[i].get()->onboard_data();
+
         if (this->alpha > 0) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           mpi_requests[i] = &fetch_batch;
           int proc_length = get_proc_length(this->alpha, this->grid->world_size);
-          this->data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false, (*mpi_requests[i]), 0, i, 1, proc_length,true);
+          this->data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false, (*mpi_requests[i]), 0, i, 1, proc_length,false);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -114,20 +113,11 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    unique_ptr<vector<vector<Tuple<DENT>>>> cache_misses_ptr =
-        unique_ptr<vector<vector<Tuple<DENT>>>>(
-            new vector<vector<Tuple<DENT>>>(this->grid->world_size));
-
-    unique_ptr<vector<vector<uint64_t>>> cache_misses_col_ptr =
-        unique_ptr<vector<vector<uint64_t>>>(
-            new vector<vector<uint64_t>>(this->grid->world_size));
-
     size_t total_memory = 0;
 
     CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
     int considering_batch_size = batch_size;
-
 
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
@@ -155,42 +145,42 @@ public:
             cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
 
         if (this->alpha < 1.0) {
-//          int proc_length = get_proc_length(this->beta, this->grid->world_size);
-//          int prev_start = 0;
-//
-//          for (int k = 1; k < this->grid->world_size; k += proc_length) {
-//            MPI_Request misses_update_request;
-//
-//            if (i == 0) {
-//              auto communicator_cache_miss =
-//                  unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-//                      new DataComm<SPT, DENT, embedding_dim>(
-//                          this->sp_local_receiver, this->sp_local_sender,
-//                          this->dense_local, this->grid, i, this->alpha));
-//
-//              this->data_comm_cache[0]
-//                  .get()
-//                  ->data_comm_cache_misses_update.insert(
-//                      std::make_pair(k, std::move(communicator_cache_miss)));
-//            }
-//
-//            int end_process =
-//                get_end_proc(k, this->beta, this->grid->world_size);
-//            MPI_Barrier(MPI_COMM_WORLD);
-//            stop_clock_and_add(t, "Computation Time");
-//            t = start_clock();
-//            this->data_comm_cache[0]
-//                .get()
-//                ->data_comm_cache_misses_update[k]
-//                .get()
-//                ->transfer_data(cache_misses_col_ptr.get(), i, 0, k,
-//                                end_process);
-//            stop_clock_and_add(t, "Communication Time");
-//            t = start_clock();
-//            this->calc_t_dist_grad_for_cache_misses(
-//                cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,
-//                k, end_process);
-//          }
+          int proc_length = get_proc_length(this->beta, this->grid->world_size);
+          int prev_start = 0;
+
+          for (int k = 1; k < this->grid->world_size; k += proc_length) {
+            MPI_Request misses_update_request;
+
+            if (i == 0) {
+              auto communicator_cache_miss =
+                  unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+                      new DataComm<SPT, DENT, embedding_dim>(
+                          this->sp_local_receiver, this->sp_local_sender,
+                          this->dense_local, this->grid, i, this->alpha));
+
+              this->data_comm_cache[0]
+                  .get()
+                  ->data_comm_cache_misses_update.insert(
+                      std::make_pair(k, std::move(communicator_cache_miss)));
+            }
+
+            int end_process =
+                get_end_proc(k, this->beta, this->grid->world_size);
+            MPI_Barrier(MPI_COMM_WORLD);
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
+            this->data_comm_cache[0]
+                .get()
+                ->data_comm_cache_misses_update[k]
+                .get()
+                ->transfer_data(cache_misses_col_ptr.get(), i, 0, k,
+                                end_process);
+            stop_clock_and_add(t, "Communication Time");
+            t = start_clock();
+            this->calc_t_dist_grad_for_cache_misses(
+                cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,
+                k, end_process);
+          }
         }
       }
 

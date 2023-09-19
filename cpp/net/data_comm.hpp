@@ -358,8 +358,7 @@ public:
     //    delete[] sendbuf;
   }
 
-  void transfer_data(vector<vector<uint64_t>> *cache_misses, int iteration,
-                     int batch_id, int starting_proc, int end_proc) {
+  void transfer_data(vector<vector<uint64_t>> *cache_misses, int iteration, int batch_id, int starting_proc, int end_proc) {
 
     if (iteration == 0) {
       int total_send_count = 0;
