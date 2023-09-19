@@ -152,51 +152,6 @@ public:
                      int batch_id, int starting_proc, int end_proc, bool temp_cache) {
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
-//    if (alpha > 0) {
-//      for (const auto &pair : send_indices_to_proc_map) {
-//        auto col_id = pair.first;
-//        bool already_fetched = false;
-//        vector<int> proc_list = pair.second;
-//        std::array<DENT, embedding_dim> dense_vector;
-//        for (int i = 0; i < proc_list.size(); i++) {
-//          if (proc_list[i] == 1) {
-//            if (!already_fetched) {
-//              dense_vector = (this->dense_local)->fetch_local_data(col_id);
-//              already_fetched = true;
-//            }
-//            int offset = sdispls[i];
-//            int index = offset_vector[i] + offset;
-//            (*sendbuf)[index].col =
-//                col_id + (this->sp_local_sender->proc_col_width *
-//                          this->grid->global_rank);
-//            (*sendbuf)[index].value = dense_vector;
-//            offset_vector[i]++;
-//          }
-//        }
-//      }
-//
-//      for (int i = 0; i < grid->world_size; i++) {
-//        total_receive_count += receivecounts[i];
-//      }
-//
-//      receivebuf->resize(total_receive_count);
-//
-//      add_datatransfers(total_receive_count, "Data transfers");
-//
-//      if (synchronous) {
-//        MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
-//                      DENSETUPLE, (*receivebuf).data(), receivecounts.data(),
-//                      rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
-//        MPI_Request dumy;
-//        this->populate_cache(receivebuf, dumy, true, iteration, batch_id,
-//                             false);
-//      } else {
-//        MPI_Ialltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
-//                       DENSETUPLE, (*receivebuf).data(), receivecounts.data(),
-//                       rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
-//      }
-//
-//    } else if (alpha == 0) {
 
       int total_send_count = 0;
       send_counts_cyclic = vector<int>(grid->world_size, 0);
