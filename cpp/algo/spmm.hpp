@@ -408,23 +408,22 @@ public:
               }
             }
 
-              if (fetch_from_cache) {
-                for (int d = 0; d < embedding_dim; d++) {
-                  prevCoordinates[index * embedding_dim + d] +=
-                      lr * array_ptr[d];
-                }
-              } else {
-                for (int d = 0; d < embedding_dim; d++) {
-                  prevCoordinates[index * embedding_dim + d] +=
-                      (lr) * (this->dense_local)
-                                 ->nCoordinates[local_dst * embedding_dim + d];
-                }
+            if (fetch_from_cache) {
+              for (int d = 0; d < embedding_dim; d++) {
+                prevCoordinates[index * embedding_dim + d] += lr * array_ptr[d];
+              }
+            } else {
+              for (int d = 0; d < embedding_dim; d++) {
+                prevCoordinates[index * embedding_dim + d] +=
+                    (lr) * (this->dense_local)
+                               ->nCoordinates[local_dst * embedding_dim + d];
               }
             }
           }
         }
+      }
     }
-
+  }
     inline void update_data_matrix_rowptr(DENT * prevCoordinates, int batch_id,
                                           int batch_size) {
       int row_base_index = batch_id * batch_size;
