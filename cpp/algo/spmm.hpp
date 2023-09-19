@@ -72,7 +72,7 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           mpi_requests[i] = &fetch_batch;
-          int proc_length = get_proc_length(alpha, grid->world_size);
+          int proc_length = get_proc_length(this->alpha, this->grid->world_size);
           this->data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false, (*mpi_requests[i]), 0, i, 1, proc_length,true);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
@@ -95,7 +95,7 @@ public:
         this->data_comm_cache[i].get()->populate_cache(fetch_all_ptr.get(), (*mpi_requests[i]), false, 0, i, false);
         if (batches > 1 and i < batches - 1) {
           mpi_requests[i + 1] = &fetch_batch_next;
-          int proc_length = get_proc_length(alpha, grid->world_size);
+          int proc_length = get_proc_length(this->alpha, this->grid->world_size);
           this->data_comm_cache[i + 1].get()->transfer_data(
               fetch_all_ptr.get(), false, (*mpi_requests[i + 1]), 0, i, 1, proc_length,true);
         }
@@ -402,11 +402,11 @@ public:
                                                                temp_cache);
 
                 if (array_ptr == nullptr) {
-
                   continue;
                 }
                 matched = true;
               }
+            }
 
               if (fetch_from_cache) {
                 for (int d = 0; d < embedding_dim; d++) {
@@ -423,7 +423,6 @@ public:
             }
           }
         }
-      }
     }
 
     inline void update_data_matrix_rowptr(DENT * prevCoordinates, int batch_id,

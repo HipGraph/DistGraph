@@ -197,7 +197,7 @@ public:
 //      }
 //
 //    } else if (alpha == 0) {
-      int total_receive_count = 0;
+
       int total_send_count = 0;
       send_counts_cyclic = vector<int>(grid->world_size, 0);
       receive_counts_cyclic = vector<int>(grid->world_size, 0);
@@ -506,8 +506,8 @@ public:
     }
 
     for (int i = 0; i < this->grid->world_size; i++) {
-      int base_index =  this->rdispls_cyclic[i]
-      int count = this->receive_counts_cyclic[i]
+      int base_index =  this->rdispls_cyclic[i];
+      int count = this->receive_counts_cyclic[i];
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
