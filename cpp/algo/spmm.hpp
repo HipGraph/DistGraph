@@ -143,14 +143,14 @@ public:
         }
 
         // local computation for first batch
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
-                                      batch_size, considering_batch_size, true,
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0, batch_size,
+                                      considering_batch_size, true,
                                       true, cache_misses_ptr.get(),
-                                      cache_misses_col_ptr.get(), 0, 0, false);
+                                      cache_misses_col_ptr.get(),
+                                      0, 0, false);
 
         // remote computation for first batch
-        this->calc_t_dist_grad_rowptr(
-            csr_block, prevCoordinates, lr, 0, batch_size,
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0, batch_size,
             considering_batch_size, false, true, cache_misses_ptr.get(),
             cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
 
@@ -214,9 +214,7 @@ public:
             stop_clock_and_add(t, "Computation Time");
 
             t = start_clock();
-            this->data_comm_cache[j].get()->transfer_data(
-                update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
-                end_process);
+            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process,true);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -286,8 +284,8 @@ public:
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
 
-            this->data_comm_cache[j].get()->transfer_data(
-                update_ptr.get(), false, request_batch_update, i, j, 0, 0);
+            int proc_length = get_proc_length(this->alpha, this->grid->world_size);
+            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 1, proc_length,false);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -304,8 +302,7 @@ public:
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            this->data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false, i, j, false);
+            this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -318,40 +315,39 @@ public:
 
             if (this->alpha < 1.0) {
 
-              int proc_length =
-                  get_proc_length(this->beta, this->grid->world_size);
-              for (int k = 1; k < this->grid->world_size; k += proc_length) {
-                if (i == 0) {
-                  auto communicator_cache_miss =
-                      unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-                          new DataComm<SPT, DENT, embedding_dim>(
-                              this->sp_local_receiver, this->sp_local_sender,
-                              this->dense_local, this->grid, i, this->alpha));
-
-                  this->data_comm_cache[j]
-                      .get()
-                      ->data_comm_cache_misses_update.insert(std::make_pair(
-                          k, std::move(communicator_cache_miss)));
-                }
-
-                MPI_Request misses_update_request;
-                int end_process =
-                    get_end_proc(k, this->beta, this->grid->world_size);
-                MPI_Barrier(MPI_COMM_WORLD);
-                stop_clock_and_add(t, "Computation Time");
-                t = start_clock();
-                this->data_comm_cache[j]
-                    .get()
-                    ->data_comm_cache_misses_update[k]
-                    .get()
-                    ->transfer_data(cache_misses_col_ptr.get(), i, j, k,
-                                    end_process);
-                stop_clock_and_add(t, "Communication Time");
-                t = start_clock();
-                this->calc_t_dist_grad_for_cache_misses(
-                    cache_misses_ptr.get(), prevCoordinates, i, j, batch_size,
-                    lr, k, end_process);
-              }
+//              int proc_length =
+//                  get_proc_length(this->beta, this->grid->world_size);
+//              for (int k = 1; k < this->grid->world_size; k += proc_length) {
+//                if (i == 0) {
+//                  auto communicator_cache_miss =
+//                      unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+//                          new DataComm<SPT, DENT, embedding_dim>(
+//                              this->sp_local_receiver, this->sp_local_sender,
+//                              this->dense_local, this->grid, i, this->alpha));
+//
+//                  this->data_comm_cache[j]
+//                      .get()
+//                      ->data_comm_cache_misses_update.insert(std::make_pair(
+//                          k, std::move(communicator_cache_miss)));
+//                }
+//
+//                MPI_Request misses_update_request;
+//                int end_process =
+//                    get_end_proc(k, this->beta, this->grid->world_size);
+//                MPI_Barrier(MPI_COMM_WORLD);
+//                stop_clock_and_add(t, "Computation Time");
+//                t = start_clock();
+//                this->data_comm_cache[j]
+//                    .get()
+//                    ->data_comm_cache_misses_update[k]
+//                    .get()
+//                    ->transfer_data(cache_misses_col_ptr.get(), i, j, k,end_process);
+//                stop_clock_and_add(t, "Communication Time");
+//                t = start_clock();
+//                this->calc_t_dist_grad_for_cache_misses(
+//                    cache_misses_ptr.get(), prevCoordinates, i, j, batch_size,
+//                    lr, k, end_process);
+//              }
             }
           }
         }
