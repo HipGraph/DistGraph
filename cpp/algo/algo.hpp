@@ -104,8 +104,10 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
           mpi_requests[i] = &fetch_batch;
-          data_comm_cache[i].get()->transfer_data(
-              fetch_all_ptr.get(), false, (*mpi_requests[i]), 0, i, 0, 0);
+
+          int proc_length = get_proc_length(alpha, grid->world_size);
+
+          data_comm_cache[i].get()->transfer_data(fetch_all_ptr.get(), false, (*mpi_requests[i]), 0, i, 1, proc_length,false);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
@@ -123,12 +125,12 @@ public:
       if (alpha > 0) {
         stop_clock_and_add(t, "Computation Time");
         t = start_clock();
-        data_comm_cache[i].get()->populate_cache(
-            fetch_all_ptr.get(), (*mpi_requests[i]), false, 0, i, false);
+        data_comm_cache[i].get()->populate_cache(fetch_all_ptr.get(), (*mpi_requests[i]), false, 0, i, false);
         if (batches > 1 and i < batches - 1) {
           mpi_requests[i + 1] = &fetch_batch_next;
+          int proc_length = get_proc_length(alpha, grid->world_size);
           data_comm_cache[i + 1].get()->transfer_data(
-              fetch_all_ptr.get(), false, (*mpi_requests[i + 1]), 0, i, 0, 0);
+              fetch_all_ptr.get(), false, (*mpi_requests[i + 1]), 0, i, 1, proc_length, false);
         }
         stop_clock_and_add(t, "Communication Time");
         t = start_clock();
@@ -184,31 +186,31 @@ public:
             cache_misses_col_ptr.get(), 0, grid->world_size, false);
 
         if (alpha < 1.0) {
-          int proc_length = get_proc_length(beta, grid->world_size);
-          int prev_start = 0;
-
-          for (int k = 1; k < grid->world_size; k += proc_length) {
-            MPI_Request misses_update_request;
-
-            if (i == 0) {
-              auto communicator_cache_miss =
-                  unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-                      new DataComm<SPT, DENT, embedding_dim>(
-                          sp_local_receiver, sp_local_sender, dense_local, grid,
-                          i, alpha));
-
-              data_comm_cache[0].get()->data_comm_cache_misses_update.insert(
-                  std::make_pair(k, std::move(communicator_cache_miss)));
-            }
-
-            int end_process = get_end_proc(k, beta, grid->world_size);
-            stop_clock_and_add(t, "Computation Time");
-            t = start_clock();
-            data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
-            stop_clock_and_add(t, "Communication Time");
-            t = start_clock();
-            this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,k, end_process);
-          }
+//          int proc_length = get_proc_length(beta, grid->world_size);
+//          int prev_start = 0;
+//
+//          for (int k = 1; k < grid->world_size; k += proc_length) {
+//            MPI_Request misses_update_request;
+//
+//            if (i == 0) {
+//              auto communicator_cache_miss =
+//                  unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
+//                      new DataComm<SPT, DENT, embedding_dim>(
+//                          sp_local_receiver, sp_local_sender, dense_local, grid,
+//                          i, alpha));
+//
+//              data_comm_cache[0].get()->data_comm_cache_misses_update.insert(
+//                  std::make_pair(k, std::move(communicator_cache_miss)));
+//            }
+//
+//            int end_process = get_end_proc(k, beta, grid->world_size);
+//            stop_clock_and_add(t, "Computation Time");
+//            t = start_clock();
+//            data_comm_cache[0].get()->data_comm_cache_misses_update[k].get()->transfer_data(cache_misses_col_ptr.get(), i, 0, k, end_process);
+//            stop_clock_and_add(t, "Communication Time");
+//            t = start_clock();
+//            this->calc_t_dist_grad_for_cache_misses(cache_misses_ptr.get(), prevCoordinates, i, 0, batch_size, lr,k, end_process);
+//          }
         }
       }
 
@@ -247,9 +249,7 @@ public:
             stop_clock_and_add(t, "Computation Time");
 
             t = start_clock();
-            this->data_comm_cache[j].get()->transfer_data(
-                update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
-                end_process);
+            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -534,17 +534,17 @@ public:
                                                                temp_cache);
 
                 if (array_ptr == nullptr) {
-                  Tuple<DENT> cacheRef;
-                  cacheRef.row = source_id;
-                  cacheRef.col = i;
-                  //#pragma omp critical
-                  //                  {
-                  (*cache_misses)[target_rank].push_back(cacheRef);
-                  if (!col_inserted) {
-                    (*cache_misses_col)[target_rank].push_back(i);
-                    col_inserted = true;
-                  }
-                  //                  }
+//                  Tuple<DENT> cacheRef;
+//                  cacheRef.row = source_id;
+//                  cacheRef.col = i;
+//                  //#pragma omp critical
+//                  //                  {
+//                  (*cache_misses)[target_rank].push_back(cacheRef);
+//                  if (!col_inserted) {
+//                    (*cache_misses_col)[target_rank].push_back(i);
+//                    col_inserted = true;
+//                  }
+//                  //                  }
                   continue;
                 }
               }

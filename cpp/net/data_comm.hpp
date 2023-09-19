@@ -106,17 +106,13 @@ public:
     int total_send_count = 0;
     // processing chunks
     // calculating receiving data cols
-    this->sp_local_receiver->fill_col_ids(batch_id, receive_col_ids_list,
-                                          alpha);
+    this->sp_local_receiver->fill_col_ids(batch_id, receive_col_ids_list,alpha);
 
     // calculating sending data cols
     this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list, alpha);
 
-    int considering_p =  (alpha > 0 and alpha < 1.0)?std::max(static_cast<int>(alpha*grid->world_size),1):grid->world_size;
-
-
-
-    for (int i = 0; i < considering_p; i++) {
+    // This needs to be changed
+    for (int i = 0; i < grid->world_size; i++) {
 
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
@@ -144,29 +140,8 @@ public:
       }
     }
 
-    if (alpha > 0 and alpha < 1.0) {
-      for (int i = considering_p; i <grid->world_size ; i++) {
-
-        receive_col_ids_list[i] = vector<uint64_t>();
-
-        receivecounts[i] = receive_col_ids_list[i].size();
-
-        send_col_ids_list[i] = vector<uint64_t>();
-
-        sendcounts[i] = send_col_ids_list[i].size();
-        total_send_count += sendcounts[i];
-        sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
-        rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-
-        for (int j = 0; j < send_col_ids_list[i].size(); j++) {
-          uint64_t local_key = send_col_ids_list[i][j];
-          send_indices_to_proc_map[local_key][i] = 1;
-        }
-      }
-
-    }
-    sendbuf = unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-        new vector<DataTuple<DENT, embedding_dim>>());
+    sendbuf = unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
+        (new vector<DataTuple<DENT, embedding_dim>>());
     if (total_send_count > 0 and alpha > 0) {
       sendbuf->resize(total_send_count);
     }
@@ -174,54 +149,54 @@ public:
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous, MPI_Request &request, int iteration,
-                     int batch_id, int starting_proc, int end_proc) {
+                     int batch_id, int starting_proc, int end_proc, bool temp_cache) {
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
-    if (alpha > 0) {
-      for (const auto &pair : send_indices_to_proc_map) {
-        auto col_id = pair.first;
-        bool already_fetched = false;
-        vector<int> proc_list = pair.second;
-        std::array<DENT, embedding_dim> dense_vector;
-        for (int i = 0; i < proc_list.size(); i++) {
-          if (proc_list[i] == 1) {
-            if (!already_fetched) {
-              dense_vector = (this->dense_local)->fetch_local_data(col_id);
-              already_fetched = true;
-            }
-            int offset = sdispls[i];
-            int index = offset_vector[i] + offset;
-            (*sendbuf)[index].col =
-                col_id + (this->sp_local_sender->proc_col_width *
-                          this->grid->global_rank);
-            (*sendbuf)[index].value = dense_vector;
-            offset_vector[i]++;
-          }
-        }
-      }
-
-      for (int i = 0; i < grid->world_size; i++) {
-        total_receive_count += receivecounts[i];
-      }
-
-      receivebuf->resize(total_receive_count);
-
-      add_datatransfers(total_receive_count, "Data transfers");
-
-      if (synchronous) {
-        MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
-                      DENSETUPLE, (*receivebuf).data(), receivecounts.data(),
-                      rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
-        MPI_Request dumy;
-        this->populate_cache(receivebuf, dumy, true, iteration, batch_id,
-                             false);
-      } else {
-        MPI_Ialltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
-                       DENSETUPLE, (*receivebuf).data(), receivecounts.data(),
-                       rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
-      }
-
-    } else if (alpha == 0) {
+//    if (alpha > 0) {
+//      for (const auto &pair : send_indices_to_proc_map) {
+//        auto col_id = pair.first;
+//        bool already_fetched = false;
+//        vector<int> proc_list = pair.second;
+//        std::array<DENT, embedding_dim> dense_vector;
+//        for (int i = 0; i < proc_list.size(); i++) {
+//          if (proc_list[i] == 1) {
+//            if (!already_fetched) {
+//              dense_vector = (this->dense_local)->fetch_local_data(col_id);
+//              already_fetched = true;
+//            }
+//            int offset = sdispls[i];
+//            int index = offset_vector[i] + offset;
+//            (*sendbuf)[index].col =
+//                col_id + (this->sp_local_sender->proc_col_width *
+//                          this->grid->global_rank);
+//            (*sendbuf)[index].value = dense_vector;
+//            offset_vector[i]++;
+//          }
+//        }
+//      }
+//
+//      for (int i = 0; i < grid->world_size; i++) {
+//        total_receive_count += receivecounts[i];
+//      }
+//
+//      receivebuf->resize(total_receive_count);
+//
+//      add_datatransfers(total_receive_count, "Data transfers");
+//
+//      if (synchronous) {
+//        MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
+//                      DENSETUPLE, (*receivebuf).data(), receivecounts.data(),
+//                      rdispls.data(), DENSETUPLE, MPI_COMM_WORLD);
+//        MPI_Request dumy;
+//        this->populate_cache(receivebuf, dumy, true, iteration, batch_id,
+//                             false);
+//      } else {
+//        MPI_Ialltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
+//                       DENSETUPLE, (*receivebuf).data(), receivecounts.data(),
+//                       rdispls.data(), DENSETUPLE, MPI_COMM_WORLD, &request);
+//      }
+//
+//    } else if (alpha == 0) {
       int total_receive_count = 0;
       int total_send_count = 0;
       send_counts_cyclic = vector<int>(grid->world_size, 0);
@@ -250,9 +225,6 @@ public:
         total_receive_count += receive_counts_cyclic[receiving_procs[i]];
       }
 
-      //      cout <<" rank "<<grid->global_rank<<" total send count
-      //      "<<total_send_count<< " total receive count "<<
-      //      total_receive_count<<endl;
       for (int i = 0; i < grid->world_size; i++) {
         sdispls_cyclic[i] =
             (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
@@ -260,10 +232,6 @@ public:
         rdispls_cyclic[i] =
             (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                     : rdispls_cyclic[i];
-        //        if (grid->global_rank==0)
-        //          cout <<" rank "<<grid->global_rank<<" send counts to rank
-        //          "<<i<< " " <<send_counts_cyclic[i]<<" receiving from rank
-        //          "<< i <<" receive counts "<<receive_counts_cyclic[i]<<endl;
       }
       unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
           unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -302,7 +270,7 @@ public:
                       receive_counts_cyclic.data(), rdispls_cyclic.data(),
                       DENSETUPLE, MPI_COMM_WORLD);
         MPI_Request dumy;
-        this->populate_cache(receivebuf, dumy, true, iteration, batch_id, true);
+        this->populate_cache(receivebuf, dumy, true, iteration, batch_id, temp_cache);
       } else {
         MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                        sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
@@ -311,7 +279,7 @@ public:
       }
       sendbuf_cyclic->clear();
       sendbuf_cyclic->shrink_to_fit();
-    }
+//    }
   }
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
@@ -538,14 +506,12 @@ public:
     }
 
     for (int i = 0; i < this->grid->world_size; i++) {
-      int base_index = (temp) ? this->rdispls_cyclic[i] : this->rdispls[i];
-      int count =
-          (temp) ? this->receive_counts_cyclic[i] : this->receivecounts[i];
+      int base_index =  this->rdispls_cyclic[i]
+      int count = this->receive_counts_cyclic[i]
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        (this->dense_local)
-            ->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
+        (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
     }
     receivebuf->clear();
