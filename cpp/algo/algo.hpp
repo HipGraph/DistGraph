@@ -249,7 +249,7 @@ public:
             stop_clock_and_add(t, "Computation Time");
 
             t = start_clock();
-            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process);
+            this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process,true);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -318,8 +318,8 @@ public:
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 0, 0);
+            int proc_length = get_proc_length(this->alpha, this->grid->world_size);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j, 1,proc_length,false );
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
