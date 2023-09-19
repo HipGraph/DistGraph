@@ -112,24 +112,17 @@ public:
     // calculating sending data cols
     this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list, alpha);
 
-    int cache_p =   std::max(static_cast<int>(alpha*grid->world_size),1);
+    int considering_p =  (alpha > 0 and alpha < 1.0)?std::max(static_cast<int>(alpha*grid->world_size),1):grid->world_size;
 
-    int counter=0;
 
-    for (int i = 0; i < grid->world_size; i++) {
-      if (alpha > 0 and alpha < 1.0) {
-        if (counter>=cache_p) {
-          return;
-        }else {
-          counter++;
-        }
-      }
+
+    for (int i = 0; i < considering_p; i++) {
+
       std::unordered_set<uint64_t> unique_set_receiv(
           receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
 
       std::unordered_set<uint64_t> unique_set_send(send_col_ids_list[i].begin(),
                                                    send_col_ids_list[i].end());
-
 
 
       receive_col_ids_list[i] =
@@ -149,6 +142,28 @@ public:
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
       }
+    }
+
+    if (alpha > 0 and alpha < 1.0) {
+      for (int i = considering_p; i <grid->world_size ; i++) {
+
+        receive_col_ids_list[i] = vector<uint64_t>();
+
+        receivecounts[i] = receive_col_ids_list[i].size();
+
+        send_col_ids_list[i] = vector<uint64_t>();
+
+        sendcounts[i] = send_col_ids_list[i].size();
+        total_send_count += sendcounts[i];
+        sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
+        rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
+
+        for (int j = 0; j < send_col_ids_list[i].size(); j++) {
+          uint64_t local_key = send_col_ids_list[i][j];
+          send_indices_to_proc_map[local_key][i] = 1;
+        }
+      }
+
     }
     sendbuf = unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
         new vector<DataTuple<DENT, embedding_dim>>());
