@@ -42,7 +42,7 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
 
     MPI_Request fetch_batch;
-    fetch_all_ptr.get()->clear();
+    vector<MPI_Request*> mpi_requests(iterations);
 
     mpi_requests[0] = &fetch_batch;
     auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
@@ -53,7 +53,7 @@ public:
     this->data_comm_cache.insert(std::make_pair(0, std::move(communicator)));
     this->data_comm_cache[0].get()->onboard_data();
 
-    vector<MPI_Request *> mpi_requests(iterations);
+
 
     if (this->alpha > 0) {
       stop_clock_and_add(t, "Computation Time");
@@ -160,11 +160,11 @@ public:
           // remote computation for first batch
           this->calc_t_dist_grad_rowptr(
               csr_block, prevCoordinates, lr, 0, batch_size,
-              considering_batch_size, false, true, cache_misses_ptr.get(),
-              cache_misses_col_ptr.get(), 0, this->grid->world_size, false);
+              considering_batch_size, false, true, 0,
+              this->grid->world_size,  false);
         }
 
-        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        this->update_data_matrix_rowptr(prevCoordinates, 0, batch_size);
 
         if (this->grid->world_size > 1 and i < iterations - 1) {
           update_ptr.get()->clear();
@@ -174,8 +174,8 @@ public:
 
           t = start_clock();
           MPI_Request request_batch_update;
-          mpi_requests(i + 1) = &request_batch_update;
-          this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, (*mpi_requests(i + 1)), i, 0, 1,
+          mpi_requests[i + 1] = &request_batch_update;
+          this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, (*mpi_requests[i + 1]), i, 0, 1,
               end_process, false);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
@@ -193,7 +193,7 @@ public:
           stop_clock_and_add(t, "Computation Time");
 
           t = start_clock();
-          this->data_comm_cache[j].get()->transfer_data(
+          this->data_comm_cache[0].get()->transfer_data(
               update_ptr.get(), false, request_batch_update_cyclic, i, 0, k,
               end_process, true);
 
@@ -204,8 +204,8 @@ public:
             // local computation
             this->calc_t_dist_grad_rowptr(
                 csr_block, prevCoordinates, lr, 0, batch_size,
-                considering_batch_size, true, true, cache_misses_ptr.get(),
-                cache_misses_col_ptr.get(), 0, 0, false);
+                considering_batch_size, true, true,
+                0, 0, false);
 
           } else if (k > 1) {
             int prev_end_process =
@@ -213,15 +213,15 @@ public:
 
             this->calc_t_dist_grad_rowptr(
                 csr_block, prevCoordinates, lr, 0, batch_size,
-                considering_batch_size, false, true, cache_misses_ptr.get(),
-                cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
+                considering_batch_size, false, true,
+                prev_start, prev_end_process, true);
 
             this->dense_local->invalidate_cache(i, 0, true);
           }
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
 
-          this->data_comm_cache[j].get()->populate_cache(
+          this->data_comm_cache[0].get()->populate_cache(
               update_ptr.get(), request_batch_update_cyclic, false, i, 0, true);
 
           temp_mem += get_memory_usage();
@@ -241,8 +241,8 @@ public:
         // updating last remote fetched data vectors
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, 0, batch_size,
-            considering_batch_size, false, true, cache_misses_ptr.get(),
-            cache_misses_col_ptr.get(), prev_start, prev_end_process, true);
+            considering_batch_size, false, true,
+            prev_start, prev_end_process, true);
 
         this->dense_local->invalidate_cache(i, 0, true);
         update_ptr.get()->resize(0);
