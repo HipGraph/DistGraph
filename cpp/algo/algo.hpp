@@ -84,7 +84,7 @@ public:
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
-    vector<MPI_Request *> mpi_requests(batches);
+    vector<MPI_Request*> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
       MPI_Request fetch_batch;
@@ -99,8 +99,9 @@ public:
                                                    grid, i, alpha));
 
         data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+        if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " preperation data" << i << endl;
         data_comm_cache[i].get()->onboard_data();
-        if (this->grid->global_rank ==0)  cout << " rank " << this->grid->global_rank << " cache inserted " << i << endl;
+        if (this->grid->global_rank ==0)  cout << " rank " << this->grid->global_rank << " onboardered  " << i << endl;
         if (alpha > 0) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();

@@ -34,7 +34,6 @@ private:
   vector<int> rdispls_cyclic;
   vector<vector<uint64_t>> receive_col_ids_list;
   vector<vector<uint64_t>> send_col_ids_list;
-  unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf;
   unordered_map<uint64_t, vector<int>> send_indices_to_proc_map;
 
   // related to cache misses
@@ -138,12 +137,6 @@ public:
         uint64_t local_key = send_col_ids_list[i][j];
         send_indices_to_proc_map[local_key][i] = 1;
       }
-    }
-
-    sendbuf = unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>
-        (new vector<DataTuple<DENT, embedding_dim>>());
-    if (total_send_count > 0 and alpha > 0) {
-      sendbuf->resize(total_send_count);
     }
   }
 
