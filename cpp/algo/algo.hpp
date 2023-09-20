@@ -169,8 +169,7 @@ public:
         // local computation for first batch
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                       batch_size, considering_batch_size, true,
-                                      true, cache_misses_ptr.get(),
-                                      cache_misses_col_ptr.get(), 0, 0, false);
+                                      true,  0, 0, false);
 
         if (this->alpha < 1.0) {
           int proc_length = get_proc_length(this->beta, this->grid->world_size);
@@ -441,8 +440,6 @@ public:
       }
     } else {
       for (int r = start_process; r < end_process; r++) {
-        (*cache_misses)[r].clear();
-        (*cache_misses_col)[r].clear();
         if (r != grid->global_rank) {
           dst_start_index = this->sp_local_receiver->proc_row_width * r;
           dst_end_index =
@@ -455,8 +452,7 @@ public:
             calc_embedding(source_start_index, source_end_index,
                            dst_start_index, dst_end_index, csr_block,
                            prevCoordinates, lr, batch_id, batch_size,
-                           block_size, cache_misses, cache_misses_col,
-                           fetch_from_temp_cache);
+                           block_size,fetch_from_temp_cache);
           } else {
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
