@@ -54,15 +54,13 @@ public:
     this->data_comm_cache[0].get()->onboard_data();
 
 
-
     if (this->alpha > 0) {
       stop_clock_and_add(t, "Computation Time");
       t = start_clock();
 
-      int proc_length = get_proc_length(this->alpha, this->grid->world_size);
+      int end_proc = get_end_proc(1,this->alpha, this->grid->world_size);
       this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false,
-                                                    (*mpi_requests[0]), 0, 0, 1,
-                                                    proc_length, false);
+                                                    (*mpi_requests[0]), 0, 0, 1, end_proc, false);
 
       stop_clock_and_add(t, "Communication Time");
       t = start_clock();
