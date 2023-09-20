@@ -137,6 +137,7 @@ public:
                                             batch_size, considering_batch_size,
                                             false, true, prev_start,
                                             prev_end_process, true);
+              this->dense_local->invalidate_cache(i, 0, true);
             }
             stop_clock_and_add(t, "Computation Time");
 
