@@ -120,16 +120,13 @@ public:
 
             t = start_clock();
             update_ptr.get()->clear();
-            this->data_comm_cache[i].get()->transfer_data(
-                update_ptr.get(), false, misses_update_request, 0, 0, k,
-                end_process, true);
+            this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, misses_update_request, i, 0, k,end_process, true);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k == prev_start) {
               // remote computation for first batch
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
-                                            batch_size, considering_batch_size,
-                                            false, true, 0,
+              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,batch_size,
+                                            considering_batch_size,false, true, 0,
                                             this->grid->world_size, false);
 
             } else if (k > prev_start) {
