@@ -78,13 +78,11 @@ public:
          << endl;
 
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-        new DataComm<SPT, DENT, embedding_dim>(
-            sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
+        new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
 
     // first batch onboarding
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(new vector<DataTuple<DENT, embedding_dim>>());
 
     vector<MPI_Request *> mpi_requests(batches);
 
@@ -131,7 +129,7 @@ public:
           int end_process = get_end_proc(1,alpha, grid->world_size);
           update_ptr.get()->clear();
           data_comm_cache[i + 1].get()->transfer_data(update_ptr.get(), false,
-                                                      (*mpi_requests[i + 1]), 0,i, 1, end_process, false);
+                                                      (*mpi_requests[i + 1]), 0,i+1, 1, end_process, false);
         }
         stop_clock_and_add(t, "Communication Time");
         t = start_clock();
