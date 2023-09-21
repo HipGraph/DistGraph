@@ -504,7 +504,7 @@ public:
 };
 
 template <typename SPT, typename DENT, size_t embedding_dim>
-std::unordered_map<uint64_t, std::vector<int>> DataComm<SPT, DENT, embedding_dim>::send_indices_to_proc_map;
+std::unordered_map<uint64_t, std::vector<BatchToProcMap>> DataComm<SPT, DENT, embedding_dim>::send_indices_to_proc_map;
 
 
 } // namespace distblas::net
