@@ -68,11 +68,11 @@ public:
     this->batch_id = batch_id;
     this->alpha = alpha;
 
-    if (batch_id==0) {
-      for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
-        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map.emplace(i,vector<int>(grid->world_size, 0));
-      }
-    }
+//    if (batch_id==0) {
+//      for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
+//        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map.emplace(i,vector<int>(grid->world_size, 0));
+//      }
+//    }
     sending_missing_cols_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
@@ -82,9 +82,15 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
   }
 
-  // storing cache misses sending metadata
-  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
-      data_comm_cache_misses_update;
+
+  static void initialize_send_indices_to_proc_map() {
+    if (send_indices_to_proc_map.empty()) {
+      // Perform the initialization once
+      for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
+        send_indices_to_proc_map.emplace(i, std::vector<int>(grid->world_size, 0));
+      }
+    }
+  }
 
   ~DataComm() {}
 
@@ -498,4 +504,9 @@ public:
     }
   }
 };
+
+template <typename SPT, typename DENT, size_t embedding_dim>
+std::unordered_map<uint64_t, std::vector<int>> DataComm<SPT, DENT, embedding_dim>::send_indices_to_proc_map;
+
+
 } // namespace distblas::net
