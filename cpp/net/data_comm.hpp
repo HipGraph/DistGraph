@@ -70,7 +70,7 @@ public:
 
     if (batch_id==0) {
       for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
-        send_indices_to_proc_map.emplace(i,vector<int>(grid->world_size, 0));
+        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map.emplace(i,vector<int>(grid->world_size, 0));
       }
     }
     sending_missing_cols_ptr =
@@ -124,7 +124,7 @@ public:
 
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         uint64_t local_key = send_col_ids_list[i][j];
-        send_indices_to_proc_map[local_key][i] = 1;
+        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map[local_key][i] = 1;
 //        auto it = send_indices_to_proc_map.find(local_key);
 //
 //        if (it != send_indices_to_proc_map.end()) {
@@ -184,7 +184,7 @@ public:
             new vector<DataTuple<DENT, embedding_dim>>());
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
-      for (const auto &pair : send_indices_to_proc_map) {
+      for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
         vector<int> proc_list = pair.second;
