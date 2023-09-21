@@ -68,11 +68,6 @@ public:
     this->batch_id = batch_id;
     this->alpha = alpha;
 
-//    if (batch_id==0) {
-//      for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
-//        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map.emplace(i,vector<int>(grid->world_size, 0));
-//      }
-//    }
     sending_missing_cols_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
@@ -83,11 +78,11 @@ public:
   }
 
 
-  static void initialize_send_indices_to_proc_map() {
+  static void initialize_send_indices_to_proc_map(int proc_row_width, int world_size) {
     if (send_indices_to_proc_map.empty()) {
       // Perform the initialization once
-      for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
-        send_indices_to_proc_map.emplace(i, std::vector<int>(grid->world_size, 0));
+      for (int i = 0; i < proc_row_width; i++) {
+        send_indices_to_proc_map.emplace(i, std::vector<int>(world_size, 0));
       }
     }
   }
