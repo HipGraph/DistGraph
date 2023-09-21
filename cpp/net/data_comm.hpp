@@ -79,7 +79,7 @@ public:
 //    } else {
       for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
         send_indices_to_proc_map.emplace(i, vector<int>(grid->world_size, 0));
-      }
+//      }
     }
 
     sending_missing_cols_ptr =
