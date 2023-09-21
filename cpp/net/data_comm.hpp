@@ -82,7 +82,10 @@ public:
     if (send_indices_to_proc_map.empty()) {
       // Perform the initialization once
       for (int i = 0; i < proc_row_width; i++) {
-        send_indices_to_proc_map.emplace(i, std::vector<BatchToProcMap>(world_size, 0));
+        BatchToProcMap m;
+        m.present = false;
+        m.batch_id = -1;
+        send_indices_to_proc_map.emplace(i, std::vector<BatchToProcMap>(world_size,m));
       }
     }
   }
