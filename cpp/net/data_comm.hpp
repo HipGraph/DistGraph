@@ -70,13 +70,13 @@ public:
     this->send_col_ids_list = vector<vector<uint64_t>>(grid->world_size);
     this->batch_id = batch_id;
     this->alpha = alpha;
-    if (batch_id >= 0) {
-      auto base_index = batch_id * sp_local_sender->batch_size;
-      for (int i = 0; i < sp_local_sender->batch_size; i++) {
-        send_indices_to_proc_map.emplace(base_index + i,
-                                         vector<int>(grid->world_size, 0));
-      }
-    } else {
+//    if (batch_id >= 0) {
+//      auto base_index = batch_id * sp_local_sender->batch_size;
+//      for (int i = 0; i < sp_local_sender->batch_size; i++) {
+//        send_indices_to_proc_map.emplace(base_index + i,
+//                                         vector<int>(grid->world_size, 0));
+//      }
+//    } else {
       for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
         send_indices_to_proc_map.emplace(i, vector<int>(grid->world_size, 0));
       }
@@ -132,10 +132,10 @@ public:
         sendcounts[i] = send_col_ids_list[i].size();
       }
 
-//      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
-//        uint64_t local_key = send_col_ids_list[i][j];
-//        send_indices_to_proc_map[local_key][i] = 1;
-//      }
+      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
+        uint64_t local_key = send_col_ids_list[i][j];
+        send_indices_to_proc_map[local_key][i] = 1;
+      }
     }
   }
 
