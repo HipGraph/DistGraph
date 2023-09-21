@@ -132,10 +132,10 @@ public:
         sendcounts[i] = send_col_ids_list[i].size();
       }
 
-      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
-        uint64_t local_key = send_col_ids_list[i][j];
-        send_indices_to_proc_map[local_key][i] = 1;
-      }
+//      for (int j = 0; j < send_col_ids_list[i].size(); j++) {
+//        uint64_t local_key = send_col_ids_list[i][j];
+//        send_indices_to_proc_map[local_key][i] = 1;
+//      }
     }
   }
 
