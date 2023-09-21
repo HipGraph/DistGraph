@@ -34,7 +34,7 @@ private:
   vector<int> rdispls_cyclic;
   vector<vector<uint64_t>> receive_col_ids_list;
   vector<vector<uint64_t>> send_col_ids_list;
-  unordered_map<uint64_t, vector<int>> send_indices_to_proc_map;
+  static unordered_map<uint64_t, vector<int>> send_indices_to_proc_map;
 
   // related to cache misses
   unique_ptr<vector<DataTuple<DENT, embedding_dim>>> sending_missing_cols_ptr;
@@ -68,11 +68,11 @@ public:
     this->batch_id = batch_id;
     this->alpha = alpha;
 
-    auto base_index = batch_id * sp_local_sender->batch_size;
-//    for (int i = 0; i < sp_local_sender->batch_size; i++) {
-//      send_indices_to_proc_map.emplace((base_index + i),vector<int>(grid->world_size, 0));
-//    }
-
+    if (batch_id==0) {
+      for (int i = 0; i < sp_local_sender->proc_row_width; i++) {
+        send_indices_to_proc_map.emplace(i,vector<int>(grid->world_size, 0));
+      }
+    }
     sending_missing_cols_ptr =
         unique_ptr<vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
@@ -124,14 +124,15 @@ public:
 
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         uint64_t local_key = send_col_ids_list[i][j];
-        auto it = send_indices_to_proc_map.find(local_key);
-
-        if (it != send_indices_to_proc_map.end()) {
-          send_indices_to_proc_map[local_key][i] = 1;
-        } else {
-          send_indices_to_proc_map.emplace(local_key,vector<int>(grid->world_size, 0));
-          send_indices_to_proc_map[local_key][i] = 1;
-        }
+        send_indices_to_proc_map[local_key][i] = 1;
+//        auto it = send_indices_to_proc_map.find(local_key);
+//
+//        if (it != send_indices_to_proc_map.end()) {
+//          send_indices_to_proc_map[local_key][i] = 1;
+//        } else {
+//          send_indices_to_proc_map.emplace(local_key,vector<int>(grid->world_size, 0));
+//          send_indices_to_proc_map[local_key][i] = 1;
+//        }
       }
     }
   }
