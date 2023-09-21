@@ -45,8 +45,8 @@ public:
     vector<MPI_Request*> mpi_requests(iterations);
 
     mpi_requests[0] = &fetch_batch;
-    DataComm<SPT, DENT, embedding_dim>::initialize_send_indices_to_proc_map(sp_local_sender->proc_row_width,
-                                                                            grid->world_size);
+    DataComm<SPT, DENT, embedding_dim>::initialize_send_indices_to_proc_map(this->sp_local_sender->proc_row_width,
+                                                                            this->grid->world_size);
     auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(
             this->sp_local_receiver, this->sp_local_sender, this->dense_local,
