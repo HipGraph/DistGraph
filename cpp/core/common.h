@@ -58,6 +58,12 @@ int get_end_proc(int  starting_index, double beta, int world_size);
 
 std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& originalSet, int count);
 
+
+struct BatchToProcMap {
+  bool present;
+  int batch_id
+};
+
 template <typename T> struct Tuple {
   int64_t row;
   int64_t col;
@@ -166,10 +172,6 @@ DENT  scale(DENT v){
   else if(v < -MAXBOUND) return -MAXBOUND;
   else return v;
 }
-
-
-
-
 
 }; // namespace distblas::core
 

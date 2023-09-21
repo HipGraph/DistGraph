@@ -129,14 +129,12 @@ public:
         stop_clock_and_add(t, "Computation Time");
         t = start_clock();
         data_comm_cache[i].get()->populate_cache(update_ptr.get(), (*mpi_requests[i]), false, 0, i, false);
-        if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " population   completed " << i << endl;
         if (batches > 1 and i < batches - 1) {
           mpi_requests[i + 1] = &fetch_batch_next;
           int end_process = get_end_proc(1,alpha, grid->world_size);
           update_ptr.get()->clear();
           data_comm_cache[i + 1].get()->transfer_data(update_ptr.get(), false,
                                                       (*mpi_requests[i + 1]), 0,i+1, 1, end_process, false);
-          if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " transfer   completed " << i+1 << endl;
         }
         stop_clock_and_add(t, "Communication Time");
         t = start_clock();

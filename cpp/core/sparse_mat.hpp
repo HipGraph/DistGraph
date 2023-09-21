@@ -112,8 +112,7 @@ public:
         for (int i = starting_index; i < end_index; i++) {
           if (rank != r and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
-                 j++) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               { proc_to_id_mapping[r].push_back(col_val); }
             }

@@ -34,7 +34,7 @@ private:
   vector<int> rdispls_cyclic;
   vector<vector<uint64_t>> receive_col_ids_list;
   vector<vector<uint64_t>> send_col_ids_list;
-  static unordered_map<uint64_t, vector<int>> send_indices_to_proc_map;
+  static unordered_map<uint64_t, vector<BatchToProcMap>> send_indices_to_proc_map;
 
   // related to cache misses
   unique_ptr<vector<DataTuple<DENT, embedding_dim>>> sending_missing_cols_ptr;
@@ -82,7 +82,7 @@ public:
     if (send_indices_to_proc_map.empty()) {
       // Perform the initialization once
       for (int i = 0; i < proc_row_width; i++) {
-        send_indices_to_proc_map.emplace(i, std::vector<int>(world_size, 0));
+        send_indices_to_proc_map.emplace(i, std::vector<BatchToProcMap>(world_size, 0));
       }
     }
   }
@@ -97,7 +97,7 @@ public:
     this->sp_local_receiver->fill_col_ids(batch_id, receive_col_ids_list,
                                           alpha);
 
-    //    // calculating sending data cols
+    // calculating sending data cols
     this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list, alpha);
 
     // This needs to be changed
@@ -125,7 +125,10 @@ public:
 
       for (int j = 0; j < send_col_ids_list[i].size(); j++) {
         uint64_t local_key = send_col_ids_list[i][j];
-        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map[local_key][i] = 1;
+        BatchToProcMap m;
+        m.present = true;
+        m.batch_id = batch_id;
+        DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map[local_key][i] = m;
 //        auto it = send_indices_to_proc_map.find(local_key);
 //
 //        if (it != send_indices_to_proc_map.end()) {
@@ -188,10 +191,10 @@ public:
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
-        vector<int> proc_list = pair.second;
+        vector<BatchToProcMap> proc_list = pair.second;
         std::array<DENT, embedding_dim> dense_vector;
         for (int i = 0; i < sending_procs.size(); i++) {
-          if (proc_list[sending_procs[i]] == 1) {
+          if (proc_list[sending_procs[i]].present and proc_list[sending_procs[i]].batch_id== batch_id) {
             if (!already_fetched) {
               dense_vector = (this->dense_local)->fetch_local_data(col_id);
               already_fetched = true;
