@@ -61,7 +61,7 @@ std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& o
 
 struct BatchToProcMap {
   bool present;
-  int batch_id
+  int batch_id;
 };
 
 template <typename T> struct Tuple {
