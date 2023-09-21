@@ -90,7 +90,6 @@ public:
       MPI_Request fetch_batch;
       MPI_Request fetch_batch_next;
       update_ptr.get()->clear();
-      if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " onboarding data" << i << endl;
 
       if (i == 0) {
         auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
@@ -99,9 +98,7 @@ public:
                                                    grid, i, alpha));
 
         data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
-        if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " preperation data" << i << endl;
         data_comm_cache[i].get()->onboard_data();
-        if (this->grid->global_rank ==0)  cout << " rank " << this->grid->global_rank << " onboardered  " << i << endl;
         if (alpha > 0) {
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
@@ -113,7 +110,7 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-        if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " transfer completed " << i << endl;
+
       }
 
 
@@ -126,7 +123,6 @@ public:
         data_comm_cache[i + 1].get()->onboard_data();
       }
 
-      if (this->grid->global_rank ==0) cout << " rank " << this->grid->global_rank << " insetion  completed " << i+1 << endl;
       if (alpha > 0) {
         stop_clock_and_add(t, "Computation Time");
         t = start_clock();

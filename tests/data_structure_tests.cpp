@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
 
   // To enable full batch size
-//  batch_size = localARows;
+  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
