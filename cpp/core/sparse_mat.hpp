@@ -81,7 +81,7 @@ public:
 
   // if batch_id<0 it will fetch all the batches
   void fill_col_ids(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
-                    unordered_map<uint64_t, vector<vector<int>>> &id_to_proc_mapping,
+                    unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping,
                     double alpha) {
 
     if (alpha == 0) {
