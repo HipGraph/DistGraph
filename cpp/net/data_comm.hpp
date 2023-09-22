@@ -144,7 +144,7 @@ public:
         std::array<DENT, embedding_dim> dense_vector;
 
         for (int i = 0; i < sending_procs.size(); i++) {
-          if (pair.second[sending_procs[i]]) {
+          if (pair.second.at(sending_procs[i])) {
             if (!already_fetched) {
               dense_vector = (this->dense_local)->fetch_local_data(col_id);
               already_fetched = true;
