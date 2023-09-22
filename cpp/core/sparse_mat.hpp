@@ -80,19 +80,19 @@ public:
   }
 
   // if batch_id<0 it will fetch all the batches
-  void fill_col_ids(int batch_id, vector<vector<uint64_t>> &proc_to_id_mapping,
+  void fill_col_ids(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
+                    unordered_map<uint64_t, vector<vector<int>>> &id_to_proc_mapping,
                     double alpha) {
 
     if (alpha == 0) {
-      fill_col_ids_for_pulling(batch_id, proc_to_id_mapping);
-
+      fill_col_ids_for_pulling(batch_id, proc_to_id_mapping,id_to_proc_mapping);
     } else {
-
-      fill_col_ids_for_pushing(batch_id, proc_to_id_mapping);
+      fill_col_ids_for_pushing(batch_id, proc_to_id_mapping,id_to_proc_mapping);
     }
   }
 
-  void fill_col_ids_for_pulling(int batch_id, vector<vector<uint64_t>> &proc_to_id_mapping) {
+  void fill_col_ids_for_pulling(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
+                                unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
 
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD,
@@ -114,7 +114,9 @@ public:
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
-              { proc_to_id_mapping[r].push_back(col_val); }
+              { proc_to_id_mapping[r].insert(col_val);
+                id_to_proc_mapping[col_val][r] = true;
+              }
             }
           }
         }
@@ -134,7 +136,8 @@ public:
               uint64_t dst_end_index =
                   std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
-                { proc_to_id_mapping[r].push_back(i); }
+                { proc_to_id_mapping[r].insert(i);
+                }
               }
             }
           }
@@ -143,7 +146,8 @@ public:
     }
   }
 
-  void fill_col_ids_for_pushing(int batch_id, vector<vector<uint64_t>> &proc_to_id_mapping) {
+  void fill_col_ids_for_pushing(int batch_id, vector<set<uint64_t>> &proc_to_id_mapping,
+                                unordered_map<uint64_t, vector<vector<int>>> &id_to_proc_mapping) {
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -182,7 +186,9 @@ public:
               if (col_val >= eligible_col_id_start and
                   col_val < eligible_col_id_end) {
                 // calculation of sender col_ids
-                { proc_to_id_mapping[r].push_back(col_val); }
+                { proc_to_id_mapping[r].insert(col_val);
+                  id_to_proc_mapping[col_val][r] = true;
+                }
               }
             }
           }
@@ -207,7 +213,7 @@ public:
                       1;
         for (auto i = starting_index; i <= (end_index); i++) {
           if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 ) {
-            proc_to_id_mapping[r].push_back(i);
+            proc_to_id_mapping[r].insert(i);
           }
         }
       }
