@@ -77,8 +77,6 @@ public:
     cout << " rank " << this->grid->global_rank << " total batches " << batches
          << endl;
 
-    DataComm<SPT, DENT, embedding_dim>::initialize_send_indices_to_proc_map(sp_local_sender->proc_row_width,
-                                                                            grid->world_size,batches);
     auto negative_update_com = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
         new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
 
