@@ -34,8 +34,8 @@ private:
   vector<int> rdispls_cyclic;
   vector<unordered_set<uint64_t>> receive_col_ids_list;
   vector<unordered_set<uint64_t>> send_col_ids_list;
-  unordered_map<uint64_t, vector<vector<int>>> send_indices_to_proc_map;
-  unordered_map<uint64_t, vector<vector<int>>> receive_indices_to_proc_map;
+  unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
+  unordered_map<uint64_t, unordered_map<int,bool>> receive_indices_to_proc_map;
 
 
   int batch_id;
