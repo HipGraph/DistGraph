@@ -146,8 +146,8 @@ public:
     }
   }
 
-  void fill_col_ids_for_pushing(int batch_id, vector<set<uint64_t>> &proc_to_id_mapping,
-                                unordered_map<uint64_t, vector<vector<int>>> &id_to_proc_mapping) {
+  void fill_col_ids_for_pushing(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
+                                unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
