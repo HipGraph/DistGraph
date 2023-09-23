@@ -138,7 +138,7 @@ public:
 
           for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
             update_ptr.get()->clear();
-            full_com.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, alpha_cyc_start, k, false);
+            full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, alpha_cyc_start, k, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
 
@@ -155,7 +155,7 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            full_com.get()->populate_cache(update_ptr.get(), fetch_batch, false,0, 0, false);
+            full_comm.get()->populate_cache(update_ptr.get(), fetch_batch, false,0, 0, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             prev_start_proc = alpha_cyc_start;
@@ -169,7 +169,7 @@ public:
           if (this->alpha < 1.0) {
             int proc_length = get_proc_length(this->beta, this->grid->world_size);
             int beta_prev_start = get_end_proc(1, this->alpha, this->grid->world_size);
-            for (int k = prev_start; k < this->grid->world_size; k += proc_length) {
+            for (int k = beta_prev_start; k < this->grid->world_size; k += proc_length) {
               MPI_Request misses_update_request;
               int end_process = get_end_proc(k, this->beta, this->grid->world_size);
               stop_clock_and_add(t, "Computation Time");
@@ -189,7 +189,7 @@ public:
 
               } else if (k > beta_prev_start) {
                 // updating last remote fetched data vectors
-                int prev_end_process = get_end_proc(prev_start, this->beta,
+                int prev_end_process = get_end_proc(beta_prev_start, this->beta,
                                                     this->grid->world_size);
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, 0, batch_size,
@@ -202,7 +202,7 @@ public:
               this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), misses_update_request, false, i, 0, true);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
-              prev_start = k;
+              beta_prev_start = k;
             }
           }
         }
@@ -371,7 +371,7 @@ public:
                   this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
                                                 next_batch_id, batch_size,
                                                 considering_batch_size, false,
-                                                true, , prev_start, false);
+                                                true,  prev_start, false);
 
                 } else if (k > prev_start) {
                   // updating last remote fetched data vectors
