@@ -87,6 +87,7 @@ public:
     vector<MPI_Request*> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
+      cout << " rank " << this->grid->global_rank << " on boarding data for batch  " << i <<" out of "<<batches << endl;
       MPI_Request fetch_batch;
       MPI_Request fetch_batch_next;
       update_ptr.get()->clear();
@@ -139,8 +140,7 @@ public:
       }
     }
 
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
 
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
