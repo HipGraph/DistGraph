@@ -80,18 +80,18 @@ public:
   }
 
   // if batch_id<0 it will fetch all the batches
-  void fill_col_ids(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
-                    unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping,
-                    double alpha) {
+  void fill_col_ids(int batch_id, int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
+                    unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
 
-    if (alpha == 0) {
-      fill_col_ids_for_pulling(batch_id, proc_to_id_mapping,id_to_proc_mapping);
+    if (mode == 0) {
+
+      fill_col_ids_for_pulling(batch_id,starting_proc,end_proc, proc_to_id_mapping,id_to_proc_mapping);
     } else {
-      fill_col_ids_for_pushing(batch_id, proc_to_id_mapping,id_to_proc_mapping);
+      fill_col_ids_for_pushing(batch_id, starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
     }
   }
 
-  void fill_col_ids_for_pulling(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
+  void fill_col_ids_for_pulling(int batch_id, int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
                                 unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
 
     int rank, world_size;
@@ -102,32 +102,39 @@ public:
 
     distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
 
+    vector<int> procs;
+    for (int i = starting_proc; i < end_proc; i++) {
+      int rank  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
+      procs.push_back(rank);
+    }
+
+
     if (col_partitioned) {
 
-      for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = batch_id * batch_size + proc_row_width * r;
+      for (int r = 0 ; r < procs.size(); r++) {
+        uint64_t starting_index = batch_id * batch_size + proc_row_width * procs[r];
         auto end_index =
-            std::min(std::min((starting_index+batch_size),static_cast<uint64_t>((r + 1) * proc_row_width)), gRows);
+            std::min(std::min((starting_index+batch_size),static_cast<uint64_t>((procs[r] + 1) * proc_row_width)), gRows);
 
         for (int i = starting_index; i < end_index; i++) {
-          if (rank != r and
+          if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
-              { proc_to_id_mapping[r].insert(col_val);
-                id_to_proc_mapping[col_val][r] = true;
+              { proc_to_id_mapping[procs[r]].insert(col_val);
+                id_to_proc_mapping[col_val][procs[r]] = true;
               }
             }
           }
         }
       }
     } else if (transpose) {
-      for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = proc_col_width * r;
+      for (int r = 0 ; r < procs.size(); r++) {
+        uint64_t starting_index = proc_col_width * procs[r];
         auto end_index =
-            std::min(static_cast<uint64_t>((r + 1) * proc_col_width), gCols);
+            std::min(static_cast<uint64_t>((procs[r] + 1) * proc_col_width), gCols);
         for (int i = starting_index; i < end_index; i++) {
-          if (rank != r and
+          if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
                  j++) {
@@ -136,7 +143,7 @@ public:
               uint64_t dst_end_index =
                   std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
-                { proc_to_id_mapping[r].insert(i);
+                { proc_to_id_mapping[procs[r]].insert(i);
                 }
               }
             }
@@ -146,7 +153,7 @@ public:
     }
   }
 
-  void fill_col_ids_for_pushing(int batch_id, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
+  void fill_col_ids_for_pushing(int batch_id,int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
                                 unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
     int rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -161,12 +168,18 @@ public:
       batches = (proc_row_width / batch_size) + 1;
     }
 
+    vector<int> procs;
+    for (int i = starting_proc; i < end_proc; i++) {
+      int rank  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
+      procs.push_back(rank);
+    }
+
     if (col_partitioned) {
       // calculation of sender col_ids
 //      #pragma omp parallel for
-      for (int r = 0; r < world_size; r++) {
-        uint64_t starting_index = proc_row_width * r;
-        auto end_index = std::min(static_cast<uint64_t>((r + 1) * proc_row_width), gRows) -1;
+      for (int r = 0 ; r < procs.size(); r++) {
+        uint64_t starting_index = proc_row_width * procs[r];
+        auto end_index = std::min(static_cast<uint64_t>((procs[r] + 1) * proc_row_width), gRows) -1;
 
         auto eligible_col_id_start =
             (batch_id >= 0) ? batch_id * batch_size : 0;
@@ -178,7 +191,7 @@ public:
 
         for (auto i = starting_index; i <= (end_index); i++) {
 
-          if (rank != r and
+          if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
                  j++) {
@@ -186,8 +199,8 @@ public:
               if (col_val >= eligible_col_id_start and
                   col_val < eligible_col_id_end) {
                 // calculation of sender col_ids
-                { proc_to_id_mapping[r].insert(col_val);
-                  id_to_proc_mapping[col_val][r] = true;
+                { proc_to_id_mapping[procs[r]].insert(col_val);
+                  id_to_proc_mapping[col_val][procs[r]] = true;
                 }
               }
             }
@@ -197,23 +210,23 @@ public:
     } else if (transpose) {
       // calculation of receiver col_ids
 //#pragma omp parallel for
-      for (int r = 0; r < world_size; r++) {
+      for (int r = 0 ; r < procs.size(); r++) {
         uint64_t starting_index =
-            (batch_id >= 0) ? batch_id * batch_size + proc_col_width * r
-                            : proc_col_width * r;
+            (batch_id >= 0) ? batch_id * batch_size + proc_col_width * procs[r]
+                            : proc_col_width *  procs[r];
         auto end_index =
             (batch_id >= 0)
                 ? std::min(
                       starting_index + batch_size,
-                      std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
+                      std::min(static_cast<uint64_t>(( procs[r] + 1) * proc_col_width),
                                gCols)) -
                       1
-                : std::min(static_cast<uint64_t>((r + 1) * proc_col_width),
+                : std::min(static_cast<uint64_t>(( procs[r] + 1) * proc_col_width),
                            gCols) -
                       1;
         for (auto i = starting_index; i <= (end_index); i++) {
-          if (rank != r and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 ) {
-            proc_to_id_mapping[r].insert(i);
+          if (rank !=  procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 ) {
+            proc_to_id_mapping[procs[r]].insert(i);
           }
         }
       }

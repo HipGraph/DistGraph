@@ -111,9 +111,7 @@ public:
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
         }
-
       }
-
 
       if (batches > 1 and i < batches - 1) {
         auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
@@ -171,8 +169,7 @@ public:
         if (this->alpha < 1.0) {
           int proc_length = get_proc_length(this->beta, this->grid->world_size);
           int prev_start = get_end_proc(1, this->alpha, this->grid->world_size);
-          for (int k = prev_start; k < this->grid->world_size;
-               k += proc_length) {
+          for (int k = prev_start; k < this->grid->world_size; k += proc_length) {
             MPI_Request misses_update_request;
             int end_process =
                 get_end_proc(k, this->beta, this->grid->world_size);
@@ -180,9 +177,7 @@ public:
 
             t = start_clock();
             update_ptr.get()->clear();
-            this->data_comm_cache[0].get()->transfer_data(
-                update_ptr.get(), false, misses_update_request, i, 0, k,
-                end_process, true);
+            this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, misses_update_request, i, 0, k, end_process, true);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             if (k == prev_start) {
@@ -190,7 +185,7 @@ public:
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                             batch_size, considering_batch_size,
                                             false, true, 0,
-                                            this->grid->world_size, false);
+                                            prev_start, false);
 
             } else if (k > prev_start) {
               // updating last remote fetched data vectors
@@ -204,8 +199,7 @@ public:
             }
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            this->data_comm_cache[0].get()->populate_cache(
-                update_ptr.get(), misses_update_request, false, i, 0, true);
+            this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), misses_update_request, false, i, 0, true);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             prev_start = k;
@@ -322,11 +316,8 @@ public:
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            int proc_length =
-                get_proc_length(this->alpha, this->grid->world_size);
-            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,
-                                                    request_batch_update, i, j,
-                                                    1, proc_length, false);
+            int end_proc = get_end_proc(1,this->alpha, this->grid->world_size);
+            data_comm_cache[j].get()->transfer_data(update_ptr.get(), false,request_batch_update, i, j,1, end_proc, false);
 
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -342,8 +333,7 @@ public:
           if (this->grid->world_size > 1) {
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update, false, i, j, false);
+            data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update, false, i, j, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
           }
@@ -365,7 +355,7 @@ public:
                   // remote computation for first batch
                   this->calc_t_dist_grad_rowptr(
                       csr_block, prevCoordinates, lr, j + 1, batch_size,
-                      considering_batch_size, false, true, 0, grid->world_size,
+                      considering_batch_size, false, true, 0, prev_start,
                       false);
 
                 } else if (k > prev_start) {

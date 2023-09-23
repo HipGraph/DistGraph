@@ -76,12 +76,34 @@ public:
     int total_send_count = 0;
     // processing chunks
     // calculating receiving data cols
-    this->sp_local_receiver->fill_col_ids(batch_id, receive_col_ids_list,receive_indices_to_proc_map,
-                                          alpha);
 
-    // calculating sending data cols
-    this->sp_local_sender->fill_col_ids(batch_id, send_col_ids_list,send_indices_to_proc_map,
-                                        alpha);
+    if (alpha==0) {
+      this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+
+      // calculating sending data cols
+      this->sp_local_sender->fill_col_ids(batch_id,0,grid->world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+    }else if (alpha == 1.0) {
+      this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
+
+      // calculating sending data cols
+      this->sp_local_sender->fill_col_ids(batch_id,0,grid->world_size, send_col_ids_list,send_indices_to_proc_map, 1);
+    }else if (alpha> 0 and alpha < 1.0){
+
+      int end_process = get_end_proc(1,alpha, grid->world_size);
+
+      this->sp_local_receiver->fill_col_ids(batch_id, 1, end_process, receive_col_ids_list,receive_indices_to_proc_map, 1);
+
+      // calculating sending data cols
+      this->sp_local_sender->fill_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
+
+      this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
+
+      // calculating sending data cols
+      this->sp_local_sender->fill_col_ids(batch_id,end_process, grid->world_size, send_col_ids_list,send_indices_to_proc_map, 1);
+
+    } else {
+      cout<<" Wrong alpha "<<endl;
+    }
 
     // This needs to be changed
     for (int i = 0; i < grid->world_size; i++) {
@@ -282,35 +304,7 @@ public:
     receivebuf->shrink_to_fit();
   }
 
-  void cross_validate_batch_from_metadata(int batch_id) {
-    int total_nodes = this->sp_local_receiver->gCols /
-                      this->sp_local_receiver->block_col_width;
-    for (int i = 0; i < total_nodes; i++) {
-      vector<uint64_t> col_ids;
-      this->sp_local_receiver->fill_col_ids(batch_id, i, col_ids, false, true);
-      for (int j = 0; j < col_ids.size(); j++) {
-        uint64_t global_col_id = col_ids[j];
-        uint64_t local_col_id =
-            global_col_id -
-            static_cast<uint64_t>(
-                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
-        bool fetch_from_cache = false;
 
-        int owner_rank = static_cast<int>(
-            global_col_id / (this->sp_local_receiver)->proc_row_width);
-        if (owner_rank != (this->grid)->global_rank) {
-          fetch_from_cache = true;
-        }
-        if (fetch_from_cache) {
-          if (!(this->dense_local)->searchForKey(global_col_id)) {
-            cout << " Assert not found my_rank " << grid->global_rank
-                 << "  target_rank " << owner_rank << " id " << global_col_id
-                 << "batch Id" << batch_id << endl;
-          }
-        }
-      }
-    }
-  }
 };
 
 } // namespace distblas::net
