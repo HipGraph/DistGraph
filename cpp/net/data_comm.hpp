@@ -96,10 +96,10 @@ public:
       // calculating sending data cols
       this->sp_local_sender->fill_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
 
-      this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
+      this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
 
       // calculating sending data cols
-      this->sp_local_sender->fill_col_ids(batch_id,end_process, grid->world_size, send_col_ids_list,send_indices_to_proc_map, 1);
+      this->sp_local_sender->fill_col_ids(batch_id,end_process, grid->world_size, send_col_ids_list,send_indices_to_proc_map, 0);
 
     } else {
       cout<<" Wrong alpha "<<endl;
