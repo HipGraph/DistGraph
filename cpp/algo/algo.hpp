@@ -161,11 +161,13 @@ public:
             prev_start_proc = alpha_cyc_start;
             alpha_cyc_start = k;
           }
-          // remote computation for first batch
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,batch_size,
-                                        considering_batch_size,
-                                        false, true, prev_start_proc,
-                                        alpha_proc_length, false);
+          if (alpha==1.0) {
+            // remote computation for first batch
+            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
+                                          batch_size, considering_batch_size,
+                                          false, true, prev_start_proc,
+                                          alpha_proc_length, false);
+          }
           if (this->alpha < 1.0) {
             int proc_length = get_proc_length(this->beta, this->grid->world_size);
             int beta_prev_start = get_end_proc(1, this->alpha, this->grid->world_size);
@@ -344,14 +346,12 @@ public:
                 prev_start_proc = alpha_cyc_start;
                 alpha_cyc_start = k;
               }
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
-                                            next_batch_id, batch_size,
-                                            considering_batch_size,
-                                            false, true,
-                                            prev_start_proc,alpha_proc_length ,
-                                            false);
-
-
+              if (alpha == 1.0) {
+                this->calc_t_dist_grad_rowptr(
+                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+                    considering_batch_size, false, true, prev_start_proc,
+                    alpha_proc_length, false);
+              }
               dense_local->invalidate_cache(i, j, false);
 
           if (alpha < 1.0) {
@@ -371,7 +371,7 @@ public:
                   this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr,
                                                 next_batch_id, batch_size,
                                                 considering_batch_size, false,
-                                                true,  prev_start, false);
+                                                true,  prev_start_proc,prev_start, false);
 
                 } else if (k > prev_start) {
                   // updating last remote fetched data vectors
