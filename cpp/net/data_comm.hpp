@@ -96,10 +96,10 @@ public:
       // calculating sending data cols
       this->sp_local_sender->fill_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
 
-//      this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
-//
-//      // calculating sending data cols
-//      this->sp_local_sender->fill_col_ids(batch_id,end_process, grid->world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+      this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+
+      // calculating sending data cols
+      this->sp_local_sender->fill_col_ids(batch_id,end_process, grid->world_size, send_col_ids_list,send_indices_to_proc_map, 0);
 
     } else {
       cout<<" Wrong alpha "<<endl;
@@ -109,8 +109,6 @@ public:
     for (int i = 0; i < grid->world_size; i++) {
         receivecounts[i] = receive_col_ids_list[i].size();
         sendcounts[i] = send_col_ids_list[i].size();
-       if (grid->global_rank == 0) cout<<" rank "<<grid->global_rank<<" sending  to "<<i<< " counts "<<sendcounts[i]<<endl;
-       if (grid->global_rank == 0)  cout<<" rank "<<grid->global_rank<<" receiving   from "<<i<< " counts "<<receivecounts[i]<<endl;
     }
   }
 
