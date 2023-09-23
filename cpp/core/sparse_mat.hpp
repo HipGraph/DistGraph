@@ -172,7 +172,7 @@ public:
     for (int i = starting_proc; i < end_proc; i++) {
       int  target  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
       procs.push_back(target);
-      if (grid->global_rank == 0) cout<<"pushing "<<target<<endl;
+      if (world_size == 0) cout<<"pushing "<<target<<endl;
     }
 
     if (col_partitioned) {
