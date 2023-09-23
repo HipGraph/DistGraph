@@ -109,8 +109,8 @@ public:
     for (int i = 0; i < grid->world_size; i++) {
         receivecounts[i] = receive_col_ids_list[i].size();
         sendcounts[i] = send_col_ids_list[i].size();
-        cout<<" rank "<<grid->global_rank<<" sending  to "<<i<< " counts "<<sendcounts[i]<<endl;
-        cout<<" rank "<<grid->global_rank<<" receiving   from "<<i<< " counts "<<receivecounts[i]<<endl;
+       if (grid->global_rank == 0) cout<<" rank "<<grid->global_rank<<" sending  to "<<i<< " counts "<<sendcounts[i]<<endl;
+       if (grid->global_rank == 0)  cout<<" rank "<<grid->global_rank<<" receiving   from "<<i<< " counts "<<receivecounts[i]<<endl;
     }
   }
 

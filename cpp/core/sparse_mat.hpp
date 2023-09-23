@@ -170,8 +170,9 @@ public:
 
     vector<int> procs;
     for (int i = starting_proc; i < end_proc; i++) {
-      int rank  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
-      procs.push_back(rank);
+      int  target  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
+      procs.push_back(target);
+      if (grid->global_rank == 0) cout<<"pushing "<<target<<endl;
     }
 
     if (col_partitioned) {
