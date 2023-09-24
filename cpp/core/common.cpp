@@ -6,7 +6,7 @@ MPI_Datatype distblas::core::SPTUPLE;
 MPI_Datatype distblas::core::DENSETUPLE;
 
 vector<string> distblas::core::perf_counter_keys = {
-    "Computation Time", "Communication Time", "Memory usage", "Data transfers"};
+    "Computation Time", "Communication Time", "Memory usage", "Data transfers","Total Time"};
 
 map<string, int> distblas::core::call_count;
 map<string, double> distblas::core::total_time;

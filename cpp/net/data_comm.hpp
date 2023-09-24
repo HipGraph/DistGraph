@@ -189,6 +189,7 @@ public:
     add_datatransfers(total_receive_count, "Data transfers");
 
     if (synchronous) {
+      auto t = start_clock();
       MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
@@ -196,11 +197,14 @@ public:
       MPI_Request dumy;
       this->populate_cache(receivebuf, dumy, true, iteration, batch_id,
                            temp_cache);
+      stop_clock_and_add(t, "Communication Time");
     } else {
+      auto t = start_clock();
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &request);
+      stop_clock_and_add(t, "Communication Time");
     }
     sendbuf_cyclic->clear();
     sendbuf_cyclic->shrink_to_fit();
@@ -271,6 +275,7 @@ public:
       }
     }
 
+    auto t = start_clock();
     MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
                   DENSETUPLE, (*receivebuf_ptr.get()).data(),
                   receive_counts_cyclic.data(), rdispls_cyclic.data(),
@@ -278,6 +283,7 @@ public:
     MPI_Request dumy;
     this->populate_cache(receivebuf_ptr.get(), dumy, true, iteration, batch_id,
                          true); // we should not do this
+    stop_clock_and_add(t, "Communication Time");
     sendbuf->clear();
     sendbuf->shrink_to_fit();
     //    delete[] sendbuf;
@@ -289,7 +295,9 @@ public:
                       int batch_id, bool temp) {
     if (!synchronous) {
       MPI_Status status;
+      auto t = start_clock();
       MPI_Wait(&request, &status);
+      stop_clock_and_add(t, "Communication Time");
     }
 
     for (int i = 0; i < this->grid->world_size; i++) {
