@@ -302,9 +302,8 @@ public:
             for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
               MPI_Request request_batch_update;
               update_ptr.get()->clear();
-             nsfer_data(update_ptr.get(), false, request_batch_update, i, j,
+              data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
                   k, (k+alpha_cyc_len), false);
-
               if (k == alpha_cyc_end) {
                 // local computation for first batch
                 this->calc_t_dist_grad_rowptr(
