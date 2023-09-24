@@ -136,12 +136,12 @@ public:
           int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
           int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
-          for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
+          for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
             if (this->grid->global_rank == 0) cout<< " alpha alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
-            full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, alpha_cyc_start, k, false);
+            full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, k, (k+alpha_cyc_len), false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
 
@@ -161,8 +161,8 @@ public:
             full_comm.get()->populate_cache(update_ptr.get(), fetch_batch, false,0, 0, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
-            prev_start_proc = alpha_cyc_start;
-            alpha_cyc_start = k;
+            prev_start_proc = k;
+            alpha_cyc_start = k+alpha_cyc_len;
           }
           if (alpha==1.0) {
             // remote computation for first batch
