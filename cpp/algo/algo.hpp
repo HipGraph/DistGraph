@@ -320,7 +320,7 @@ public:
             int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
             int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
-            for (int k = alpha_cyc_end; k < alpha_proc_length; k += alpha_cyc_len) {
+            for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
               MPI_Request request_batch_update;
               update_ptr.get()->clear();
               stop_clock_and_add(t, "Computation Time");
