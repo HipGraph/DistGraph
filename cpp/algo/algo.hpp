@@ -129,8 +129,7 @@ public:
         int alpha_cyc_start = 1;
         int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
         if (i == 0) {
-          stop_clock_and_add(t, "Computation Time");
-          t = start_clock();
+
           MPI_Request fetch_batch;
 
           int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
@@ -138,6 +137,8 @@ public:
 
           for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
             update_ptr.get()->clear();
+            stop_clock_and_add(t, "Computation Time");
+            t = start_clock();
             full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, alpha_cyc_start, k, false);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
@@ -317,14 +318,12 @@ public:
             int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
             int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
-            for (int k = alpha_cyc_end; k <= alpha_proc_length;
-                 k += alpha_cyc_len) {
+            for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
               MPI_Request request_batch_update;
               update_ptr.get()->clear();
               stop_clock_and_add(t, "Computation Time");
               t = start_clock();
-              data_comm_cache[j].get()->transfer_data(
-                  update_ptr.get(), false, request_batch_update, i, j,
+              data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
                   alpha_cyc_start, k, false);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
