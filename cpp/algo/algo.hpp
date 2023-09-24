@@ -128,14 +128,16 @@ public:
         int prev_start_proc = 0;
         int alpha_cyc_start = 1;
         int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
+        if (this->grid->global_rank == 0) cout<< " alpha end proc "<<alpha_proc_length<<endl;
         if (i == 0) {
 
           MPI_Request fetch_batch;
 
-          int alpha_cyc_len = get_proc_length(1, alpha_proc_length);
-          int alpha_cyc_end = get_end_proc(1, 1, alpha_proc_length);
+          int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
+          int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
           for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
+            if (this->grid->global_rank == 0) cout<< " alpha alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
             update_ptr.get()->clear();
             stop_clock_and_add(t, "Computation Time");
             t = start_clock();
