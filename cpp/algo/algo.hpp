@@ -317,16 +317,16 @@ public:
             int alpha_cyc_start = 1;
             int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
 
-            int alpha_cyc_len = get_proc_length(1, alpha_proc_length);
-            int alpha_cyc_end = get_end_proc(1, 1, alpha_proc_length);
+            int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
+            int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
-            for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
+            for (int k = alpha_cyc_end; k < alpha_proc_length; k += alpha_cyc_len) {
               MPI_Request request_batch_update;
               update_ptr.get()->clear();
               stop_clock_and_add(t, "Computation Time");
               t = start_clock();
               data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
-                  alpha_cyc_start, k, false);
+                  k, (k+alpha_cyc_len), false);
               stop_clock_and_add(t, "Communication Time");
               t = start_clock();
               if (k == alpha_cyc_end) {
@@ -348,8 +348,8 @@ public:
                 stop_clock_and_add(t, "Communication Time");
                 t = start_clock();
               }
-              prev_start_proc = alpha_cyc_start;
-              alpha_cyc_start = k;
+              prev_start_proc = k;
+              alpha_cyc_start = (k+alpha_cyc_len);
             }
             if (alpha == 1.0) {
               this->calc_t_dist_grad_rowptr(
