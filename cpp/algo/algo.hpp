@@ -132,8 +132,8 @@ public:
 
           MPI_Request fetch_batch;
 
-          int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
-          int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
+          int alpha_cyc_len = get_proc_length(1, alpha_proc_length);
+          int alpha_cyc_end = get_end_proc(1, 1, alpha_proc_length);
 
           for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
             update_ptr.get()->clear();
@@ -315,8 +315,8 @@ public:
             int alpha_cyc_start = 1;
             int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
 
-            int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
-            int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
+            int alpha_cyc_len = get_proc_length(1, alpha_proc_length);
+            int alpha_cyc_end = get_end_proc(1, 1, alpha_proc_length);
 
             for (int k = alpha_cyc_end; k <= alpha_proc_length; k += alpha_cyc_len) {
               MPI_Request request_batch_update;
