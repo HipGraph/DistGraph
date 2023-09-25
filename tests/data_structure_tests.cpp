@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   int ns = 5;
   double lr = 0.02;
 
-  bool spmm = false;
+  bool spmm = true;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
