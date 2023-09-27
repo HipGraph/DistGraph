@@ -280,10 +280,11 @@ public:
                   DENSETUPLE, (*receivebuf_ptr.get()).data(),
                   receive_counts_cyclic.data(), rdispls_cyclic.data(),
                   DENSETUPLE, MPI_COMM_WORLD);
+    stop_clock_and_add(t, "Communication Time");
     MPI_Request dumy;
     this->populate_cache(receivebuf_ptr.get(), dumy, true, iteration, batch_id,
                          true); // we should not do this
-    stop_clock_and_add(t, "Communication Time");
+
     sendbuf->clear();
     sendbuf->shrink_to_fit();
     //    delete[] sendbuf;
