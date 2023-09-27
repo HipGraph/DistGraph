@@ -140,7 +140,7 @@ public:
             if (this->grid->global_rank == 0) cout<< " alpha alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
             update_ptr.get()->clear();
 
-            full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, k, (k+alpha_cyc_len), false);
+            full_comm.get()->transfer_data(update_ptr.get(), true, fetch_batch,0, 0, k, (k+alpha_cyc_len), false);
 
             if (k == alpha_cyc_end) {
               // local computation for first batch
@@ -154,7 +154,7 @@ public:
                                             alpha_cyc_start, false);
             }
 
-            full_comm.get()->populate_cache(update_ptr.get(), fetch_batch, false,0, 0, false);
+//            full_comm.get()->populate_cache(update_ptr.get(), fetch_batch, false,0, 0, false);
 
             prev_start_proc = k;
             alpha_cyc_start = k+alpha_cyc_len;
@@ -173,7 +173,7 @@ public:
               int end_process = get_end_proc(k, this->beta, this->grid->world_size);
 
               update_ptr.get()->clear();
-              this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false,misses_update_request,i, 0, k,end_process, true);
+              this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), true,misses_update_request,i, 0, k,end_process, true);
 
               if (k == beta_prev_start) {
                 // remote computation for first batch
@@ -193,7 +193,7 @@ public:
                 dense_local->invalidate_cache(i, 0, true);
               }
 
-              this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), misses_update_request, false, i, 0, true);
+//              this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), misses_update_request, false, i, 0, true);
               beta_prev_start = k;
             }
           }
@@ -231,7 +231,7 @@ public:
             int end_process = get_end_proc(k, beta, grid->world_size);
 
             this->data_comm_cache[j].get()->transfer_data(
-                update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
+                update_ptr.get(), true, request_batch_update_cyclic, i, j, k,
                 end_process, true);
 
             if (k == 1) {
@@ -250,9 +250,9 @@ public:
               dense_local->invalidate_cache(i, j, true);
             }
 
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update_cyclic, false, i, j,
-                true);
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), request_batch_update_cyclic, false, i, j,
+//                true);
 
             prev_start = k;
             update_ptr.get()->clear();
@@ -302,7 +302,7 @@ public:
             for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
               MPI_Request request_batch_update;
               update_ptr.get()->clear();
-              data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
+              data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update, i, j,
                   k, (k+alpha_cyc_len), false);
               if (k == alpha_cyc_end) {
                 // local computation for first batch
@@ -317,8 +317,8 @@ public:
               }
               if (this->grid->world_size > 1) {
 
-                data_comm_cache[j].get()->populate_cache(
-                    update_ptr.get(), request_batch_update, false, i, j, false);
+//                data_comm_cache[j].get()->populate_cache(
+//                    update_ptr.get(), request_batch_update, false, i, j, false);
 
               }
               prev_start_proc = k;
@@ -344,7 +344,7 @@ public:
 
                 update_ptr.get()->clear();
                 this->data_comm_cache[next_batch_id].get()->transfer_data(
-                    update_ptr.get(), false, misses_update_request,
+                    update_ptr.get(), true, misses_update_request,
                     next_iteration, next_batch_id, k, end_process, true);
 
                 if (k == prev_start) {
@@ -366,9 +366,9 @@ public:
                                                 true);
                 }
 
-                this->data_comm_cache[next_batch_id].get()->populate_cache(
-                    update_ptr.get(), misses_update_request, false,
-                    next_iteration, next_batch_id, true);
+//                this->data_comm_cache[next_batch_id].get()->populate_cache(
+//                    update_ptr.get(), misses_update_request, false,
+//                    next_iteration, next_batch_id, true);
                 prev_start = k;
               }
             }
