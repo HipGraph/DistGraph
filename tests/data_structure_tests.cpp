@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   int ns = 5;
   double lr = 0.02;
 
-  bool spmm = false;
+  bool spmm = true;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
 
   // To enable full batch size
-//  batch_size = localARows;
+  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
