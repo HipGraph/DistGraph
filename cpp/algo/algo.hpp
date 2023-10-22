@@ -213,165 +213,179 @@ public:
 
           full_comm.get()->transfer_data(random_number_vec, i, j);
 
+        } else {
+          //local computations for 1 process
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        true, true, 0, 0, false);
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                         j, batch_size, considering_batch_size);
 
-        dense_local->invalidate_cache(i, j, true);
-
-        //  pull model code
-        if (alpha == 0) {
-          int proc_length = get_proc_length(beta, grid->world_size);
-          int prev_start = 0;
-          for (int k = 1; k < grid->world_size; k += proc_length) {
-
-            MPI_Request request_batch_update_cyclic;
-            int end_process = get_end_proc(k, beta, grid->world_size);
-
-            this->data_comm_cache[j].get()->transfer_data(
-                update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
-                end_process, true);
-
-            if (k == 1) {
-              // local computation
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                            batch_size, considering_batch_size,
-                                            true, true, 0, 0, false);
-
-            } else if (k > 1) {
-              int prev_end_process =
-                  get_end_proc(prev_start, beta, grid->world_size);
-              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                            batch_size, considering_batch_size,
-                                            false, true, prev_start,
-                                            prev_end_process, true);
-              dense_local->invalidate_cache(i, j, true);
-            }
-
-            data_comm_cache[j].get()->populate_cache(
-                update_ptr.get(), request_batch_update_cyclic, false, i, j,
-                true);
-
-            prev_start = k;
-            update_ptr.get()->clear();
-
-          }
-          int prev_end_process =
-              get_end_proc(prev_start, beta, grid->world_size);
-
-          // updating last remote fetched data vectors
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                        batch_size, considering_batch_size,
-                                        false, true, prev_start,
-                                        prev_end_process, true);
-
-          dense_local->invalidate_cache(i, j, true);
-          update_ptr.get()->resize(0);
-
-          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-          for (int k = 0; k < batch_size; k += 1) {
-            int IDIM = k * embedding_dim;
-            for (int d = 0; d < embedding_dim; d++) {
-              prevCoordinates[IDIM + d] = 0;
-            }
-          }
-
-        } else {
-          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-
-          if (!(i== iterations-1 and j == batches -1)) {
-            // clear up data
-            for (int k = 0; k < batch_size; k += 1) {
-              int IDIM = k * embedding_dim;
-              for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[IDIM + d] = 0;
-              }
-            }
-            int next_batch_id = (j + 1) % batches;
-            int next_iteration = (next_batch_id == 0) ? i + 1 : i;
-
-            int prev_start_proc = 0;
-            int alpha_cyc_start = 1;
-            int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
-
-            int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
-            int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
-
-            for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
-              MPI_Request request_batch_update;
-              update_ptr.get()->clear();
-              data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
-                  k, (k+alpha_cyc_len), false);
-              if (k == alpha_cyc_end) {
-                if (this->grid->global_rank == 0)
-                  cout<< " rank "<< this->grid->global_rank << " calculating local for batch  ("<<i<<","<<j<<")"<<endl;
-                // local computation for first batch
-                this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-                    considering_batch_size, true, true, 0, 0, false);
-              } else if (k > alpha_cyc_end) {
-                this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-                    considering_batch_size, false, true, prev_start_proc,
-                    alpha_cyc_start, false);
-              }
-              if (this->grid->world_size > 1) {
-
-                data_comm_cache[j].get()->populate_cache(
-                    update_ptr.get(), request_batch_update, false, i, j, false);
-
-              }
-              prev_start_proc = k;
-              alpha_cyc_start = (k+alpha_cyc_len);
-            }
-            if (alpha == 1.0) {
-              this->calc_t_dist_grad_rowptr(
-                  csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-                  considering_batch_size, false, true, prev_start_proc,
-                  alpha_cyc_start, false);
-            }
-            dense_local->invalidate_cache(i, j, false);
-
-            if (alpha < 1.0) {
-              int proc_length =
-                  get_proc_length(this->beta, this->grid->world_size);
-              int prev_start =
-                  get_end_proc(1, this->alpha, this->grid->world_size);
-              for (int k = prev_start; k < this->grid->world_size; k += proc_length) {
-                MPI_Request misses_update_request;
-                int end_process =
-                    get_end_proc(k, this->beta, this->grid->world_size);
-
-                update_ptr.get()->clear();
-                this->data_comm_cache[next_batch_id].get()->transfer_data(
-                    update_ptr.get(), false, misses_update_request,
-                    next_iteration, next_batch_id, k, end_process, true);
-
-                if (k == prev_start) {
-                  // remote computation for first batch
-                  this->calc_t_dist_grad_rowptr(
-                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-                      considering_batch_size, false, true, prev_start_proc,
-                      prev_start, false);
-
-                } else if (k > prev_start) {
-                  // updating last remote fetched data vectors
-                  int prev_end_process = get_end_proc(prev_start, this->beta,
-                                                      this->grid->world_size);
-                  this->calc_t_dist_grad_rowptr(
-                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-                      considering_batch_size, false, true, prev_start,
-                      prev_end_process, true);
-                  dense_local->invalidate_cache(next_iteration, next_batch_id,true);
-                }
-
-                this->data_comm_cache[next_batch_id].get()->populate_cache(update_ptr.get(), misses_update_request, false,next_iteration, next_batch_id, true);
-                prev_start = k;
-              }
-            }
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+        for (int k = 0; k < batch_size; k += 1) {
+          int IDIM = k * embedding_dim;
+          for (int d = 0; d < embedding_dim; d++) {
+            prevCoordinates[IDIM + d] = 0;
           }
         }
+
+//        dense_local->invalidate_cache(i, j, true);
+//
+//        //  pull model code
+//        if (alpha == 0) {
+//          int proc_length = get_proc_length(beta, grid->world_size);
+//          int prev_start = 0;
+//          for (int k = 1; k < grid->world_size; k += proc_length) {
+//
+//            MPI_Request request_batch_update_cyclic;
+//
+//            int end_process = get_end_proc(k, beta, grid->world_size);
+//
+//            this->data_comm_cache[j].get()->transfer_data(
+//                update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
+//                end_process, true);
+//
+//            if (k == 1) {
+//              // local computation
+//              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                            batch_size, considering_batch_size,
+//                                            true, true, 0, 0, false);
+//
+//            } else if (k > 1) {
+//              int prev_end_process =
+//                  get_end_proc(prev_start, beta, grid->world_size);
+//              this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                            batch_size, considering_batch_size,
+//                                            false, true, prev_start,
+//                                            prev_end_process, true);
+//              dense_local->invalidate_cache(i, j, true);
+//            }
+//
+//            data_comm_cache[j].get()->populate_cache(
+//                update_ptr.get(), request_batch_update_cyclic, false, i, j,
+//                true);
+//
+//            prev_start = k;
+//            update_ptr.get()->clear();
+//
+//          }
+//          int prev_end_process =
+//              get_end_proc(prev_start, beta, grid->world_size);
+//
+//          // updating last remote fetched data vectors
+//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                        batch_size, considering_batch_size,
+//                                        false, true, prev_start,
+//                                        prev_end_process, true);
+//
+//          dense_local->invalidate_cache(i, j, true);
+//          update_ptr.get()->resize(0);
+//
+//          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//          for (int k = 0; k < batch_size; k += 1) {
+//            int IDIM = k * embedding_dim;
+//            for (int d = 0; d < embedding_dim; d++) {
+//              prevCoordinates[IDIM + d] = 0;
+//            }
+//          }
+//
+//        } else {
+//          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//
+//          if (!(i== iterations-1 and j == batches -1)) {
+//            // clear up data
+//            for (int k = 0; k < batch_size; k += 1) {
+//              int IDIM = k * embedding_dim;
+//              for (int d = 0; d < embedding_dim; d++) {
+//                prevCoordinates[IDIM + d] = 0;
+//              }
+//            }
+//            int next_batch_id = (j + 1) % batches;
+//            int next_iteration = (next_batch_id == 0) ? i + 1 : i;
+//
+//            int prev_start_proc = 0;
+//            int alpha_cyc_start = 1;
+//            int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
+//
+//            int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
+//            int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
+//
+//            for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
+//              MPI_Request request_batch_update;
+//              update_ptr.get()->clear();
+//              data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
+//                  k, (k+alpha_cyc_len), false);
+//              if (k == alpha_cyc_end) {
+//                if (this->grid->global_rank == 0)
+//                  cout<< " rank "<< this->grid->global_rank << " calculating local for batch  ("<<i<<","<<j<<")"<<endl;
+//                // local computation for first batch
+//                this->calc_t_dist_grad_rowptr(
+//                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+//                    considering_batch_size, true, true, 0, 0, false);
+//              } else if (k > alpha_cyc_end) {
+//                this->calc_t_dist_grad_rowptr(
+//                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+//                    considering_batch_size, false, true, prev_start_proc,
+//                    alpha_cyc_start, false);
+//              }
+//              if (this->grid->world_size > 1) {
+//
+//                data_comm_cache[j].get()->populate_cache(
+//                    update_ptr.get(), request_batch_update, false, i, j, false);
+//
+//              }
+//              prev_start_proc = k;
+//              alpha_cyc_start = (k+alpha_cyc_len);
+//            }
+//            if (alpha == 1.0) {
+//              this->calc_t_dist_grad_rowptr(
+//                  csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+//                  considering_batch_size, false, true, prev_start_proc,
+//                  alpha_cyc_start, false);
+//            }
+//            dense_local->invalidate_cache(i, j, false);
+//
+//            if (alpha < 1.0) {
+//              int proc_length =
+//                  get_proc_length(this->beta, this->grid->world_size);
+//              int prev_start =
+//                  get_end_proc(1, this->alpha, this->grid->world_size);
+//              for (int k = prev_start; k < this->grid->world_size; k += proc_length) {
+//                MPI_Request misses_update_request;
+//                int end_process =
+//                    get_end_proc(k, this->beta, this->grid->world_size);
+//
+//                update_ptr.get()->clear();
+//                this->data_comm_cache[next_batch_id].get()->transfer_data(
+//                    update_ptr.get(), false, misses_update_request,
+//                    next_iteration, next_batch_id, k, end_process, true);
+//
+//                if (k == prev_start) {
+//                  // remote computation for first batch
+//                  this->calc_t_dist_grad_rowptr(
+//                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+//                      considering_batch_size, false, true, prev_start_proc,
+//                      prev_start, false);
+//
+//                } else if (k > prev_start) {
+//                  // updating last remote fetched data vectors
+//                  int prev_end_process = get_end_proc(prev_start, this->beta,
+//                                                      this->grid->world_size);
+//                  this->calc_t_dist_grad_rowptr(
+//                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+//                      considering_batch_size, false, true, prev_start,
+//                      prev_end_process, true);
+//                  dense_local->invalidate_cache(next_iteration, next_batch_id,true);
+//                }
+//
+//                this->data_comm_cache[next_batch_id].get()->populate_cache(update_ptr.get(), misses_update_request, false,next_iteration, next_batch_id, true);
+//                prev_start = k;
+//              }
+//            }
+//          }
+//        }
         total_memory += get_memory_usage();
       }
     }
