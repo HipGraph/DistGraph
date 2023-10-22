@@ -24,7 +24,7 @@ using namespace distblas::net;
 
 int main(int argc, char **argv) {
 
-  const int dimension = 128;
+  const int dimension = 2;
 
   string input_file = "";
   string output_file = "embedding.txt";
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
 
   // To enable full batch size
-  batch_size = localARows;
+//  batch_size = localARows;
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
