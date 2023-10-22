@@ -209,8 +209,6 @@ public:
             0, (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
-          MPI_Barrier(MPI_COMM_WORLD);
-
           full_comm.get()->transfer_data(random_number_vec, i, j);
 
         } else {
@@ -451,57 +449,6 @@ public:
     }
   }
 
-  inline void
-  calc_t_dist_grad_for_cache_misses(vector<vector<Tuple<DENT>>> *cache_misses,
-                                    DENT *prevCoordinates, int iteration,
-                                    int batch_id, int batch_size, double lr,
-                                    int starting_proc, int end_proc) {
-
-    vector<int> sending_procs;
-    vector<int> receiving_procs;
-
-    for (int i = starting_proc; i < end_proc; i++) {
-      int sending_rank = (grid->global_rank + i) % grid->world_size;
-      int receiving_rank =
-          (grid->global_rank >= i)
-              ? (grid->global_rank - i) % grid->world_size
-              : (grid->world_size - i + grid->global_rank) % grid->world_size;
-      sending_procs.push_back(sending_rank);
-      receiving_procs.push_back(receiving_rank);
-    }
-
-    //#pragma omp parallel for schedule(static)
-    for (int i = 0; i < sending_procs.size(); i++) {
-      for (int k = 0; k < (*cache_misses)[sending_procs[i]].size(); k++) {
-        uint64_t col_id = (*cache_misses)[sending_procs[i]][k].col;
-        uint64_t source_id = (*cache_misses)[sending_procs[i]][k].row;
-        auto index = source_id - batch_id * batch_size;
-        DENT forceDiff[embedding_dim];
-        DENT attrc = 0;
-        DENT *array_ptr =
-            (this->dense_local)
-                ->fetch_data_vector_from_cache(sending_procs[i], col_id, true);
-        for (int d = 0; d < embedding_dim; d++) {
-          forceDiff[d] =
-              (this->dense_local)->nCoordinates[source_id * embedding_dim + d] -
-              array_ptr[d];
-
-          attrc += forceDiff[d] * forceDiff[d];
-        }
-        DENT d1 = -2.0 / (1.0 + attrc);
-
-        for (int d = 0; d < embedding_dim; d++) {
-          DENT l = scale(forceDiff[d] * d1);
-          prevCoordinates[index * embedding_dim + d] =
-              prevCoordinates[index * embedding_dim + d] + (lr)*l;
-        }
-      }
-      (*cache_misses)[sending_procs[i]].clear();
-      (*cache_misses)[sending_procs[i]].shrink_to_fit();
-    }
-    dense_local->invalidate_cache(iteration, batch_id, true);
-  }
-
   inline void calc_embedding(uint64_t source_start_index,
                              uint64_t source_end_index,
                              uint64_t dst_start_index, uint64_t dst_end_index,
@@ -511,7 +458,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      //#pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
@@ -535,10 +482,6 @@ public:
                 array_ptr = (this->dense_local)
                                 ->fetch_data_vector_from_cache(target_rank, i,
                                                                temp_cache);
-
-                if (array_ptr == nullptr) {
-                  continue;
-                }
               }
               matched = true;
             }
