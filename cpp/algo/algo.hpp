@@ -92,9 +92,7 @@ public:
     vector<MPI_Request *> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
-      cout << " rank " << this->grid->global_rank
-           << " on boarding data for batch  " << i << " out of " << batches
-           << endl;
+      cout << " rank " << this->grid->global_rank << " on boarding data for batch  " << i << " out of " << batches << endl;
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
               sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
@@ -137,13 +135,14 @@ public:
           int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
           for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
-            if (this->grid->global_rank == 0) cout<< " alpha alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
+            if (this->grid->global_rank == 0) cout<< "  alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
             update_ptr.get()->clear();
 
             full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, k, (k+alpha_cyc_len), false);
 
             if (k == alpha_cyc_end) {
               // local computation for first batch
+              if (this->grid->global_rank == 0) cout<< " rank "<< this->grid->global_rank << " calculating local for batch  ("<<i<<",0)"<<endl;
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                             batch_size, considering_batch_size,
                                             true, true, 0, 0, false);
@@ -305,6 +304,8 @@ public:
               data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update, i, j,
                   k, (k+alpha_cyc_len), false);
               if (k == alpha_cyc_end) {
+                if (this->grid->global_rank == 0)
+                  cout<< " rank "<< this->grid->global_rank << " calculating local for batch  ("<<i<<","<<j<<")"<<endl;
                 // local computation for first batch
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, next_batch_id, batch_size,
@@ -362,13 +363,10 @@ public:
                       csr_block, prevCoordinates, lr, next_batch_id, batch_size,
                       considering_batch_size, false, true, prev_start,
                       prev_end_process, true);
-                  dense_local->invalidate_cache(next_iteration, next_batch_id,
-                                                true);
+                  dense_local->invalidate_cache(next_iteration, next_batch_id,true);
                 }
 
-                this->data_comm_cache[next_batch_id].get()->populate_cache(
-                    update_ptr.get(), misses_update_request, false,
-                    next_iteration, next_batch_id, true);
+                this->data_comm_cache[next_batch_id].get()->populate_cache(update_ptr.get(), misses_update_request, false,next_iteration, next_batch_id, true);
                 prev_start = k;
               }
             }
