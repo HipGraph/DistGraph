@@ -213,9 +213,9 @@ public:
 
         } else {
           //local computations for 1 process
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        true, false, 0, 0, false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        true, false, 0, 0, false);
         }
 
 //        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
