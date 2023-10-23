@@ -213,9 +213,9 @@ public:
 
         } else {
           //local computations for 1 process
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                        batch_size, considering_batch_size,
-                                        true, true, 0, 0, false);
+//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                        batch_size, considering_batch_size,
+//                                        true, true, 0, 0, false);
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
@@ -458,7 +458,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-      #pragma omp parallel for schedule(static)
+//      #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
