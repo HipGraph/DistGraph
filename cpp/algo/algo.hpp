@@ -518,8 +518,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for  // enable for full batch training or
-                                          // batch size larger than 1000000
+      #pragma omp parallel for  // enable for full batch training or batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -562,6 +561,8 @@ public:
             }
             DENT d1 = -2.0 / (1.0 + attrc);
 
+            #pragma forceinline
+            #pragma omp simd
             for (int d = 0; d < embedding_dim; d++) {
               DENT l = scale(forceDiff[d] * d1);
               prevCoordinates[index * embedding_dim + d] =
