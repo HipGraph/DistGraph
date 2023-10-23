@@ -213,9 +213,9 @@ public:
 
         } else {
           //local computations for 1 process
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        true, true, 0, 0, false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        true, false, 0, 0, false);
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
@@ -400,17 +400,12 @@ public:
                           int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
-    auto source_end_index = std::min((batch_id + 1) * batch_size,
-                                     this->sp_local_receiver->proc_row_width) -
-                            1;
+    auto source_end_index = std::min((batch_id + 1) * batch_size,this->sp_local_receiver->proc_row_width) -1;
 
-    auto dst_start_index =
-        this->sp_local_receiver->proc_col_width * this->grid->global_rank;
+    auto dst_start_index = this->sp_local_receiver->proc_col_width * this->grid->global_rank;
     auto dst_end_index =
         std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
-                                       (this->grid->global_rank + 1)),
-                 this->sp_local_receiver->gCols) -
-        1;
+                                       (this->grid->global_rank + 1)), this->sp_local_receiver->gCols) -1;
 
     if (local) {
       if (col_major) {
@@ -458,7 +453,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-//      #pragma omp parallel for schedule(static)
+      #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
         uint64_t local_dst = i - (this->grid)->global_rank *
