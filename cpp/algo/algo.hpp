@@ -218,8 +218,8 @@ public:
 //                                        true, false, 0, 0, false);
         }
 
-        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-                                        j, batch_size, considering_batch_size);
+//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+//                                        j, batch_size, considering_batch_size);
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         for (int k = 0; k < batch_size; k += 1) {
