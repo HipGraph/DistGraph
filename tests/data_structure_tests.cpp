@@ -18,9 +18,9 @@
 using json = nlohmann::json;
 
 using namespace std;
-using namespace distblas::io;
-using namespace distblas::partition;
-using namespace distblas::net;
+//using namespace distblas::io;
+//using namespace distblas::partition;
+//using namespace distblas::net;
 
 int main(int argc, char **argv) {
 
