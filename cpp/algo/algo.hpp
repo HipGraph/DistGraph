@@ -245,13 +245,13 @@ public:
                 // local computation
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, true, 0, 0, false);
+                    considering_batch_size, true, false, 0, 0, false);
                 cout << " rank " << grid->global_rank << " iteration " << i << "local computation completed "<<"batch "<<j<< endl;
 
               } else if (k > 1) {
                 int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
                 this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, false, true, prev_start,
+                    considering_batch_size, false, false, prev_start,
                     prev_end_process, true);
                 cout << " rank " << grid->global_rank << " iteration " << i << "remote computation completed "<<"batch "<<j<< endl;
 //                dense_local->invalidate_cache(i, j, true);
@@ -267,7 +267,7 @@ public:
             // updating last remote fetched data vectors
             this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
-                                          false, true, prev_start,
+                                          false, false, prev_start,
                                           prev_end_process, true);
             cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "<<j<< endl;
 
