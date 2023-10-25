@@ -48,7 +48,6 @@ add_library(disblas_lib SHARED
         cpp/algo/algo.hpp
         cpp/core/json.hpp
         cpp/partition/partitioner.cpp
-        cpp/core/csr_linked_list.hpp
         cpp/partition/partitioner.hpp)
 
 SET(BUILD_TESTS "" ON)
