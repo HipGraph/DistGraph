@@ -61,27 +61,23 @@ public:
 
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     auto t = start_clock();
+
     int batches = 0;
     int last_batch_size = batch_size;
 
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
     } else {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-      last_batch_size =
-          sp_local_receiver->proc_row_width - batch_size * (batches - 1);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+      last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
-         << endl;
+    cout << " rank " << this->grid->global_rank << " total batches " << batches << endl;
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
     auto full_comm = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-        new DataComm<SPT, DENT, embedding_dim>(
-            sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
+        new DataComm<SPT, DENT, embedding_dim>(sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
     full_comm.get()->onboard_data();
 
     // first batch onboarding
@@ -92,23 +88,19 @@ public:
     vector<MPI_Request *> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
-      cout << " rank " << this->grid->global_rank << " on boarding data for batch  " << i << " out of " << batches << endl;
-      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-          new DataComm<SPT, DENT, embedding_dim>(
+      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(new DataComm<SPT, DENT, embedding_dim>(
               sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
 
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
 
-    DENT *prevCoordinates = static_cast<DENT *>(
-        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+    DENT *prevCoordinates = static_cast<DENT *>(::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
     size_t total_memory = 0;
 
-    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+    CSRLocal<SPT> *csr_block = (this->sp_local_native)->csr_local_data.get();
 
     int considering_batch_size = batch_size;
 
@@ -393,8 +385,7 @@ public:
     mpi_requests.clear();
   }
 
-  inline void
-  calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, bool col_major, int start_process,
                           int end_process, bool fetch_from_temp_cache) {
@@ -509,8 +500,7 @@ public:
     }
   }
 
-  inline void
-  calc_embedding_row_major(uint64_t source_start_index,
+  inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
                            DENT *prevCoordinates, DENT lr, int batch_id,
@@ -572,9 +562,8 @@ public:
     }
   }
 
-  inline void calc_t_dist_replus_rowptr(DENT *prevCoordinates,
-                                        vector<uint64_t> &col_ids, DENT lr,
-                                        int batch_id, int batch_size,
+  inline void calc_t_dist_replus_rowptr(DENT *prevCoordinates,vector<uint64_t> &col_ids,
+                                        DENT lr,int batch_id, int batch_size,
                                         int block_size) {
 
     int row_base_index = batch_id * batch_size;
