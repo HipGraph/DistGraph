@@ -640,11 +640,15 @@ public:
 //    cout<<"batch size "<<batch_size<<" update size "<<(end_row - row_base_index)<<endl;
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
-      for (int d = 0; d < embedding_dim; d++) {
-        (this->dense_local)
-            ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
-            prevCoordinates[i * embedding_dim + d];
-      }
+//      for (int d = 0; d < embedding_dim; d++) {
+//        (this->dense_local)
+//            ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
+//            prevCoordinates[i * embedding_dim + d];
+//      }
+      int j = i+1;
+      int k = j+3;
+      int r = j+ k;
+      cout<<r<<endl;
     }
   }
 };
