@@ -64,19 +64,22 @@ int main(int argc, char **argv) {
   }
 
 
-    vector<int> result =  vector<int>(1000000000*1000);
+    vector<int> result =  vector<int>(1000000000*2);
     auto start = std::chrono::steady_clock::now();
 
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < (1000000000); i++) {
-      for (int d = 0; d < 1000; d++) {
+      for (int d = 0; d < 2; d++) {
         //        (this->dense_local)
         //            ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
         //            prevCoordinates[i * embedding_dim + d];
-        int j = i+1;
-        int k = j+3;
-        int r = j+ k;
-        result[i+d*1000]=r;
+        int r = 0;
+        for (int d = 0; d < 1000; d++) {
+          int j = i + 1;
+          int k = j + 3;
+          r = j + k;
+        }
+        result[i+d*2]=r;
       }
     }
 
