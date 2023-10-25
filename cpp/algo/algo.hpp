@@ -252,7 +252,7 @@ public:
                     considering_batch_size, false, false, prev_start,
                     prev_end_process, true);
 //                cout << " rank " << grid->global_rank << " iteration " << i << "remote computation completed "<<"batch "<<j<< endl;
-                dense_local->invalidate_cache(i, j, true);
+//                dense_local->invalidate_cache(i, j, true);
               }
 
               data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
@@ -270,7 +270,7 @@ public:
                                           prev_end_process, true);
 //            cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "<<j<< endl;
 
-            dense_local->invalidate_cache(i, j, true);
+//            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
 
             this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
