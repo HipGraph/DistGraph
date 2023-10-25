@@ -222,7 +222,7 @@ public:
           full_comm.get()->transfer_data(random_number_vec, i, j);
           this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                           j, batch_size, considering_batch_size);
-          dense_local->invalidate_cache(i, j, true);
+//          dense_local->invalidate_cache(i, j, true);
 
           //  pull model code
           if (alpha == 0) {
