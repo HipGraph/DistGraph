@@ -213,13 +213,13 @@ public:
 
         } else {
           //local computations for 1 process
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        true, false, 0, 0, false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        true, false, 0, 0, false);
         }
 
-//        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
-//                                        j, batch_size, considering_batch_size);
+        this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
+                                        j, batch_size, considering_batch_size);
 
         this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         for (int k = 0; k < batch_size; k += 1) {
@@ -635,19 +635,13 @@ public:
 
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,((this->sp_local_receiver)->proc_row_width));
-//    cout<<"batch size "<<batch_size<<" update size "<<(end_row - row_base_index)<<endl;
-    vector<int> result =  vector<int>((end_row - row_base_index)*embedding_dim);
 
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
-//        (this->dense_local)
-//            ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
-//            prevCoordinates[i * embedding_dim + d];
-        int j = i+1;
-        int k = j+3;
-        int r = j+ k;
-        result[i+d*embedding_dim]=r;
+        (this->dense_local)
+            ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
+            prevCoordinates[i * embedding_dim + d];
       }
     }
   }
