@@ -532,7 +532,7 @@ public:
             if (fetch_from_cache) {
               array_ptr = (this->dense_local)
                               ->fetch_data_vector_from_cache(target_rank,
-                                                             dst_id, false);
+                                                             dst_id, true);
               if (array_ptr == nullptr){
                 cout<<" rank "<<(this->grid)->global_rank<<" nulling "<<dst_id<<endl;
               }
