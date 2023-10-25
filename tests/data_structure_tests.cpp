@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
         int j = i+1;
         int k = j+3;
         int r = j+ k;
-        result[i+d*embedding_dim]=r;
+        result[i+d*2]=r;
       }
     }
 //  }
