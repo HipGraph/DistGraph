@@ -634,12 +634,11 @@ public:
   inline void update_data_matrix_rowptr(DENT *prevCoordinates, int batch_id, int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-    int end_row = std::min((batch_id + 1) * batch_size,
-                           ((this->sp_local_receiver)->proc_row_width));
+    int end_row = std::min((batch_id + 1) * batch_size,((this->sp_local_receiver)->proc_row_width));
 //    cout<<"batch size "<<batch_size<<" update size "<<(end_row - row_base_index)<<endl;
     vector<int> result =  vector<int>((end_row - row_base_index)*embedding_dim);
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
 //        (this->dense_local)
