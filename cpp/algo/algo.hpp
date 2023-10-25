@@ -223,6 +223,8 @@ public:
           this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                           j, batch_size, considering_batch_size);
 //          dense_local->invalidate_cache(i, j, true);
+          cout << " rank " << grid->global_rank << " iteration " << i << "repulsive calculation completed "<<"batch "<<j endl;
+
 
           //  pull model code
           if (alpha == 0) {
@@ -234,8 +236,7 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(
-                  update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
                   end_process, true);
 
               if (k == 1) {
@@ -243,20 +244,18 @@ public:
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, true, true, 0, 0, false);
+                cout << " rank " << grid->global_rank << " iteration " << i << "local computation completed "<<"batch "<<j endl;
 
               } else if (k > 1) {
-                int prev_end_process =
-                    get_end_proc(prev_start, beta, grid->world_size);
-                this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, j, batch_size,
+                int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
+                this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, false, true, prev_start,
                     prev_end_process, true);
+                cout << " rank " << grid->global_rank << " iteration " << i << "remote computation completed "<<"batch "<<j endl;
                 dense_local->invalidate_cache(i, j, true);
               }
 
-              data_comm_cache[j].get()->populate_cache(
-                  update_ptr.get(), request_batch_update_cyclic, false, i, j,
-                  true);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
 
               prev_start = k;
               update_ptr.get()->clear();
@@ -269,6 +268,7 @@ public:
                                           batch_size, considering_batch_size,
                                           false, true, prev_start,
                                           prev_end_process, true);
+            cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "<<j endl;
 
             dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
