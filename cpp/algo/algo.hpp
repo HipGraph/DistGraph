@@ -205,17 +205,17 @@ public:
         }
 
         // negative samples generation
-        vector<uint64_t> random_number_vec = generate_random_numbers(
-            0, (this->sp_local_receiver)->gRows, seed, ns);
+        vector<uint64_t> random_number_vec = generate_random_numbers(0,
+                                                                     (this->sp_local_receiver)->gRows, seed, ns);
 
         if (this->grid->world_size > 1) {
           full_comm.get()->transfer_data(random_number_vec, i, j);
 
         } else {
           //local computations for 1 process
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                        batch_size, considering_batch_size,
-                                        true, false, 0, 0, false);
+//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                        batch_size, considering_batch_size,
+//                                        true, false, 0, 0, false);
         }
 
         this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
