@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
         //            ->nCoordinates[(row_base_index + i) * embedding_dim + d] +=
         //            prevCoordinates[i * embedding_dim + d];
         int r = 0;
-        for (int d = 0; d < 1000; d++) {
+        for (int d = 0; d < 1000000; d++) {
           int j = i + 1;
           int k = j + 3;
           r = j + k;
