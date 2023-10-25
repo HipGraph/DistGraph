@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
     fout << j_obj.dump(4) << "," << endl;
 //  }
 //
-//  fout.close();
+  fout.close();
 //  //
 //  reader->parallel_write("embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension);
 //  //    dense_mat.get()->print_matrix_rowptr(0);
