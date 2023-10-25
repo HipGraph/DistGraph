@@ -145,14 +145,14 @@ json distblas::core::json_perf_statistics() {
   json j_obj;
   int rank;
   int world_size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+//  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
   for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
        it++) {
     double val = total_time[*it];
 
-    MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+//    MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     if( rank ==0) {
       cout<< (*it) <<val<<endl;
