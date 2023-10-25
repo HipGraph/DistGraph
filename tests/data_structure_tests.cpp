@@ -8,6 +8,7 @@
 //#include "../cpp/io/parrallel_IO.hpp"
 //#include "../cpp/net/data_comm.hpp"
 //#include "../cpp/partition/partitioner.hpp"
+#include "../cpp/core/json.hpp"
 #include <chrono>
 #include <cstring>
 #include <fstream>
