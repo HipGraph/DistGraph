@@ -63,7 +63,8 @@ int main(int argc, char **argv) {
 
 
     vector<int> result =  vector<int>(256*2);
-    auto t = start_clock();
+    auto start = std::chrono::steady_clock::now();
+
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < (256); i++) {
       for (int d = 0; d < 2; d++) {
@@ -76,7 +77,10 @@ int main(int argc, char **argv) {
         result[i+d*2]=r;
       }
     }
-    stop_clock_and_add(t, "Total Time");
+
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> diff = end - start;
+    return diff.count();
 //  }
 
 //  MPI_Init(&argc, &argv);
@@ -192,21 +196,21 @@ int main(int argc, char **argv) {
 //  //
 //  //
 //  //  cout << " rank " << rank << " training completed  " << endl;
-  ofstream fout;
-  fout.open("perf_output", std::ios_base::app);
-//
-  json j_obj;
-  j_obj["alpha"] = alpha;
-  j_obj["beta"] = beta;
-  j_obj["algo"] = "Embedding";
-//  j_obj["p"] = world_size;
-  j_obj["data_set"] = data_set_name;
-  j_obj["perf_stats"] = json_perf_statistics();
-//  if (rank == 0) {
-    fout << j_obj.dump(4) << "," << endl;
-//  }
-//
-  fout.close();
+//  ofstream fout;
+//  fout.open("perf_output", std::ios_base::app);
+////
+//  json j_obj;
+//  j_obj["alpha"] = alpha;
+//  j_obj["beta"] = beta;
+//  j_obj["algo"] = "Embedding";
+////  j_obj["p"] = world_size;
+//  j_obj["data_set"] = data_set_name;
+//  j_obj["perf_stats"] = json_perf_statistics();
+////  if (rank == 0) {
+//    fout << j_obj.dump(4) << "," << endl;
+////  }
+////
+//  fout.close();
 //  //
 //  reader->parallel_write("embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension);
 //  //    dense_mat.get()->print_matrix_rowptr(0);
