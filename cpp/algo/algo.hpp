@@ -637,6 +637,7 @@ public:
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
                            ((this->sp_local_receiver)->proc_row_width));
+    cout<<" update size "<<end_row - row_base_index<<endl;
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
       for (int d = 0; d < embedding_dim; d++) {
