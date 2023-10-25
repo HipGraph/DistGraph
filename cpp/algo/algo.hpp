@@ -544,7 +544,7 @@ public:
                     (this->dense_local)
                         ->nCoordinates[local_dst * embedding_dim + d];
               } else {
-                (this->dense_local)->nCoordinates[i * embedding_dim + d] -
+                forceDiff[d] = (this->dense_local)->nCoordinates[i * embedding_dim + d] -
                     array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
