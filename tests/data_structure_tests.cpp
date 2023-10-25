@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - start;
-    return diff.count();
+    cout<<" Time taken"<< diff.count()<<endl;
 //  }
 
 //  MPI_Init(&argc, &argv);
