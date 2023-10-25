@@ -74,8 +74,8 @@ void distblas::core::stop_clock_and_add(my_timer_t &start,
                                         string counter_name) {
   int rank;
   int world_size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+//  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   if (find(perf_counter_keys.begin(), perf_counter_keys.end(), counter_name) !=
       perf_counter_keys.end()) {
     call_count[counter_name]++;
