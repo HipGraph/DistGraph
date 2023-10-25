@@ -14,6 +14,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 using json = nlohmann::json;
 
