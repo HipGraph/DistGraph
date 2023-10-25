@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
 //  //
 //  //
 //  //  cout << " rank " << rank << " training completed  " << endl;
-//  ofstream fout;
+  ofstream fout;
   fout.open("perf_output", std::ios_base::app);
 //
   json j_obj;
