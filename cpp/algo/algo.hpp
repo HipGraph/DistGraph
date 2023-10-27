@@ -468,10 +468,9 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                array_ptr = (this->dense_local)
-                                ->fetch_data_vector_from_cache(target_rank, i,
-                                                               temp_cache);
+                array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, i,temp_cache);
                 if (array_ptr==nullptr){
+                  cout<<" rank "<<(this->grid)->global_rank<<" missing col value "<<i<<endl;
                   continue;
                 }
               }
