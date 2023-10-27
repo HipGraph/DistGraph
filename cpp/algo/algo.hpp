@@ -539,6 +539,7 @@ public:
                                                              dst_id, true);
               if (array_ptr == nullptr){
                 cout<<" rank "<<(this->grid)->global_rank<<" nulling "<<dst_id<<endl;
+                continue;
               }
               // If not in cache we should fetch that from remote for limited
               // cache
