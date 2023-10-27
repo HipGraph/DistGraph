@@ -470,6 +470,9 @@ public:
                 array_ptr = (this->dense_local)
                                 ->fetch_data_vector_from_cache(target_rank, i,
                                                                temp_cache);
+                if (array_ptr==nullptr){
+                  continue;
+                }
               }
               matched = true;
             }
