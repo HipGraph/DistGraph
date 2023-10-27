@@ -269,7 +269,8 @@ public:
                                           batch_size, considering_batch_size,
                                           false, true, prev_start,
                                           prev_end_process, true);
-            cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "<<j<< endl;
+            cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "
+                 <<j<<"prev_start "<<prev_start<<" prev_end"<<prev_end_process<< endl;
 
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
