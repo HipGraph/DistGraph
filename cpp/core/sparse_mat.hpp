@@ -117,8 +117,7 @@ public:
             std::min(std::min((starting_index+batch_size),static_cast<uint64_t>((procs[r] + 1) * proc_row_width)), gRows);
 
         for (int i = starting_index; i < end_index; i++) {
-          if (rank != procs[r] and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+          if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               { proc_to_id_mapping[procs[r]].insert(col_val);
@@ -136,12 +135,10 @@ public:
         for (int i = starting_index; i < end_index; i++) {
           if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
-                 j++) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
               auto col_val = handle->col_idx[j];
               uint64_t dst_start = batch_id * batch_size;
-              uint64_t dst_end_index =
-                  std::min((batch_id + 1) * batch_size, proc_row_width);
+              uint64_t dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
                 { proc_to_id_mapping[procs[r]].insert(i);
                 }

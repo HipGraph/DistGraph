@@ -121,7 +121,7 @@ public:
         int prev_start_proc = 0;
         int alpha_cyc_start = 1;
         int alpha_proc_length = get_end_proc(1, alpha, grid->world_size);
-        if (this->grid->global_rank == 0) cout<< " alpha end proc "<<alpha_proc_length<<endl;
+//        if (this->grid->global_rank == 0) cout<< " alpha end proc "<<alpha_proc_length<<endl;
         if (i == 0) {
 
           MPI_Request fetch_batch;
@@ -130,14 +130,14 @@ public:
           int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
           for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
-            if (this->grid->global_rank == 0) cout<< "  alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
+//            if (this->grid->global_rank == 0) cout<< "  alpha_cyc_start "<<alpha_cyc_start <<" k "<<k<<endl;
             update_ptr.get()->clear();
 
             full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, k, (k+alpha_cyc_len), false);
 
             if (k == alpha_cyc_end) {
               // local computation for first batch
-              if (this->grid->global_rank == 0) cout<< " rank "<< this->grid->global_rank << " calculating local for batch  ("<<i<<",0)"<<endl;
+//              if (this->grid->global_rank == 0) cout<< " rank "<< this->grid->global_rank << " calculating local for batch  ("<<i<<",0)"<<endl;
               this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                             batch_size, considering_batch_size,
                                             true, true, 0, 0, false);
@@ -225,7 +225,7 @@ public:
           this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
                                           j, batch_size, considering_batch_size);
 //          dense_local->invalidate_cache(i, j, true);
-          cout << " rank " << grid->global_rank << " iteration " << i << "repulsive calculation completed "<<"batch "<<j<< endl;
+//          cout << " rank " << grid->global_rank << " iteration " << i << "repulsive calculation completed "<<"batch "<<j<< endl;
 
 
           //  pull model code
@@ -246,14 +246,14 @@ public:
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, true, true, 0, 0, false);
-                cout << " rank " << grid->global_rank << " iteration " << i << "local computation completed "<<"batch "<<j<< endl;
+//                cout << " rank " << grid->global_rank << " iteration " << i << "local computation completed "<<"batch "<<j<< endl;
 
               } else if (k > 1) {
                 int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
                 this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, false, true, prev_start,
                     prev_end_process, true);
-                cout << " rank " << grid->global_rank << " iteration " << i << "remote computation completed "<<"batch "<<j<< endl;
+//                cout << " rank " << grid->global_rank << " iteration " << i << "remote computation completed "<<"batch "<<j<< endl;
 //                dense_local->invalidate_cache(i, j, true);
               }
 
@@ -269,8 +269,8 @@ public:
                                           batch_size, considering_batch_size,
                                           false, true, prev_start,
                                           prev_end_process, true);
-            cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "
-                 <<j<<"prev_start "<<prev_start<<" prev_end"<<prev_end_process<< endl;
+//            cout << " rank " << grid->global_rank << " iteration " << i << " final remote computation completed "<<"batch "
+//                 <<j<<"prev_start "<<prev_start<<" prev_end"<<prev_end_process<< endl;
 
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
@@ -450,8 +450,7 @@ public:
 //      #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
-        uint64_t local_dst = i - (this->grid)->global_rank *
-                                     (this->sp_local_receiver)->proc_row_width;
+
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;

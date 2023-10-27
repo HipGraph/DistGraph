@@ -159,6 +159,7 @@ public:
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
+
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
@@ -184,6 +185,7 @@ public:
         }
       }
     }
+
     receivebuf->resize(total_receive_count);
 
     add_datatransfers(total_receive_count, "Data transfers");
