@@ -243,9 +243,9 @@ public:
 
               if (k == 1) {
                 // local computation
-                this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, true, 0, 0, false);
+//                this->calc_t_dist_grad_rowptr(
+//                    csr_block, prevCoordinates, lr, j, batch_size,
+//                    considering_batch_size, true, true, 0, 0, false);
 //                cout << " rank " << grid->global_rank << " iteration " << i << "local computation completed "<<"batch "<<j<< endl;
 
               } else if (k > 1) {
@@ -452,7 +452,7 @@ public:
 //      #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
-        cout<<" rank "<< (this->grid)->global_rank<<" dst_start_index "<<dst_start_index<<" dst_end_index "<<dst_end_index<<endl;
+//        cout<<" rank "<< (this->grid)->global_rank<<" dst_start_index "<<dst_start_index<<" dst_end_index "<<dst_end_index<<endl;
 
         uint64_t local_dst = i - (this->grid)->global_rank *
                                      (this->sp_local_receiver)->proc_row_width;
