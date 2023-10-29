@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
   auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get(), localARows));
 //  dense_local->print_cache(i);
-  dense_mat.get()->print_matrix_rowptr(0);
+  dense_mat.get()->print_matrix_rowptr(-1);
 
   if (spmm) {
     auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(
@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << "  algo started  " << endl;
-    embedding_algo.get()->algo_force2_vec_ns(5, batch_size, ns, lr);
+    embedding_algo.get()->algo_force2_vec_ns(1, batch_size, ns, lr);
   }
   cout << " rank " << rank << " async completed  " << endl;
   //
