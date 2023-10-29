@@ -452,6 +452,8 @@ public:
 //      #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
+        cout<<" rank "<< (this->grid)->global_rank<<" dst_start_index "<<dst_start_index<<" dst_end_index "<<dst_end_index<<endl;
+
         uint64_t local_dst = i - (this->grid)->global_rank *
                                      (this->sp_local_receiver)->proc_row_width;
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
