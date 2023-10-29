@@ -141,6 +141,8 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
   auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get(), localARows));
+//  dense_local->print_cache(i);
+  dense_mat.get()->print_matrix_rowptr(i);
 
   if (spmm) {
     auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(

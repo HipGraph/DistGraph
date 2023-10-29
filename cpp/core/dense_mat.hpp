@@ -159,7 +159,7 @@ public:
     //    fout << (*this->matrixPtr).rows() << " " << (*this->matrixPtr).cols()
     //         << endl;
     for (int i = 0; i < rows; ++i) {
-      fout << i + 1 + rank * rows << " ";
+      fout << i  + rank * rows << " ";
       for (int j = 0; j < embedding_dim; ++j) {
         fout << this->nCoordinates[i * embedding_dim + j] << " ";
       }
