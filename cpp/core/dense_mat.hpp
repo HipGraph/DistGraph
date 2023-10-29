@@ -71,24 +71,23 @@ public:
     entry.inserted_batch_id = batch_id;
     entry.inserted_itr = iteration;
     entry.value = arr;
-    if (temp){
+    if (temp) {
       (*this->tempCachePtr)[rank].insert_or_assign(key, entry);
-    }else {
+    } else {
       (*this->cachePtr)[rank].insert_or_assign(key, entry);
     }
   }
-
 
   DENT *fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
 
-    auto &arrayMap =(temp)?(*tempCachePtr)[rank]:(*cachePtr)[rank];
+    auto &arrayMap = (temp) ? (*tempCachePtr)[rank] : (*cachePtr)[rank];
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
-       auto temp = it->second;
-       return temp.value.data(); // Pointer to the array's data
+      auto temp = it->second;
+      return temp.value.data(); // Pointer to the array's data
     } else {
       return nullptr; // Key not found
     }
@@ -104,13 +103,14 @@ public:
   }
 
   void invalidate_cache(int current_itr, int current_batch, bool temp) {
-    if (temp ){
+    if (temp) {
       purge_temp_cache();
-    }else {
+    } else {
       for (int i = 0; i < grid->world_size; i++) {
         auto &arrayMap = (*cachePtr)[i];
         for (auto it = arrayMap.begin(); it != arrayMap.end();) {
-          distblas::core::CacheEntry<DENT, embedding_dim> cache_ent = it->second;
+          distblas::core::CacheEntry<DENT, embedding_dim> cache_ent =
+              it->second;
           if (cache_ent.inserted_itr < current_itr and
               cache_ent.inserted_batch_id <= current_batch) {
             it = arrayMap.erase(it);
@@ -123,10 +123,11 @@ public:
     }
   }
 
-  void purge_temp_cache(){
+  void purge_temp_cache() {
     for (int i = 0; i < grid->world_size; i++) {
       (*this->tempCachePtr)[i].clear();
-      std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>().swap((*this->tempCachePtr)[i]);
+      std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>().swap(
+          (*this->tempCachePtr)[i]);
     }
   }
 
@@ -150,7 +151,8 @@ public:
   void print_matrix_rowptr(int iter) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    string output_path = "rank_" + to_string(rank)+"itr_" + to_string(iter) + "_embedding.txt";
+    string output_path =
+        "rank_" + to_string(rank) + "itr_" + to_string(iter) + "_embedding.txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
     ofstream fout(stats, std::ios_base::app);
@@ -170,7 +172,7 @@ public:
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     for (int i = 0; i < (*this->cachePtr).size(); i++) {
-      unordered_map<uint64_t, std::array<DENT, embedding_dim>> map =
+      unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> map =
           (*this->cachePtr)[i];
 
       string output_path = "rank_" + to_string(rank) + "remote_rank_" +
@@ -181,7 +183,7 @@ public:
 
       for (const auto &kvp : map) {
         uint64_t key = kvp.first;
-        const std::array<DENT, embedding_dim> &value = kvp.second;
+        const std::array<DENT, embedding_dim> &value = kvp.second.value;
         fout << key << " ";
         for (int i = 0; i < embedding_dim; ++i) {
           fout << value[i] << " ";
