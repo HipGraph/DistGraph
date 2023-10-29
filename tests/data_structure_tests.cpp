@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
   auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
       new DenseMat<int, double, dimension>(grid.get(), localARows));
 //  dense_local->print_cache(i);
-  dense_mat.get()->print_matrix_rowptr(i);
+  dense_mat.get()->print_matrix_rowptr(0);
 
   if (spmm) {
     auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(
