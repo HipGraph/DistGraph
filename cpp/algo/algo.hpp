@@ -457,6 +457,9 @@ public:
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;
+
+        if (fetch_from_cache) cout<<" rank "<< (this->grid)->global_rank<<" target rank "<<target_rank<<" for i "<<i<<endl;
+
         bool matched = false;
         DENT *array_ptr = nullptr;
         bool col_inserted = false;
