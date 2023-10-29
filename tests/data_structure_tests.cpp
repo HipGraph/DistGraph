@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << "  algo started  " << endl;
-    embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
+    embedding_algo.get()->algo_force2_vec_ns(5, batch_size, ns, lr);
   }
   cout << " rank " << rank << " async completed  " << endl;
   //
@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
   fout.close();
   //
   reader->parallel_write("embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension);
-  //    dense_mat.get()->print_matrix_rowptr(0);
+
 
   MPI_Finalize();
   return 0;

@@ -239,7 +239,7 @@ public:
               int end_process = get_end_proc(k, beta, grid->world_size);
 
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
-                  end_process, true);
+                  end_process, false);
 
               if (k == 1) {
                 // local computation
@@ -257,7 +257,7 @@ public:
 //                dense_local->invalidate_cache(i, j, true);
               }
 
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,true);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,false);
 
               prev_start = k;
               update_ptr.get()->clear();
@@ -381,6 +381,8 @@ public:
 //        }
         total_memory += get_memory_usage();
       }
+      dense_local->print_cache(i);
+      dense_local->print_matrix_rowptr(i);
     }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
@@ -470,7 +472,7 @@ public:
               if (fetch_from_cache) {
                 array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, i,temp_cache);
                 if (array_ptr==nullptr){
-                  cout<<" rank "<<(this->grid)->global_rank<<" missing col value "<<i<<endl;
+//                  cout<<" rank "<<(this->grid)->global_rank<<" missing col value "<<i<<endl;
                   continue;
                 }
               }
