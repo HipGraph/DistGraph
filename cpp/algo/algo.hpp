@@ -247,7 +247,7 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,
                   end_process, false);
 
               if (k == 1) {
@@ -265,7 +265,7 @@ public:
 //                dense_local->invalidate_cache(i, j, true);
               }
 
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,false);
+//              data_comm_cache[j].get()->populate_cache(update_ptr.get(), request_batch_update_cyclic, false, i, j,false);
 
               prev_start = k;
               update_ptr.get()->clear();

@@ -152,7 +152,7 @@ json distblas::core::json_perf_statistics() {
        it++) {
     double val = total_time[*it];
 
-//    MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     if( rank ==0) {
       cout<< (*it) <<val<<endl;
