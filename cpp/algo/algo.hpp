@@ -461,7 +461,7 @@ public:
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;
 
-        if (fetch_from_cache) cout<<" rank "<< (this->grid)->global_rank<<" target rank "<<target_rank<<" for i "<<i<<endl;
+//        if (fetch_from_cache) cout<<" rank "<< (this->grid)->global_rank<<" target rank "<<target_rank<<" for i "<<i<<endl;
 
         bool matched = false;
         DENT *array_ptr = nullptr;
