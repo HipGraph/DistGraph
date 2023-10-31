@@ -74,7 +74,7 @@ public:
     if (temp) {
       (*this->tempCachePtr)[rank][key]= entry;
     } else {
-      (*this->cachePtr)[rank][rank][key]= entry;
+      (*this->cachePtr)[rank][key]= entry;
     }
   }
 
