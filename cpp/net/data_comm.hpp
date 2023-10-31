@@ -141,6 +141,8 @@ public:
     }
 
     for (int i = 0; i < sending_procs.size(); i++) {
+      cout<<" my rank "<<grid->global_rank<<" sending rank"<<sending_procs[i]<<"batch_id"<<batch_id<<endl;
+      cout<<" my rank "<<grid->global_rank<<" reciving rank"<<receiving_procs[i]<<"batch_id"<<batch_id<<endl;
       send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
       receive_counts_cyclic[receiving_procs[i]] =
           receivecounts[receiving_procs[i]];
@@ -176,7 +178,7 @@ public:
             }
             int offset = sdispls_cyclic[sending_procs[i]];
             int index = offset_vector[sending_procs[i]] + offset;
-            if (index == 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<i<<"batch_id"<<batch_id<<endl;
+            if (index == 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<sending_procs[i]<<"batch_id"<<batch_id<<endl;
             (*sendbuf_cyclic)[index].col =
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
