@@ -164,7 +164,6 @@ public:
       sendbuf_cyclic->resize(total_send_count);
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
-        if (col_id > 60000) cout<<" initial wrongdoing "<<col_id  <<" my rank "<<grid->global_rank<<endl;
         bool already_fetched = false;
 //        vector<int> proc_list = pair.second[batch_id];
         std::array<DENT, embedding_dim> dense_vector;
@@ -177,6 +176,7 @@ public:
             }
             int offset = sdispls_cyclic[sending_procs[i]];
             int index = offset_vector[sending_procs[i]] + offset;
+            if (index > 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<i<<"batch_id"<<batch_id<<endl;
             (*sendbuf_cyclic)[index].col =
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
