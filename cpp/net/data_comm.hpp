@@ -144,8 +144,8 @@ public:
       send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
       receive_counts_cyclic[receiving_procs[i]] =
           receivecounts[receiving_procs[i]];
-      cout<<" my rank "<<grid->global_rank<<" sending rank"<<sending_procs[i]<<"batch_id"<<batch_id<<" count"<< send_counts_cyclic[sending_procs[i]]<<endl;
-      cout<<" my rank "<<grid->global_rank<<" reciving rank"<<receiving_procs[i]<<"batch_id"<<batch_id<<"count"<<receive_counts_cyclic[receiving_procs[i]]<<endl;
+//      cout<<" my rank "<<grid->global_rank<<" sending rank"<<sending_procs[i]<<"batch_id"<<batch_id<<" count"<< send_counts_cyclic[sending_procs[i]]<<endl;
+//      cout<<" my rank "<<grid->global_rank<<" reciving rank"<<receiving_procs[i]<<"batch_id"<<batch_id<<"count"<<receive_counts_cyclic[receiving_procs[i]]<<endl;
       total_send_count += send_counts_cyclic[sending_procs[i]];
       total_receive_count += receive_counts_cyclic[receiving_procs[i]];
     }
@@ -157,7 +157,7 @@ public:
       rdispls_cyclic[i] =
           (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                   : rdispls_cyclic[i];
-      cout<<" my rank "<<grid->global_rank<<" sending disps "<<i<<" : "<<sdispls_cyclic[i]<<" receving disps "<<i<<" : "<<rdispls_cyclic[i]<<"batch_id"<<batch_id<<endl;
+//      cout<<" my rank "<<grid->global_rank<<" sending disps "<<i<<" : "<<sdispls_cyclic[i]<<" receving disps "<<i<<" : "<<rdispls_cyclic[i]<<"batch_id"<<batch_id<<endl;
     }
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -183,7 +183,7 @@ public:
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
             (*sendbuf_cyclic)[index].value = dense_vector;
-            if (index == 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<sending_procs[i]<<"batch_id"<<batch_id<<"col id"<<(*sendbuf_cyclic)[index].col<<endl;
+//            if (index == 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<sending_procs[i]<<"batch_id"<<batch_id<<"col id"<<(*sendbuf_cyclic)[index].col<<endl;
             offset_vector[sending_procs[i]]++;
           }
         }
