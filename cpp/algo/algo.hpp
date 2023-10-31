@@ -213,6 +213,7 @@ public:
                                           j, batch_size, considering_batch_size);
 
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
           for (int k = 0; k < batch_size; k += 1) {
             int IDIM = k * embedding_dim;
             for (int d = 0; d < embedding_dim; d++) {
@@ -382,8 +383,8 @@ public:
 //        }
         total_memory += get_memory_usage();
       }
-//      dense_local->print_cache(i);
-//      dense_local->print_matrix_rowptr(i);
+      dense_local->print_cache(i);
+      dense_local->print_matrix_rowptr(i);
     }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
