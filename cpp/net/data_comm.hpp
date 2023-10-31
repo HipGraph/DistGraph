@@ -180,8 +180,6 @@ public:
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
             (*sendbuf_cyclic)[index].value = dense_vector;
-            if ((*sendbuf_cyclic)[index].col > 60000)
-              cout<<"rank "<<grid->global_rank<< " accessing exhousting key "<<(*sendbuf_cyclic)[index].col<<endl;
             offset_vector[sending_procs[i]]++;
           }
         }
@@ -311,8 +309,8 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        (this->dense_local)
-            ->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
+        if (t.col > 60000) cout<<" inserting exhasuting "<<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
+        (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
     }
     receivebuf->clear();
