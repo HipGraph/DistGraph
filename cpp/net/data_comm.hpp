@@ -157,6 +157,7 @@ public:
       rdispls_cyclic[i] =
           (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                   : rdispls_cyclic[i];
+      cout<<" my rank "<<grid->global_rank<<" reciving disps "<<i<<" : "<<rdispls_cyclic[i]<<"batch_id"<<batch_id<<endl;
     }
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
