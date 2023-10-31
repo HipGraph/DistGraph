@@ -72,9 +72,9 @@ public:
     entry.inserted_itr = iteration;
     entry.value = arr;
     if (temp) {
-      (*this->tempCachePtr)[rank].insert_or_assign(key, entry);
+      (*this->tempCachePtr)[rank][key]= entry;
     } else {
-      (*this->cachePtr)[rank].insert_or_assign(key, entry);
+      (*this->cachePtr)[rank][rank][key]= entry;
     }
   }
 
