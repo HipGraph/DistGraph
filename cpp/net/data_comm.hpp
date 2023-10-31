@@ -176,7 +176,7 @@ public:
             }
             int offset = sdispls_cyclic[sending_procs[i]];
             int index = offset_vector[sending_procs[i]] + offset;
-            if (index > 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<i<<"batch_id"<<batch_id<<endl;
+            if (index == 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<i<<"batch_id"<<batch_id<<endl;
             (*sendbuf_cyclic)[index].col =
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
