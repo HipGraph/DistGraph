@@ -164,6 +164,7 @@ public:
       sendbuf_cyclic->resize(total_send_count);
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
+        if (col_id > 60000) cout<<" initial wrongdoing "<<col_id  <<" my rank "<<grid->global_rank<<endl;
         bool already_fetched = false;
 //        vector<int> proc_list = pair.second[batch_id];
         std::array<DENT, embedding_dim> dense_vector;
@@ -309,7 +310,7 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        if (t.col > 60000) cout<<" inserting exhasuting "<<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
+        if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
         (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
     }
