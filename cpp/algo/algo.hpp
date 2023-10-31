@@ -221,6 +221,14 @@ public:
           }
 
         } else {
+
+          for (int k = 0; k < batch_size; k += 1) {
+            int IDIM = k * embedding_dim;
+            for (int d = 0; d < embedding_dim; d++) {
+              prevCoordinates[IDIM + d] = 0;
+            }
+          }
+
           full_comm.get()->transfer_data(random_number_vec, i, j);
 //          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec, lr,
 //                                          j, batch_size, considering_batch_size);
@@ -276,12 +284,6 @@ public:
             update_ptr.get()->resize(0);
 
             this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-            for (int k = 0; k < batch_size; k += 1) {
-              int IDIM = k * embedding_dim;
-              for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[IDIM + d] = 0;
-              }
-            }
           }
         }
 //        } else {
