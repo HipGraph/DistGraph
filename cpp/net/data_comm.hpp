@@ -180,6 +180,8 @@ public:
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
             (*sendbuf_cyclic)[index].value = dense_vector;
+            if ((*sendbuf_cyclic)[index].col > 60000)
+              cout<<"rank "<<grid->global_rank<< " accessing exhousting key "<<(*sendbuf_cyclic)[index].col<<endl;
             offset_vector[sending_procs[i]]++;
           }
         }
