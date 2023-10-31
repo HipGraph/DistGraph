@@ -71,7 +71,7 @@ public:
     entry.inserted_batch_id = batch_id;
     entry.inserted_itr = iteration;
     entry.value = arr;
-    if key > 60000 cout<<" exhousting key "<<" rank "<<rank<<": "<<key<<endl;
+    if (key > 60000) cout<<" exhousting key "<<" rank "<<rank<<": "<<key<<endl;
     if (temp) {
       (*this->tempCachePtr)[rank][key]= entry;
     } else {
