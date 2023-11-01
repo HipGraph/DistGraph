@@ -536,7 +536,7 @@ public:
         //        i "<<i<<endl;
 
         bool matched = false;
-        DENT *array_ptr = nullptr;
+        const DENT *array_ptr = nullptr;
         bool col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
@@ -670,10 +670,11 @@ public:
 
         if (fetch_from_cache) {
           DENT repuls = 0;
-          DENT *colvec = (this->dense_local)->fetch_data_vector_from_cache(owner_rank, global_col_id, true);
+         const DENT *colvec = (this->dense_local)->fetch_data_vector_from_cache(owner_rank, global_col_id, true);
 
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = (this->dense_local)->nCoordinates[row_id * embedding_dim + d] - colvec[d];
+            cout<<colvec[d]<<endl;
             repuls += forceDiff[d] * forceDiff[d];
           }
 
