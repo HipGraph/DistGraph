@@ -54,7 +54,7 @@ public:
         grid->world_size);
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
-    std::srand(this->grid->global_rank);
+//    std::srand(this->grid->global_rank);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < embedding_dim; j++) {
         DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
