@@ -536,7 +536,7 @@ public:
         //        i "<<i<<endl;
 
         bool matched = false;
-        const std::array<DENT, embedding_dim> &array_ptr = nullptr;
+        std::array<DENT, embedding_dim> array_ptr;
         bool col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
@@ -548,7 +548,7 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, i,temp_cache);
+                (this->dense_local)->fetch_data_vector_from_cache(array_ptr,target_rank, i,temp_cache);
               }
               matched = true;
             }
@@ -609,9 +609,9 @@ public:
                 target_rank == (this->grid)->global_rank ? false : true;
 
             DENT forceDiff[embedding_dim];
-            const std::array<DENT, embedding_dim> &array_ptr = nullptr;
+            std::array<DENT, embedding_dim> array_ptr;
             if (fetch_from_cache) {
-              array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, dst_id, true);
+              (this->dense_local)->fetch_data_vector_from_cache(array_ptr,target_rank, dst_id, true);
               // If not in cache we should fetch that from remote for limited
               // cache
             }
@@ -670,7 +670,8 @@ public:
 
         if (fetch_from_cache) {
           DENT repuls = 0;
-         const std::array<DENT, embedding_dim> &colvec = (this->dense_local)->fetch_data_vector_from_cache(owner_rank, global_col_id, true);
+          std::array<DENT, embedding_dim> colvec;
+          (this->dense_local)->fetch_data_vector_from_cache(colvec,owner_rank, global_col_id, true);
 
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = (this->dense_local)->nCoordinates[row_id * embedding_dim + d] - colvec[d];

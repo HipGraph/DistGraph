@@ -268,7 +268,7 @@ public:
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;
         bool matched = false;
-        std::array<DENT, embedding_dim> &colvec = nullptr;
+        std::array<DENT, embedding_dim> colvec;
         bool col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
@@ -280,9 +280,7 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                array_ptr = (this->dense_local)
-                                ->fetch_data_vector_from_cache(target_rank, i,
-                                                               temp_cache);
+                (this->dense_local)->fetch_data_vector_from_cache(colvec,target_rank, i,temp_cache);
 
                 if (array_ptr == nullptr) {
                   continue;
