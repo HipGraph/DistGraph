@@ -92,6 +92,7 @@ public:
     }else {
       throw std::runtime_error("cannot find the given key");
     }
+
   }
 
   std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
