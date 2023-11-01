@@ -276,9 +276,14 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(
-                  update_ptr.get(), true, request_batch_update_cyclic, i, j, k,
-                  end_process, false);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, false);
+
+
+              if (i == iterations - 2 and j == batches -1) {
+                dense_local->print_cache(i);
+                dense_local->print_matrix_rowptr(i);
+              }
+
 
               if (k == 1) {
                 // local computation
@@ -442,10 +447,6 @@ public:
         total_memory += get_memory_usage();
       }
       //      dense_local->print_cache(i);
-      if (i == iterations - 2) {
-        dense_local->print_cache(i);
-        dense_local->print_matrix_rowptr(i);
-      }
     }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
