@@ -89,10 +89,6 @@ public:
     if (it != arrayMap.end()) {
       auto temp = it->second;
       value =  temp.value;
-      for (int i = 0; i < embedding_dim; ++i) {
-        cout << value[i] << " ";
-      }
-      cout << endl;
     }else {
       throw std::runtime_error("cannot find the given key");
     }
