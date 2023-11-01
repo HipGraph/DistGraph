@@ -442,7 +442,7 @@ public:
         total_memory += get_memory_usage();
       }
       //      dense_local->print_cache(i);
-      if (i == iterations - 1) {
+      if (i == iterations - 2) {
         dense_local->print_cache(i);
         dense_local->print_matrix_rowptr(i);
       }
