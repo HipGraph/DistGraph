@@ -548,9 +548,7 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                array_ptr = (this->dense_local)
-                                ->fetch_data_vector_from_cache(target_rank, i,
-                                                               temp_cache);
+                array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, i,temp_cache);
               }
               matched = true;
             }
@@ -566,6 +564,7 @@ public:
                 forceDiff[d] =
                     (this->dense_local)
                         ->nCoordinates[source_id * embedding_dim + d] - array_ptr[d];
+                cout<<array_ptr[d]<<endl;
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
@@ -582,8 +581,7 @@ public:
     }
   }
 
-  inline void
-  calc_embedding_row_major(uint64_t source_start_index,
+  inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
                            DENT *prevCoordinates, DENT lr, int batch_id,
@@ -613,9 +611,7 @@ public:
             DENT forceDiff[embedding_dim];
             DENT *array_ptr = nullptr;
             if (fetch_from_cache) {
-              array_ptr =
-                  (this->dense_local)
-                      ->fetch_data_vector_from_cache(target_rank, dst_id, true);
+              array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, dst_id, true);
               // If not in cache we should fetch that from remote for limited
               // cache
             }
@@ -667,25 +663,26 @@ public:
 
         int owner_rank = static_cast<int>(
             global_col_id / (this->sp_local_receiver)->proc_row_width);
+
         if (owner_rank != (this->grid)->global_rank) {
           fetch_from_cache = true;
         }
+
         if (fetch_from_cache) {
           DENT repuls = 0;
-          DENT *colvec = (this->dense_local)
-                             ->fetch_data_vector_from_cache(
-                                 owner_rank, global_col_id, true);
+          DENT *colvec = (this->dense_local)->fetch_data_vector_from_cache(owner_rank, global_col_id, true);
+
           for (int d = 0; d < embedding_dim; d++) {
-            forceDiff[d] =
-                (this->dense_local)->nCoordinates[row_id * embedding_dim + d] -
-                colvec[d];
+            forceDiff[d] = (this->dense_local)->nCoordinates[row_id * embedding_dim + d] - colvec[d];
             repuls += forceDiff[d] * forceDiff[d];
           }
+
           DENT d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = scale(forceDiff[d] * d1);
             prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
           }
+
         } else {
           DENT repuls = 0;
           for (int d = 0; d < embedding_dim; d++) {

@@ -252,8 +252,6 @@ public:
       rdispls_cyclic[i] =
           (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                   : rdispls_cyclic[i];
-
-//      total_send_count = total_send_count + sendcounts[i];
       total_receive_count = total_receive_count + receive_counts_cyclic[i];
     }
 
@@ -275,11 +273,9 @@ public:
           (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
       std::array<DENT, embedding_dim> val_arr =
           (this->dense_local)->fetch_local_data(local_key);
-//      for (int i = 0; i < grid->world_size; i++) {
         int index = j;
         (*sendbuf)[index].col = send_col_ids_list[j];
         (*sendbuf)[index].value = val_arr;
-//      }
     }
 
     auto t = start_clock();
