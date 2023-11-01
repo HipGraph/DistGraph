@@ -88,7 +88,8 @@ public:
 
     if (it != arrayMap.end()) {
       auto temp = it->second;
-      return temp.value.data(); // Pointer to the array's data
+      const std::array<DENT, embedding_dim> &value =  temp.value;
+      return value.data(); // Pointer to the array's data
     }
      throw std::runtime_error("cannot find the given key");
   }
