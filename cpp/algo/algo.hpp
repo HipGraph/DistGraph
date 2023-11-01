@@ -276,7 +276,7 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, false);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
 
 
               if (i == iterations - 2 and j == batches -1) {
@@ -289,7 +289,7 @@ public:
                 // local computation
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, true, 0, 0, false);
+                    considering_batch_size, true, true, 0, 0, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "local computation
                 //                completed "<<"batch "<<j<< endl;
@@ -300,7 +300,7 @@ public:
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, false, true, prev_start,
-                    prev_end_process, false);
+                    prev_end_process, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "remote computation
                 //                completed "<<"batch "<<j<< endl;
@@ -320,14 +320,14 @@ public:
             this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
                                           false, true, prev_start,
-                                          prev_end_process, false);
+                                          prev_end_process, true);
             //            cout << " rank " << grid->global_rank << " iteration "
             //            << i << " final remote computation completed "<<"batch
             //            "
             //                 <<j<<"prev_start "<<prev_start<<"
             //                 prev_end"<<prev_end_process<< endl;
 
-//            dense_local->invalidate_cache(i, j, true);
+            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
 
             this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
