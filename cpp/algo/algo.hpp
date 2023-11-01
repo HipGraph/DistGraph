@@ -609,7 +609,7 @@ public:
                 target_rank == (this->grid)->global_rank ? false : true;
 
             DENT forceDiff[embedding_dim];
-            DENT *array_ptr = nullptr;
+           const DENT *array_ptr = nullptr;
             if (fetch_from_cache) {
               array_ptr = (this->dense_local)->fetch_data_vector_from_cache(target_rank, dst_id, true);
               // If not in cache we should fetch that from remote for limited
