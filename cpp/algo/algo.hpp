@@ -564,7 +564,7 @@ public:
                 forceDiff[d] =
                     (this->dense_local)
                         ->nCoordinates[source_id * embedding_dim + d] - *(array_ptr + d);
-                cout<<array_ptr[d]<<endl;
+                cout<<*(array_ptr + d)<<endl;
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
