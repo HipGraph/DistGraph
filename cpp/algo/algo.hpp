@@ -536,7 +536,7 @@ public:
         //        i "<<i<<endl;
 
         bool matched = false;
-        std::array<DENT, embedding_dim> array_ptr;
+        std::array<DENT, embedding_dim> &array_ptr;
         bool col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
@@ -549,7 +549,7 @@ public:
             if (!matched) {
               if (fetch_from_cache) {
                 unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> arrayMap = (temp_cache) ? (*this->dense_local->tempCachePtr)[target_rank] : (*this->dense_local->cachePtr)[target_rank];
-                &array_ptr   =  arrayMap[i].value;
+                array_ptr   =  arrayMap[i].value;
 //                (this->dense_local)->fetch_data_vector_from_cache(array_ptr,target_rank, i,temp_cache);
               }
               matched = true;
