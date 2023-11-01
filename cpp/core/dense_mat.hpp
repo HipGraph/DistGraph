@@ -83,7 +83,7 @@ public:
 
     // Access the array using the provided rank and key
 
-    auto &arrayMap = (temp) ? (*tempCachePtr)[rank] : (*cachePtr)[rank];
+    auto arrayMap = (temp) ? (*tempCachePtr)[rank] : (*cachePtr)[rank];
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
