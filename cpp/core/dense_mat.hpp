@@ -79,7 +79,7 @@ public:
     }
   }
 
-   void  fetch_data_vector_from_cache(std::array<DENT, embedding_dim> &value,int rank, uint64_t key, bool temp) {
+  auto fetch_data_vector_from_cache(std::array<DENT, embedding_dim> &value,int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
 
@@ -87,7 +87,7 @@ public:
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
-      return it->second;
+      auto temp = it->second;
       value =  temp.value;
       for (int i = 0; i < embedding_dim; ++i) {
         cout << value[i] << " ";
