@@ -548,7 +548,7 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                auto arrayMap = auto arrayMap = (temp_cache) ? this->dense_local->tempCachePtr.get()[target_rank] : this->dense_local->cachePtr.get()[target_rank];
+                auto arrayMap = (temp_cache) ? this->dense_local->tempCachePtr.get()[target_rank] : this->dense_local->cachePtr.get()[target_rank];
                 &array_ptr   =  arrayMap[i].value;
 //                (this->dense_local)->fetch_data_vector_from_cache(array_ptr,target_rank, i,temp_cache);
               }
@@ -673,7 +673,7 @@ public:
           DENT repuls = 0;
 //          std::array<DENT, embedding_dim> colvec;
 //          (this->dense_local)->fetch_data_vector_from_cache(colvec,owner_rank, global_col_id, true);
-          auto arrayMap = (this->dense_local->tempCachePtr.get())[owner_rank];
+          auto arrayMap = this->dense_local->tempCachePtr.get()[owner_rank];
           std::array<DENT, embedding_dim> &colvec   =  arrayMap[global_col_id].value;
 
           for (int d = 0; d < embedding_dim; d++) {
