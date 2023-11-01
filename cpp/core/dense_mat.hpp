@@ -79,7 +79,7 @@ public:
     }
   }
 
-  auto fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
+  std::array<DENT, embedding_dim> fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
 
