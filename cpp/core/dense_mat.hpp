@@ -79,7 +79,7 @@ public:
     }
   }
 
-  const DENT *fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
+  auto fetch_data_vector_from_cache(int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
 
@@ -87,13 +87,13 @@ public:
     auto it = arrayMap.find(key);
 
     if (it != arrayMap.end()) {
-      auto temp = it->second;
-      const std::array<DENT, embedding_dim> &value =  temp.value;
-      for (int i = 0; i < embedding_dim; ++i) {
-        cout << value[i] << " ";
-      }
-      cout << endl;
-      return value.data(); // Pointer to the array's data
+      return it->second.value;
+//      const std::array<DENT, embedding_dim> &value =  temp.value;
+//      for (int i = 0; i < embedding_dim; ++i) {
+//        cout << value[i] << " ";
+//      }
+//      cout << endl;
+//      return value.data(); // Pointer to the array's data
     }
      throw std::runtime_error("cannot find the given key");
   }
