@@ -565,8 +565,7 @@ public:
               } else {
                 forceDiff[d] =
                     (this->dense_local)
-                        ->nCoordinates[source_id * embedding_dim + d] -
-                    array_ptr[d];
+                        ->nCoordinates[source_id * embedding_dim + d] - array_ptr[d];
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
