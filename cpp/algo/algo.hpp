@@ -614,7 +614,7 @@ public:
             if (fetch_from_cache) {
               unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> &arrayMap =
                   (true) ? (*this->dense_local->tempCachePtr)[target_rank] : (*this->dense_local->cachePtr)[target_rank];
-              array_ptr   =  arrayMap[i].value;
+              array_ptr   =  arrayMap[dst_id].value;
               // If not in cache we should fetch that from remote for limited
               // cache
             }
