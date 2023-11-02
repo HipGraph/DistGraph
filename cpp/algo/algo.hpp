@@ -108,10 +108,10 @@ public:
 
     size_t total_memory = 0;
 
-    CSRLocal<SPT> *csr_block =
-        (this->sp_local_native)->csr_local_data.get();
+//    CSRLocal<SPT> *csr_block =
+//        (this->sp_local_native)->csr_local_data.get();
 
-//    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
     int considering_batch_size = batch_size;
 
@@ -233,7 +233,7 @@ public:
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
-                                        true, false, 0, 0, false);
+                                        true, true, 0, 0, false);
 
           this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
                                           lr, j, batch_size,
