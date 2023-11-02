@@ -299,7 +299,7 @@ public:
                     get_end_proc(prev_start, beta, grid->world_size);
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, false, true, prev_start,
+                    considering_batch_size, false, false, prev_start,
                     prev_end_process, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "remote computation
@@ -317,7 +317,7 @@ public:
                 get_end_proc(prev_start, beta, grid->world_size);
 
             // updating last remote fetched data vectors
-            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+            this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
                                           false, true, prev_start,
                                           prev_end_process, true);
