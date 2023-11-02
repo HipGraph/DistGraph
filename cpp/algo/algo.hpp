@@ -330,7 +330,7 @@ public:
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
 
-            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
           }
         }
         //        } else {
