@@ -108,10 +108,10 @@ public:
 
     size_t total_memory = 0;
 
-    CSRLocal<SPT> *csr_block =
+    CSRLocal<SPT> *csr_block_row =
         (this->sp_local_native)->csr_local_data.get();
 
-//    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
     int considering_batch_size = batch_size;
 
@@ -276,7 +276,7 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-//              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
 
 
 //              if (i == iterations - 2 and j == batches -1) {
@@ -288,7 +288,7 @@ public:
               if (k == 1) {
                 // local computation
                 this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, j, batch_size,
+                    csr_block_row, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, true, false, 0, 0, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "local computation
@@ -297,10 +297,10 @@ public:
               } else if (k > 1) {
                 int prev_end_process =
                     get_end_proc(prev_start, beta, grid->world_size);
-//                this->calc_t_dist_grad_rowptr(
-//                    csr_block, prevCoordinates, lr, j, batch_size,
-//                    considering_batch_size, false, true, prev_start,
-//                    prev_end_process, true);
+                this->calc_t_dist_grad_rowptr(
+                    csr_block, prevCoordinates, lr, j, batch_size,
+                    considering_batch_size, false, true, prev_start,
+                    prev_end_process, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "remote computation
                 //                completed "<<"batch "<<j<< endl;
@@ -317,10 +317,10 @@ public:
                 get_end_proc(prev_start, beta, grid->world_size);
 
             // updating last remote fetched data vectors
-//            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                          batch_size, considering_batch_size,
-//                                          false, true, prev_start,
-//                                          prev_end_process, true);
+            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                          batch_size, considering_batch_size,
+                                          false, true, prev_start,
+                                          prev_end_process, true);
             //            cout << " rank " << grid->global_rank << " iteration "
             //            << i << " final remote computation completed "<<"batch
             //            "
