@@ -117,7 +117,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
       if (this->grid->global_rank == 0)
-        cout << " rank " << grid->global_rank << " iteration " << i << endl;
+//        cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
       //      if (alpha > 0) {
       //        for (int k = 0; k < batch_size; k += 1) {
