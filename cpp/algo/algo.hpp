@@ -116,7 +116,8 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
-        cout << " rank " << grid->global_rank << " iteration " << i << endl;
+      if (i == iterations-3)
+           cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
       //      if (alpha > 0) {
       //        for (int k = 0; k < batch_size; k += 1) {
