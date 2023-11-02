@@ -327,7 +327,7 @@ public:
             //                 <<j<<"prev_start "<<prev_start<<"
             //                 prev_end"<<prev_end_process<< endl;
 
-            dense_local->invalidate_cache(i, j, true);
+//            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
 
             this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
@@ -548,9 +548,9 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> &arrayMap = (temp_cache) ? (*this->dense_local->tempCachePtr)[target_rank] : (*this->dense_local->cachePtr)[target_rank];
+                unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> &arrayMap =
+                    (temp_cache) ? (*this->dense_local->tempCachePtr)[target_rank] : (*this->dense_local->cachePtr)[target_rank];
                 array_ptr   =  arrayMap[i].value;
-//                (this->dense_local)->fetch_data_vector_from_cache(array_ptr,target_rank, i,temp_cache);
               }
               matched = true;
             }
