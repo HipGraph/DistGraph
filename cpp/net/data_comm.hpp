@@ -140,6 +140,7 @@ public:
       receiving_procs.push_back(receiving_rank);
     }
 
+    #pragma omp parallel for
     for (int i = 0; i < sending_procs.size(); i++) {
       send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
       receive_counts_cyclic[receiving_procs[i]] =
@@ -165,6 +166,7 @@ public:
 
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
+      #pragma omp parallel for
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
