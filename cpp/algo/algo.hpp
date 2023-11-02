@@ -287,9 +287,9 @@ public:
 
               if (k == 1) {
                 // local computation
-                this->calc_t_dist_grad_rowptr(
-                    csr_block_row, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, false, 0, 0, true);
+//                this->calc_t_dist_grad_rowptr(
+//                    csr_block_row, prevCoordinates, lr, j, batch_size,
+//                    considering_batch_size, true, false, 0, 0, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "local computation
                 //                completed "<<"batch "<<j<< endl;
