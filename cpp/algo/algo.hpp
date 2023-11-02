@@ -258,9 +258,9 @@ public:
           }
 
           full_comm.get()->transfer_data(random_number_vec, i, j);
-//          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
-//                                          lr, j, batch_size,
-//                                          considering_batch_size);
+          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
+                                          lr, j, batch_size,
+                                          considering_batch_size);
           //          dense_local->invalidate_cache(i, j, true);
           //          cout << " rank " << grid->global_rank << " iteration " <<
           //          i << "repulsive calculation completed "<<"batch "<<j<<
@@ -328,7 +328,7 @@ public:
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
 
-//            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
           }
         }
         //        } else {
