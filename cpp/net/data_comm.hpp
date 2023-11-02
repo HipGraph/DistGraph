@@ -140,7 +140,6 @@ public:
       receiving_procs.push_back(receiving_rank);
     }
 
-    #pragma omp parallel for
     for (int i = 0; i < sending_procs.size(); i++) {
       send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
       receive_counts_cyclic[receiving_procs[i]] =
@@ -166,13 +165,11 @@ public:
 
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
-      #pragma omp parallel for
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
 //        vector<int> proc_list = pair.second[batch_id];
         std::array<DENT, embedding_dim> dense_vector;
-
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
             if (!already_fetched) {
@@ -196,24 +193,24 @@ public:
 
     add_datatransfers(total_receive_count, "Data transfers");
 
-//    if (synchronous) {
-//      auto t = start_clock();
-//      MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
-//                    sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
-//                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
-//                    DENSETUPLE, MPI_COMM_WORLD);
-//      MPI_Request dumy;
-//      this->populate_cache(receivebuf, dumy, true, iteration, batch_id,
-//                           temp_cache);
-//      stop_clock_and_add(t, "Communication Time");
-//    } else {
-//      auto t = start_clock();
-//      MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
-//                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
-//                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
-//                     DENSETUPLE, MPI_COMM_WORLD, &request);
-//      stop_clock_and_add(t, "Communication Time");
-//    }
+    if (synchronous) {
+      auto t = start_clock();
+      MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
+                    sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
+                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
+                    DENSETUPLE, MPI_COMM_WORLD);
+      MPI_Request dumy;
+      this->populate_cache(receivebuf, dumy, true, iteration, batch_id,
+                           temp_cache);
+      stop_clock_and_add(t, "Communication Time");
+    } else {
+      auto t = start_clock();
+      MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
+                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
+                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
+                     DENSETUPLE, MPI_COMM_WORLD, &request);
+      stop_clock_and_add(t, "Communication Time");
+    }
     sendbuf_cyclic->clear();
     sendbuf_cyclic->shrink_to_fit();
     //    }
