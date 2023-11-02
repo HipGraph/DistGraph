@@ -276,7 +276,7 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-//              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
 
 
 //              if (i == iterations - 2 and j == batches -1) {
