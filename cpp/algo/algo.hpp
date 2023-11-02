@@ -612,7 +612,9 @@ public:
             DENT forceDiff[embedding_dim];
             std::array<DENT, embedding_dim> array_ptr;
             if (fetch_from_cache) {
-              (this->dense_local)->fetch_data_vector_from_cache(array_ptr,target_rank, dst_id, true);
+              unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> &arrayMap =
+                  (true) ? (*this->dense_local->tempCachePtr)[target_rank] : (*this->dense_local->cachePtr)[target_rank];
+              array_ptr   =  arrayMap[i].value;
               // If not in cache we should fetch that from remote for limited
               // cache
             }
