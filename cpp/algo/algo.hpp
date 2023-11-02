@@ -289,7 +289,7 @@ public:
                 // local computation
                 this->calc_t_dist_grad_rowptr(
                     csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, false, 0, 0, true);
+                    considering_batch_size, true, true, 0, 0, true);
                 //                cout << " rank " << grid->global_rank << "
                 //                iteration " << i << "local computation
                 //                completed "<<"batch "<<j<< endl;
@@ -330,7 +330,7 @@ public:
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
 
-            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
           }
         }
         //        } else {
