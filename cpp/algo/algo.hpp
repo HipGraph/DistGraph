@@ -108,10 +108,10 @@ public:
 
     size_t total_memory = 0;
 
-//    CSRLocal<SPT> *csr_block =
-//        (this->sp_local_native)->csr_local_data.get();
+    CSRLocal<SPT> *csr_block =
+        (this->sp_local_native)->csr_local_data.get();
 
-    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+//    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
 
     int considering_batch_size = batch_size;
 
