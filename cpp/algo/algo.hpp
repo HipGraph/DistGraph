@@ -281,10 +281,10 @@ public:
               } else if (k > 1) {
                 int prev_end_process =
                     get_end_proc(prev_start, beta, grid->world_size);
-                this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, false, false, prev_start,
-                    prev_end_process, true);
+//                this->calc_t_dist_grad_rowptr(
+//                    csr_block, prevCoordinates, lr, j, batch_size,
+//                    considering_batch_size, false, false, prev_start,
+//                    prev_end_process, true);
 //                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
@@ -300,7 +300,7 @@ public:
             this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
                                           false, false, prev_start,
-                                          prev_end_process, true);
+                                          16, true);
 
 //            cout<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
 
