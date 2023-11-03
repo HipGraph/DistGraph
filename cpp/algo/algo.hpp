@@ -268,10 +268,10 @@ public:
             int prev_start = 0;
             for (int k = 1; k < grid->world_size; k += proc_length) {
               MPI_Request request_batch_update_cyclic;
-              cout<<" k "<<k<<endl;
+//              cout<<" k "<<k<<endl;
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, 1,16, true);
 
               if (k == 1) {
                 // local computation
@@ -285,7 +285,7 @@ public:
                     csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, false, false, prev_start,
                     prev_end_process, true);
-                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
+//                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
 //              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
@@ -302,7 +302,7 @@ public:
                                           false, false, prev_start,
                                           prev_end_process, true);
 
-            cout<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
+//            cout<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
 
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
