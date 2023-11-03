@@ -154,10 +154,6 @@ json distblas::core::json_perf_statistics() {
 
     MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    if( rank ==0) {
-      cout<< (*it) <<val<<endl;
-    }
-
     // We also have the call count for each statistic timed
     val /= world_size;
 
