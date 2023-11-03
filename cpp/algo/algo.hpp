@@ -281,11 +281,11 @@ public:
               } else if (k > 1) {
                 int prev_end_process =
                     get_end_proc(prev_start, beta, grid->world_size);
-//                this->calc_t_dist_grad_rowptr(
-//                    csr_block, prevCoordinates, lr, j, batch_size,
-//                    considering_batch_size, false, false, prev_start,
-//                    prev_end_process, true);
-//                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
+                this->calc_t_dist_grad_rowptr(
+                    csr_block, prevCoordinates, lr, j, batch_size,
+                    considering_batch_size, false, false, prev_start,
+                    prev_end_process, true);
+                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
 //              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
@@ -299,8 +299,8 @@ public:
             // updating last remote fetched data vectors
             this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
-                                          false, false, 1,
-                                          16, true);
+                                          false, false, prev_start,
+                                          prev_end_process, true);
 
 //            cout<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
 
