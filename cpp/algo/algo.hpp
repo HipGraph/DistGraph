@@ -271,7 +271,7 @@ public:
 //              cout<<" k "<<k<<endl;
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process, true);
 
               if (k == 1) {
                 // local computation
@@ -288,7 +288,7 @@ public:
 //                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
-//              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
+              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
 
               prev_start = k;
               update_ptr.get()->clear();
