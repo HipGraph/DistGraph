@@ -267,7 +267,6 @@ public:
             int proc_length = get_proc_length(beta, grid->world_size);
             int prev_start = 0;
             for (int k = 1; k < grid->world_size; k += proc_length) {
-
               MPI_Request request_batch_update_cyclic;
 
               int end_process = get_end_proc(k, beta, grid->world_size);
@@ -291,6 +290,7 @@ public:
 //              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
 
               prev_start = k;
+              cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process "<<prev_end_process<<endl;
               update_ptr.get()->clear();
             }
             int prev_end_process =
