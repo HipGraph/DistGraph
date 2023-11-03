@@ -257,7 +257,7 @@ public:
             }
           }
 
-          full_comm.get()->transfer_data(random_number_vec, i, j);
+//          full_comm.get()->transfer_data(random_number_vec, i, j);
 //          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
 //                                          lr, j, batch_size,
 //                                          considering_batch_size);
@@ -268,7 +268,7 @@ public:
             int prev_start = 0;
             for (int k = 1; k < grid->world_size; k += proc_length) {
               MPI_Request request_batch_update_cyclic;
-//              cout<<" k "<<k<<endl;
+              cout<<" k "<<k<<endl;
               int end_process = get_end_proc(k, beta, grid->world_size);
 
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process, true);
