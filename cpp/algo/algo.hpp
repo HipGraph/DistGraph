@@ -272,7 +272,7 @@ public:
 
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, request_batch_update_cyclic, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
 
               if (k == 1) {
                 // local computation
@@ -288,7 +288,7 @@ public:
                     prev_end_process, true);
               }
 
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
+//              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
 
               prev_start = k;
               update_ptr.get()->clear();
