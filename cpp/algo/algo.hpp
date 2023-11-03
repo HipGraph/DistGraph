@@ -300,6 +300,7 @@ public:
             this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
                                           false, false, prev_start,
+                                          prev_end_process, true);
 
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
