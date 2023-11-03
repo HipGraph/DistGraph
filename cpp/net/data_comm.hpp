@@ -208,7 +208,7 @@ public:
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                     DENSETUPLE, MPI_COMM_WORLD, request);
+                     DENSETUPLE, MPI_COMM_WORLD, &request);
       stop_clock_and_add(t, "Communication Time");
     }
     sendbuf_cyclic->clear();
