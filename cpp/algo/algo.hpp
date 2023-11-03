@@ -271,7 +271,7 @@ public:
 //              cout<<" k "<<k<<endl;
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, 1,16, true);
+              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), true, request_batch_update_cyclic, i, j, k,end_process, true);
 
               if (k == 1) {
                 // local computation
