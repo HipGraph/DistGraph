@@ -285,7 +285,7 @@ public:
                     csr_block, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, false, false, prev_start,
                     prev_end_process, true);
-                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
+//                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
 //              data_comm_cache[j].get()->populate_cache(update_ptr.get(),request_batch_update_cyclic, false, i, j,true);
@@ -576,8 +576,7 @@ public:
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
-
-          if (dst_id >= dst_start_index and dst_id <= dst_end_index) {
+          if (dst_id >= dst_start_index and dst_id < dst_end_index) {
             uint64_t local_dst =
                 dst_id - (this->grid)->global_rank *
                              (this->sp_local_receiver)->proc_col_width;
