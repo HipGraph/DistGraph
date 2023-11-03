@@ -302,7 +302,7 @@ public:
                                           false, false, prev_start,
                                           prev_end_process, true);
 
-            cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process "<<prev_end_process<<endl;
+            cout<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
 
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
