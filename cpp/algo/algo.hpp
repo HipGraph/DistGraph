@@ -274,6 +274,16 @@ public:
               std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
 
               this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
+              MPI_Status status;
+              MPI_Wait(&req, &status);
+              int source = status.MPI_SOURCE;
+              int tag = status.MPI_TAG;
+              int error_code = status.MPI_ERROR;
+
+              std::cout << "Status of MPI operation:" << std::endl;
+              std::cout << "Source: " << source << std::endl;
+              std::cout << "Tag: " << tag << std::endl;
+              std::cout << "Error code: " << error_code << std::endl;
 //              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 ////              if (!synchronous) {
 //                MPI_Status status;
