@@ -287,10 +287,8 @@ public:
                 int count = this->data_comm_cache[j].get()->receive_counts_cyclic[m];
 
                 for (int n = base_index; n < base_index + count; n++) {
-                  if (grid->global_rank == 0)
-//                    cout<<" k  "<<n<<endl;
                    DataTuple<DENT, embedding_dim> tup = (*receivebuf)[n];
-                  if (tup.col > 60000) cout<<" inserting exhasuting "<<tup.col  <<" for rank "<<i<<" access index "<<n<<" batch id"<<j<<endl;
+                   if (tup.col > 60000) cout<<" inserting exhasuting "<<tup.col  <<" for rank "<<i<<" access index "<<n<<" batch id"<<j<<endl;
 //                  (this->dense_local)->insert_cache(n, t.col, j, i, t.value, true);
                 }
               }
