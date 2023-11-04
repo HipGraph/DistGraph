@@ -59,8 +59,8 @@ public:
       t = start_clock();
 
       int end_proc = get_end_proc(1,this->alpha, this->grid->world_size);
-      this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false,
-                                                    (*mpi_requests[0]), 0, 0, 1, end_proc, false);
+//      this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false,
+//                                                    (*mpi_requests[0]), 0, 0, 1, end_proc, false);
 
       stop_clock_and_add(t, "Communication Time");
       t = start_clock();
@@ -101,7 +101,7 @@ public:
 
         stop_clock_and_add(t, "Computation Time");
         t = start_clock();
-        this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), (*mpi_requests[i]), false, i, 0, false);
+//        this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), (*mpi_requests[i]), false, i, 0, false);
         stop_clock_and_add(t, "Communication Time");
         t = start_clock();
 
@@ -118,7 +118,7 @@ public:
 
             t = start_clock();
             update_ptr.get()->clear();
-            this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, misses_update_request, i, 0, k,end_process, true);
+//            this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, misses_update_request, i, 0, k,end_process, true);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             temp_mem += get_memory_usage();
@@ -142,7 +142,7 @@ public:
 
 
             t = start_clock();
-            this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), misses_update_request, false, i, 0, true);
+//            this->data_comm_cache[0].get()->populate_cache(update_ptr.get(), misses_update_request, false, i, 0, true);
             stop_clock_and_add(t, "Communication Time");
             t = start_clock();
             prev_start = k;
@@ -188,9 +188,9 @@ public:
           stop_clock_and_add(t, "Computation Time");
 
           t = start_clock();
-          this->data_comm_cache[0].get()->transfer_data(
-              update_ptr.get(), false, request_batch_update_cyclic, i, 0, k,
-              end_process, true);
+//          this->data_comm_cache[0].get()->transfer_data(
+//              update_ptr.get(), false, request_batch_update_cyclic, i, 0, k,
+//              end_process, true);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
           temp_mem += get_memory_usage();
@@ -215,8 +215,8 @@ public:
           stop_clock_and_add(t, "Computation Time");
           t = start_clock();
 
-          this->data_comm_cache[0].get()->populate_cache(
-              update_ptr.get(), request_batch_update_cyclic, false, i, 0, true);
+//          this->data_comm_cache[0].get()->populate_cache(
+//              update_ptr.get(), request_batch_update_cyclic, false, i, 0, true);
 
           prev_start = k;
           update_ptr.get()->clear();
