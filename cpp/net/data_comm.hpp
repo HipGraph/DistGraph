@@ -205,13 +205,13 @@ public:
       stop_clock_and_add(t, "Communication Time");
     } else {
       auto t = start_clock();
-      MPI_Request dumy;
+      MPI_Request dumy = &request;
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dumy);
-      this->populate_cache(receivebuf, dumy, false, iteration, batch_id,
-                           temp_cache);
+//      this->populate_cache(receivebuf, dumy, false, iteration, batch_id,
+//                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
     }
     sendbuf_cyclic->clear();
