@@ -10,6 +10,7 @@
 #include "../algo/algo.hpp"
 
 using namespace distblas::core;
+using namespace distblas::algo;
 
 namespace distblas::net {
 
