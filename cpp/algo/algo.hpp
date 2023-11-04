@@ -271,8 +271,9 @@ public:
 
               MPI_Request req;
 //              vector<MPI_Request*> vec(1);
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true);
-              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+              std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
+              this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->populate_cache(receivebuf, &req, false, i, j,true);
 
 //              if (k == 1) {
 //                // local computation
