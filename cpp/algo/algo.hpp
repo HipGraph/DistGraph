@@ -272,12 +272,12 @@ public:
               MPI_Request req;
 
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true);
-              if (!synchronous) {
+//              if (!synchronous) {
                 MPI_Status status;
                 auto t = start_clock();
                 MPI_Wait(&req, &status);
                 stop_clock_and_add(t, "Communication Time");
-              }
+//              }
 
               for (int i = 0; i < this->grid->world_size; i++) {
                 int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[i];
