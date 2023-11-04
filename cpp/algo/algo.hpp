@@ -275,23 +275,23 @@ public:
 
               MPI_Request* req_proc = this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
 
-//              if (!synchronous) {
-                MPI_Status status;
-                auto t = start_clock();
-                MPI_Wait(req_proc, &status);
-                stop_clock_and_add(t, "Communication Time");
+////              if (!synchronous) {
+//                MPI_Status status;
+//                auto t = start_clock();
+//                MPI_Wait(req_proc, &status);
+//                stop_clock_and_add(t, "Communication Time");
+////              }
+//
+//              for (int m = 0; m < this->grid->world_size; m++) {
+//                int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[m];
+//                int count = this->data_comm_cache[j].get()->receive_counts_cyclic[m];
+//
+//                for (int n = base_index; n < base_index + count; n++) {
+//                   DataTuple<DENT, embedding_dim> tup = (*receivebuf)[n];
+//                   if (tup.col > 60000) cout<<" inserting exhasuting "<<tup.col  <<" for rank "<<i<<" access index "<<n<<" batch id"<<j<<endl;
+////                  (this->dense_local)->insert_cache(n, t.col, j, i, t.value, true);
+//                }
 //              }
-
-              for (int m = 0; m < this->grid->world_size; m++) {
-                int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[m];
-                int count = this->data_comm_cache[j].get()->receive_counts_cyclic[m];
-
-                for (int n = base_index; n < base_index + count; n++) {
-                   DataTuple<DENT, embedding_dim> tup = (*receivebuf)[n];
-                   if (tup.col > 60000) cout<<" inserting exhasuting "<<tup.col  <<" for rank "<<i<<" access index "<<n<<" batch id"<<j<<endl;
-//                  (this->dense_local)->insert_cache(n, t.col, j, i, t.value, true);
-                }
-              }
 //              receivebuf->clear();
 //              receivebuf->shrink_to_fit();
 //            }
