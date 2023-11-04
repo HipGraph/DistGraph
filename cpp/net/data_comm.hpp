@@ -312,6 +312,14 @@ public:
       MPI_Status status;
       auto t = start_clock();
       MPI_Wait(request, &status);
+      int source = status.MPI_SOURCE;
+      int tag = status.MPI_TAG;
+      int error_code = status.MPI_ERROR;
+
+      std::cout << "Status of MPI operation:" << std::endl;
+      std::cout << "Source: " << source << std::endl;
+      std::cout << "Tag: " << tag << std::endl;
+      std::cout << "Error code: " << error_code << std::endl;
       stop_clock_and_add(t, "Communication Time");
     }
 
