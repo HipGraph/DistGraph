@@ -115,9 +115,14 @@ public:
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous, MPI_Request *request, int iteration,
+                     bool synchronous, int iteration,
                      int batch_id, int starting_proc, int end_proc,
-                     bool temp_cache) {
+                     bool temp_cache, (*func)(CSRLocal<SPT>*, DENT *,DENT, int, int, int, bool, bool, int,int, bool),
+                     CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+                     DENT lr, int batch_id, int batch_size, int block_size,
+                     bool local, bool col_major, int start_process,
+                     int end_process, bool fetch_from_temp_cache) {
+
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
 
@@ -210,12 +215,9 @@ public:
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dummy);
-      for(int i=i;i<1000000000;i++){
-        int j= i*2;
-        if (i==1000000000-1){
-          cout<<"j"<<j<<endl;
-        }
-      }
+
+      func(csr_block, prevCoordinates,lr, batch_id, batch_size, block_size,local, col_major, start_process,end_process,fetch_from_temp_cache);
+
       this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
                            temp_cache);
       stop_clock_and_add(t, "Communication Time");
