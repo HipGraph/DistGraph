@@ -219,12 +219,9 @@ public:
 //      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
 
       stop_clock_and_add(t, "Communication Time");
-      return nullptr;
     }
     sendbuf_cyclic->clear();
     sendbuf_cyclic->shrink_to_fit();
-    return nullptr;
-    //    }
   }
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
