@@ -197,8 +197,6 @@ public:
 
     receivebuf->resize(total_receive_count);
 
-    cout<<" receive buf inside "<<receivebuf->size()<<endl;
-
     add_datatransfers(total_receive_count, "Data transfers");
 
     if (synchronous) {
@@ -222,8 +220,8 @@ public:
 
       stop_clock_and_add(t, "Communication Time");
     }
-//    sendbuf_cyclic->clear();
-//    sendbuf_cyclic->shrink_to_fit();
+    sendbuf_cyclic->clear();
+    sendbuf_cyclic->shrink_to_fit();
     //    }
   }
 

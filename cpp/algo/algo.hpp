@@ -272,9 +272,9 @@ public:
 
               MPI_Request req;
               std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
-              cout<<" size "<<receivebuf->size()<<endl;
+
               this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
-              cout<<" after size "<<receivebuf->size()<<endl;
+
 //              if (!synchronous) {
                 MPI_Status status;
                 auto t = start_clock();
@@ -291,7 +291,7 @@ public:
                     cout<<" k  "<<n<<endl;
                    DataTuple<DENT, embedding_dim> t = (*receivebuf)[n];
                   if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<n<<" batch id"<<j<<endl;
-//                  (this->dense_local)->insert_cache(m, t.col, j, i, t.value, true);
+                  (this->dense_local)->insert_cache(n, t.col, j, i, t.value, true);
                 }
               }
 //              receivebuf->clear();
