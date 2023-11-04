@@ -62,7 +62,7 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     auto t = start_clock();
 
-    using MemberFunctionPtr = void (EmbeddingAlgo::*)(CSRLocal<SPT> *, DENT *,lr, int, int, int,bool, bool, int, int, bool);
+    using MemberFunctionPtr = void (EmbeddingAlgo::*)(CSRLocal<SPT> *, DENT *,double, int, int, int,bool, bool, int, int, bool);
     MemberFunctionPtr funcPtr = &EmbeddingAlgo::calc_t_dist_grad_rowptr;
 
 
