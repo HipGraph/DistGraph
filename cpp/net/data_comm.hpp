@@ -116,7 +116,7 @@ public:
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous,MPI_Request *request, int iteration,
+                     bool synchronous,vector<MPI_Request> &holder, int iteration,
                      int batch_id, int starting_proc, int end_proc,
                      bool temp_cache) {
 
@@ -213,8 +213,10 @@ public:
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dummy);
 
-      this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
-                           temp_cache);
+      holder[0]= &dummy;
+
+//      this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
+//                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
     }
     sendbuf_cyclic->clear();
