@@ -272,24 +272,25 @@ public:
               MPI_Request req;
 //              vector<MPI_Request*> vec(1);
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
-              if (k == 1) {
-                // local computation
-                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, false, 0, 0, true);
+//              if (k == 1) {
+//                // local computation
+//                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
+//                    considering_batch_size, true, false, 0, 0, true);
+//
+//              } else if (k > 1) {
+//                int prev_end_process =
+//                    get_end_proc(prev_start, beta, grid->world_size);
+//
+//                this->calc_t_dist_grad_rowptr(
+//                    csr_block_row, prevCoordinates, lr, j, batch_size,
+//                    considering_batch_size, false, false, prev_start,
+//                    prev_end_process, true);
+////                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
+//              }
 
-              } else if (k > 1) {
-                int prev_end_process =
-                    get_end_proc(prev_start, beta, grid->world_size);
-
-                this->calc_t_dist_grad_rowptr(
-                    csr_block_row, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, false, false, prev_start,
-                    prev_end_process, true);
-//                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
-              }
-
-//              data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+//              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
               prev_start = k;
               update_ptr.get()->clear();
