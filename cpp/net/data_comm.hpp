@@ -115,7 +115,7 @@ public:
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous, MPI_Request *request, int iteration,
+                     bool synchronous, MPI_Request &request, int iteration,
                      int batch_id, int starting_proc, int end_proc,
                      bool temp_cache) {
     int total_receive_count = 0;
@@ -205,12 +205,10 @@ public:
       stop_clock_and_add(t, "Communication Time");
     } else {
       auto t = start_clock();
-      MPI_Request  dumy;
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                     DENSETUPLE, MPI_COMM_WORLD, &dumy);
-      request = &dumy;
+                     DENSETUPLE, MPI_COMM_WORLD, &request);
 //      this->populate_cache(receivebuf, dumy, false, iteration, batch_id,
 //                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
