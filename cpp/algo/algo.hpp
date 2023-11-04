@@ -274,7 +274,7 @@ public:
 
               if (k == 1) {
                 // local computation
-                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,calc_t_dist_grad_rowptr,csr_block_row, prevCoordinates, lr, j, batch_size,
+                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,this->calc_t_dist_grad_rowptr,csr_block_row, prevCoordinates, lr, batch_size,
                                                               considering_batch_size, true, false, 0, 0, true);
 //                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
 //                    considering_batch_size, true, false, 0, 0, true);
@@ -282,7 +282,7 @@ public:
               } else if (k > 1) {
                 int prev_end_process =
                     get_end_proc(prev_start, beta, grid->world_size);
-                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,calc_t_dist_grad_rowptr,csr_block_row, prevCoordinates, lr, j, batch_size,
+                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,this->calc_t_dist_grad_rowptr,csr_block_row, prevCoordinates, lr, batch_size,
                                                               considering_batch_size, false, false, prev_start,
                                                               prev_end_process, true);
 //                this->calc_t_dist_grad_rowptr(

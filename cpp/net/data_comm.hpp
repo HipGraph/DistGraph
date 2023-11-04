@@ -117,9 +117,9 @@ public:
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous, int iteration,
                      int batch_id, int starting_proc, int end_proc,
-                     bool temp_cache, (*func)(CSRLocal<SPT>*, DENT *,DENT, int, int, int, bool, bool, int,int, bool),
+                     bool temp_cache, void (*func)(CSRLocal<SPT>*, DENT *,DENT, int, int, int, bool, bool, int,int, bool),
                      CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
-                     DENT lr, int batch_id, int batch_size, int block_size,
+                     DENT lr, int batch_size, int block_size,
                      bool local, bool col_major, int start_process,
                      int end_process, bool fetch_from_temp_cache) {
 
