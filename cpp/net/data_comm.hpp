@@ -116,7 +116,7 @@ public:
   }
 
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous,vector<MPI_Request> &holder, int iteration,
+                     bool synchronous,vector<MPI_Request*> &holder, int iteration,
                      int batch_id, int starting_proc, int end_proc,
                      bool temp_cache) {
 
