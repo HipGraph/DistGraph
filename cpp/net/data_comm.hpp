@@ -208,12 +208,11 @@ public:
     } else {
       auto t = start_clock();
       MPI_Request dummy;
+      holder[0]= &dummy;
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dummy);
-
-      holder[0]= &dummy;
 
 //      this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
 //                           temp_cache);

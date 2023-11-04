@@ -267,7 +267,6 @@ public:
             int proc_length = get_proc_length(beta, grid->world_size);
             int prev_start = 0;
             for (int k = 1; k < grid->world_size; k += proc_length) {
-              MPI_Request req;
               int end_process = get_end_proc(k, beta, grid->world_size);
 
               vector<MPI_Request*> vec(1);
