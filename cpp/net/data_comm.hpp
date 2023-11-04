@@ -220,8 +220,8 @@ public:
 
       stop_clock_and_add(t, "Communication Time");
     }
-    sendbuf_cyclic->clear();
-    sendbuf_cyclic->shrink_to_fit();
+//    sendbuf_cyclic->clear();
+//    sendbuf_cyclic->shrink_to_fit();
   }
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
