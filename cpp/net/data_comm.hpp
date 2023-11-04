@@ -197,6 +197,8 @@ public:
 
     receivebuf->resize(total_receive_count);
 
+    cout<<" receive buf inside "<<receivebuf->size()<<endl;
+
     add_datatransfers(total_receive_count, "Data transfers");
 
     if (synchronous) {
@@ -216,7 +218,7 @@ public:
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, req);
 
-      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
+//      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
 
       stop_clock_and_add(t, "Communication Time");
     }
