@@ -272,6 +272,26 @@ public:
               MPI_Request req;
 
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true);
+              if (!synchronous) {
+                MPI_Status status;
+                auto t = start_clock();
+                MPI_Wait(&req, &status);
+                stop_clock_and_add(t, "Communication Time");
+              }
+
+              for (int i = 0; i < this->grid->world_size; i++) {
+                int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[i];
+                int count = this->data_comm_cache[j].get()->receive_counts_cyclic[i];
+
+                for (int j = base_index; j < base_index + count; j++) {
+                  DataTuple<DENT, embedding_dim> t = (*update_ptr.get())[j];
+                  if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
+                  (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
+                }
+              }
+              receivebuf->clear();
+              receivebuf->shrink_to_fit();
+            }
 //              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
 //              if (k == 1) {
