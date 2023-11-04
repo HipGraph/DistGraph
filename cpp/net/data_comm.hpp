@@ -32,9 +32,9 @@ private:
   vector<int> rdispls;
   vector<int> receivecounts;
   vector<int> send_counts_cyclic;
-  vector<int> receive_counts_cyclic;
+//  vector<int> receive_counts_cyclic;
   vector<int> sdispls_cyclic;
-  vector<int> rdispls_cyclic;
+//  vector<int> rdispls_cyclic;
   vector<unordered_set<uint64_t>> receive_col_ids_list;
   vector<unordered_set<uint64_t>> send_col_ids_list;
   unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
