@@ -38,7 +38,7 @@ private:
   unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
   unordered_map<uint64_t, unordered_map<int,bool>> receive_indices_to_proc_map;
   MPI_Request *saved;
-  std::vector<DataTuple<DENT, embedding_dim>> *receivebuf
+  std::vector<DataTuple<DENT, embedding_dim>> *receivebuf;
 
   int batch_id;
 
