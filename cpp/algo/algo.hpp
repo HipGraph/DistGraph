@@ -270,7 +270,7 @@ public:
               MPI_Request req;
               int end_process = get_end_proc(k, beta, grid->world_size);
 
-              vector<MPI_Request> vec(1);
+              vector<MPI_Request*> vec(1);
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &vec, i, j, k,end_process, true);
 
               if (k == 1) {
