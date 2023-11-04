@@ -119,7 +119,7 @@ public:
     }
   }
 
-  MPI_Request* transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+ inline void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous,MPI_Request* req, int iteration,
                      int batch_id, int starting_proc, int end_proc,
                      bool temp_cache) {
@@ -304,7 +304,7 @@ public:
   }
 
 
-  void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+  inline void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request *request, bool synchronous, int iteration,
                       int batch_id, bool temp) {
     if (!synchronous) {
