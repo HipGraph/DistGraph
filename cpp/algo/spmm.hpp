@@ -170,8 +170,8 @@ public:
           t = start_clock();
           MPI_Request request_batch_update;
           mpi_requests[i + 1] = &request_batch_update;
-          this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, (*mpi_requests[i + 1]), i, 0, 1,
-              end_process, false);
+//          this->data_comm_cache[0].get()->transfer_data(update_ptr.get(), false, (*mpi_requests[i + 1]), i, 0, 1,
+//              end_process, false);
           stop_clock_and_add(t, "Communication Time");
           t = start_clock();
           this->dense_local->invalidate_cache(i, 0, false);
