@@ -266,6 +266,7 @@ public:
           if (alpha == 0) {
             int proc_length = get_proc_length(beta, grid->world_size);
             int prev_start = 0;
+
             for (int k = 1; k < grid->world_size; k += proc_length) {
               int end_process = get_end_proc(k, beta, grid->world_size);
 
@@ -289,9 +290,9 @@ public:
                   (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, true);
                 }
               }
-              receivebuf->clear();
-              receivebuf->shrink_to_fit();
-            }
+//              receivebuf->clear();
+//              receivebuf->shrink_to_fit();
+//            }
 //              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
 //              if (k == 1) {
