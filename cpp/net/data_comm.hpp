@@ -7,7 +7,6 @@
 #include <mpi.h>
 #include <unordered_map>
 #include <vector>
-#include "../algo/algo.hpp"
 
 using namespace distblas::core;
 using namespace distblas::algo;
@@ -119,10 +118,7 @@ public:
   void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                      bool synchronous, int iteration,
                      int batch_id, int starting_proc, int end_proc,
-                     bool temp_cache,distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>& obj,
-                     CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
-                     DENT lr,  int batch_size, int block_size,
-                     bool local, bool col_major) {
+                     bool temp_cache) {
 
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
@@ -216,11 +212,6 @@ public:
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dummy);
-
-      obj.calc_t_dist_grad_rowptr(csr_block, prevCoordinates,lr, batch_id, batch_size,
-                                  block_size,local, col_major,
-                                  starting_proc,end_proc,
-                                  temp_cache);
 
       this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
                            temp_cache);
