@@ -216,8 +216,8 @@ public:
                      DENSETUPLE, MPI_COMM_WORLD, req);
       this->receivebuf = receivebuf;
       saved = req;
-//      this->populate_cache(receivebuf, saved, false, iteration, batch_id,
-//                           temp_cache);
+      this->populate_cache(this->receivebuf, saved, false, iteration, batch_id,
+                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
     }
 //    sendbuf_cyclic->clear();
@@ -317,7 +317,7 @@ public:
       int count = this->receive_counts_cyclic[i];
 
       for (int j = base_index; j < base_index + count; j++) {
-        DataTuple<DENT, embedding_dim> t = (*this->receivebuf)[j];
+        DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
         if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
         (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
