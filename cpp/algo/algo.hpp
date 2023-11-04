@@ -271,8 +271,8 @@ public:
               int end_process = get_end_proc(k, beta, grid->world_size);
 
               MPI_Request req;
-
-              this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true);
+              std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
+              this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
 //              if (!synchronous) {
                 MPI_Status status;
                 auto t = start_clock();
@@ -287,7 +287,7 @@ public:
                 for (int k = base_index; k < base_index + count; k++) {
                   if (grid->global_rank == 0)
                     cout<<" k  "<<k<<endl;
-                   DataTuple<DENT, embedding_dim> t = (*update_ptr.get())[k];
+                   DataTuple<DENT, embedding_dim> t = (*receivebuf)[k];
                   if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<k<<" batch id"<<j<<endl;
 //                  (this->dense_local)->insert_cache(m, t.col, j, i, t.value, true);
                 }
