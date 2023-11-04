@@ -272,7 +272,7 @@ public:
               MPI_Request req;
 
               this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true);
-              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+//              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
 //              if (k == 1) {
 //                // local computation

@@ -37,8 +37,6 @@ private:
   vector<unordered_set<uint64_t>> send_col_ids_list;
   unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
   unordered_map<uint64_t, unordered_map<int,bool>> receive_indices_to_proc_map;
-  MPI_Request *saved;
-  std::vector<DataTuple<DENT, embedding_dim>> *receivebuf;
 
   int batch_id;
 
@@ -212,7 +210,9 @@ public:
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, req);
-      this->receivebuf = receivebuf;
+      std::this_thread::sleep_for(std::chrono::seconds(20));
+
+      this->populate_cache(receivebuf, &req, true, iteration, batch_id,temp_cache);
 
       stop_clock_and_add(t, "Communication Time");
     }
