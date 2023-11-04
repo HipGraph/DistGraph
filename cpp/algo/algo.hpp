@@ -280,13 +280,13 @@ public:
                 stop_clock_and_add(t, "Communication Time");
 //              }
 
-              for (int i = 0; i < this->grid->world_size; i++) {
-                int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[i];
-                int count = this->data_comm_cache[j].get()->receive_counts_cyclic[i];
+              for (int m = 0; m < this->grid->world_size; m++) {
+                int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[m];
+                int count = this->data_comm_cache[j].get()->receive_counts_cyclic[m];
 
-                for (int j = base_index; j < base_index + count; j++) {
-                  DataTuple<DENT, embedding_dim> t = (*update_ptr.get())[j];
-                  if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
+                for (int k = base_index; k < base_index + count; k++) {
+                  DataTuple<DENT, embedding_dim> t = (*update_ptr.get())[k];
+                  if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<k<<" batch id"<<j<<endl;
                   (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, true);
                 }
               }
