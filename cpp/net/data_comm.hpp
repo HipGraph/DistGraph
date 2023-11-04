@@ -208,16 +208,12 @@ public:
       stop_clock_and_add(t, "Communication Time");
     } else {
       auto t = start_clock();
-//      MPI_Request dummy;
-//      holder[0]= &dummy;
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, req);
       this->receivebuf = receivebuf;
-      saved = req;
-      this->populate_cache(this->receivebuf, saved, false, iteration, batch_id,
-                           temp_cache);
+
       stop_clock_and_add(t, "Communication Time");
     }
 //    sendbuf_cyclic->clear();
@@ -308,7 +304,7 @@ public:
     if (!synchronous) {
       MPI_Status status;
       auto t = start_clock();
-      MPI_Wait(saved, &status);
+      MPI_Wait(request, &status);
       stop_clock_and_add(t, "Communication Time");
     }
 
