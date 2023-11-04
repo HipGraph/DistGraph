@@ -37,6 +37,7 @@ private:
   vector<unordered_set<uint64_t>> send_col_ids_list;
   unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
   unordered_map<uint64_t, unordered_map<int,bool>> receive_indices_to_proc_map;
+  MPI_Request *saved;
 
 
   int batch_id;
@@ -213,7 +214,7 @@ public:
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, req);
-
+      saved = req;
 //      this->populate_cache(receivebuf, req, false, iteration, batch_id,
 //                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
@@ -306,7 +307,7 @@ public:
     if (!synchronous) {
       MPI_Status status;
       auto t = start_clock();
-      MPI_Wait(request, &status);
+      MPI_Wait(saved, &status);
       stop_clock_and_add(t, "Communication Time");
     }
 
