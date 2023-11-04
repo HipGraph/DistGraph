@@ -219,7 +219,7 @@ public:
 //      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
 
       stop_clock_and_add(t, "Communication Time");
-      return &req;
+      return nullptr;
     }
     sendbuf_cyclic->clear();
     sendbuf_cyclic->shrink_to_fit();
