@@ -210,7 +210,7 @@ public:
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dumy);
-      request = dumy;
+      request = &dumy;
 //      this->populate_cache(receivebuf, dumy, false, iteration, batch_id,
 //                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
