@@ -214,8 +214,8 @@ public:
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dummy);
 
-//      this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
-//                           temp_cache);
+      this->populate_cache(receivebuf, holder[0], false, iteration, batch_id,
+                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
     }
     sendbuf_cyclic->clear();
