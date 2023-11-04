@@ -273,12 +273,12 @@ public:
               MPI_Request req;
               std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
 
-              this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
+              MPI_Request* req_proc = this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
 
 //              if (!synchronous) {
                 MPI_Status status;
                 auto t = start_clock();
-                MPI_Wait(&req, &status);
+                MPI_Wait(req_proc, &status);
                 stop_clock_and_add(t, "Communication Time");
 //              }
 
