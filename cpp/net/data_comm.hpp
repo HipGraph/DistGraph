@@ -212,9 +212,10 @@ public:
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, req);
+
       std::this_thread::sleep_for(std::chrono::seconds(20));
 
-      this->populate_cache(receivebuf, req, true, iteration, batch_id,temp_cache);
+      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
 
       stop_clock_and_add(t, "Communication Time");
     }
