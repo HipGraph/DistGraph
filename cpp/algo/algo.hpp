@@ -274,6 +274,7 @@ public:
               std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
               cout<<" size "<<receivebuf->size()<<endl;
               this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
+              cout<<" after size "<<receivebuf->size()<<endl;
 //              if (!synchronous) {
                 MPI_Status status;
                 auto t = start_clock();
