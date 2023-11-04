@@ -287,7 +287,7 @@ public:
                 for (int k = base_index; k < base_index + count; k++) {
                   DataTuple<DENT, embedding_dim> t = (*update_ptr.get())[k];
                   if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<k<<" batch id"<<j<<endl;
-                  (this->dense_local)->insert_cache(i, t.col, j, iteration, t.value, true);
+                  (this->dense_local)->insert_cache(i, t.col, j, i, t.value, true);
                 }
               }
 //              receivebuf->clear();
