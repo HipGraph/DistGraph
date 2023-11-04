@@ -211,12 +211,12 @@ public:
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
                      DENSETUPLE, MPI_COMM_WORLD, &dummy);
       for(int i=i;i<1000000000;i++){
-        int j= i**2;
+        int j= i*2;
         if (i==1000000000-1){
           cout<<"j"<<j<<endl;
         }
       }
-      this->populate_cache(receivebuf, &dumy, false, iteration, batch_id,
+      this->populate_cache(receivebuf, &dummy, false, iteration, batch_id,
                            temp_cache);
       stop_clock_and_add(t, "Communication Time");
     }
