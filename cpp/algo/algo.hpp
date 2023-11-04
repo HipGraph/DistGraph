@@ -62,10 +62,6 @@ public:
   void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
     auto t = start_clock();
 
-    using MemberFunctionPtr = void (EmbeddingAlgo::*)(CSRLocal<SPT> *, DENT *,double, int, int, int,bool, bool, int, int, bool);
-    MemberFunctionPtr funcPtr = &EmbeddingAlgo::calc_t_dist_grad_rowptr;
-
-
     int batches = 0;
     int last_batch_size = batch_size;
 
@@ -278,17 +274,16 @@ public:
 
               if (k == 1) {
                 // local computation
-                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,funcPtr,this,csr_block_row, prevCoordinates, lr, batch_size,
-                                                              considering_batch_size, true, false, 0, 0, true);
+                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,this,csr_block_row, prevCoordinates, lr, batch_size,
+                                                              considering_batch_size, true, false);
 //                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
 //                    considering_batch_size, true, false, 0, 0, true);
 
               } else if (k > 1) {
                 int prev_end_process =
                     get_end_proc(prev_start, beta, grid->world_size);
-                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,funcPtr,this,csr_block_row, prevCoordinates, lr, batch_size,
-                                                              considering_batch_size, false, false, prev_start,
-                                                              prev_end_process, true);
+                this->data_comm_cache[j].get()->transfer_data(update_ptr.get(), false, &req, i, j, k,end_process, true,this,csr_block_row, prevCoordinates, lr, batch_size,
+                                                              considering_batch_size, false, false);
 //                this->calc_t_dist_grad_rowptr(
 //                    csr_block_row, prevCoordinates, lr, j, batch_size,
 //                    considering_batch_size, false, false, prev_start,
