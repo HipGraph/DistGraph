@@ -287,7 +287,7 @@ public:
 //                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
-              data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+//              data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
               prev_start = k;
               update_ptr.get()->clear();

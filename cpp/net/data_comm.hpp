@@ -205,12 +205,19 @@ public:
       stop_clock_and_add(t, "Communication Time");
     } else {
       auto t = start_clock();
+      MPI_Request dummy;
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                     DENSETUPLE, MPI_COMM_WORLD, request);
-//      this->populate_cache(receivebuf, dumy, false, iteration, batch_id,
-//                           temp_cache);
+                     DENSETUPLE, MPI_COMM_WORLD, &dummy);
+      for(int i=i;i<1000000000;i++){
+        int j= i**2;
+        if (i==1000000000-1){
+          cout<<"j"<<j<<endl;
+        }
+      }
+      this->populate_cache(receivebuf, &dumy, false, iteration, batch_id,
+                           temp_cache);
       stop_clock_and_add(t, "Communication Time");
     }
     sendbuf_cyclic->clear();
