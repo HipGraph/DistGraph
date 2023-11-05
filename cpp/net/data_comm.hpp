@@ -199,7 +199,9 @@ public:
       }
     }
 
-    receivebuf->resize(total_receive_count);
+    if (total_receive_count>0) {
+      receivebuf->resize(total_receive_count);
+    }
 
     add_datatransfers(total_receive_count, "Data transfers");
 
