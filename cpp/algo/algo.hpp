@@ -284,7 +284,7 @@ public:
                              this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                              this->data_comm_cache[j].get()->receive_counts_cyclic.data(), this->data_comm_cache[j].get()->rdispls_cyclic.data(),
                              DENSETUPLE, MPI_COMM_WORLD, &req);
-              cout<<" send buf size "<<(*sendbuf_ptr.get())->size()<<" receive buf size "<<receivebuf->size()<<endl;
+              cout<<" send buf size "<<(sendbuf_ptr.get())->size()<<" receive buf size "<<receivebuf->size()<<endl;
               MPI_Status status;
               MPI_Wait(&req, &status);
               int source = status.MPI_SOURCE;
