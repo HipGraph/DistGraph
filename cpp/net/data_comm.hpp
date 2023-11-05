@@ -31,9 +31,9 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-  vector<int> send_counts_cyclic;
+//  vector<int> send_counts_cyclic;
 //  vector<int> receive_counts_cyclic;
-  vector<int> sdispls_cyclic;
+//  vector<int> sdispls_cyclic;
 //  vector<int> rdispls_cyclic;
   vector<unordered_set<uint64_t>> receive_col_ids_list;
   vector<unordered_set<uint64_t>> send_col_ids_list;
@@ -72,6 +72,8 @@ public:
 
   vector<int> receive_counts_cyclic;
   vector<int> rdispls_cyclic;
+  vector<int> send_counts_cyclic;
+  vector<int> sdispls_cyclic;
 
    MPI_Request request = MPI_REQUEST_NULL;
 
@@ -120,10 +122,11 @@ public:
     }
   }
 
- inline void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                     bool synchronous,MPI_Request* req, int iteration,
-                     int batch_id, int starting_proc, int end_proc,
-                     bool temp_cache) {
+ inline void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *sendbuf_cyclic,
+                            std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+                            bool synchronous,MPI_Request* req, int iteration,
+                            int batch_id, int starting_proc, int end_proc,
+                            bool temp_cache) {
 
     int total_receive_count = 0;
     vector<int> offset_vector(grid->world_size, 0);
@@ -166,9 +169,9 @@ public:
                   : rdispls_cyclic[i];
 //      cout<<" my rank "<<grid->global_rank<<" sending disps "<<i<<" : "<<sdispls_cyclic[i]<<" receving disps "<<i<<" : "<<rdispls_cyclic[i]<<"batch_id"<<batch_id<<endl;
     }
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
+//        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+//            new vector<DataTuple<DENT, embedding_dim>>());
 
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
@@ -212,10 +215,10 @@ public:
       stop_clock_and_add(t, "Communication Time");
     } else {
       auto t = start_clock();
-      MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
-                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
-                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                     DENSETUPLE, MPI_COMM_WORLD, &request);
+//      MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
+//                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
+//                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
+//                     DENSETUPLE, MPI_COMM_WORLD, &request);
 
 //      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
 

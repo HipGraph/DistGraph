@@ -90,6 +90,11 @@ public:
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
+    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf =
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
+
+
     vector<MPI_Request *> mpi_requests(batches);
 
     for (int i = 0; i < batches; i++) {
@@ -273,7 +278,11 @@ public:
               MPI_Request req;
               std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
 
-//              this->data_comm_cache[j].get()->transfer_data(receivebuf, false, &req, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(sendbuf_cyclic.get(),receivebuf, false, &req, i, j, k,end_process, true);
+              MPI_Ialltoallv((*sendbuf_cyclic).data(), this->data_comm_cache[j].get()->send_counts_cyclic.data(),
+                             this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
+                             this->data_comm_cache[j].get()->receive_counts_cyclic.data(), this->data_comm_cache[j].get()->rdispls_cyclic.data(),
+                             DENSETUPLE, MPI_COMM_WORLD, &req);
 //              MPI_Status status;
 //              MPI_Wait(&req, &status);
 //              int source = status.MPI_SOURCE;
