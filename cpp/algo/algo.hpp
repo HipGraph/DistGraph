@@ -284,18 +284,9 @@ public:
                              this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                              this->data_comm_cache[j].get()->receive_counts_cyclic.data(), this->data_comm_cache[j].get()->rdispls_cyclic.data(),
                              DENSETUPLE, MPI_COMM_WORLD, &req);
-              cout<<" send buf size "<<(sendbuf_ptr.get())->size()<<" receive buf size "<<receivebuf->size()<<endl;
-              MPI_Status status;
-              MPI_Wait(&req, &status);
-              int source = status.MPI_SOURCE;
-              int tag = status.MPI_TAG;
-              int error_code = status.MPI_ERROR;
 
-              std::cout << "Status of MPI operation:" << std::endl;
-              std::cout << "Source: " << source << std::endl;
-              std::cout << "Tag: " << tag << std::endl;
-              std::cout << "Error code: " << error_code << std::endl;
-//              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+
+              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 ////              if (!synchronous) {
 //                MPI_Status status;
 //                auto t = start_clock();
