@@ -301,7 +301,7 @@ public:
               for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
                 MPI_Request request_batch_update;
 
-//                this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), sync,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
+                this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), sync,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
 
                 if (!sync) {
 //                  MPI_Ialltoallv(
