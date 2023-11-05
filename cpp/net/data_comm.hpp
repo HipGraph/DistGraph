@@ -73,7 +73,7 @@ public:
   vector<int> receive_counts_cyclic;
   vector<int> rdispls_cyclic;
 
-   MPI_Request request;
+   MPI_Request request = MPI_REQUEST_NULL;
 
   ~DataComm() {}
 
@@ -308,9 +308,7 @@ public:
     if (!synchronous) {
       MPI_Status status;
       auto t = start_clock();
-      int isInitialized;
-      MPI_Request_get_status(request, &isInitialized, &status);
-      if (isInitialized) {
+      if (request != MPI_REQUEST_NULL) {
         std::cout << "Request is initialized." << std::endl;
       } else {
         std::cout << "Request is not initialized." << std::endl;
