@@ -278,6 +278,7 @@ public:
               MPI_Request req;
               std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
 
+
               this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(),receivebuf, false, &req, i, j, k,end_process, true);
               MPI_Ialltoallv((*sendbuf_ptr.get()).data(), this->data_comm_cache[j].get()->send_counts_cyclic.data(),
                              this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
