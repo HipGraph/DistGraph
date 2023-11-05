@@ -39,6 +39,10 @@ protected:
 
   double beta = 1.0;
 
+  bool sync = false;
+
+  bool col_major = false;
+
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
                 distblas::core::SpMat<SPT> *sp_local_receiver,
@@ -113,10 +117,7 @@ public:
 
     size_t total_memory = 0;
 
-    CSRLocal<SPT> *csr_block_row =
-        (this->sp_local_native)->csr_local_data.get();
-
-    CSRLocal<SPT> *csr_block = (this->sp_local_receiver)->csr_local_data.get();
+    CSRLocal<SPT> *csr_block = (col_major)?(this->sp_local_receiver)->csr_local_data.get():(this->sp_local_native)->csr_local_data.get();;
 
     int considering_batch_size = batch_size;
 
@@ -278,29 +279,36 @@ public:
               MPI_Request req;
 
 
-              this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(),update_ptr.get(), false, &req, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(),update_ptr.get(), sync, &req, i, j, k,end_process, true);
 
-              MPI_Ialltoallv((*sendbuf_ptr.get()).data(), this->data_comm_cache[j].get()->send_counts_cyclic.data(),
-                             this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*update_ptr.get()).data(),
-                             this->data_comm_cache[j].get()->receive_counts_cyclic.data(), this->data_comm_cache[j].get()->rdispls_cyclic.data(),
-                             DENSETUPLE, MPI_COMM_WORLD, &req);
+              if (!sync) {
+                MPI_Ialltoallv((*sendbuf_ptr.get()).data(),
+                    this->data_comm_cache[j].get()->send_counts_cyclic.data(),
+                    this->data_comm_cache[j].get()->sdispls_cyclic.data(),
+                    DENSETUPLE, (*update_ptr.get()).data(),
+                    this->data_comm_cache[j].get()->receive_counts_cyclic.data(),
+                    this->data_comm_cache[j].get()->rdispls_cyclic.data(),
+                    DENSETUPLE, MPI_COMM_WORLD, &req);
+              }
 
               if (k == 1) {
                 // local computation
-                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, true, false, 0, 0, true);
+                this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j, batch_size,
+                    considering_batch_size, true, col_major, 0, 0, true);
 
               } else if (k > 1) {
                 int prev_end_process =
                     get_end_proc(prev_start, beta, grid->world_size);
 
                 this->calc_t_dist_grad_rowptr(
-                    csr_block_row, prevCoordinates, lr, j, batch_size,
-                    considering_batch_size, false, false, prev_start,
+                    csr_block, prevCoordinates, lr, j, batch_size,
+                    considering_batch_size, false, col_major, prev_start,
                     prev_end_process, true);
               }
 
-              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+              if (!sync) {
+                this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, sync, i, j, true);
+              }
 
               prev_start = k;
               update_ptr.get()->clear();
@@ -309,9 +317,9 @@ public:
                 get_end_proc(prev_start, beta, grid->world_size);
 
             // updating last remote fetched data vectors
-            this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j,
+            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                           batch_size, considering_batch_size,
-                                          false, false, prev_start,
+                                          false, col_major, prev_start,
                                           prev_end_process, true);
 
 
