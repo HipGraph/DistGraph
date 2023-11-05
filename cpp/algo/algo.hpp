@@ -286,6 +286,7 @@ public:
                   prevCoordinates[IDIM + d] = 0;
                 }
               }
+
               int next_batch_id = (j + 1) % batches;
               int next_iteration = (next_batch_id == 0) ? i + 1 : i;
               int next_considering_batch_size = (next_batch_id == batches-1)?last_batch_size:considering_batch_size;
@@ -301,7 +302,7 @@ public:
                 MPI_Request request_batch_update;
 
                 this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), sync,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
-                 cout<<" send buf size "<<sendbuf_ptr.get()->size()<<" j "<<j<<endl;
+//                 cout<<" send buf size "<<sendbuf_ptr.get()->size()<<" j "<<j<<endl;
                 if (!sync) {
                   MPI_Ialltoallv(
                       (*sendbuf_ptr.get()).data(),
