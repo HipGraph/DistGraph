@@ -84,11 +84,6 @@ public:
             sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
     full_comm.get()->onboard_data();
 
-    if (alpha >0 and this->grid->world_size>1 ){
-      int alpha_proc_end = get_end_proc(1, alpha, grid->world_size);
-      full_comm.get()->transfer_data(update_ptr.get(), true, fetch_batch,0, 0, 1, alpha_proc_end, false);
-    }
-
     // first batch onboarding
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
@@ -97,6 +92,13 @@ public:
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
+
+    if (alpha >0 and this->grid->world_size>1 ){
+      MPI_Request fetch_batch_full;
+      int alpha_proc_end = get_end_proc(1, alpha, grid->world_size);
+      full_comm.get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true, fetch_batch_full,0, 0, 1, alpha_proc_end, false);
+    }
+
 
     vector<MPI_Request *> mpi_requests(batches);
 
@@ -140,7 +142,7 @@ public:
 
         for (int k = 1; k < alpha_cyc_end; k += alpha_cyc_len) {
           MPI_Request fetch_batch;
-          this->data_comm_cache[0].get()->transfer_data(sendbuf_ptr.get(),update_ptr.get(), sync, fetch_batch,0, 0, k, (k + alpha_cyc_len), false);
+          this->data_comm_cache[0].get()->transfer_data(sendbuf_ptr.get(),update_ptr.get(), sync, &fetch_batch,0, 0, k, (k + alpha_cyc_len), false);
 
           if (!sync) {
             MPI_Ialltoallv((*sendbuf_ptr.get()).data(), this->data_comm_cache[0].get()->send_counts_cyclic.data(),this->data_comm_cache[0].get()->sdispls_cyclic.data(),
