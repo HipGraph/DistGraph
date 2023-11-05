@@ -122,8 +122,6 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
-//      if (i == iterations-3)
-//           cout << " rank " << grid->global_rank << " iteration " << i << endl;
 
       //      if (alpha > 0) {
       //        for (int k = 0; k < batch_size; k += 1) {
@@ -307,7 +305,7 @@ public:
               }
 
               if (!sync) {
-                this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, sync, i, j, true);
+                this->data_comm_cache[j].get()->populate_cache(sendbuf_ptr.get(),update_ptr.get(), &req, sync, i, j, true);
               }
 
               prev_start = k;

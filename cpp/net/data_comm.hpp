@@ -305,7 +305,8 @@ public:
   }
 
 
-  inline void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+  inline void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *sendbuf,
+                             std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
                       MPI_Request *req, bool synchronous, int iteration,
                       int batch_id, bool temp) {
     if (!synchronous) {
@@ -335,6 +336,9 @@ public:
     }
     receivebuf->clear();
     receivebuf->shrink_to_fit();
+    sendbuf->clear();
+    sendbuf->shrink_to_fit();
+
   }
 
 
