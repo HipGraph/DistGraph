@@ -308,6 +308,14 @@ public:
     if (!synchronous) {
       MPI_Status status;
       auto t = start_clock();
+      int isInitialized;
+      MPI_Request_get_status(request, &isInitialized, &status);
+      if (isInitialized) {
+        std::cout << "Request is initialized." << std::endl;
+      } else {
+        std::cout << "Request is not initialized." << std::endl;
+      }
+
       MPI_Wait(&request, &status);
       int source = status.MPI_SOURCE;
       int tag = status.MPI_TAG;
