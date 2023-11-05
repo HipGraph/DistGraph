@@ -291,7 +291,7 @@ public:
 //
 //          //            dense_local->invalidate_cache(i, j, true);
 //          update_ptr.get()->resize(0);
-         this->execute_pull_model_computations(sendbuf_ptr.get(),receive_buf.get(),
+         this->execute_pull_model_computations(sendbuf_ptr.get(),update_ptr.get(),
                                       i,j,this->data_comm_cache[j].get(),
                                       csr_block,batch_size,considering_batch_size,lr,prevCoordinates);
 
@@ -439,13 +439,11 @@ inline void execute_pull_model_computations(std::vector<DataTuple<DENT, embeddin
 
     MPI_Request req;
 
-    data_comm->transfer_data(
-        sendbuf_ptr.get(), update_ptr.get(), sync, &req, iteration, batch, k,
-        end_process, true);
+    data_comm->transfer_data(sendbuf, receivebuf, sync, &req, iteration, batch, k,end_process, true);
 
     if (!sync) {
-      MPI_Ialltoallv((sendbuf).data(), data_comm->send_counts_cyclic.data(),data_comm->sdispls_cyclic.data(),
-          DENSETUPLE, (receivebuf).data(), data_comm->receive_counts_cyclic.data(),data_comm->rdispls_cyclic.data(),
+      MPI_Ialltoallv((*sendbuf).data(), data_comm->send_counts_cyclic.data(),data_comm->sdispls_cyclic.data(),
+          DENSETUPLE, (*receivebuf).data(), data_comm->receive_counts_cyclic.data(),data_comm->rdispls_cyclic.data(),
           DENSETUPLE, MPI_COMM_WORLD, &req);
     }
 
@@ -466,15 +464,13 @@ inline void execute_pull_model_computations(std::vector<DataTuple<DENT, embeddin
     }
 
     if (!sync) {
-      data_comm->populate_cache(
-          sendbuf_ptr.get(), update_ptr.get(), &req, sync, i, j, true);
+      data_comm->populate_cache(sendbuf, receivebuf, &req, sync, iteration, batch, true);
     }
 
     prev_start = k;
-    update_ptr.get()->clear();
+    receivebuf->clear();
   }
-  int prev_end_process =
-      get_end_proc(prev_start, beta, grid->world_size);
+  int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
 
   // updating last remote fetched data vectors
   this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
