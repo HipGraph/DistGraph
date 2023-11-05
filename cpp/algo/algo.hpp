@@ -96,7 +96,7 @@ public:
     if (alpha >0 and this->grid->world_size>1 ){
       MPI_Request fetch_batch_full;
       int alpha_proc_end = get_end_proc(1, alpha, grid->world_size);
-      full_comm.get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true, fetch_batch_full,0, 0, 1, alpha_proc_end, false);
+      full_comm.get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true, &fetch_batch_full,0, 0, 1, alpha_proc_end, false);
     }
 
 
