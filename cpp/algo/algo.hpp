@@ -133,14 +133,21 @@ public:
         int prev_start_proc = 0;
         int alpha_proc_length = get_proc_length(alpha, grid->world_size);
 
-        MPI_Request fetch_batch;
+
 
         int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
         int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
 
         for (int k = 1; k < alpha_cyc_end; k += alpha_cyc_len) {
+          MPI_Request fetch_batch;
+          this->data_comm_cache[0].get()->transfer_data(sendbuf_ptr.get(),update_ptr.get(), sync, fetch_batch,0, 0, k, (k + alpha_cyc_len), false);
 
-          full_comm.get()->transfer_data(update_ptr.get(), false, fetch_batch,0, 0, k, (k + alpha_cyc_len), false);
+          if (!sync) {
+            MPI_Ialltoallv((*sendbuf_ptr.get()).data(), this->data_comm_cache[0].get()->send_counts_cyclic.data(),this->data_comm_cache[0].get()->sdispls_cyclic.data(),
+                           DENSETUPLE, (*update_ptr.get()).data(), this->data_comm_cache[0].get()->receive_counts_cyclic.data(),this->data_comm_cache[0].get()->rdispls_cyclic.data(),
+                           DENSETUPLE, MPI_COMM_WORLD, &fetch_batch);
+          }
+
 
           if (k == 1) {
             // local computation for first batch
@@ -151,12 +158,11 @@ public:
           } else if (k > 1) {
             this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                           batch_size, considering_batch_size,
-                                          false, true, prev_start_proc,
+                                          false, col_major, prev_start_proc,
                                           k, false);
           }
 
-          full_comm.get()->populate_cache(update_ptr.get(), fetch_batch, false,0, 0, false);
-          update_ptr.get()->clear();
+          this->data_comm_cache[0].get()->populate_cache(sendbuf_ptr.get(),update_ptr.get(), &fetch_batch, false,0, 0, false);
 
           prev_start_proc = k;
         }
@@ -164,7 +170,7 @@ public:
           // remote computation for first batch
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                         batch_size, considering_batch_size,
-                                        false, true, prev_start_proc,
+                                        false, col_major, prev_start_proc,
                                         alpha_cyc_end, false);
         }
 //        } else if (this->alpha < 1.0) {
