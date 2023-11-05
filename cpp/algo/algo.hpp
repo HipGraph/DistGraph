@@ -284,7 +284,7 @@ public:
 //              std::cout << "Source: " << source << std::endl;
 //              std::cout << "Tag: " << tag << std::endl;
 //              std::cout << "Error code: " << error_code << std::endl;
-//              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
+              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 ////              if (!synchronous) {
 //                MPI_Status status;
 //                auto t = start_clock();
