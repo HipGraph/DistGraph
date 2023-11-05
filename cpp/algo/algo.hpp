@@ -178,8 +178,7 @@ public:
           }
 
           this->data_comm_cache[0].get()->populate_cache(
-              sendbuf_ptr.get(), update_ptr.get(), &fetch_batch, false, 0, 0,
-              false);
+              sendbuf_ptr.get(), update_ptr.get(), &fetch_batch, false, 0, 0,false);
 
           prev_start_proc = k;
         }
@@ -301,19 +300,17 @@ public:
               for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
                 MPI_Request request_batch_update;
 
-//                this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), sync,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
-
+                this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), sync,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
+                 cout<<" send buf size "<<sendbuf_ptr.get()->size()<<" j "<<j<<endl;
                 if (!sync) {
-//                  MPI_Ialltoallv(
-//                      (*sendbuf_ptr.get()).data(),
-//                      this->data_comm_cache[j].get()->send_counts_cyclic.data(),
-//                      this->data_comm_cache[j].get()->sdispls_cyclic.data(),
-//                      DENSETUPLE, (*update_ptr.get()).data(),
-//                      this->data_comm_cache[j]
-//                          .get()
-//                          ->receive_counts_cyclic.data(),
-//                      this->data_comm_cache[j].get()->rdispls_cyclic.data(),
-//                      DENSETUPLE, MPI_COMM_WORLD, &request_batch_update);
+                  MPI_Ialltoallv(
+                      (*sendbuf_ptr.get()).data(),
+                      this->data_comm_cache[j].get()->send_counts_cyclic.data(),
+                      this->data_comm_cache[j].get()->sdispls_cyclic.data(),
+                      DENSETUPLE, (*update_ptr.get()).data(),
+                      this->data_comm_cache[j].get()->receive_counts_cyclic.data(),
+                      this->data_comm_cache[j].get()->rdispls_cyclic.data(),
+                      DENSETUPLE, MPI_COMM_WORLD, &request_batch_update);
                 }
 
                 if (k == 1) {
@@ -329,9 +326,7 @@ public:
                 }
 
                 if (!sync) {
-//                  data_comm_cache[j].get()->populate_cache(
-//                      sendbuf_ptr.get(), update_ptr.get(),
-//                      &request_batch_update, sync, i, j, false);
+                  this->data_comm_cache[j].get()->populate_cache(sendbuf_ptr.get(), update_ptr.get(),&request_batch_update, sync, i, j, false);
                 }
 
                 prev_start_proc = k;
