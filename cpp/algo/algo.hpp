@@ -315,14 +315,14 @@ public:
 
                 if (k == 1) {
                   // local computation for first batch
-//                  this->calc_t_dist_grad_rowptr(
-//                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-//                      next_considering_batch_size, true, col_major, 0, 0, false);
+                  this->calc_t_dist_grad_rowptr(
+                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+                      next_considering_batch_size, true, col_major, 0, 0, false);
                 } else if (k > 1) {
-//                  this->calc_t_dist_grad_rowptr(
-//                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-//                      next_considering_batch_size, false, col_major, prev_start_proc,
-//                      k, false);
+                  this->calc_t_dist_grad_rowptr(
+                      csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+                      next_considering_batch_size, false, col_major, prev_start_proc,
+                      k, false);
                 }
 
                 if (!sync) {
@@ -332,10 +332,10 @@ public:
                 prev_start_proc = k;
               }
               if (alpha == 1.0) {
-//                this->calc_t_dist_grad_rowptr(
-//                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-//                    next_considering_batch_size, false, col_major, prev_start_proc,
-//                    alpha_cyc_end, false);
+                this->calc_t_dist_grad_rowptr(
+                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+                    next_considering_batch_size, false, col_major, prev_start_proc,
+                    alpha_cyc_end, false);
               }
               //              dense_local->invalidate_cache(i, j, false);
 
