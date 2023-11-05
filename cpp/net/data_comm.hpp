@@ -295,8 +295,7 @@ public:
                   DENSETUPLE, MPI_COMM_WORLD);
     stop_clock_and_add(t, "Communication Time");
     MPI_Request dumy;
-    this->populate_cache(sendbuf,receivebuf_ptr.get(), &dumy, true, iteration, batch_id,
-                         true); // we should not do this
+    this->populate_cache(sendbuf.get(),receivebuf_ptr.get(), &dumy, true, iteration, batch_id,true); // we should not do this
 
     sendbuf->clear();
     sendbuf->shrink_to_fit();
