@@ -276,12 +276,12 @@ public:
               int end_process = get_end_proc(k, beta, grid->world_size);
 
               MPI_Request req;
-              std::vector<DataTuple<DENT, embedding_dim>> *receivebuf = update_ptr.get();
 
 
-              this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(),receivebuf, false, &req, i, j, k,end_process, true);
+              this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(),update_ptr.get(), false, &req, i, j, k,end_process, true);
+
               MPI_Ialltoallv((*sendbuf_ptr.get()).data(), this->data_comm_cache[j].get()->send_counts_cyclic.data(),
-                             this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
+                             this->data_comm_cache[j].get()->sdispls_cyclic.data(), DENSETUPLE, (*update_ptr.get()).data(),
                              this->data_comm_cache[j].get()->receive_counts_cyclic.data(), this->data_comm_cache[j].get()->rdispls_cyclic.data(),
                              DENSETUPLE, MPI_COMM_WORLD, &req);
 
@@ -298,7 +298,6 @@ public:
                     csr_block_row, prevCoordinates, lr, j, batch_size,
                     considering_batch_size, false, false, prev_start,
                     prev_end_process, true);
-//                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
               }
 
               this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
@@ -315,7 +314,6 @@ public:
                                           false, false, prev_start,
                                           prev_end_process, true);
 
-//            cout<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
 
 //            dense_local->invalidate_cache(i, j, true);
             update_ptr.get()->resize(0);
