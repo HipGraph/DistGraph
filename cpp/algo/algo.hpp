@@ -285,47 +285,23 @@ public:
                              this->data_comm_cache[j].get()->receive_counts_cyclic.data(), this->data_comm_cache[j].get()->rdispls_cyclic.data(),
                              DENSETUPLE, MPI_COMM_WORLD, &req);
 
+              if (k == 1) {
+                // local computation
+                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
+                    considering_batch_size, true, false, 0, 0, true);
+
+              } else if (k > 1) {
+                int prev_end_process =
+                    get_end_proc(prev_start, beta, grid->world_size);
+
+                this->calc_t_dist_grad_rowptr(
+                    csr_block_row, prevCoordinates, lr, j, batch_size,
+                    considering_batch_size, false, false, prev_start,
+                    prev_end_process, true);
+//                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
+              }
 
               this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
-////              if (!synchronous) {
-//                MPI_Status status;
-//                auto t = start_clock();
-//                MPI_Wait(req_proc, &status);
-//                stop_clock_and_add(t, "Communication Time");
-////              }
-//
-//              for (int m = 0; m < this->grid->world_size; m++) {
-//                int base_index = this->data_comm_cache[j].get()->rdispls_cyclic[m];
-//                int count = this->data_comm_cache[j].get()->receive_counts_cyclic[m];
-//
-//                for (int n = base_index; n < base_index + count; n++) {
-//                   DataTuple<DENT, embedding_dim> tup = (*receivebuf)[n];
-//                   if (tup.col > 60000) cout<<" inserting exhasuting "<<tup.col  <<" for rank "<<i<<" access index "<<n<<" batch id"<<j<<endl;
-////                  (this->dense_local)->insert_cache(n, t.col, j, i, t.value, true);
-//                }
-//              }
-//              receivebuf->clear();
-//              receivebuf->shrink_to_fit();
-//            }
-//              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
-
-//              if (k == 1) {
-//                // local computation
-//                this->calc_t_dist_grad_rowptr(csr_block_row, prevCoordinates, lr, j, batch_size,
-//                    considering_batch_size, true, false, 0, 0, true);
-//
-//              } else if (k > 1) {
-//                int prev_end_process =
-//                    get_end_proc(prev_start, beta, grid->world_size);
-//
-//                this->calc_t_dist_grad_rowptr(
-//                    csr_block_row, prevCoordinates, lr, j, batch_size,
-//                    considering_batch_size, false, false, prev_start,
-//                    prev_end_process, true);
-////                cout<<" k "<<k<<" prev_start"<<prev_start<<"prev_end_process"<<prev_end_process<<endl;
-//              }
-
-//              this->data_comm_cache[j].get()->populate_cache(update_ptr.get(), &req, false, i, j,true);
 
               prev_start = k;
               update_ptr.get()->clear();
