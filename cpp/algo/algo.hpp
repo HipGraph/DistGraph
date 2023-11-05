@@ -316,7 +316,7 @@ public:
                           .get()
                           ->receive_counts_cyclic.data(),
                       this->data_comm_cache[j].get()->rdispls_cyclic.data(),
-                      DENSETUPLE, MPI_COMM_WORLD, &fetch_batch);
+                      DENSETUPLE, MPI_COMM_WORLD, &request_batch_update);
                 }
 
                 if (k == 1) {
