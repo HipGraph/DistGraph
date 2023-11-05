@@ -73,6 +73,7 @@ public:
   vector<int> receive_counts_cyclic;
   vector<int> rdispls_cyclic;
 
+   MPI_Request request;
 
   ~DataComm() {}
 
@@ -214,7 +215,7 @@ public:
       MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                      sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                      receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                     DENSETUPLE, MPI_COMM_WORLD, req);
+                     DENSETUPLE, MPI_COMM_WORLD, &request);
 
 //      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
 
@@ -302,12 +303,12 @@ public:
 
 
   inline void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request *request, bool synchronous, int iteration,
+                      MPI_Request *req, bool synchronous, int iteration,
                       int batch_id, bool temp) {
     if (!synchronous) {
       MPI_Status status;
       auto t = start_clock();
-      MPI_Wait(request, &status);
+      MPI_Wait(&request, &status);
       int source = status.MPI_SOURCE;
       int tag = status.MPI_TAG;
       int error_code = status.MPI_ERROR;
