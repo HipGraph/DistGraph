@@ -132,7 +132,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
 
-      if (alpha > 0 and this->grid->world_size > 1) {
+      if (alpha > 0 and this->grid->world_size > 1 and i ==0) {
 
         for (int k = 0; k < batch_size; k += 1) {
           int IDIM = k * embedding_dim;
