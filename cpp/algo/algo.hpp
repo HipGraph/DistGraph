@@ -288,6 +288,10 @@ public:
         }
         total_memory += get_memory_usage();
       }
+      if (i== iterations-2){
+        (this->dense_local)->print_cache(i);
+        (this->dense_local)->print_matrix_rowptr(i);
+      }
     }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
@@ -324,8 +328,8 @@ public:
       }
 
       if (k == comm_initial_start) {
-        if (grid->global_rank == 0)
-          cout << "executing local"<<"first_execution_proc"<<first_execution_proc<<"prev_start"<<prev_start<< endl;
+//        if (grid->global_rank == 0)
+//          cout << "executing local"<<"first_execution_proc"<<first_execution_proc<<"prev_start"<<prev_start<< endl;
         // local computation
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
@@ -348,9 +352,9 @@ public:
       prev_start = k;
     }
     int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
-    if (grid->global_rank == 0)
-      cout << "prev_start" << prev_start << " prev_end_process "
-           << prev_end_process << "iterations" << iteration << endl;
+//    if (grid->global_rank == 0)
+//      cout << "prev_start" << prev_start << " prev_end_process "
+//           << prev_end_process << "iterations" << iteration << endl;
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size, false,
