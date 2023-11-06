@@ -387,7 +387,8 @@ public:
     }
     int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
     if (grid->global_rank == 0)
-      cout<<"prev_start" <<prev_start<< " prev_end_process "<<prev_end_process<<endl;
+      cout<<"prev_start" <<prev_start<< " prev_end_process "<<prev_end_process
+           <<"iterations"<<iteration<<endl;
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size, false,
