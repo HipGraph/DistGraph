@@ -268,8 +268,8 @@ public:
                   prevCoordinates[IDIM + d] = 0;
                 }
               }
-              int next_batch_id = (batch + 1) % batches;
-              int next_iteration = (next_batch_id == 0) ? iteration + 1 : iteration;
+              int next_batch_id = (j + 1) % batches;
+              int next_iteration = (next_batch_id == 0) ? i + 1 : i;
               int next_considering_batch_size = (next_batch_id == batches - 1)
                                                     ? last_batch_size
                                                     : considering_batch_size;
@@ -332,10 +332,11 @@ public:
 
   inline void execute_pull_model_computations(
       std::vector<DataTuple<DENT, embedding_dim>> *sendbuf,
-      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf, int iteration,
+      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+      int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, DENT *prevCoordinates int initial_start, bool local_execution,
+      double lr, DENT *prevCoordinates, int initial_start, bool local_execution,
       int first_execution_proc) {
 
     int proc_length = get_proc_length(beta, grid->world_size);
