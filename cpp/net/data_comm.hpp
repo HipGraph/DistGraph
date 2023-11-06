@@ -299,8 +299,6 @@ public:
     MPI_Request dumy;
     this->populate_cache(sendbuf.get(),receivebuf_ptr.get(), &dumy, true, iteration, batch_id,true); // we should not do this
 
-    sendbuf->clear();
-    sendbuf->shrink_to_fit();
     //    delete[] sendbuf;
   }
 
