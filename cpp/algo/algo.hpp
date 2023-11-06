@@ -145,14 +145,14 @@ public:
             last_batch_size, considering_batch_size, lr, prevCoordinates, 0, 0,
             considering_batch_size, false);
 
-        if (alpha < 1.0) {
-          int prev_start = get_end_proc(1, alpha, this->grid->world_size);
-          this->execute_pull_model_computations(
-              sendbuf_ptr.get(), update_ptr.get(), 0, 0,
-              this->data_comm_cache[0].get(), csr_block, batch_size,
-              considering_batch_size, lr, prevCoordinates, prev_start, false,
-              last_proc, true);
-        }
+//        if (alpha < 1.0) {
+//          int prev_start = get_end_proc(1, alpha, this->grid->world_size);
+//          this->execute_pull_model_computations(
+//              sendbuf_ptr.get(), update_ptr.get(), 0, 0,
+//              this->data_comm_cache[0].get(), csr_block, batch_size,
+//              considering_batch_size, lr, prevCoordinates, prev_start, false,
+//              last_proc, true);
+//        }
       }
 
       for (int j = 0; j < batches; j++) {
