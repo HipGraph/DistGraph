@@ -470,7 +470,7 @@ public:
     for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
       MPI_Request request_batch_update;
 
-      this->data_comm_cache[j].get()->transfer_data(sendbuf, receivebuf, sync,&request_batch_update, iteration, batch, k, (k + alpha_cyc_len), false);
+      data_comm->transfer_data(sendbuf, receivebuf, sync,&request_batch_update, iteration, batch, k, (k + alpha_cyc_len), false);
       if (!sync) {
         MPI_Ialltoallv(sendbuf,data_comm->send_counts_cyclic.data(),data_comm->sdispls_cyclic.data(),
                        DENSETUPLE, receivebuf,data_comm->receive_counts_cyclic.data(),
