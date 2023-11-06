@@ -311,10 +311,13 @@ public:
                 prev_start_proc = k;
               }
               if (alpha == 1.0) {
-                this->calc_t_dist_grad_rowptr(
-                    csr_block, prevCoordinates, lr, next_batch_id, batch_size,
-                    next_considering_batch_size, false, col_major, prev_start_proc,
-                    alpha_cyc_end, false);
+                if (grid->global_rank ==0  )
+                   cout<<"prev_start_proc "<<prev_start_proc<<"alpha_cyc_end"<<alpha_cyc_end<<endl;
+
+                  this->calc_t_dist_grad_rowptr(
+                          csr_block, prevCoordinates, lr, next_batch_id, batch_size,
+                         next_considering_batch_size, false, col_major, prev_start_proc,
+                          alpha_cyc_end, false);
               }
               //              dense_local->invalidate_cache(i, j, false);
 
