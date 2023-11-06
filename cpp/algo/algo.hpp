@@ -319,14 +319,14 @@ public:
             data_comm->rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &req);
       }
 
-      if (k == prev_start) {
+      if (k == initial_start) {
         // local computation
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution, col_major,
             first_execution_proc, prev_start, local_execution);
 
-      } else if (k > prev_start) {
+      } else if (k > initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
