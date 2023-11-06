@@ -153,7 +153,7 @@ public:
               sendbuf_ptr.get(), update_ptr.get(), 0, 0,
               this->data_comm_cache[0].get(), csr_block, batch_size,
               considering_batch_size, lr, prevCoordinates, prev_start, false,
-              last_proc, false);
+              last_proc, true);
         }
       }
 
@@ -194,19 +194,24 @@ public:
 
           //  pull model code
           if (alpha == 0) {
+
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
-                considering_batch_size, lr, prevCoordinates, 1, true, 0, true);
+                considering_batch_size, lr, prevCoordinates, 1,
+                true, 0, true);
 
             this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
             for (int k = 0; k < batch_size; k += 1) {
               int IDIM = k * embedding_dim;
               for (int d = 0; d < embedding_dim; d++) {
                 prevCoordinates[IDIM + d] = 0;
               }
             }
+
           } else {
+
             this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
             if (!(i == iterations - 1 and j == batches - 1)) {
@@ -295,11 +300,11 @@ public:
       std::vector<DataTuple<DENT, embedding_dim>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, DENT *prevCoordinates, int initial_start, bool local_execution,
+      double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
     int proc_length = get_proc_length(beta, grid->world_size);
-    int prev_start = initial_start;
+    int prev_start = comm_initial_start;
 
     for (int k = prev_start; k < grid->world_size; k += proc_length) {
       int end_process = get_end_proc(k, beta, grid->world_size);
@@ -307,8 +312,7 @@ public:
       MPI_Request req;
 
       if (communication) {
-        data_comm->transfer_data(sendbuf, receivebuf, sync, &req, iteration,
-                                 batch, k, end_process, true);
+        data_comm->transfer_data(sendbuf, receivebuf, sync, &req, iteration,batch, k, end_process, true);
       }
 
       if (!sync and communication) {
@@ -319,14 +323,16 @@ public:
             data_comm->rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &req);
       }
 
-      if (k == initial_start) {
+      if (k == comm_initial_start) {
+        if (grid->global_rank == 0)
+          cout << "executing local"<< endl;
         // local computation
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution, col_major,
             first_execution_proc, prev_start, local_execution);
 
-      } else if (k > initial_start) {
+      } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
@@ -336,8 +342,7 @@ public:
       }
 
       if (!sync and communication) {
-        data_comm->populate_cache(sendbuf, receivebuf, &req, sync, iteration,
-                                  batch, true);
+        data_comm->populate_cache(sendbuf, receivebuf, &req, sync, iteration, batch, true);
       }
 
       prev_start = k;
