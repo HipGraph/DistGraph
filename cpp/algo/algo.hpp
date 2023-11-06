@@ -185,10 +185,10 @@ public:
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         } else {
-//          full_comm.get()->transfer_data(random_number_vec, i, j);
-//          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
-//                                          lr, j, batch_size,
-//                                          considering_batch_size);
+          full_comm.get()->transfer_data(random_number_vec, i, j);
+          this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
+                                          lr, j, batch_size,
+                                          considering_batch_size);
 
           //  pull model code
           if (alpha == 0) {
