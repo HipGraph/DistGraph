@@ -472,7 +472,7 @@ public:
 
       data_comm->transfer_data(sendbuf, receivebuf, sync,&request_batch_update, iteration, batch, k, (k + alpha_cyc_len), false);
       if (!sync) {
-        MPI_Ialltoallv((*sendbuf).data(,data_comm->send_counts_cyclic.data(),data_comm->sdispls_cyclic.data(),
+        MPI_Ialltoallv((*sendbuf).data(),data_comm->send_counts_cyclic.data(),data_comm->sdispls_cyclic.data(),
                        DENSETUPLE, (*receivebuf).data(),data_comm->receive_counts_cyclic.data(),
                        data_comm->rdispls_cyclic.data(),
                        DENSETUPLE, MPI_COMM_WORLD, &request_batch_update);
