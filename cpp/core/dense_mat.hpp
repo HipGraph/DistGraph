@@ -175,8 +175,8 @@ public:
 
     for (int i = 0; i < (*this->cachePtr).size(); i++) {
       unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> map =
-          (*this->cachePtr)[i];
-//      (*this->tempCachePtr)[i];
+//          (*this->cachePtr)[i];
+      (*this->tempCachePtr)[i];
 
       string output_path = "rank_" + to_string(rank) + "remote_rank_" +
                            to_string(i) + " itr_" + to_string(iter) + ".txt";
