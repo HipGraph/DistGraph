@@ -325,7 +325,7 @@ public:
 
       if (k == comm_initial_start) {
         if (grid->global_rank == 0)
-          cout << "executing local"<< endl;
+          cout << "executing local"<<"first_execution_proc"<<first_execution_proc<<"prev_start"<<prev_start<< endl;
         // local computation
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
