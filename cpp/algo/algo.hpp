@@ -147,24 +147,8 @@ public:
 
         for (int k = 1; k < alpha_cyc_end; k += alpha_cyc_len) {
           MPI_Request fetch_batch;
-//          this->data_comm_cache[0].get()->transfer_data(
-//              sendbuf_ptr.get(), update_ptr.get(), sync, &fetch_batch, 0, 0, k,
-//              (k + alpha_cyc_len), false);
-
-//          if (!sync) {
-//            MPI_Ialltoallv(
-//                (*sendbuf_ptr.get()).data(),
-//                this->data_comm_cache[0].get()->send_counts_cyclic.data(),
-//                this->data_comm_cache[0].get()->sdispls_cyclic.data(),
-//                DENSETUPLE, (*update_ptr.get()).data(),
-//                this->data_comm_cache[0].get()->receive_counts_cyclic.data(),
-//                this->data_comm_cache[0].get()->rdispls_cyclic.data(),
-//                DENSETUPLE, MPI_COMM_WORLD, &fetch_batch);
-//          }
-
           if (k == 1) {
             // local computation for first batch
-
             this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, 0,
                                           batch_size, considering_batch_size,
                                           true, col_major, 0, 0, false);
@@ -174,10 +158,6 @@ public:
                                           false, col_major, prev_start_proc, k,
                                           false);
           }
-
-//          this->data_comm_cache[0].get()->populate_cache(
-//              sendbuf_ptr.get(), update_ptr.get(), &fetch_batch, false, 0, 0,false);
-
           prev_start_proc = k;
         }
         if (alpha == 1.0) {
@@ -299,8 +279,8 @@ public:
               for (int k = 1; k < alpha_proc_length; k += alpha_cyc_len) {
                 MPI_Request request_batch_update;
 
-//                this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
-//                 cout<<" send buf size "<<sendbuf_ptr.get()->size()<<" j "<<j<<endl;
+                this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
+                 cout<<" send buf size "<<sendbuf_ptr.get()->size()<<" j "<<j<<endl;
 //                if (!sync) {
 //                  MPI_Ialltoallv(
 //                      (*sendbuf_ptr.get()).data(),
