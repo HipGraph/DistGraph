@@ -280,7 +280,6 @@ public:
                 MPI_Request request_batch_update;
 
                 this->data_comm_cache[j].get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true,&request_batch_update, i, j, k, (k + alpha_cyc_len), false);
-                 cout<<" send buf size "<<sendbuf_ptr.get()->size()<<" j "<<j<<endl;
 //                if (!sync) {
 //                  MPI_Ialltoallv(
 //                      (*sendbuf_ptr.get()).data(),
@@ -311,9 +310,6 @@ public:
                 prev_start_proc = k;
               }
               if (alpha == 1.0) {
-                if (grid->global_rank ==0  )
-                   cout<<"prev_start_proc "<<prev_start_proc<<"alpha_cyc_end"<<alpha_cyc_end<<endl;
-
                   this->calc_t_dist_grad_rowptr(
                           csr_block, prevCoordinates, lr, next_batch_id, batch_size,
                          next_considering_batch_size, false, col_major, prev_start_proc,
@@ -377,10 +373,10 @@ public:
         }
         total_memory += get_memory_usage();
       }
-      if (i=iterations-1) {
-        dense_local->print_cache(i);
-        dense_local->print_matrix_rowptr(i);
-      }
+//      if (i=iterations-1) {
+//        dense_local->print_cache(i);
+//        dense_local->print_matrix_rowptr(i);
+//      }
     }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
