@@ -39,7 +39,7 @@ protected:
 
   double beta = 1.0;
 
-  bool sync = true;
+  bool sync = false;
 
   bool col_major = false;
 
