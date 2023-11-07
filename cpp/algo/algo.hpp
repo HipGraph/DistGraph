@@ -104,8 +104,6 @@ public:
       full_comm.get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true,&fetch_batch_full, 0, 0, 1, alpha_proc_end,false);
     }
 
-    vector<MPI_Request *> mpi_requests(batches);
-
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
@@ -145,14 +143,14 @@ public:
             last_batch_size, considering_batch_size, lr, prevCoordinates, 0, 0,
             considering_batch_size, false);
 
-//        if (alpha < 1.0) {
-//          int prev_start = get_end_proc(1, alpha, this->grid->world_size);
-//          this->execute_pull_model_computations(
-//              sendbuf_ptr.get(), update_ptr.get(), 0, 0,
-//              this->data_comm_cache[0].get(), csr_block, batch_size,
-//              considering_batch_size, lr, prevCoordinates, prev_start, false,
-//              last_proc, true);
-//        }
+        if (alpha < 1.0) {
+          int prev_start = get_end_proc(1, alpha, this->grid->world_size);
+          this->execute_pull_model_computations(
+              sendbuf_ptr.get(), update_ptr.get(), 0, 0,
+              this->data_comm_cache[0].get(), csr_block, batch_size,
+              considering_batch_size, lr, prevCoordinates, prev_start, false,
+              last_proc, true);
+        }
       }
 
       for (int j = 0; j < batches; j++) {
@@ -234,52 +232,13 @@ public:
                   true);
 
               if (alpha < 1.0) {
-                //                int proc_length = get_proc_length(beta,
-                //                this->grid->world_size);
-//                int prev_start = get_end_proc(1, alpha, this->grid->world_size);
-//                this->execute_pull_model_computations(
-//                    sendbuf_ptr.get(), update_ptr.get(), next_iteration,
-//                    next_batch_id, this->data_comm_cache[next_batch_id].get(),
-//                    csr_block, batch_size, considering_batch_size, lr,
-//                    prevCoordinates, prev_start, false, last_proc, true);
-
-                //                for (int k = prev_start; k <
-                //                this->grid->world_size; k += proc_length) {
-                //                  MPI_Request misses_update_request;
-                //                  int end_process = get_end_proc(k, beta,
-                //                  this->grid->world_size);
-                //
-                //                  this->data_comm_cache[next_batch_id].get()->transfer_data(update_ptr.get(),
-                //                  false, misses_update_request,next_iteration,
-                //                  next_batch_id, k, end_process, true);
-                //
-                //                  if (k == prev_start) {
-                //                    // remote computation for first batch
-                //                    this->calc_t_dist_grad_rowptr(csr_block,
-                //                    prevCoordinates, lr, next_batch_id,
-                //                        batch_size, considering_batch_size,
-                //                        false, true, prev_start_proc,
-                //                        prev_start, false);
-                //
-                //                  } else if (k > prev_start) {
-                //                    // updating last remote fetched data
-                //                    vectors int prev_end_process =
-                //                    get_end_proc(prev_start, this->beta,
-                //                                                        this->grid->world_size);
-                //                    this->calc_t_dist_grad_rowptr(
-                //                        csr_block, prevCoordinates, lr,
-                //                        next_batch_id, batch_size,
-                //                        considering_batch_size, false, true,
-                //                        prev_start, prev_end_process, true);
-                //
-                //// dense_local->invalidate_cache(next_iteration,
-                /// next_batch_id, / true);
-                //                  }
-                //
-                //                  this->data_comm_cache[next_batch_id].get()->populate_cache(update_ptr.get(),
-                //                  misses_update_request, false,next_iteration,
-                //                  next_batch_id, true); prev_start = k;
-                //                }
+                int prev_start = get_end_proc(1, alpha, this->grid->world_size);
+                this->execute_pull_model_computations(
+                    sendbuf_ptr.get(), update_ptr.get(), next_iteration,
+                    next_batch_id, this->data_comm_cache[next_batch_id].get(),
+                    csr_block, batch_size, considering_batch_size, lr,
+                    prevCoordinates, prev_start,
+                    false, last_proc, true);
               }
             }
           }
@@ -294,7 +253,6 @@ public:
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
-    mpi_requests.clear();
   }
 
   inline void execute_pull_model_computations(
@@ -326,8 +284,6 @@ public:
       }
 
       if (k == comm_initial_start) {
-//        if (grid->global_rank == 0)
-//          cout << "executing local"<<"first_execution_proc"<<first_execution_proc<<"prev_start"<<prev_start<< endl;
         // local computation
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
@@ -349,10 +305,9 @@ public:
 
       prev_start = k;
     }
+
     int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
-//    if (grid->global_rank == 0)
-//      cout << "prev_start" << prev_start << " prev_end_process "
-//           << prev_end_process << "iterations" << iteration << endl;
+
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size, false,
@@ -456,11 +411,17 @@ public:
       }
     } else {
       for (int r = start_process; r < end_process; r++) {
+
         if (r != grid->global_rank) {
-          dst_start_index = this->sp_local_receiver->proc_row_width * r;
+
+          int computing_rank = (grid->global_rank >= r)
+                                   ? (grid->global_rank - r) % grid->world_size
+                                   : (grid->world_size - r + grid->global_rank) % grid->world_size;
+
+          dst_start_index = this->sp_local_receiver->proc_row_width * computing_rank;
           dst_end_index =
               std::min(static_cast<uint64_t>(
-                           this->sp_local_receiver->proc_row_width * (r + 1)),
+                           this->sp_local_receiver->proc_row_width * (computing_rank + 1)),
                        this->sp_local_receiver->gCols) -
               1;
 
