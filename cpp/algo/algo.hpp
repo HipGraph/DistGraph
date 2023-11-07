@@ -39,7 +39,7 @@ protected:
 
   double beta = 1.0;
 
-  bool sync = false;
+  bool sync = true;
 
   bool col_major = false;
 
@@ -112,8 +112,7 @@ public:
       data_comm_cache[i].get()->onboard_data();
     }
 
-    cout << " rank " << this->grid->global_rank << " onboard_data completed "
-         << batches << endl;
+    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
 
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
@@ -244,10 +243,6 @@ public:
           }
         }
         total_memory += get_memory_usage();
-      }
-      if (i== iterations-2){
-        (this->dense_local)->print_cache(i);
-        (this->dense_local)->print_matrix_rowptr(i);
       }
     }
     total_memory = total_memory / (iterations * batches);
@@ -453,19 +448,12 @@ public:
 #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
-        //        cout<<" rank "<< (this->grid)->global_rank<<"
-        //        dst_start_index
-        //        "<<dst_start_index<<" dst_end_index "<<dst_end_index<<endl;
-
         uint64_t local_dst = i - (this->grid)->global_rank *
                                      (this->sp_local_receiver)->proc_row_width;
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
             target_rank == (this->grid)->global_rank ? false : true;
 
-        //        if (fetch_from_cache) cout<<" rank "<<
-        //        (this->grid)->global_rank<<" target rank "<<target_rank<<"
-        //        for i "<<i<<endl;
 
         bool matched = false;
         std::optional<std::array<DENT, embedding_dim>> array_ptr;
@@ -612,9 +600,6 @@ public:
 
         if (fetch_from_cache) {
           DENT repuls = 0;
-          //          std::array<DENT, embedding_dim> colvec;
-          //          (this->dense_local)->fetch_data_vector_from_cache(colvec,owner_rank,
-          //          global_col_id, true);
           unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> &arrayMap =
               (*this->dense_local->tempCachePtr)[owner_rank];
           std::array<DENT, embedding_dim> &colvec =

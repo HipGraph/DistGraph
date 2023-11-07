@@ -176,10 +176,8 @@ int main(int argc, char **argv) {
     cout << " rank " << rank << "  algo started  " << endl;
     embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
   }
-  cout << " rank " << rank << " async completed  " << endl;
-  //
-  //
-  //  cout << " rank " << rank << " training completed  " << endl;
+  cout << " rank " << rank << " algo completed  " << endl;
+
   ofstream fout;
   fout.open("perf_output", std::ios_base::app);
 //

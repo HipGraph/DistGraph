@@ -31,10 +31,6 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-//  vector<int> send_counts_cyclic;
-//  vector<int> receive_counts_cyclic;
-//  vector<int> sdispls_cyclic;
-//  vector<int> rdispls_cyclic;
   vector<unordered_set<uint64_t>> receive_col_ids_list;
   vector<unordered_set<uint64_t>> send_col_ids_list;
   unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
@@ -154,8 +150,6 @@ public:
       send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
       receive_counts_cyclic[receiving_procs[i]] =
           receivecounts[receiving_procs[i]];
-//      cout<<" my rank "<<grid->global_rank<<" sending rank"<<sending_procs[i]<<"batch_id"<<batch_id<<" count"<< send_counts_cyclic[sending_procs[i]]<<endl;
-//      cout<<" my rank "<<grid->global_rank<<" reciving rank"<<receiving_procs[i]<<"batch_id"<<batch_id<<"count"<<receive_counts_cyclic[receiving_procs[i]]<<endl;
       total_send_count += send_counts_cyclic[sending_procs[i]];
       total_receive_count += receive_counts_cyclic[receiving_procs[i]];
     }
@@ -167,18 +161,14 @@ public:
       rdispls_cyclic[i] =
           (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                   : rdispls_cyclic[i];
-//      cout<<" my rank "<<grid->global_rank<<" sending disps "<<i<<" : "<<sdispls_cyclic[i]<<" receving disps "<<i<<" : "<<rdispls_cyclic[i]<<"batch_id"<<batch_id<<endl;
     }
-//    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_cyclic =
-//        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-//            new vector<DataTuple<DENT, embedding_dim>>());
+
 
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
-//        vector<int> proc_list = pair.second[batch_id];
         std::array<DENT, embedding_dim> dense_vector;
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
@@ -192,7 +182,6 @@ public:
                 col_id + (this->sp_local_sender->proc_col_width *
                           this->grid->global_rank);
             (*sendbuf_cyclic)[index].value = dense_vector;
-//            if (index == 0) cout<<" inserting  index "<<0  <<" my rank "<<grid->global_rank<<" your rank"<<sending_procs[i]<<"batch_id"<<batch_id<<"col id"<<(*sendbuf_cyclic)[index].col<<endl;
             offset_vector[sending_procs[i]]++;
           }
         }
@@ -214,19 +203,7 @@ public:
       MPI_Request dumy;
       this->populate_cache(sendbuf_cyclic, receivebuf, &dumy, true, iteration, batch_id,temp_cache);
       stop_clock_and_add(t, "Communication Time");
-    } else {
-      auto t = start_clock();
-//      MPI_Ialltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
-//                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
-//                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
-//                     DENSETUPLE, MPI_COMM_WORLD, &request);
-
-//      this->populate_cache(receivebuf, req, false, iteration, batch_id,temp_cache);
-
-      stop_clock_and_add(t, "Communication Time");
     }
-//    sendbuf_cyclic->clear();
-//    sendbuf_cyclic->shrink_to_fit();
   }
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
@@ -328,7 +305,6 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        if (t.col > 60000) cout<<" inserting exhasuting "<<t.col  <<" for rank "<<i<<" access index "<<j<<" batch id"<<batch_id<<endl;
         (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
     }
