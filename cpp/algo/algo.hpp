@@ -518,6 +518,10 @@ public:
 #pragma omp parallel for schedule(static) // enable for full batch training or
                                           // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
+        int thread_id = omp_get_thread_num();
+        int num_threads_actual = omp_get_num_threads();
+
+        cout<<"working thread"<<thread_id<<" num_threads_actual "<<num_threads_actual<<endl;
 
         uint64_t index = i - batch_id * batch_size;
 
