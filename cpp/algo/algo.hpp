@@ -515,7 +515,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static) // enable for full batch training or
+#pragma omp parallel for num_threads(8) schedule(static) // enable for full batch training or
                                           // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
         int thread_id = omp_get_thread_num();
