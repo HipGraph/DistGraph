@@ -1,3 +1,6 @@
+/**
+ * This class re distribute the nodes based on distribution policy
+ */
 #pragma once
 #include "../core/common.h"
 #include "../core/sparse_mat.hpp"
@@ -37,8 +40,8 @@ public:
   template <typename T>
   void partition_data(distblas::core::SpMat<T> *sp_mat) {
 
-    int world_size = process_3D_grid->world_size;
-    int my_rank = process_3D_grid->global_rank;
+    int world_size = process_3D_grid->col_world_size;
+    int my_rank = process_3D_grid->rank_in_col;
 
     Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
 
@@ -85,7 +88,7 @@ public:
       // Broadcast the number of nonzeros that each processor is going to
       // receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
-                   process_3D_grid->global);
+                   process_3D_grid->row_world);
 
       vector<int> recvoffsets;
       prefix_sum(recvcounts, recvoffsets);
@@ -98,7 +101,7 @@ public:
 
       MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(), SPTUPLE,
                     (sp_mat->coords).data(), recvcounts.data(),
-                    recvoffsets.data(), SPTUPLE, process_3D_grid->global);
+                    recvoffsets.data(), SPTUPLE, process_3D_grid->row_world);
 
       // TODO: Parallelize the sort routine?
             std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
