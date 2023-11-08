@@ -17,7 +17,8 @@ namespace distblas::net {
 
 /**
  * This class represents the data transfer related operations across processes
- * based on internal data connectivity patterns.
+ * based on internal data connectivity patterns. This implementation is tightly coupled
+ * with 1D partitioning of Sparse Matrix and 1D partitioning of Dense Matrix.
  */
 
 template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
@@ -39,8 +40,6 @@ private:
   int batch_id;
 
   double alpha;
-
-  //  DataTuple<DENT, embedding_dim> *receivebuf;
 
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local_receiver,
@@ -82,18 +81,21 @@ public:
     // calculating receiving data cols
 
     if (alpha==0) {
-         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+      // This represents the case for pulling
+         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
 
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id,0,grid->world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+         this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
     } else if (alpha == 1.0) {
-         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
+      // This represents the case for pushing
+         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
 
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id,0,grid->world_size, send_col_ids_list,send_indices_to_proc_map, 1);
+         this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 1);
     } else if (alpha> 0 and alpha < 1.0){
 
-          int end_process = get_end_proc(1,alpha, grid->world_size);
+      // This represents the case for pull and pushing
+          int end_process = get_end_proc(1,alpha, grid->col_world_size);
 
          this->sp_local_receiver->fill_col_ids(batch_id, 1, end_process, receive_col_ids_list,receive_indices_to_proc_map, 1);
 
@@ -101,17 +103,16 @@ public:
          this->sp_local_sender->fill_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
 
       if (batch_id>=0) {
-         this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+         this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
 
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id, end_process,grid->world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+         this->sp_local_sender->fill_col_ids(batch_id, end_process,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
       }
 
     } else {
-      cout<<" Wrong alpha "<<endl;
+      cout<<"  alpha needs to be in the range of [0,1]"<<endl;
     }
 
-    // This needs to be changed
     for (int i = 0; i < grid->world_size; i++) {
         receivecounts[i] = receive_col_ids_list[i].size();
         sendcounts[i] = send_col_ids_list[i].size();
@@ -125,23 +126,23 @@ public:
                             bool temp_cache) {
 
     int total_receive_count = 0;
-    vector<int> offset_vector(grid->world_size, 0);
+    vector<int> offset_vector(grid->col_world_size, 0);
 
     int total_send_count = 0;
-    send_counts_cyclic = vector<int>(grid->world_size, 0);
-    receive_counts_cyclic = vector<int>(grid->world_size, 0);
-    sdispls_cyclic = vector<int>(grid->world_size, 0);
-    rdispls_cyclic = vector<int>(grid->world_size, 0);
+    send_counts_cyclic = vector<int>(grid->col_world_size, 0);
+    receive_counts_cyclic = vector<int>(grid->col_world_size, 0);
+    sdispls_cyclic = vector<int>(grid->col_world_size, 0);
+    rdispls_cyclic = vector<int>(grid->col_world_size, 0);
 
     vector<int> sending_procs;
     vector<int> receiving_procs;
 
     for (int i = starting_proc; i < end_proc; i++) {
-      int sending_rank = (grid->global_rank + i) % grid->world_size;
+      int sending_rank = (grid->rank_in_col + i) % grid->col_world_size;
       int receiving_rank =
-          (grid->global_rank >= i)
-              ? (grid->global_rank - i) % grid->world_size
-              : (grid->world_size - i + grid->global_rank) % grid->world_size;
+          (grid->rank_in_col >= i)
+              ? (grid->rank_in_col - i) % grid->col_world_size
+              : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
     }
@@ -154,7 +155,7 @@ public:
       total_receive_count += receive_counts_cyclic[receiving_procs[i]];
     }
 
-    for (int i = 0; i < grid->world_size; i++) {
+    for (int i = 0; i < grid->col_world_size; i++) {
       sdispls_cyclic[i] =
           (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
                   : sdispls_cyclic[i];
@@ -199,7 +200,7 @@ public:
       MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                    DENSETUPLE, MPI_COMM_WORLD);
+                    DENSETUPLE, grid->col_world);
       MPI_Request dumy;
       this->populate_cache(sendbuf_cyclic, receivebuf, &dumy, true, iteration, batch_id,temp_cache);
       stop_clock_and_add(t, "Communication Time");
@@ -208,7 +209,7 @@ public:
 
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
 
-    vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
+    vector<vector<uint64_t>> receive_col_ids_list(grid->col_world_size);
     vector<uint64_t> send_col_ids_list;
 
     int total_send_count = 0;
@@ -216,16 +217,16 @@ public:
 
     for (int i = 0; i < col_ids.size(); i++) {
       int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
-      if (owner_rank == grid->global_rank) {
+      if (owner_rank == grid->rank_in_col) {
         send_col_ids_list.push_back(col_ids[i]);
       } else {
         receive_col_ids_list[owner_rank].push_back(col_ids[i]);
       }
     }
 
-    for (int i = 0; i < grid->world_size; i++) {
+    for (int i = 0; i < grid->col_world_size; i++) {
        total_send_count = send_col_ids_list.size();
-      if (i != grid->global_rank) {
+      if (i != grid->rank_in_col) {
         sendcounts[i] = total_send_count;
       } else {
         sendcounts[i] = 0;
@@ -235,7 +236,7 @@ public:
 
     sdispls[0] = 0;
     rdispls_cyclic[0] = 0;
-    for (int i = 0; i < grid->world_size; i++) {
+    for (int i = 0; i < grid->col_world_size; i++) {
 
       sdispls[i] = 0;
       rdispls_cyclic[i] =
@@ -259,7 +260,7 @@ public:
     for (int j = 0; j < send_col_ids_list.size(); j++) {
       int local_key =
           send_col_ids_list[j] -
-          (grid->global_rank) * (this->sp_local_receiver)->proc_row_width;
+          (grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
       std::array<DENT, embedding_dim> val_arr =
           (this->dense_local)->fetch_local_data(local_key);
         int index = j;
@@ -288,18 +289,10 @@ public:
       MPI_Status status;
       auto t = start_clock();
       MPI_Wait(req, &status);
-//      int source = status.MPI_SOURCE;
-//      int tag = status.MPI_TAG;
-//      int error_code = status.MPI_ERROR;
-//
-//      std::cout << "Status of MPI operation:" << std::endl;
-//      std::cout << "Source: " << source << std::endl;
-//      std::cout << "Tag: " << tag << std::endl;
-//      std::cout << "Error code: " << error_code << std::endl;
       stop_clock_and_add(t, "Communication Time");
     }
 
-    for (int i = 0; i < this->grid->world_size; i++) {
+    for (int i = 0; i < this->grid->col_world_size; i++) {
       int base_index = this->rdispls_cyclic[i];
       int count = this->receive_counts_cyclic[i];
 
