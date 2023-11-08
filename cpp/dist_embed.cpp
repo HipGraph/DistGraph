@@ -121,8 +121,8 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
        << "gCols" << shared_sparseMat.get()->gCols << endl;
 
-  vector<Tuple<int>> copiedVector(grid.get(),shared_sparseMat.get()->coords);
-  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<int>>(
+  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<int>>(grid.get(),
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
       localARows, localBRows, false, true);
