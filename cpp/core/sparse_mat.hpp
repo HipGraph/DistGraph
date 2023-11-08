@@ -59,7 +59,9 @@ public:
     this->grid = grid;
   }
 
-  SpMat() {}
+  SpMat(Process3DGrid *grid) {
+    this->grid = grid;
+  }
 
   /**
    * Initialize the CSR from coords data structure

@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(world_size, 1, 1, 1));
 
   auto shared_sparseMat =
-      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>());
+      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>(grid.get()));
 
   cout << " rank " << rank << " reading data from file path:  " << input_file
        << endl;
@@ -121,13 +121,13 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
        << "gCols" << shared_sparseMat.get()->gCols << endl;
 
-  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
+  vector<Tuple<int>> copiedVector(grid.get(),shared_sparseMat.get()->coords);
   auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<int>>(
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
       localARows, localBRows, false, true);
 
-  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<int>>(
+  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<int>>(grid.get(),
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
       localARows, localBRows, true, false);
