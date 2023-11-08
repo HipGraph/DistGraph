@@ -14,8 +14,10 @@
 #include <unordered_set>
 #include <vector>
 #include "common.h"
+#include "../net/process_3D_grid.hpp"
 
 using namespace std;
+using namespace distblas::net;
 
 namespace distblas::core {
 
