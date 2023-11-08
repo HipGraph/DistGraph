@@ -50,10 +50,10 @@ public:
 
     this->cachePtr = std::make_unique<std::vector<
         std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
-        grid->row_world_size);
+        grid->col_world_size);
     this->tempCachePtr = std::make_unique<std::vector<
         std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
-        grid->row_world_size);
+        grid->col_world_size);
     nCoordinates =
         static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
 //    std::srand(this->grid->global_rank);
@@ -109,7 +109,7 @@ public:
     if (temp) {
       purge_temp_cache();
     } else {
-      for (int i = 0; i < grid->row_world_size; i++) {
+      for (int i = 0; i < grid->col_world_size; i++) {
         auto &arrayMap = (*cachePtr)[i];
         for (auto it = arrayMap.begin(); it != arrayMap.end();) {
           distblas::core::CacheEntry<DENT, embedding_dim> cache_ent =
@@ -127,7 +127,7 @@ public:
   }
 
   void purge_temp_cache() {
-    for (int i = 0; i < grid->row_world_size; i++) {
+    for (int i = 0; i < grid->col_world_size; i++) {
       (*this->tempCachePtr)[i].clear();
       std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>().swap(
           (*this->tempCachePtr)[i]);
@@ -136,7 +136,7 @@ public:
 
   // Utitly methods
   void print_matrix() {
-    int rank = grid->rank_in_row;
+    int rank = grid->rank_in_col;
     string output_path = "embedding" + to_string(rank) + ".txt";
     char stats[500];
     strcpy(stats, output_path.c_str());
@@ -151,7 +151,7 @@ public:
   }
 
   void print_matrix_rowptr(int iter) {
-    int rank= grid->rank_in_row;
+    int rank= grid->rank_in_col;
     string output_path =
         "rank_" + to_string(rank) + "itr_" + to_string(iter) + "_embedding.txt";
     char stats[500];
@@ -169,7 +169,7 @@ public:
   }
 
   void print_cache(int iter) {
-    int rank = grid->rank_in_row;
+    int rank = grid->rank_in_col;
 
     for (int i = 0; i < (*this->cachePtr).size(); i++) {
       unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> map =
