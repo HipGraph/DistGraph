@@ -124,7 +124,7 @@ public:
 
 
     if (col_partitioned) {
-
+     #pragma omp parallel for
       for (int r = 0 ; r < procs.size(); r++) {
         uint64_t starting_index = batch_id * batch_size + proc_row_width * procs[r];
         auto end_index =
@@ -142,6 +142,7 @@ public:
         }
       }
     } else if (transpose) {
+     #pragma omp parallel for
       for (int r = 0 ; r < procs.size(); r++) {
         uint64_t starting_index = proc_col_width * procs[r];
         auto end_index =
@@ -188,7 +189,7 @@ public:
 
     if (col_partitioned) {
       // calculation of sender col_ids
-//      #pragma omp parallel for
+      #pragma omp parallel for
       for (int r = 0 ; r < procs.size(); r++) {
         uint64_t starting_index = proc_row_width * procs[r];
         auto end_index = std::min(static_cast<uint64_t>((procs[r] + 1) * proc_row_width), gRows) -1;
@@ -221,7 +222,7 @@ public:
       }
     } else if (transpose) {
       // calculation of receiver col_ids
-//#pragma omp parallel for
+      #pragma omp parallel for
       for (int r = 0 ; r < procs.size(); r++) {
         uint64_t starting_index =
             (batch_id >= 0) ? batch_id * batch_size + proc_col_width * procs[r]
