@@ -41,7 +41,7 @@ protected:
 
   bool sync = true;
 
-  bool col_major = false;
+  bool col_major = true;
 
 public:
   EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
