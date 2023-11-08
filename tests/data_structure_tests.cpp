@@ -41,6 +41,9 @@ int main(int argc, char **argv) {
 
   bool spmm = false;
 
+  bool col_major = false;
+  bool sync_comm  = false;
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -60,7 +63,13 @@ int main(int argc, char **argv) {
       beta = atof(argv[p + 1]);
     } else if (strcmp(argv[p], "-dataset") == 0) {
       data_set_name = argv[p + 1];
-    }
+    } else if (strcmp(argv[p], "-col_major") == 0) {
+      int val = atoi(argv[p + 1]);
+      col_major =  (val != 0) ? true : false;
+   } else if (strcmp(argv[p], "-sync_comm") == 0) {
+     int val = atoi(argv[p + 1]);
+     sync_comm =  (val != 0) ? true : false;
+   }
   }
 
 //  }
@@ -170,7 +179,7 @@ int main(int argc, char **argv) {
                 new distblas::algo::EmbeddingAlgo<int, double, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), dense_mat.get(), grid.get(),
-                    alpha, beta, 5, -5));
+                    alpha, beta, 5, -5,col_major,sync_comm));
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << "  algo started  " << endl;
