@@ -272,7 +272,7 @@ public:
     MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
                   DENSETUPLE, (*receivebuf_ptr.get()).data(),
                   receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                  DENSETUPLE, MPI_COMM_WORLD);
+                  DENSETUPLE, grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     MPI_Request dumy;
     this->populate_cache(sendbuf.get(),receivebuf_ptr.get(), &dumy, true, iteration, batch_id,true); // we should not do this

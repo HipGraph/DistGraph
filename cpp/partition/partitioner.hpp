@@ -88,7 +88,7 @@ public:
       // Broadcast the number of nonzeros that each processor is going to
       // receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
-                   process_3D_grid->row_world);
+                   process_3D_grid->col_world);
 
       vector<int> recvoffsets;
       prefix_sum(recvcounts, recvoffsets);
@@ -101,7 +101,7 @@ public:
 
       MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(), SPTUPLE,
                     (sp_mat->coords).data(), recvcounts.data(),
-                    recvoffsets.data(), SPTUPLE, process_3D_grid->row_world);
+                    recvoffsets.data(), SPTUPLE, process_3D_grid->col_world);
 
       // TODO: Parallelize the sort routine?
             std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
