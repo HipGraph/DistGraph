@@ -1,3 +1,7 @@
+/**
+ * This class represents the implementation of the distributed Embedding Algorithm.
+ * This is tightly coupled with 1D partitioning of Sparse Matrix and Dense Matrix.
+ */
 #pragma once
 #include "../core/common.h"
 #include "../core/csr_local.hpp"
@@ -34,13 +38,16 @@ protected:
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
       data_comm_cache;
 
-  // cache size controlling hyper parameter
+  //cache size controlling hyper parameter
   double alpha = 1.0;
 
+ //hyper parameter controls the  computation and communication overlapping
   double beta = 1.0;
 
+  //hyper parameter controls the switching the sync vs async commiunication
   bool sync = true;
 
+  //hyper parameter controls the col major or row major  data access
   bool col_major = true;
 
 public:
@@ -80,7 +87,7 @@ public:
           sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << this->grid->global_rank << " total batches " << batches
+    cout << " rank " << grid->rank_in_col << " total batches " << batches
          << endl;
 
     // This communicator is being used for negative updates and in alpha > 0 to
@@ -90,18 +97,19 @@ public:
             sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
     full_comm.get()->onboard_data();
 
-    // first batch onboarding
+    // Buffer used for receive MPI operations data
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
+    //Buffer used for send MPI operations data
     unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_ptr =
         unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
             new vector<DataTuple<DENT, embedding_dim>>());
 
-    if (alpha > 0 and this->grid->world_size > 1) {
+    if (alpha > 0 and grid->col_world_size > 1) {
       MPI_Request fetch_batch_full;
-      int alpha_proc_end = get_end_proc(1, alpha, grid->world_size);
+      int alpha_proc_end = get_end_proc(1, alpha, grid->col_world_size);
       full_comm.get()->transfer_data(sendbuf_ptr.get(), update_ptr.get(), true,&fetch_batch_full, 0, 0, 1, alpha_proc_end,false);
     }
 
@@ -113,7 +121,7 @@ public:
       data_comm_cache[i].get()->onboard_data();
     }
 
-    cout << " rank " << this->grid->global_rank << " onboard_data completed " << batches << endl;
+    cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
@@ -128,7 +136,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
 
-      if (alpha > 0 and this->grid->world_size > 1 and i == 0) {
+      if (alpha > 0 and grid->col_world_size > 1 and i == 0) {
 
         for (int k = 0; k < batch_size; k += 1) {
           int IDIM = k * embedding_dim;
@@ -144,7 +152,7 @@ public:
             considering_batch_size, false);
 
         if (alpha < 1.0) {
-          int prev_start = get_end_proc(1, alpha, this->grid->world_size);
+          int prev_start = get_end_proc(1, alpha, grid->col_world_size);
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), 0, 0,
               this->data_comm_cache[0].get(), csr_block, batch_size,
@@ -164,7 +172,8 @@ public:
         vector<uint64_t> random_number_vec = generate_random_numbers(
             0, (this->sp_local_receiver)->gRows, seed, ns);
 
-        if (this->grid->world_size == 1) {
+        // One process computations without MPI operations
+        if (grid->col_world_size == 1) {
           for (int k = 0; k < batch_size; k += 1) {
             int IDIM = k * embedding_dim;
             for (int d = 0; d < embedding_dim; d++) {
@@ -183,6 +192,7 @@ public:
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         } else {
+          //These operations are for more than one processes.
           full_comm.get()->transfer_data(random_number_vec, i, j);
           this->calc_t_dist_replus_rowptr(prevCoordinates, random_number_vec,
                                           lr, j, batch_size,
@@ -232,7 +242,7 @@ public:
                   true);
 
               if (alpha < 1.0) {
-                int prev_start = get_end_proc(1, alpha, this->grid->world_size);
+                int prev_start = get_end_proc(1, alpha, grid->col_world_size);
                 this->execute_pull_model_computations(
                     sendbuf_ptr.get(), update_ptr.get(), next_iteration,
                     next_batch_id, this->data_comm_cache[next_batch_id].get(),
@@ -259,11 +269,11 @@ public:
       double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
-    int proc_length = get_proc_length(beta, grid->world_size);
+    int proc_length = get_proc_length(beta, grid->col_world_size);
     int prev_start = comm_initial_start;
 
-    for (int k = prev_start; k < grid->world_size; k += proc_length) {
-      int end_process = get_end_proc(k, beta, grid->world_size);
+    for (int k = prev_start; k < grid->col_world_size; k += proc_length) {
+      int end_process = get_end_proc(k, beta, grid->col_world_size);
 
       MPI_Request req;
 
@@ -276,7 +286,7 @@ public:
             (*sendbuf).data(), data_comm->send_counts_cyclic.data(),
             data_comm->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
             data_comm->receive_counts_cyclic.data(),
-            data_comm->rdispls_cyclic.data(), DENSETUPLE, MPI_COMM_WORLD, &req);
+            data_comm->rdispls_cyclic.data(), DENSETUPLE, grid->col_world, &req);
       }
 
       if (k == comm_initial_start) {
@@ -287,7 +297,7 @@ public:
             first_execution_proc, prev_start, local_execution);
 
       } else if (k > comm_initial_start) {
-        int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
+        int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
         this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                       batch_size, considering_batch_size, false,
@@ -302,7 +312,7 @@ public:
       prev_start = k;
     }
 
-    int prev_end_process = get_end_proc(prev_start, beta, grid->world_size);
+    int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
@@ -323,7 +333,7 @@ public:
       bool communication) {
 
     int prev_start_proc = 0;
-    int alpha_proc_length = get_proc_length(alpha, grid->world_size);
+    int alpha_proc_length = get_proc_length(alpha, grid->col_world_size);
 
     int alpha_cyc_len = get_proc_length(beta, alpha_proc_length);
     int alpha_cyc_end = get_end_proc(1, beta, alpha_proc_length);
@@ -387,10 +397,10 @@ public:
                             1;
 
     auto dst_start_index =
-        this->sp_local_receiver->proc_col_width * this->grid->global_rank;
+        this->sp_local_receiver->proc_col_width * grid->rank_in_col;
     auto dst_end_index =
         std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
-                                       (this->grid->global_rank + 1)),
+                                       (grid->rank_in_col + 1)),
                  this->sp_local_receiver->gCols) -
         1;
 
@@ -408,11 +418,11 @@ public:
     } else {
       for (int r = start_process; r < end_process; r++) {
 
-        if (r != grid->global_rank) {
+        if (r != grid->rank_in_col) {
 
-          int computing_rank = (grid->global_rank >= r)
-                                   ? (grid->global_rank - r) % grid->world_size
-                                   : (grid->world_size - r + grid->global_rank) % grid->world_size;
+          int computing_rank = (grid->rank_in_col >= r)
+                                   ? (grid->rank_in_col - r) % grid->col_world_size
+                                   : (grid->col_world_size - r + grid->rank_in_col) % grid->col_world_size;
 
           dst_start_index = this->sp_local_receiver->proc_row_width * computing_rank;
           dst_end_index =
@@ -449,11 +459,11 @@ public:
 #pragma omp parallel for schedule(static)
       for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
 
-        uint64_t local_dst = i - (this->grid)->global_rank *
+        uint64_t local_dst = i - (grid)->rank_in_col *
                                      (this->sp_local_receiver)->proc_row_width;
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
-            target_rank == (this->grid)->global_rank ? false : true;
+            target_rank == (grid)->rank_in_col ? false : true;
 
 
         bool matched = false;
@@ -527,12 +537,12 @@ public:
           auto dst_id = csr_handle->col_idx[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
             uint64_t local_dst =
-                dst_id - (this->grid)->global_rank *
+                dst_id - (grid)->rank_in_col *
                              (this->sp_local_receiver)->proc_col_width;
             int target_rank =
                 (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
             bool fetch_from_cache =
-                target_rank == (this->grid)->global_rank ? false : true;
+                target_rank == (grid)->rank_in_col ? false : true;
 
             DENT forceDiff[embedding_dim];
             std::array<DENT, embedding_dim> array_ptr;
@@ -588,14 +598,14 @@ public:
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
             global_col_id -
-            static_cast<uint64_t>(((this->grid)->global_rank *
+            static_cast<uint64_t>(((grid)->rank_in_col *
                                    (this->sp_local_receiver)->proc_row_width));
         bool fetch_from_cache = false;
 
         int owner_rank = static_cast<int>(
             global_col_id / (this->sp_local_receiver)->proc_row_width);
 
-        if (owner_rank != (this->grid)->global_rank) {
+        if (owner_rank != (grid)->rank_in_col) {
           fetch_from_cache = true;
         }
 
