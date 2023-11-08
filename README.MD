@@ -1,4 +1,4 @@
-#DF2V
+## DF2V
 This is the official implementation for "DF2V: Distributed Memory Algorithms
 for Force-Directed Graph Embedding".
 
