@@ -1,3 +1,6 @@
+/**
+ * This class implements the distributed sparse graph.
+ */
 #pragma once
 #include "common.h"
 #include "csr_local.hpp"
@@ -30,6 +33,7 @@ public:
   bool transpose = false;
   bool col_partitioned = false;
   unique_ptr<CSRLocal<T>> csr_local_data;
+  Process3DGrid *grid;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -38,7 +42,7 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols,
+  SpMat(Process3DGrid *grid, vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols,
         uint64_t &gNNz, int &batch_size, int &proc_row_width,
         int &proc_col_width, bool transpose, bool col_partitioned) {
     this->gRows = gRows;
@@ -50,10 +54,14 @@ public:
     this->proc_row_width = proc_row_width;
     this->transpose = transpose;
     this->col_partitioned = col_partitioned;
+    this->grid = grid;
   }
 
   SpMat() {}
 
+  /**
+   * Initialize the CSR from coords data structure
+   */
   void initialize_CSR_blocks() {
 
 #pragma omp parallel for
@@ -67,12 +75,12 @@ public:
     Tuple<T> *coords_ptr = coords.data();
 
     if (col_partitioned) {
-      // This is always non-transpose col partitioned
+      // This is used to find sending indices
       csr_local_data =
           make_unique<CSRLocal<T>>(gRows, proc_col_width, coords.size(),
                                    coords_ptr, coords.size(), transpose);
     } else {
-      // This may have transpose and non transpose version for row partitioned
+      // This is used to find receiving indices and computations
       csr_local_data =
           make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
                                    coords_ptr, coords.size(), transpose);
@@ -91,14 +99,16 @@ public:
     }
   }
 
+  /*
+   * This method computes all indicies for pull based approach
+   */
   void fill_col_ids_for_pulling(int batch_id, int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
                                 unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
 
-    int rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD,
-                  &rank); // TODO convert this is flexible grid indexes
+    int rank= grid->rank_in_col;
+    int world_size = grid->col_world_size;
 
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+   // TODO convert this is flexible grid indexes
 
     distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
 
@@ -150,12 +160,13 @@ public:
     }
   }
 
+  /*
+   * This method computes all indicies for push based approach
+   */
   void fill_col_ids_for_pushing(int batch_id,int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
                                 unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
-    int rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    int rank= grid->rank_in_col;
+    int world_size = grid->col_world_size;
 
     distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
 
@@ -231,8 +242,8 @@ public:
   }
 
   void print_coords(bool trans) {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int rank= grid->rank_in_col;
+    int world_size = grid->col_world_size;
     string output_path =
         "coords" + to_string(rank) + "trans" + to_string(trans) + ".txt";
     char stats[500];

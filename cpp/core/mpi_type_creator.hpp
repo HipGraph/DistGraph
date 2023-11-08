@@ -1,3 +1,6 @@
+/**
+ * This class has methods to create custom MPI types
+ */
 #pragma once
 #include <mpi.h>
 #include <type_traits>
