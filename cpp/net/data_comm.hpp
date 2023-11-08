@@ -1,448 +1,314 @@
 #pragma once
+#include "../core/common.h"
 #include "../core/dense_mat.hpp"
 #include "../core/sparse_mat.hpp"
 #include "process_3D_grid.hpp"
 #include <iostream>
 #include <mpi.h>
+#include <unordered_map>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 using namespace distblas::core;
+
 
 namespace distblas::net {
 
 /**
  * This class represents the data transfer related operations across processes
- * based on internal data connectivity patterns.
+ * based on internal data connectivity patterns. This implementation is tightly coupled
+ * with 1D partitioning of Sparse Matrix and 1D partitioning of Dense Matrix.
  */
 
 template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 
 private:
-  distblas::core::SpMat<SPT> *sp_local;
-  distblas::core::SpMat<SPT> *sp_local_trans;
-  distblas::core::DenseMat<DENT, embedding_dim> *dense_local;
+  distblas::core::SpMat<SPT> *sp_local_receiver;
+  distblas::core::SpMat<SPT> *sp_local_sender;
+  distblas::core::DenseMat<SPT, DENT, embedding_dim> *dense_local;
   Process3DGrid *grid;
   vector<int> sdispls;
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-  DataTuple<DENT, embedding_dim> *sendbuf;
+  vector<unordered_set<uint64_t>> receive_col_ids_list;
+  vector<unordered_set<uint64_t>> send_col_ids_list;
+  unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
+  unordered_map<uint64_t, unordered_map<int,bool>> receive_indices_to_proc_map;
 
-  //  DataTuple<DENT, embedding_dim> *receivebuf;
+  int batch_id;
+
+  double alpha;
 
 public:
-  DataComm(distblas::core::SpMat<SPT> *sp_local,
-           distblas::core::SpMat<SPT> *sp_local_trans,
-           DenseMat<DENT, embedding_dim> *dense_local, Process3DGrid *grid) {
-    this->sp_local = sp_local;
-    this->sp_local_trans = sp_local_trans;
+  DataComm(distblas::core::SpMat<SPT> *sp_local_receiver,
+           distblas::core::SpMat<SPT> *sp_local_sender,
+           DenseMat<SPT, DENT, embedding_dim> *dense_local, Process3DGrid *grid,
+           int batch_id, double alpha) {
+    this->sp_local_receiver = sp_local_receiver;
+    this->sp_local_sender = sp_local_sender;
     this->dense_local = dense_local;
     this->grid = grid;
     this->sdispls = vector<int>(grid->world_size, 0);
     this->sendcounts = vector<int>(grid->world_size, 0);
     this->rdispls = vector<int>(grid->world_size, 0);
     this->receivecounts = vector<int>(grid->world_size, 0);
+    this->send_counts_cyclic = vector<int>(grid->world_size, 0);
+    this->receive_counts_cyclic = vector<int>(grid->world_size, 0);
+    this->sdispls_cyclic = vector<int>(grid->world_size, 0);
+    this->rdispls_cyclic = vector<int>(grid->world_size, 0);
+    this->receive_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
+    this->send_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
+    this->batch_id = batch_id;
+    this->alpha = alpha;
+
   }
 
-  ~DataComm() {
-    //    if (receivebuf != nullptr) {
-    //      delete[] receivebuf;
-    //    }
-    //    cout << "successfully executed" << endl;
-    //    delete[] sendbuf;
-  }
+  vector<int> receive_counts_cyclic;
+  vector<int> rdispls_cyclic;
+  vector<int> send_counts_cyclic;
+  vector<int> sdispls_cyclic;
 
-  void async_transfer(int batch_id, bool fetch_all, bool verify,
-                      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request &request) {
+   MPI_Request request = MPI_REQUEST_NULL;
 
-    int total_nodes =((this->sp_local->proc_col_width %this->sp_local->block_col_width)==0)? ( this->sp_local->gCols/this->sp_local->block_col_width):(((this->sp_local->proc_col_width/this->sp_local->block_col_width)+1)*this->grid->world_size);
-    int total_nodes_trans =
-        this->sp_local_trans->gRows / this->sp_local_trans->block_row_width;
+  ~DataComm() {}
 
-    int no_of_nodes_per_proc_list =
-        (this->sp_local->proc_col_width % this->sp_local->block_col_width==0)?
-                                                                                (this->sp_local->proc_col_width / this->sp_local->block_col_width):
-                                                                                (this->sp_local->proc_col_width / this->sp_local->block_col_width)+1;
-
-    int no_of_nodes_per_proc_list_trans = ((this->sp_local_trans->proc_row_width % this->sp_local_trans->block_row_width)==0)?
-                                              (this->sp_local_trans->proc_row_width /this->sp_local_trans->block_row_width):
-                                              (this->sp_local_trans->proc_row_width /this->sp_local_trans->block_row_width)+1;
-
-    int no_of_lists = ((this->sp_local->proc_row_width % this->sp_local->block_row_width)==0)?
-                     (this->sp_local->proc_row_width / this->sp_local->block_row_width)
-                     :(this->sp_local->proc_row_width / this->sp_local->block_row_width)+1;
-
-    int no_of_lists_trans = ((this->sp_local_trans->proc_col_width %
-                             this->sp_local_trans->block_col_width)==0)?
-                                (this->sp_local_trans->proc_col_width / this->sp_local_trans->block_col_width):
-                                (this->sp_local_trans->proc_col_width / this->sp_local_trans->block_col_width)+1;
-
-    vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
-    vector<vector<uint64_t>> send_col_ids_list(grid->world_size);
+  void onboard_data() {
 
     int total_send_count = 0;
-    int total_receive_count = 0;
+    // processing chunks
+    // calculating receiving data cols
 
-    cout<<" rank "<< grid->global_rank<<" no_of_lists "<<no_of_lists
-         <<" no_of_lists_trans "<< no_of_lists_trans<<" no_of_nodes_per_proc_list "<<no_of_nodes_per_proc_list<<"total_nodes"<<total_nodes<<endl;
-    // processing initial communication
-    if (fetch_all and batch_id == 0) {
+    if (alpha==0) {
+      // This represents the case for pulling
+         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
 
-      // calculating receiving data cols
-      for (int i = 0; i < no_of_lists; i++) {
-        int working_rank = 0;
+         // calculating sending data cols
+         this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+    } else if (alpha == 1.0) {
+      // This represents the case for pushing
+         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
 
-        for (int j = 0; j < total_nodes; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
-            ++working_rank;
-          }
-          if (working_rank != grid->global_rank) {
-            vector<uint64_t> col_ids;
+         // calculating sending data cols
+         this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 1);
+    } else if (alpha> 0 and alpha < 1.0){
 
-            this->sp_local->fill_col_ids(i, j, col_ids, false, true);
+      // This represents the case for pull and pushing
+          int end_process = get_end_proc(1,alpha, grid->col_world_size);
 
+         this->sp_local_receiver->fill_col_ids(batch_id, 1, end_process, receive_col_ids_list,receive_indices_to_proc_map, 1);
 
-            receive_col_ids_list[working_rank].insert(
-                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                  col_ids.end());
+         // calculating sending data cols
+         this->sp_local_sender->fill_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
 
-          }
-        }
+      if (batch_id>=0) {
+         this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+
+         // calculating sending data cols
+         this->sp_local_sender->fill_col_ids(batch_id, end_process,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
       }
 
-      // calculating sending data cols
-
-      for (int i = 0; i < no_of_lists_trans; i++) {
-        int working_rank = 0;
-
-        for (int j = 0; j < total_nodes_trans; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-            ++working_rank;
-          }
-          if (working_rank != grid->global_rank) {
-            vector<uint64_t> col_ids;
-            this->sp_local_trans->fill_col_ids(j, i, col_ids, true, true);
-            send_col_ids_list[working_rank].insert(
-                send_col_ids_list[working_rank].end(), col_ids.begin(),
-                col_ids.end());
-          }
-        }
-      }
-    }
-     else {
-      // processing chunks
-      // calculating receiving data cols
-
-      int offset = batch_id;
-      for (int i = 0; i < no_of_lists; i++) {
-        int working_rank = 0;
-        for (int j = 0; j < total_nodes; j++) {
-          if (j > 0 and j % no_of_nodes_per_proc_list == 0) {
-            ++working_rank;
-          }
-
-          if (j == working_rank * no_of_nodes_per_proc_list + offset) {
-            if (working_rank != grid->global_rank) {
-              vector<uint64_t> col_ids;
-              this->sp_local->fill_col_ids(i, j, col_ids, false, true);
-
-              receive_col_ids_list[working_rank].insert(
-                  receive_col_ids_list[working_rank].end(), col_ids.begin(),
-                  col_ids.end());
-            }
-          }
-        }
-      }
-//
-//      // calculating sending data cols
-      int working_rank = 0;
-      for (int j = 0; j < total_nodes_trans; j++) {
-        if (j > 0 and j % no_of_nodes_per_proc_list_trans == 0) {
-          ++working_rank;
-        }
-        if (working_rank != grid->global_rank) {
-          vector<uint64_t> col_ids;
-          this->sp_local_trans->fill_col_ids(j, batch_id, col_ids, true, true);
-
-          send_col_ids_list[working_rank].insert(
-              send_col_ids_list[working_rank].end(), col_ids.begin(),
-              col_ids.end());
-        }
-      }
+    } else {
+      cout<<"  alpha needs to be in the range of [0,1]"<<endl;
     }
 
     for (int i = 0; i < grid->world_size; i++) {
-      std::unordered_set<uint64_t> unique_set_receiv(
-          receive_col_ids_list[i].begin(), receive_col_ids_list[i].end());
-      receive_col_ids_list[i] = vector<uint64_t>(unique_set_receiv.begin(),
-                                                 unique_set_receiv.end());
-
-      receivecounts[i] = receive_col_ids_list[i].size();
-
-      std::unordered_set<uint64_t> unique_set_send(
-          send_col_ids_list[i].begin(), send_col_ids_list[i].end());
-      send_col_ids_list[i] =
-          vector<uint64_t>(unique_set_send.begin(), unique_set_send.end());
-
-      sendcounts[i] = send_col_ids_list[i].size();
-
-      sdispls[i] = (i > 0) ? sdispls[i - 1] + sendcounts[i - 1] : sdispls[i];
-      rdispls[i] =
-          (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-
-      total_send_count = total_send_count + sendcounts[i];
-      total_receive_count = total_receive_count + receivecounts[i];
-    }
-
-    cout<<" rank "<< grid->global_rank<<" total_send_count "<<total_send_count <<" total_receive_count "<< total_receive_count<<endl;
-
-    sendbuf = new DataTuple<DENT, embedding_dim>[total_send_count];
-
-    receivebuf->resize(total_receive_count);
-    DataTuple<DENT, embedding_dim> *receivebufverify;
-
-    if (verify) {
-      receivebufverify =
-          new DataTuple<DENT, embedding_dim>[total_receive_count];
-    }
-
-    for (int i = 0; i < grid->world_size; i++) {
-      vector<uint64_t> sending_vec = send_col_ids_list[i];
-      vector<uint64_t> receiving_vec = receive_col_ids_list[i];
-
-#pragma omp parallel
-      for (int j = 0; j < sending_vec.size(); j++) {
-        int index = sdispls[i] + j;
-        sendbuf[index].col = sending_vec[j];
-        int local_key = sendbuf[index].col -
-                        (grid->global_rank) * (this->sp_local)->proc_row_width;
-        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-      }
-
-      if (verify) {
-        for (int j = 0; j < receiving_vec.size(); j++) {
-          int index = rdispls[i] + j;
-          receivebufverify[index].col = receiving_vec[j];
-        }
-      }
-
-////      if(grid->global_rank==0 or grid->global_rank == 1) {
-////        cout << " rank " << grid->global_rank << " sending to rank " << i
-////             << " size " << sending_vec.size() << endl;
-////        cout << " rank " << grid->global_rank << " receving from   rank " << i
-////             << " size " << receiving_vec.size() << endl;
-////      }
-
-    }
-
-    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD, &request);
-
-    if (verify) {
-      MPI_Status status;
-      MPI_Wait(&request, &status);
-
-      for (int i = 0; i < grid->world_size; i++) {
-        int base_index = rdispls[i];
-        int size = receivecounts[i];
-        for (int k = 0; k < size; k++) {
-          int index = rdispls[i] + k;
-          bool matched = false;
-          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-            if (receivebufverify[m].col == (*receivebuf)[index].col) {
-              matched = true;
-            }
-          }
-          if (!matched) {
-            cout << " rank " << grid->global_rank << "cannot verify value" << (*receivebuf)[index].col << endl;
-                    }
-        }
-      }
-      delete[] receivebufverify;
+        receivecounts[i] = receive_col_ids_list[i].size();
+        sendcounts[i] = send_col_ids_list[i].size();
     }
   }
 
-  void async_transfer(vector<uint64_t> &col_ids, bool verify,
-                      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request &request) {
+ inline void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *sendbuf_cyclic,
+                            std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+                            bool synchronous,MPI_Request* req, int iteration,
+                            int batch_id, int starting_proc, int end_proc,
+                            bool temp_cache) {
 
-    vector<vector<uint64_t>> receive_col_ids_list(grid->world_size);
+    int total_receive_count = 0;
+    vector<int> offset_vector(grid->col_world_size, 0);
+
+    int total_send_count = 0;
+    send_counts_cyclic = vector<int>(grid->col_world_size, 0);
+    receive_counts_cyclic = vector<int>(grid->col_world_size, 0);
+    sdispls_cyclic = vector<int>(grid->col_world_size, 0);
+    rdispls_cyclic = vector<int>(grid->col_world_size, 0);
+
+    vector<int> sending_procs;
+    vector<int> receiving_procs;
+
+    for (int i = starting_proc; i < end_proc; i++) {
+      int sending_rank = (grid->rank_in_col + i) % grid->col_world_size;
+      int receiving_rank =
+          (grid->rank_in_col >= i)
+              ? (grid->rank_in_col - i) % grid->col_world_size
+              : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
+      sending_procs.push_back(sending_rank);
+      receiving_procs.push_back(receiving_rank);
+    }
+
+    for (int i = 0; i < sending_procs.size(); i++) {
+      send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
+      receive_counts_cyclic[receiving_procs[i]] =
+          receivecounts[receiving_procs[i]];
+      total_send_count += send_counts_cyclic[sending_procs[i]];
+      total_receive_count += receive_counts_cyclic[receiving_procs[i]];
+    }
+
+    for (int i = 0; i < grid->col_world_size; i++) {
+      sdispls_cyclic[i] =
+          (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
+                  : sdispls_cyclic[i];
+      rdispls_cyclic[i] =
+          (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
+                  : rdispls_cyclic[i];
+    }
+
+
+    if (total_send_count > 0) {
+      sendbuf_cyclic->resize(total_send_count);
+      for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
+        auto col_id = pair.first;
+        bool already_fetched = false;
+        std::array<DENT, embedding_dim> dense_vector;
+        for (int i = 0; i < sending_procs.size(); i++) {
+          if (pair.second.count(sending_procs[i]) > 0) {
+            if (!already_fetched) {
+              dense_vector = (this->dense_local)->fetch_local_data(col_id);
+              already_fetched = true;
+            }
+            int offset = sdispls_cyclic[sending_procs[i]];
+            int index = offset_vector[sending_procs[i]] + offset;
+            (*sendbuf_cyclic)[index].col =
+                col_id + (this->sp_local_sender->proc_col_width *
+                          this->grid->global_rank);
+            (*sendbuf_cyclic)[index].value = dense_vector;
+            offset_vector[sending_procs[i]]++;
+          }
+        }
+      }
+    }
+
+    if (total_receive_count>0) {
+      receivebuf->resize(total_receive_count);
+    }
+
+    add_datatransfers(total_receive_count, "Data transfers");
+
+    if (synchronous) {
+      auto t = start_clock();
+      MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
+                    sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
+                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
+                    DENSETUPLE, grid->col_world);
+      MPI_Request dumy;
+      this->populate_cache(sendbuf_cyclic, receivebuf, &dumy, true, iteration, batch_id,temp_cache);
+      stop_clock_and_add(t, "Communication Time");
+    }
+  }
+
+  void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
+
+    vector<vector<uint64_t>> receive_col_ids_list(grid->col_world_size);
     vector<uint64_t> send_col_ids_list;
 
     int total_send_count = 0;
     int total_receive_count = 0;
 
     for (int i = 0; i < col_ids.size(); i++) {
-      int owner_rank = col_ids[i] / (this->sp_local)->proc_row_width;
-      if (owner_rank == grid->global_rank) {
+      int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
+      if (owner_rank == grid->rank_in_col) {
         send_col_ids_list.push_back(col_ids[i]);
       } else {
         receive_col_ids_list[owner_rank].push_back(col_ids[i]);
       }
     }
 
-    for (int i = 0; i < grid->world_size; i++) {
-      int send_size = send_col_ids_list.size();
-      if (i != grid->global_rank) {
-        sendcounts[i] = send_size;
+    for (int i = 0; i < grid->col_world_size; i++) {
+       total_send_count = send_col_ids_list.size();
+      if (i != grid->rank_in_col) {
+        sendcounts[i] = total_send_count;
       } else {
         sendcounts[i] = 0;
       }
-      receivecounts[i] = receive_col_ids_list[i].size();
+      receive_counts_cyclic[i] = receive_col_ids_list[i].size();
     }
+
     sdispls[0] = 0;
-    rdispls[0] = 0;
-    for (int i = 0; i < grid->world_size; i++) {
+    rdispls_cyclic[0] = 0;
+    for (int i = 0; i < grid->col_world_size; i++) {
 
       sdispls[i] = 0;
-      rdispls[i] = (i > 0) ? rdispls[i - 1] + receivecounts[i - 1] : rdispls[i];
-
-      total_send_count = total_send_count + sendcounts[i];
-      total_receive_count = total_receive_count + receivecounts[i];
+      rdispls_cyclic[i] =
+          (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
+                  : rdispls_cyclic[i];
+      total_receive_count = total_receive_count + receive_counts_cyclic[i];
     }
 
-    DataTuple<DENT, embedding_dim> *sendbuf =
-        new DataTuple<DENT, embedding_dim>[total_send_count];
-    //     vector<DataTuple<DENT, embedding_dim>>  *sendbuf =
-    //         new vector<DataTuple<DENT, embedding_dim>>(total_send_count);
+    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf =
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
 
-    receivebuf->resize(total_receive_count);
+    sendbuf->resize(total_send_count);
 
-    DataTuple<DENT, embedding_dim> *receivebufverify;
+    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> receivebuf_ptr =
+        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
+            new vector<DataTuple<DENT, embedding_dim>>());
 
-    if (verify) {
-      receivebufverify =
-          new DataTuple<DENT, embedding_dim>[total_receive_count];
+    receivebuf_ptr.get()->resize(total_receive_count);
+
+    for (int j = 0; j < send_col_ids_list.size(); j++) {
+      int local_key =
+          send_col_ids_list[j] -
+          (grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
+      std::array<DENT, embedding_dim> val_arr =
+          (this->dense_local)->fetch_local_data(local_key);
+        int index = j;
+        (*sendbuf)[index].col = send_col_ids_list[j];
+        (*sendbuf)[index].value = val_arr;
     }
 
-    for (int i = 0; i < grid->world_size; i++) {
-      vector<uint64_t> sending_vec = send_col_ids_list;
-      vector<uint64_t> receiving_vec = receive_col_ids_list[i];
+    auto t = start_clock();
+    MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
+                  DENSETUPLE, (*receivebuf_ptr.get()).data(),
+                  receive_counts_cyclic.data(), rdispls_cyclic.data(),
+                  DENSETUPLE, grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
+    MPI_Request dumy;
+    this->populate_cache(sendbuf.get(),receivebuf_ptr.get(), &dumy, true, iteration, batch_id,true); // we should not do this
 
-#pragma omp parallel
-      for (int j = 0; j < sending_vec.size(); j++) {
-        int index = sdispls[i] + j;
-        ((sendbuf)[index]).col = sending_vec[j];
-        int local_key = ((sendbuf)[index]).col -
-                        (grid->global_rank) * (this->sp_local)->proc_row_width;
-        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-      }
-
-      if (verify) {
-        for (int j = 0; j < receiving_vec.size(); j++) {
-          int index = rdispls[i] + j;
-          receivebufverify[index].col = receiving_vec[j];
-        }
-      }
-    }
-
-    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD, &request);
-    //     cout<<"  MPI executed  success"<<endl;
-    if (verify) {
-      MPI_Status status;
-      MPI_Wait(&request, &status);
-
-      for (int i = 0; i < grid->world_size; i++) {
-        int base_index = rdispls[i];
-        int size = receivecounts[i];
-        for (int k = 0; k < size; k++) {
-          int index = rdispls[i] + k;
-          bool matched = false;
-          for (int m = rdispls[i]; m < rdispls[i] + receivecounts[i]; m++) {
-            if (receivebufverify[m].col == (*receivebuf)[index].col) {
-              matched = true;
-            }
-          }
-          if (!matched) {
-            cout << " rank " << grid->global_rank << "cannot verify value "
-                 << (*receivebuf)[index].col << endl;
-          }
-        }
-      }
-      delete[] receivebufverify;
-    }
-    //     cout<<"  verification success"<<endl;
-    //     delete[] receivebufverify;
     //    delete[] sendbuf;
-    //     delete[] receivebuf;
   }
 
-  void
-  async_re_transfer(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                    MPI_Request &request) {
-    int total_receive_count = 0;
-    for (int i = 0; i < grid->world_size; i++) {
-      total_receive_count  += receivecounts[i];
-      int sendcount = sendcounts[i];
-      int offset = sdispls[i];
-      #pragma omp parallel
-      for(int k=0;k<sendcount;k++){
-        int index = offset + k;
-        int local_key = ((sendbuf)[index]).col -
-                        (grid->global_rank) * (this->sp_local)->proc_row_width;
-        sendbuf[index].value = (this->dense_local)->fetch_local_data(local_key);
-      }
+
+  inline void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *sendbuf,
+                             std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+                      MPI_Request *req, bool synchronous, int iteration,
+                      int batch_id, bool temp) {
+    if (!synchronous) {
+      MPI_Status status;
+      auto t = start_clock();
+      MPI_Wait(req, &status);
+      stop_clock_and_add(t, "Communication Time");
     }
-    receivebuf->resize(total_receive_count);
-    MPI_Ialltoallv(sendbuf, sendcounts.data(), sdispls.data(), DENSETUPLE,
-                   (*receivebuf).data(), receivecounts.data(), rdispls.data(),
-                   DENSETUPLE, MPI_COMM_WORLD, &request);
-  }
 
-  void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
-                      MPI_Request &request) {
-    MPI_Status status;
-    MPI_Wait(&request, &status);
-    //    if (status.MPI_ERROR == MPI_SUCCESS) {
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      int base_index = this->rdispls_cyclic[i];
+      int count = this->receive_counts_cyclic[i];
 
-    // TODO parallaize
-    for (int i = 0; i < this->grid->world_size; i++) {
-      int base_index = this->rdispls[i];
-
-      int count = this->receivecounts[i];
-      //        cout<<" rank "<<grid->global_rank<<" baseindex "<<base_index<<"
-      //        working rank "
-      //             <<i<<" count "<<count<<endl;
       for (int j = base_index; j < base_index + count; j++) {
         DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
-        (this->dense_local)->insert_cache(i, t.col, t.value);
+        (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
     }
-  }
+    receivebuf->clear();
+    receivebuf->shrink_to_fit();
+    sendbuf->clear();
+    sendbuf->shrink_to_fit();
 
-
-  void cross_validate_batch_from_metadata(int batch_id) {
-    int total_nodes = this->sp_local->gCols / this->sp_local->block_col_width;
-    for(int i=0;i<total_nodes;i++){
-      vector<uint64_t> col_ids;
-      this->sp_local->fill_col_ids(batch_id, i, col_ids, false, true);
-      for(int j=0;j<col_ids.size();j++){
-        uint64_t global_col_id = col_ids[j];
-        uint64_t local_col_id =
-            global_col_id -
-            static_cast<uint64_t>(
-                ((this->grid)->global_rank * (this->sp_local)->proc_row_width));
-        bool fetch_from_cache = false;
-
-        int owner_rank =
-            static_cast<int>(global_col_id / (this->sp_local)->proc_row_width);
-        if (owner_rank != (this->grid)->global_rank) {
-          fetch_from_cache = true;
-        }
-        if (fetch_from_cache) {
-          if (!(this->dense_local)->searchForKey(global_col_id)) {
-            cout<<" Assert not found my_rank "<<grid->global_rank<<
-                "  target_rank "<<owner_rank <<" id "<<global_col_id<<"batch Id"<<batch_id<<endl;
-          }
-        }
-      }
-    }
   }
 
 
 };
+
 } // namespace distblas::net

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(DistBLAS)
+project(DistEmbed)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -34,7 +34,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 #add_subdirectory(core)
 #add_subdirectory(embedding)
 
-add_library(disblas_lib SHARED
+add_library(disembed_lib SHARED
         cpp/core/common.h
         cpp/core/common.cpp
         cpp/core/distributed_mat.hpp
@@ -45,32 +45,31 @@ add_library(disblas_lib SHARED
         cpp/net/process_3D_grid.cpp
         cpp/net/process_3D_grid.hpp
         cpp/net/data_comm.hpp
-        cpp/embedding/algo.hpp
-
+        cpp/algo/algo.hpp
+        cpp/core/json.hpp
         cpp/partition/partitioner.cpp
-        cpp/core/csr_linked_list.hpp
         cpp/partition/partitioner.hpp)
 
 SET(BUILD_TESTS "" ON)
 
-if (BUILD_TESTS)
-    add_subdirectory(tests)
-    message(STATUS "Building tests ....")
-endif ()
+#if (BUILD_TESTS)
+#    add_subdirectory(tests)
+#    message(STATUS "Building tests ....")
+#endif ()
 
-SET(SOURCES cpp/distblas.cpp)
+SET(SOURCES cpp/dist_embed.cpp)
 
-add_executable(distblas ${SOURCES})
-
-
-target_compile_options(distblas PRIVATE  -DMKL_ILP64  -m64 -fopenmp -I$ENV{MKLROOT}/include)
-target_link_options(distblas PRIVATE -L$ENV{MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl)
+add_executable(distembed ${SOURCES})
 
 
-target_link_libraries(distblas disblas_lib)
+target_compile_options(distembed PRIVATE  -DMKL_ILP64  -m64 -fopenmp -I$ENV{MKLROOT}/include)
+target_link_options(distembed PRIVATE -L$ENV{MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl)
 
-target_link_libraries(distblas MPI::MPI_CXX)
-target_link_libraries(distblas OpenMP::OpenMP_CXX)
-target_link_libraries(distblas CombBLAS)
+
+target_link_libraries(distembed disembed_lib)
+
+target_link_libraries(distembed MPI::MPI_CXX)
+target_link_libraries(distembed OpenMP::OpenMP_CXX)
+target_link_libraries(distembed CombBLAS)
 #target_link_libraries(distblas $ENV{MKLROOT})
 

@@ -1,3 +1,6 @@
+/**
+ * This class re distribute the nodes based on distribution policy
+ */
 #pragma once
 #include "../core/common.h"
 #include "../core/sparse_mat.hpp"
@@ -35,17 +38,10 @@ public:
                         uint64_t  proc_col_width, uint64_t gCols,bool transpose);
 
   template <typename T>
-  void partition_data(distblas::core::SpMat<T> *sp_mat, bool transpose) {
+  void partition_data(distblas::core::SpMat<T> *sp_mat) {
 
-    int world_size = process_3D_grid->world_size;
-    int my_rank = process_3D_grid->global_rank;
-
-    int considered_row_width;
-    if (my_rank == world_size - 1) {
-      considered_row_width = sp_mat->gRows - sp_mat->proc_row_width *my_rank ;
-    }else{
-      considered_row_width = sp_mat->proc_row_width;
-    }
+    int world_size = process_3D_grid->col_world_size;
+    int my_rank = process_3D_grid->rank_in_col;
 
     Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
 
@@ -62,9 +58,9 @@ public:
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col,
-                                      considered_row_width,
+                                      sp_mat->proc_row_width,
                                       sp_mat->proc_col_width,
-                                      sp_mat->gCols,transpose);
+                                      sp_mat->gCols,sp_mat->col_partitioned);
 #pragma omp atomic update
         sendcounts[owner]++;
       }
@@ -74,9 +70,9 @@ public:
 #pragma omp parallel for
       for (int i = 0; i < coords.size(); i++) {
         int owner = get_owner_Process(coords[i].row, coords[i].col,
-                                      considered_row_width,
+                                      sp_mat->proc_row_width,
                                       sp_mat->proc_col_width,
-                                      sp_mat->gCols,transpose);
+                                      sp_mat->gCols,sp_mat->col_partitioned);
 
         int idx;
 #pragma omp atomic capture
@@ -92,7 +88,7 @@ public:
       // Broadcast the number of nonzeros that each processor is going to
       // receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
-                   process_3D_grid->global);
+                   process_3D_grid->col_world);
 
       vector<int> recvoffsets;
       prefix_sum(recvcounts, recvoffsets);
@@ -105,14 +101,14 @@ public:
 
       MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(), SPTUPLE,
                     (sp_mat->coords).data(), recvcounts.data(),
-                    recvoffsets.data(), SPTUPLE, process_3D_grid->global);
+                    recvoffsets.data(), SPTUPLE, process_3D_grid->col_world);
 
       // TODO: Parallelize the sort routine?
-      //      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
-      //      column_major<T>);
+            std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
+            column_major<T>); // This helps to speed up CSR creation
     }
-    __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
-                         column_major<T>);
+//    __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
+//                         column_major<T>);
 
     delete[] sendbuf;
   }

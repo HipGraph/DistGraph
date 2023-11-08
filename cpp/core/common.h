@@ -10,8 +10,20 @@
 #include <mpi.h>
 #include <random>
 #include <vector>
+#include <chrono>
+#include <iostream>
+#include <fstream>
+#include "json.hpp"
+#include <unordered_map>
+#include <unistd.h>
+#include <unordered_set>
+#include <algorithm>
 
 using namespace std;
+using namespace std::chrono;
+using json = nlohmann::json;
+
+typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
 
@@ -21,6 +33,33 @@ vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int s
                                     int ns);
 
 void prefix_sum(vector<int> &values, vector<int> &offsets);
+
+size_t get_memory_usage();
+
+void reset_performance_timers();
+
+void stop_clock_and_add(my_timer_t &start, string counter_name);
+
+void add_memory(size_t mem, string counter_name);
+
+void add_datatransfers(uint64_t count, string counter_name);
+
+void print_performance_statistics();
+
+my_timer_t start_clock();
+
+double stop_clock_get_elapsed(my_timer_t &start);
+
+json json_perf_statistics();
+
+int get_proc_length(double beta, int world_size);
+
+int get_end_proc(int  starting_index, double beta, int world_size);
+
+std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& originalSet, int count);
+
+
+
 
 template <typename T> struct Tuple {
   int64_t row;
@@ -39,6 +78,13 @@ template <typename T, size_t size> struct DataTuple {
   std::array<T, size> value;
 };
 
+template <typename T, size_t size> struct CacheEntry {
+  std::array<T, size> value;
+  int inserted_batch_id;
+  int inserted_itr;
+};
+
+
 struct CSRHandle {
   vector<double> values;
   vector<MKL_INT> col_idx;
@@ -46,6 +92,12 @@ struct CSRHandle {
   vector<MKL_INT> row_idx;
   sparse_matrix_t mkl_handle;
 };
+
+template <typename T>
+bool CompareTuple(const Tuple<T>& obj1, const Tuple<T>& obj2) {
+  // Customize the comparison logic based on your requirements
+  return obj1.col == obj2.col;
+}
 
 // TODO: removed reference type due to binding issue
 template <typename T> bool column_major(Tuple<T> a, Tuple<T> b) {
@@ -67,6 +119,12 @@ template <typename T> bool row_major(Tuple<T> a, Tuple<T> b) {
 extern MPI_Datatype SPTUPLE;
 
 extern MPI_Datatype DENSETUPLE;
+
+
+extern vector<string> perf_counter_keys;
+
+extern map<string, int> call_count;
+extern map<string, double> total_time;
 
 template <typename T> void initialize_mpi_datatype_SPTUPLE() {
   const int nitems = 3;
