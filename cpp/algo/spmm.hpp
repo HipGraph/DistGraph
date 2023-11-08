@@ -25,7 +25,7 @@ public:
            DENT MIN_BOUND)
       : EmbeddingAlgo<SPT, DENT, embedding_dim>(
             sp_local_native, sp_local_receiver, sp_local_sender,
-            dense_local_input, grid, alpha, beta, MAX_BOUND, MIN_BOUND) {
+            dense_local_input, grid, alpha, beta, MAX_BOUND, MIN_BOUND,true,false) {
     this->dense_local_output = dense_local_output;
   }
 
