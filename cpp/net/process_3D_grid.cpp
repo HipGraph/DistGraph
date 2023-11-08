@@ -74,6 +74,7 @@ Process3DGrid::Process3DGrid(int nr, int nc, int nl, int adjacency) {
   MPI_Comm_rank(fiber_world, &rank_in_fiber);
 
   MPI_Comm_size(row_world, &row_world_size);
+  MPI_Comm_size(col_world, &col_world_size);
 }
 
 Process3DGrid::~Process3DGrid() {

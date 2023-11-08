@@ -39,7 +39,7 @@ public:
   MPI_Comm row_world, col_world, fiber_world, global;
   MPI_Comm rowcol_slice, rowfiber_slice, colfiber_slice;
   int rank_in_row, rank_in_col, rank_in_fiber;
-  int world_size, row_world_size;
+  int world_size, row_world_size, col_world_size;
 
   /**
    *

@@ -46,7 +46,7 @@ public:
     this->rows = rows;
     this->grid = grid;
 
-    cout<<" row world size "<<grid->row_world_size<<endl;
+    cout<<" col world size "<<grid->col_world_size<<endl;
 
     this->cachePtr = std::make_unique<std::vector<
         std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
