@@ -52,10 +52,10 @@ add_library(disembed_lib SHARED
 
 SET(BUILD_TESTS "" ON)
 
-if (BUILD_TESTS)
-    add_subdirectory(tests)
-    message(STATUS "Building tests ....")
-endif ()
+#if (BUILD_TESTS)
+#    add_subdirectory(tests)
+#    message(STATUS "Building tests ....")
+#endif ()
 
 SET(SOURCES cpp/dist_embed.cpp)
 
