@@ -1,3 +1,6 @@
+/**
+ * This implements the CSR data structure. We use MKL routines to create CSR from COO.
+ */
 #pragma once
 #include "common.h"
 #include <algorithm>
@@ -50,7 +53,7 @@ public:
 
 
 //    cout << " number of coordinates " << num_coords << endl;
-//#pragma omp parallel for
+      #pragma omp parallel for schedule (static)
       for (int i = 0; i < num_coords; i++) {
         rArray[i] = coords[i].row;
         cArray[i] = coords[i].col;
@@ -104,7 +107,7 @@ public:
       (handler.get())->rowStart.resize(this->rows + 1);
 
 // Copy over row indices
-//#pragma omp parallel for
+      #pragma omp parallel for schedule (static)
       for (int i = 0; i < num_coords; i++) {
         (handler.get())->row_idx[i] = coords[i].row;
       }

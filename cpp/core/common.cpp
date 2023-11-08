@@ -1,3 +1,6 @@
+/**
+ * This file includes all utility methods
+ */
 #include "common.h"
 
 using namespace std;
