@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
   bool col_major = false;
   bool sync_comm  = false;
 
-  bool fix_batch_training = true;
+  bool fix_batch_training = false;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
