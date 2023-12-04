@@ -67,15 +67,15 @@ int main(int argc, char **argv) {
       data_set_name = argv[p + 1];
     } else if (strcmp(argv[p], "-col_major") == 0) {
       int val = atoi(argv[p + 1]);
-      col_major =  (val != 0) ? true : false;
-   } else if (strcmp(argv[p], "-sync_comm") == 0) {
-     int val = atoi(argv[p + 1]);
-     sync_comm =  (val != 0) ? true : false;
-   }else if (strcmp(argv[p], "-full_batch_training") == 0) {
-     int full_batch_tra = atoi(argv[p + 1]);
-     full_batch_training = full_batch_tra == 1 ? true : false;
-
-   }
+      col_major = (val != 0) ? true : false;
+    } else if (strcmp(argv[p], "-sync_comm") == 0) {
+      int val = atoi(argv[p + 1]);
+      sync_comm = (val != 0) ? true : false;
+    } else if (strcmp(argv[p], "-full_batch_training") == 0) {
+      int full_batch_tra = atoi(argv[p + 1]);
+      full_batch_training = full_batch_tra == 1 ? true : false;
+    }
+  }
 
 //  }
 
