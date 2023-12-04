@@ -44,6 +44,8 @@ int main(int argc, char **argv) {
   bool col_major = false;
   bool sync_comm  = false;
 
+  bool full_batch_training = true;
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -69,8 +71,11 @@ int main(int argc, char **argv) {
    } else if (strcmp(argv[p], "-sync_comm") == 0) {
      int val = atoi(argv[p + 1]);
      sync_comm =  (val != 0) ? true : false;
+   }else if (strcmp(argv[p], "-full_batch_training") == 0) {
+     int full_batch_tra = atoi(argv[p + 1]);
+     full_batch_training = full_batch_tra == 1 ? true : false;
+
    }
-  }
 
 //  }
 
@@ -79,7 +84,9 @@ int main(int argc, char **argv) {
   int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-  batch_size = batch_size/world_size;
+  if (full_batch_training) {
+    batch_size = batch_size / world_size;
+  }
 
   // Initialize MPI DataTypes
   initialize_mpi_datatypes<int, double, dimension>();
