@@ -97,7 +97,7 @@ public:
        int offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
       for (int j = 0; j < cols; ++j) {
         offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
-        cout<<"nodeId" <<nodeid<<" offset "<<offset<<endl;
+        cout<<"nodeId" <<node_id<<" offset "<<offset<<endl;
       }
       offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
       MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
