@@ -101,7 +101,9 @@ public:
         cout<<"nodeId" <<node_id<<" offset "<<offset<<endl;
       }
       offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
+      cout<<"nodeId" <<node_id<<" writiting to file "<<offset<<endl;
       MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
+      cout<<"nodeId" <<node_id<<" writiting to file sucess "<<offset<<endl;
     }
     MPI_File_close(&fh);
   }
