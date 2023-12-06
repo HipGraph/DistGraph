@@ -93,17 +93,13 @@ public:
 
     for (uint64_t i = 0; i < rows; ++i) {
        uint64_t   node_id = i + 1+ proc_rank*rows;
-       char buffer[1000000];
+       char buffer[10000];
        int offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
       for (int j = 0; j < cols; ++j) {
-        cout<<"nodeId" <<node_id<<" accessing  "<<(i * cols + j)<<"i "<<i<<" j "<<j<<endl;
         offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
-        cout<<"nodeId" <<node_id<<" offset "<<offset<<endl;
       }
       offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
-      cout<<"nodeId" <<node_id<<" writiting to file "<<offset<<endl;
       MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
-      cout<<"nodeId" <<node_id<<" writiting to file sucess "<<offset<<endl;
     }
     MPI_File_close(&fh);
   }
