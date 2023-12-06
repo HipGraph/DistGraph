@@ -96,6 +96,7 @@ public:
        char buffer[1000000];
        int offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
       for (int j = 0; j < cols; ++j) {
+        cout<<"nodeId" <<node_id<<" accessing  "<<(i * cols + j)<<"i "<<i<<" j "<<j<<endl;
         offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
         cout<<"nodeId" <<node_id<<" offset "<<offset<<endl;
       }
