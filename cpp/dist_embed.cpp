@@ -111,9 +111,9 @@ int main(int argc, char **argv) {
        << " completed " << endl;
 
   auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
-                                        grid.get()->world_size);
+                                        grid.get()->col_world_size);
   auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
-                                        grid.get()->world_size);
+                                        grid.get()->col_world_size);
 
 
 

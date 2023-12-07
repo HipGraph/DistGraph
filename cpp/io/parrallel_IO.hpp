@@ -96,6 +96,7 @@ public:
       expected_rows = min(expected_last_rows,rows);
     }
 
+    cout<<" rank :"<<grid->rank_in_col<<" expected rows :" << expected_last_rows<<endl;
     for (uint64_t i = 0; i < expected_rows; ++i) {
        uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
        char buffer[1000000];
