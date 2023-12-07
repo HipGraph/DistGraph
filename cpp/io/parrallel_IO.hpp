@@ -96,18 +96,19 @@ public:
       expected_rows = min(expected_last_rows,rows);
     }
 
-    int offset= rows-expected_rows;
+//    int offset= rows-expected_rows;
     cout<<" rank :"<<grid->rank_in_col<<" expected rows " << expected_rows<<endl;
+    char buffer[1000000000000];
     for (uint64_t i = 0; i < expected_rows; ++i) {
        uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
-       char buffer[1000000];
-       offset = snprintf(buffer+offset, sizeof(buffer), "%d", node_id);
+
+      int  offset = snprintf(buffer+offset, sizeof(buffer), "%d", node_id);
       for (int j = 0; j < cols; ++j) {
         offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
       }
       offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
-      MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
     }
+    MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
     MPI_File_close(&fh);
   }
 
