@@ -92,6 +92,7 @@ public:
     uint64_t  expected_rows = rows;
     if (grid->rank_in_col == grid->col_world_size -1){
       auto expected_last_rows = sp_mat->gRows- rows*grid->rank_in_col;
+      cout<<" expected rows " << expected_last_rows<<endl;
       expected_rows = min(expected_last_rows,rows);
     }
 
