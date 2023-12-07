@@ -99,6 +99,7 @@ public:
 //    int offset= rows-expected_rows;
     cout<<" rank :"<<grid->rank_in_col<<" expected rows " << expected_rows<<endl;
     char buffer[1000000000000];
+    int  offset =0;
     for (uint64_t i = 0; i < expected_rows; ++i) {
        uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
 
