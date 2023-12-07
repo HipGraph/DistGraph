@@ -85,7 +85,7 @@ public:
   }
 
   template <typename T, typename SPT>
-  void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols, Process3DGrid *grid, SpMat<SPT> *sp_mat) {
+  void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols, Process3DGrid *grid, distblas::core::SpMat<SPT> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
