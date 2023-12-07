@@ -84,15 +84,19 @@ public:
 
   }
 
-  template <typename T>
-  void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols) {
-    int proc_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+  template <typename T, typename SPT>
+  void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols, Process3DGrid *grid, SpMat<SPT> * sp_mat) {
     MPI_File fh;
-    MPI_File_open(MPI_COMM_WORLD, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    for (uint64_t i = 0; i < rows; ++i) {
-       uint64_t   node_id = i + 1+ proc_rank*rows;
+    uint64_t  expected_rows;
+    if (grid->rank_in_col == grid->col_world_size -1){
+      auto expected_last_rows = sp_mat->gRows- rows*grid->rank_in_col;
+      expected_rows = min(expected_last_rows,rows);
+    }
+
+    for (uint64_t i = 0; i < expected_rows; ++i) {
+       uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
        char buffer[1000000];
        int offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
       for (int j = 0; j < cols; ++j) {
