@@ -26,7 +26,7 @@ using namespace distblas::net;
 
 int main(int argc, char **argv) {
 
-  const int dimension = 2;
+  const int dimension = 128;
 
   string input_file = "";
   string output_file = "embedding.txt";
