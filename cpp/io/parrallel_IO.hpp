@@ -89,26 +89,37 @@ public:
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    uint64_t  expected_rows = rows;
-    if (grid->rank_in_col == grid->col_world_size -1){
-      auto expected_last_rows = sp_mat->gRows- rows*grid->rank_in_col;
-      cout<<" expected rows " << expected_last_rows<<endl;
-      expected_rows = min(expected_last_rows,rows);
+    uint64_t expected_rows = rows;
+
+    // Adjust expected rows for the last rank in the column
+    if (grid->rank_in_col == grid->col_world_size - 1) {
+      auto remaining_rows = sp_mat->gRows - rows * grid->rank_in_col;
+      std::cout << " remaining rows " << remaining_rows << std::endl;
+      expected_rows = std::min(remaining_rows, rows);
     }
 
-    cout<<" rank :"<<grid->rank_in_col<<" expected rows :" << expected_rows<<endl;
+    std::vector<char> buffer;  // Collect all data in a buffer
+
     for (uint64_t i = 0; i < expected_rows; ++i) {
-       uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
-       char buffer[1000000];
-       int offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
+      uint64_t node_id = i + 1 + grid->rank_in_col * rows;
+      int offset = snprintf(nullptr, 0, "%d", node_id);  // Compute the size first
+
+      buffer.resize(buffer.size() + offset + 1);  // Resize the buffer to accommodate the new data
+
+      offset = snprintf(buffer.data() + buffer.size() - offset - 1, offset + 1, "%d", node_id);
+
       for (int j = 0; j < cols; ++j) {
-        offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
+        offset += snprintf(buffer.data() + buffer.size() - offset - 1, offset + 1, " %.5f", nCoordinates[i * cols + j]);
       }
-      offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
-      MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
+
+      offset += snprintf(buffer.data() + buffer.size() - offset - 1, offset + 1, "\n");
     }
+
+    MPI_File_write_ordered(fh, buffer.data(), buffer.size(), MPI_CHAR, MPI_STATUS_IGNORE);
+
     MPI_File_close(&fh);
   }
+
 
 };
 } // namespace distblas::io
