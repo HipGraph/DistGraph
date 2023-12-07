@@ -89,7 +89,7 @@ public:
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    uint64_t  expected_rows;
+    uint64_t  expected_rows = rows;
     if (grid->rank_in_col == grid->col_world_size -1){
       auto expected_last_rows = sp_mat->gRows- rows*grid->rank_in_col;
       expected_rows = min(expected_last_rows,rows);
