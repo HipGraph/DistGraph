@@ -84,38 +84,43 @@ public:
 
   }
 
+#include <mpi.h>
+#include <iostream>
+
   template <typename T, typename SPT>
   void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols, Process3DGrid *grid, distblas::core::SpMat<SPT> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     uint64_t expected_rows = rows;
-
-    // Adjust expected rows for the last rank in the column
     if (grid->rank_in_col == grid->col_world_size - 1) {
-      auto remaining_rows = sp_mat->gRows - rows * grid->rank_in_col;
-      std::cout << " remaining rows " << remaining_rows << std::endl;
-      expected_rows = std::min(remaining_rows, rows);
+      auto expected_last_rows = sp_mat->gRows - rows * grid->rank_in_col;
+      cout << " expected rows " << expected_last_rows << endl;
+      expected_rows = min(expected_last_rows, rows);
     }
 
-    std::vector<char> buffer;  // Collect all data in a buffer
+    cout << " rank :" << grid->rank_in_col << " expected rows :" << expected_rows << endl;
+
+    // Calculate the offset based on the rank order
+    MPI_Offset offset = (MPI_Offset)grid->rank_in_col * rows * (cols * sizeof(char) + 1);
 
     for (uint64_t i = 0; i < expected_rows; ++i) {
       uint64_t node_id = i + 1 + grid->rank_in_col * rows;
-      int offset = snprintf(nullptr, 0, "%d", node_id);  // Compute the size first
-
-      buffer.resize(buffer.size() + offset + 1);  // Resize the buffer to accommodate the new data
-
-      offset = snprintf(buffer.data() + buffer.size() - offset - 1, offset + 1, "%d", node_id);
+      char buffer[1000000];
+      int snprintf_offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
 
       for (int j = 0; j < cols; ++j) {
-        offset += snprintf(buffer.data() + buffer.size() - offset - 1, offset + 1, " %.5f", nCoordinates[i * cols + j]);
+        snprintf_offset += snprintf(buffer + snprintf_offset, sizeof(buffer) - snprintf_offset, " %.5f", nCoordinates[i * cols + j]);
       }
 
-      offset += snprintf(buffer.data() + buffer.size() - offset - 1, offset + 1, "\n");
-    }
+      snprintf_offset += snprintf(buffer + snprintf_offset, sizeof(buffer) - snprintf_offset, "\n");
 
-    MPI_File_write_ordered(fh, buffer.data(), buffer.size(), MPI_CHAR, MPI_STATUS_IGNORE);
+      // Write at the calculated offset
+      MPI_File_write_at(fh, offset, buffer, snprintf_offset, MPI_CHAR, MPI_STATUS_IGNORE);
+
+      // Update the offset for the next write
+      offset += snprintf_offset;
+    }
 
     MPI_File_close(&fh);
   }
