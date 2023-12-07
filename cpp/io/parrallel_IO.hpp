@@ -98,18 +98,38 @@ public:
 
 //    int offset= rows-expected_rows;
     cout<<" rank :"<<grid->rank_in_col<<" expected rows " << expected_rows<<endl;
-    char buffer[1000000000000];
-    int  offset =0;
+    size_t total_size = 0;
     for (uint64_t i = 0; i < expected_rows; ++i) {
-       uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
-
-      int  offset = snprintf(buffer+offset, sizeof(buffer), "%d", node_id);
+      total_size += snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
-        offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
+        total_size += snprintf(nullptr, 0, " %.5f", nCoordinates[i * cols + j]);
       }
-      offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
+      total_size += snprintf(nullptr, 0, "\n");
     }
-    MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
+
+    // Allocate memory dynamically
+    char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
+    if (buffer == nullptr) {
+      // Handle allocation failure
+      cout << "Memory allocation failed." << endl;
+      return;
+    }
+
+    char *current_position = buffer;
+
+    for (uint64_t i = 0; i < expected_rows; ++i) {
+      current_position += snprintf(current_position, total_size, "%lu", i + 1 + grid->rank_in_col * rows);
+      for (int j = 0; j < cols; ++j) {
+        current_position += snprintf(current_position, total_size, " %.5f", nCoordinates[i * cols + j]);
+      }
+      current_position += snprintf(current_position, total_size, "\n");
+    }
+
+    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
+
+    // Free the dynamically allocated memory
+    free(buffer);
+
     MPI_File_close(&fh);
   }
 
