@@ -114,6 +114,11 @@ int main(int argc, char **argv) {
                                         grid.get()->world_size);
   auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
                                         grid.get()->world_size);
+  if (grid.get()->rank_in_col == grid.get()->col_world_size -1){
+    int expected_last_rows = (shared_sparseMat.get()->gRows)-(localARows*(grid.get()->col_world_size-1));
+    localARows = min(expected_last_rows,localARows);
+  }
+
 
   // To enable full batch size
 //  batch_size = localARows;
