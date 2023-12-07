@@ -84,47 +84,32 @@ public:
 
   }
 
-#include <mpi.h>
-#include <iostream>
-
   template <typename T, typename SPT>
   void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols, Process3DGrid *grid, distblas::core::SpMat<SPT> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    uint64_t expected_rows = rows;
-    if (grid->rank_in_col == grid->col_world_size - 1) {
-      auto expected_last_rows = sp_mat->gRows - rows * grid->rank_in_col;
-      cout << " expected rows " << expected_last_rows << endl;
-      expected_rows = min(expected_last_rows, rows);
+    uint64_t  expected_rows = rows;
+    if (grid->rank_in_col == grid->col_world_size -1){
+      auto expected_last_rows = sp_mat->gRows- rows*grid->rank_in_col;
+      cout<<" expected rows " << expected_last_rows<<endl;
+      expected_rows = min(expected_last_rows,rows);
     }
 
-    cout << " rank :" << grid->rank_in_col << " expected rows :" << expected_rows << endl;
-
-    // Calculate the offset based on the rank order
-    MPI_Offset offset = (MPI_Offset)grid->rank_in_col * rows * (cols * sizeof(char) + 1);
-
+    int offset= rows-expected_rows;
+    cout<<" rank :"<<grid->rank_in_col<<" expected rows " << expected_last_rows<<endl;
     for (uint64_t i = 0; i < expected_rows; ++i) {
-      uint64_t node_id = i + 1 + grid->rank_in_col * rows;
-      char buffer[1000000];
-      int snprintf_offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
-
+       uint64_t   node_id = i + 1+ grid->rank_in_col*rows;
+       char buffer[1000000];
+       offset = snprintf(buffer, sizeof(buffer), "%d", node_id);
       for (int j = 0; j < cols; ++j) {
-        snprintf_offset += snprintf(buffer + snprintf_offset, sizeof(buffer) - snprintf_offset, " %.5f", nCoordinates[i * cols + j]);
+        offset += snprintf(buffer + offset, sizeof(buffer) - offset, " %.5f", nCoordinates[i * cols + j]);
       }
-
-      snprintf_offset += snprintf(buffer + snprintf_offset, sizeof(buffer) - snprintf_offset, "\n");
-
-      // Write at the calculated offset
-      MPI_File_write_at(fh, offset, buffer, snprintf_offset, MPI_CHAR, MPI_STATUS_IGNORE);
-
-      // Update the offset for the next write
-      offset += snprintf_offset;
+      offset += snprintf(buffer + offset, sizeof(buffer) - offset, "\n");
+      MPI_File_write_ordered(fh, buffer, offset, MPI_CHAR, MPI_STATUS_IGNORE);
     }
-
     MPI_File_close(&fh);
   }
-
 
 };
 } // namespace distblas::io
