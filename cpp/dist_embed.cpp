@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
 //
   fout.close();
   //
-  reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension);
+  reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
 
 
   MPI_Finalize();
