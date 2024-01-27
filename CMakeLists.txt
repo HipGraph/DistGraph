@@ -48,7 +48,8 @@ add_library(disembed_lib SHARED
         cpp/algo/algo.hpp
         cpp/core/json.hpp
         cpp/partition/partitioner.cpp
-        cpp/partition/partitioner.hpp)
+        cpp/partition/partitioner.hpp
+        cpp/algo/spmm.hpp)
 
 SET(BUILD_TESTS "" ON)
 
