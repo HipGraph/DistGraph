@@ -10,7 +10,7 @@ using namespace distblas::core;
 
 namespace distblas::algo {
 template <typename SPT, typename DENT, size_t embedding_dim>
-class SpMMAlgo : public EmbeddingAlgo<SPT, DENT, embedding_dim> {
+class SpMMAlgo {
 
 private:
   DenseMat<SPT, DENT, embedding_dim> *dense_local_output;
@@ -45,9 +45,7 @@ public:
            Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
-        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm) {
-    this->dense_local_output=dense_local_output;
-  }
+        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),dense_local_output(dense_local_output) {}
 
 
 
@@ -134,8 +132,6 @@ public:
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         } else {
-          //These operations are for more than one processes.
-          full_comm.get()->transfer_data(random_number_vec, i, j);
 
           //  pull model code
             this->execute_pull_model_computations(
