@@ -19,14 +19,15 @@ public:
   SpMMAlgo(distblas::core::SpMat<SPT> *sp_local_native,
            distblas::core::SpMat<SPT> *sp_local_receiver,
            distblas::core::SpMat<SPT> *sp_local_sender,
-           DenseMat<SPT, DENT, embedding_dim> *dense_local_input,
+           DenseMat<SPT, DENT, embedding_dim> *dense_local,
            DenseMat<SPT, DENT, embedding_dim> *dense_local_output,
            Process3DGrid *grid, double alpha, double beta, DENT MAX_BOUND,
-           DENT MIN_BOUND)
-      : EmbeddingAlgo<SPT, DENT, embedding_dim>(
-            sp_local_native, sp_local_receiver, sp_local_sender,
-            dense_local_input, grid, alpha, beta, MAX_BOUND, MIN_BOUND,true,false) {
-    this->dense_local_output = dense_local_output;
+           DENT MIN_BOUND, bool col_major, bool sync_comm)
+      : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
+        sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
+        alpha(alpha), beta(beta), MAX_BOUND(MAX_BOUND), MIN_BOUND(MIN_BOUND),
+        col_major(col_major),sync(sync_comm) {
+    this->dense_local_output=dense_local_output;
   }
 
 
