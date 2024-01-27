@@ -15,25 +15,37 @@ class SpMMAlgo : public EmbeddingAlgo<SPT, DENT, embedding_dim> {
 private:
   DenseMat<SPT, DENT, embedding_dim> *dense_local_output;
 
+  DenseMat<SPT, DENT, embedding_dim> *dense_local;
+  distblas::core::SpMat<SPT> *sp_local_receiver;
+  distblas::core::SpMat<SPT> *sp_local_sender;
+  distblas::core::SpMat<SPT> *sp_local_native;
+  Process3DGrid *grid;
+
+  //cache size controlling hyper parameter
+  double alpha = 1.0;
+
+  //hyper parameter controls the  computation and communication overlapping
+  double beta = 1.0;
+
+  //hyper parameter controls the switching the sync vs async commiunication
+  bool sync = true;
+
+  //hyper parameter controls the col major or row major  data access
+  bool col_major = true;
+
 public:
   SpMMAlgo(distblas::core::SpMat<SPT> *sp_local_native,
            distblas::core::SpMat<SPT> *sp_local_receiver,
            distblas::core::SpMat<SPT> *sp_local_sender,
            DenseMat<SPT, DENT, embedding_dim> *dense_local,
            DenseMat<SPT, DENT, embedding_dim> *dense_local_output,
-           Process3DGrid *grid, double alpha, double beta, DENT MAX_BOUND,
-           DENT MIN_BOUND, bool col_major, bool sync_comm)
-      : distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sp_local_native(sp_local_native),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sp_local_receiver(sp_local_receiver),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sp_local_sender(sp_local_sender),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::dense_local(dense_local), grid(grid),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::alpha(alpha),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::beta(beta),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::MAX_BOUND(MAX_BOUND),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::MIN_BOUND(MIN_BOUND),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::col_major(col_major),
-        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sync(sync_comm),
-        dense_local_output(dense_local_output){}
+           Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
+      : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
+        sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
+        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm) {
+    this->dense_local_output=dense_local_output;
+  }
+
 
 
   void algo_spmm(int iterations, int batch_size, DENT lr) {
