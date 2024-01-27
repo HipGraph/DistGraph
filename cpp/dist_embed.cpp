@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
     batch_size = batch_size / world_size;
   }
 
+
   // Initialize MPI DataTypes
   initialize_mpi_datatypes<int, double, dimension>();
 
@@ -121,7 +122,9 @@ int main(int argc, char **argv) {
 
 
   // To enable full batch size
-//  batch_size = localARows;
+  if (spmm) {
+    batch_size = localARows;
+  }
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
        << localARows << endl;
