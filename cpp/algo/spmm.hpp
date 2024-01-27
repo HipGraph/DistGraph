@@ -21,6 +21,9 @@ private:
   distblas::core::SpMat<SPT> *sp_local_native;
   Process3DGrid *grid;
 
+  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
+      data_comm_cache;
+
   //cache size controlling hyper parameter
   double alpha = 1.0;
 
@@ -114,9 +117,6 @@ public:
           considering_batch_size = last_batch_size;
         }
 
-        // negative samples generation
-        vector<uint64_t> random_number_vec = generate_random_numbers(
-            0, (this->sp_local_receiver)->gRows, seed, ns);
 
         // One process computations without MPI operations
         if (grid->col_world_size == 1) {
@@ -307,7 +307,7 @@ public:
 
 
         bool matched = false;
-        std::array<DENT, embedding_dim>> array_ptr;
+        std::array<DENT, embedding_dim> array_ptr;
         bool col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
