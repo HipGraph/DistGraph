@@ -74,6 +74,9 @@ int main(int argc, char **argv) {
     } else if (strcmp(argv[p], "-fix_batch_training") == 0) {
       int full_batch_tra = atoi(argv[p + 1]);
       fix_batch_training = full_batch_tra == 1 ? true : false;
+    }else if (strcmp(argv[p], "-spmm") == 0) {
+      int enable_spmm = atoi(argv[p + 1]);
+      spmm = enable_spmm == 1 ? true : false;
     }
   }
 
@@ -173,7 +176,7 @@ int main(int argc, char **argv) {
                 new distblas::algo::SpMMAlgo<int, double, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), dense_mat.get(),
-                    dense_mat_output.get(), grid.get(), alpha, beta, 5, -5));
+                    dense_mat_output.get(), grid.get(), alpha, beta, col_major, sync_comm));
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << "  algo started  " << endl;
