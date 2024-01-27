@@ -23,13 +23,17 @@ public:
            DenseMat<SPT, DENT, embedding_dim> *dense_local_output,
            Process3DGrid *grid, double alpha, double beta, DENT MAX_BOUND,
            DENT MIN_BOUND, bool col_major, bool sync_comm)
-      : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
-        sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
-        alpha(alpha), beta(beta), MAX_BOUND(MAX_BOUND), MIN_BOUND(MIN_BOUND),
-        col_major(col_major),sync(sync_comm) {
-    this->dense_local_output=dense_local_output;
-  }
-
+      : distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sp_local_native(sp_local_native),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sp_local_receiver(sp_local_receiver),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sp_local_sender(sp_local_sender),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::dense_local(dense_local), grid(grid),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::alpha(alpha),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::beta(beta),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::MAX_BOUND(MAX_BOUND),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::MIN_BOUND(MIN_BOUND),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::col_major(col_major),
+        distblas::algo::EmbeddingAlgo<SPT,DENT,embedding_dim>::sync(sync_comm),
+        dense_local_output(dense_local_output){}
 
 
   void algo_spmm(int iterations, int batch_size, DENT lr) {
