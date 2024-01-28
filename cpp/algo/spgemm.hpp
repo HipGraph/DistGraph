@@ -85,7 +85,7 @@ public:
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
           new DataComm<SPT, DENT, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
+              sp_local_receiver, sp_local_sender, sparse_local, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
@@ -195,7 +195,7 @@ public:
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size,
-                                  false,prev_start, prev_end_process,);
+                                  false,prev_start, prev_end_process);
 
     // dense_local->invalidate_cache(i, j, true);
   }
@@ -342,7 +342,7 @@ public:
             bool fetch_from_cache =
                 target_rank == (grid)->rank_in_col ? false : true;
 
-            vector<Tuple<T>> remote_tuples;
+            vector<Tuple<DENT>> remote_tuples;
 
             if (fetch_from_cache) {
               unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>
