@@ -357,12 +357,13 @@ public:
 
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
             if (!fetch_from_cache) {
-              for (auto d = handle->rowStart[local_dst]; d < handle->rowStart[local_dst + 1]; d++) {
-                prevCoordinates[index * embedding_dim + d] += lr *handle->values[d];
+              for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
+                auto d = handle->col_idx[k];
+                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
               for(Tuple<DENT> t: remote_tuples){
-                 auto d = t.col;
+                auto d = t.col;
                 prevCoordinates[index * embedding_dim + d] += lr *t.value;
               }
             }
