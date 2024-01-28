@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
                     dense_mat_output.get(), grid.get(), alpha, beta, col_major, sync_comm));
 
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << "  algo started  " << endl;
+    cout << " rank " << rank << " spmm algo started  " << endl;
     embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
   } else {
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
                     alpha, beta, 5, -5,col_major,sync_comm));
 
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << "  algo started  " << endl;
+    cout << " rank " << rank << " embedding algo started  " << endl;
     embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
   }
   cout << " rank " << rank << " algo completed  " << endl;
