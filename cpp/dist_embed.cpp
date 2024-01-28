@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
                                                                    false,
                                                                    false);
 
-    unique_ptr<distblas::core::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::core::SpGEMMAlgo<int, double, dimension>>(
+    unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
                 new SpGEMMAlgo<int, double, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
