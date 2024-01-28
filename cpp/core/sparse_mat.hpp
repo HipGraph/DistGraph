@@ -265,7 +265,7 @@ public:
                     Tuple<T> tuple) {
 
     if ((*this->tempCachePtr)[rank].find(key) != (*this->tempCachePtr)[rank].end()){
-      (*this->tempCachePtr)[rank][key].tuples.push_backpush_back(entry);
+      (*this->tempCachePtr)[rank][key].tuples.push_backpush_back(tuple);
     } else {
       SparseCacheEntry<T> entry;
       entry.inserted_batch_id = batch_id;
