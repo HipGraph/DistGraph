@@ -271,7 +271,7 @@ public:
       entry.inserted_batch_id = batch_id;
       entry.inserted_itr = iteration;
       entry.tuples.push_back(tuple);
-      (*this->cachePtr)[rank][key]=entry;
+      (*this->tempCachePtr)[rank][key]=entry;
     }
   }
 
