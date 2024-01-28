@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
   bool fix_batch_training = false;
 
-  double density=0.5
+  double density=0.5;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
