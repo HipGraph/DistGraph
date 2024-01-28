@@ -365,9 +365,9 @@ public:
             }else{
               for(Tuple<DENT> t: remote_tuples){
                 auto d = t.col;
-                if (d>=128){
-                  cout<< " rank " << grid->rank_in_col <<" invalid d"<<d<<endl;
-                }
+//                if (d>=128){
+//                  cout<< " rank " << grid->rank_in_col <<" invalid d"<<d<<endl;
+//                }
                 prevCoordinates[index * embedding_dim + d] += lr *t.value;
               }
             }
