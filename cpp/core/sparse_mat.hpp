@@ -253,7 +253,7 @@ public:
          Tuple<T> t;
          t.row=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
          t.col=j;
-         t.val=handle->values[j];
+         t.value=handle->values[j];
          result.push_back(t);
        }
      }
@@ -265,7 +265,7 @@ public:
                     Tuple<T> tuple) {
 
     if ((*this->tempCachePtr)[rank].find(key) != (*this->tempCachePtr)[rank].end()){
-      (*this->tempCachePtr)[rank][key].tuples.push_backpush_back(tuple);
+      (*this->tempCachePtr)[rank][key].tuples.push_back(tuple);
     } else {
       SparseCacheEntry<T> entry;
       entry.inserted_batch_id = batch_id;

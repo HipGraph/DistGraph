@@ -223,7 +223,7 @@ int main(int argc, char **argv) {
                                                                    false);
 
     unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
-                new SpGEMMAlgo<int, double, dimension>(
+                new distblas::algo::SpGEMMAlgo<int, double, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
                     grid.get(),
@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
 //
   fout.close();
   //
-  reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
+//  reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
 
 
   MPI_Finalize();
