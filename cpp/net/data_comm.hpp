@@ -410,7 +410,7 @@ public:
   }
 
   inline void populate_sparse_cache(vector<Tuple<DENT>> *sendbuf,
-                                    vector<<Tuple<DENT>> *receivebuf,
+                                    vector<Tuple<DENT>> *receivebuf,
                                     int iteration,
                                     int batch_id) {
     for (int i = 0; i < this->grid->col_world_size; i++) {
