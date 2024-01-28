@@ -172,7 +172,7 @@ public:
       if (communication) {
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        cout << " rank " << grid->rank_in_col << " transfer_sparse_data completed " << batches << endl;
+        cout << " rank " << grid->rank_in_col << " transfer_sparse_data completed "<< endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -191,7 +191,7 @@ public:
       prev_start = k;
     }
 
-    cout << " rank " << grid->rank_in_col << " calc_t_dist_grad_rowptr completed " << batches << endl;
+    cout << " rank " << grid->rank_in_col << " calc_t_dist_grad_rowptr completed " <<endl;
 
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
@@ -200,7 +200,7 @@ public:
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
 
-    cout << " rank " << grid->rank_in_col << " final calc_t_dist_grad_rowptr completed " << batches << endl;
+    cout << " rank " << grid->rank_in_col << " final calc_t_dist_grad_rowptr completed "<< endl;
 
     // dense_local->invalidate_cache(i, j, true);
   }
