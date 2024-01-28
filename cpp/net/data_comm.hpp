@@ -270,12 +270,14 @@ public:
           (*data_buffer_ptr)[sending_procs[i]]=vector<Tuple<DENT>>();
           if (pair.second.count(sending_procs[i]) > 0) {
             if (!already_fetched) {
-              cout<<" rank "<<grid->rank_in_col<<" col_id "<<col_id<<endl;
               sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
               already_fetched = true;
             }
-            send_counts_cyclic[sending_procs[i]]+= sparse_vector.size();
-            (*data_buffer_ptr)[sending_procs[i]].insert((*data_buffer_ptr)[sending_procs[i]].end(),sparse_vector.begin(),sparse_vector.end());
+            if(sparse_vector.size()>0) {
+              send_counts_cyclic[sending_procs[i]] += sparse_vector.size();
+              (*data_buffer_ptr)[sending_procs[i]].insert((*data_buffer_ptr)[sending_procs[i]].end(),
+                                                          sparse_vector.begin(), sparse_vector.end());
+            }
           }
         }
     }
