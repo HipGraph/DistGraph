@@ -238,7 +238,8 @@ public:
                                    int batch_id, int starting_proc, int end_proc) {
 
     int total_receive_count = 0;
-    unique_ptr<vector<vector<Tuple<DENT>>>> data_buffer_ptr = make_unique<vector<vector<Tuple<DENT>>>>(grid->col_world_size);
+    unique_ptr<vector<vector<Tuple<DENT>>>> data_buffer_ptr = make_unique<vector<vector<Tuple<DENT>>>>();
+    data_buffer_ptr->resize(grid->col_world_size);
 
     int total_send_count = 0;
     send_counts_cyclic = vector<int>(grid->col_world_size, 0);
@@ -259,12 +260,14 @@ public:
       receiving_procs.push_back(receiving_rank);
     }
 
+     cout<<" rank "<<grid->rank_in_col<<" transfer_sparse_data  process selection completed"<<endl;
 
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
         vector<Tuple<DENT>> sparse_vector;
         for (int i = 0; i < sending_procs.size(); i++) {
+          (*data_buffer_ptr)[sending_procs[i]]=vector<Tuple<DENT>>();
           if (pair.second.count(sending_procs[i]) > 0) {
             if (!already_fetched) {
               sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
