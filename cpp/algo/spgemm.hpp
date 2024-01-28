@@ -330,10 +330,11 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+//#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
+
 
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
@@ -364,6 +365,9 @@ public:
             }else{
               for(Tuple<DENT> t: remote_tuples){
                 auto d = t.col;
+                if (d>=128){
+                  cout<< " rank " << grid->rank_in_col <<" invalid d"<<d<<endl;
+                }
                 prevCoordinates[index * embedding_dim + d] += lr *t.value;
               }
             }
