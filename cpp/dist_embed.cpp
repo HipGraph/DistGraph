@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
                     alpha, beta,col_major,sync_comm));
 
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << " embedding algo started  " << endl;
+    cout << " rank " << rank << " spgemm algo started  " << endl;
     spgemm_algo.get()->algo_spgemm(iterations, batch_size,lr);
 
   }else {
