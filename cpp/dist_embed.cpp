@@ -204,8 +204,9 @@ int main(int argc, char **argv) {
 
     auto sparse_input = make_shared<distblas::core::SpMat<double>>(grid.get(),
                                                                    sparse_coo,
-                                                                   localARows,
-                                                                   dimension,sparse_coo.size(),
+                                                                   static_cast<uint64_t>(localARows),
+                                                                   static_cast<uint64_t>(dimension),
+                                                                   static_cast<uint64_t>(sparse_coo.size()),
                                                                    batch_size,
                                                                    localARows,
                                                                    dimension,
@@ -214,8 +215,9 @@ int main(int argc, char **argv) {
 
     auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),
                                                                    sparse_coo,
-                                                                   localARows,
-                                                                   dimension,sparse_coo.size(),
+                                                                 static_cast<uint64_t>(localARows),
+                                                                 static_cast<uint64_t>(dimension),
+                                                                 static_cast<uint64_t>(sparse_coo.size()),
                                                                    batch_size,
                                                                    localARows,
                                                                    dimension,
