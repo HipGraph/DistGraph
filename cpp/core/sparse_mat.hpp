@@ -37,6 +37,9 @@ public:
   unique_ptr<CSRLocal<T>> csr_local_data;
   Process3DGrid *grid;
 
+  unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>>
+      tempCachePtr;
+
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
    * @param coords  (src, dst, value) Tuple vector loaded as input
@@ -57,6 +60,7 @@ public:
     this->transpose = transpose;
     this->col_partitioned = col_partitioned;
     this->grid = grid;
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
   }
 
   SpMat(Process3DGrid *grid) {
@@ -239,6 +243,54 @@ public:
       }
     }
   }
+
+
+   vector<Tuple<T>> fetch_local_data(uint64_t local_key) {
+     CSRHandle *handle = (csr_local_data.get())->handler.get();
+     vector<Tuple<T>> result;
+     if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
+       for (auto j = handle->rowStart[local_key]; j < handle->rowStart[local_key + 1];j++) {
+         Tuple<T> t;
+         t.row=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
+         t.col=j;
+         t.val=handle->values[j];
+         result.push_back(t);
+       }
+     }
+     return result;
+  }
+
+
+  void insert_cache(int rank, uint64_t key, int batch_id, int iteration,
+                    Tuple<T> tuple) {
+
+    if ((*this->tempCachePtr)[rank].find(key) != (*this->tempCachePtr)[rank].end()){
+      (*this->tempCachePtr)[rank][key].tuples.push_backpush_back(entry);
+    } else {
+      SparseCacheEntry<DENT> entry;
+      entry.inserted_batch_id = batch_id;
+      entry.inserted_itr = iteration;
+      entry.tuples.push_back(tuple);
+      (*this->cachePtr)[rank][key]=entry;
+    }
+  }
+
+  auto fetch_data_vector_from_cache( vector<Tuple<T>>& entries,int rank, uint64_t key) {
+
+    // Access the array using the provided rank and key
+
+    auto arrayMap = (*tempCachePtr)[rank];
+    auto it = arrayMap.find(key);
+
+    if (it != arrayMap.end()) {
+      auto temp = it->second;
+      value =  temp.value;
+    }else {
+      throw std::runtime_error("cannot find the given key");
+    }
+  }
+
+
 
   void print_coords(bool trans) {
     int rank= grid->rank_in_col;

@@ -84,6 +84,13 @@ template <typename T, size_t size> struct CacheEntry {
   int inserted_itr;
 };
 
+template <typename T> struct SparseCacheEntry {
+  vector<Tuple<T>> tuples;
+  int inserted_batch_id;
+  int inserted_itr;
+};
+
+
 
 struct CSRHandle {
   vector<double> values;

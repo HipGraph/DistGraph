@@ -24,9 +24,10 @@ namespace distblas::net {
 template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
 
 private:
-  distblas::core::SpMat<SPT> *sp_local_receiver;
-  distblas::core::SpMat<SPT> *sp_local_sender;
-  distblas::core::DenseMat<SPT, DENT, embedding_dim> *dense_local;
+  SpMat<SPT> *sp_local_receiver;
+  SpMat<SPT> *sp_local_sender;
+  DenseMat<SPT, DENT, embedding_dim> *dense_local;
+  SpMat<DENT> *sparse_local;
   Process3DGrid *grid;
   vector<int> sdispls;
   vector<int> sendcounts;
@@ -44,11 +45,36 @@ private:
 public:
   DataComm(distblas::core::SpMat<SPT> *sp_local_receiver,
            distblas::core::SpMat<SPT> *sp_local_sender,
-           DenseMat<SPT, DENT, embedding_dim> *dense_local, Process3DGrid *grid,
+           DenseMat<SPT, DENT, embedding_dim> *dense_local,
+           Process3DGrid *grid,
            int batch_id, double alpha) {
     this->sp_local_receiver = sp_local_receiver;
     this->sp_local_sender = sp_local_sender;
     this->dense_local = dense_local;
+    this->grid = grid;
+    this->sdispls = vector<int>(grid->world_size, 0);
+    this->sendcounts = vector<int>(grid->world_size, 0);
+    this->rdispls = vector<int>(grid->world_size, 0);
+    this->receivecounts = vector<int>(grid->world_size, 0);
+    this->send_counts_cyclic = vector<int>(grid->world_size, 0);
+    this->receive_counts_cyclic = vector<int>(grid->world_size, 0);
+    this->sdispls_cyclic = vector<int>(grid->world_size, 0);
+    this->rdispls_cyclic = vector<int>(grid->world_size, 0);
+    this->receive_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
+    this->send_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
+    this->batch_id = batch_id;
+    this->alpha = alpha;
+
+  }
+
+  DataComm(SpMat<SPT> *sp_local_receiver,
+           SpMat<SPT> *sp_local_sender,
+           SpMat<DENT> *sparse_local,
+           Process3DGrid *grid,
+           int batch_id, double alpha) {
+    this->sp_local_receiver = sp_local_receiver;
+    this->sp_local_sender = sp_local_sender;
+    this->sparse_local = sparse_local;
     this->grid = grid;
     this->sdispls = vector<int>(grid->world_size, 0);
     this->sendcounts = vector<int>(grid->world_size, 0);
@@ -207,6 +233,84 @@ public:
     }
   }
 
+  inline void transfer_sparse_data(vector<Tuple<DENT>> *sendbuf_cyclic,
+                                   vector<Tuple<DENT>> *receivebuf,
+                                   bool synchronous=true,MPI_Request* req, int iteration,
+                                   int batch_id, int starting_proc, int end_proc,
+                                   bool temp_cache) {
+
+    int total_receive_count = 0;
+    unique_ptr<vector<vector<Tuple<DENT>>>> data_buffer_ptr = make_unique<vector<vector<Tuple<DENT>>>>(grid->col_world_size);
+
+    int total_send_count = 0;
+    send_counts_cyclic = vector<int>(grid->col_world_size, 0);
+    receive_counts_cyclic = vector<int>(grid->col_world_size, 0);
+    sdispls_cyclic = vector<int>(grid->col_world_size, 0);
+    rdispls_cyclic = vector<int>(grid->col_world_size, 0);
+
+    vector<int> sending_procs;
+    vector<int> receiving_procs;
+
+    for (int i = starting_proc; i < end_proc; i++) {
+      int sending_rank = (grid->rank_in_col + i) % grid->col_world_size;
+      int receiving_rank =
+          (grid->rank_in_col >= i)
+              ? (grid->rank_in_col - i) % grid->col_world_size
+              : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
+      sending_procs.push_back(sending_rank);
+      receiving_procs.push_back(receiving_rank);
+    }
+
+
+      for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
+        auto col_id = pair.first;
+        bool already_fetched = false;
+        vector<Tuple<DENT>> sparse_vector;
+        for (int i = 0; i < sending_procs.size(); i++) {
+          if (pair.second.count(sending_procs[i]) > 0) {
+            if (!already_fetched) {
+              sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
+              already_fetched = true;
+            }
+            send_counts_cyclic[sending_procs[i]]+= dense_vector.size();
+            (*data_buffer_ptr)[sending_procs[i]].insert((*data_buffer_ptr)[sending_procs[i]].end(),sparse_vector.begin(),sparse_vector.end());
+          }
+        }
+    }
+
+    for (int i = 0; i < grid->col_world_size; i++) {
+          sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
+          total_send_count += send_counts_cyclic[i];
+          (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[sending_procs[i]].begin(),(*data_buffer_ptr)[sending_procs[i]].end());
+    }
+
+    MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
+
+    for (int i = 0; i < grid->col_world_size; i++) {
+      rdispls_cyclic[i] =(i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]: rdispls_cyclic[i];
+      total_receive_count += receive_counts_cyclic[i];
+    }
+
+    if (total_receive_count>0) {
+      receivebuf->resize(total_receive_count);
+    }
+
+    add_datatransfers(total_receive_count, "Data transfers");
+
+    if (synchronous) {
+      auto t = start_clock();
+      MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
+                    sdispls_cyclic.data(), SPTUPLE, (*receivebuf).data(),
+                    receive_counts_cyclic.data(), rdispls_cyclic.data(),
+                    SPTUPLE, grid->col_world);
+      MPI_Request dumy;
+      this->populate_sparse_cache(sendbuf_cyclic, receivebuf, &dumy, true, iteration, batch_id);
+      stop_clock_and_add(t, "Communication Time");
+    }
+  }
+
+
+
   void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
 
     vector<vector<uint64_t>> receive_col_ids_list(grid->col_world_size);
@@ -308,7 +412,32 @@ public:
 
   }
 
+  inline void populate_sparse_cache(std::vector<Tuple<T>> *sendbuf,
+                             std::vector<<Tuple<T>> *receivebuf,
+                             MPI_Request *req, bool synchronous, int iteration,
+                             int batch_id) {
+    if (!synchronous) {
+      MPI_Status status;
+      auto t = start_clock();
+      MPI_Wait(req, &status);
+      stop_clock_and_add(t, "Communication Time");
+    }
 
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      int base_index = this->rdispls_cyclic[i];
+      int count = this->receive_counts_cyclic[i];
+
+      for (int j = base_index; j < base_index + count; j++) {
+        Tuple<DENT> t = (*receivebuf)[j];
+        (this->sparse_local)->insert_cache(i, t.row, batch_id, iteration, t);
+      }
+    }
+    receivebuf->clear();
+    receivebuf->shrink_to_fit();
+    sendbuf->clear();
+    sendbuf->shrink_to_fit();
+
+  }
 };
 
 } // namespace distblas::net
