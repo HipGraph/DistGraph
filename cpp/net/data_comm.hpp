@@ -234,8 +234,7 @@ public:
   }
 
   inline void transfer_sparse_data(vector<Tuple<DENT>> *sendbuf_cyclic,
-                                   vector<Tuple<DENT>> *receivebuf,
-                                   bool synchronous=true,MPI_Request* req, int iteration,
+                                   vector<Tuple<DENT>> *receivebuf,int iteration,
                                    int batch_id, int starting_proc, int end_proc,
                                    bool temp_cache) {
 
@@ -272,7 +271,7 @@ public:
               sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
               already_fetched = true;
             }
-            send_counts_cyclic[sending_procs[i]]+= dense_vector.size();
+            send_counts_cyclic[sending_procs[i]]+= sparse_vector.size();
             (*data_buffer_ptr)[sending_procs[i]].insert((*data_buffer_ptr)[sending_procs[i]].end(),sparse_vector.begin(),sparse_vector.end());
           }
         }
@@ -297,16 +296,14 @@ public:
 
     add_datatransfers(total_receive_count, "Data transfers");
 
-    if (synchronous) {
-      auto t = start_clock();
-      MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
+
+    auto t = start_clock();
+    MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), SPTUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
                     SPTUPLE, grid->col_world);
-      MPI_Request dumy;
-      this->populate_sparse_cache(sendbuf_cyclic, receivebuf, &dumy, true, iteration, batch_id);
-      stop_clock_and_add(t, "Communication Time");
-    }
+    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
+    stop_clock_and_add(t, "Communication Time");
   }
 
 
@@ -412,17 +409,10 @@ public:
 
   }
 
-  inline void populate_sparse_cache(std::vector<Tuple<T>> *sendbuf,
-                             std::vector<<Tuple<T>> *receivebuf,
-                             MPI_Request *req, bool synchronous, int iteration,
-                             int batch_id) {
-    if (!synchronous) {
-      MPI_Status status;
-      auto t = start_clock();
-      MPI_Wait(req, &status);
-      stop_clock_and_add(t, "Communication Time");
-    }
-
+  inline void populate_sparse_cache(vector<Tuple<DENT>> *sendbuf,
+                                    vector<<Tuple<DENT>> *receivebuf,
+                                    int iteration,
+                                    int batch_id) {
     for (int i = 0; i < this->grid->col_world_size; i++) {
       int base_index = this->rdispls_cyclic[i];
       int count = this->receive_counts_cyclic[i];
@@ -436,7 +426,6 @@ public:
     receivebuf->shrink_to_fit();
     sendbuf->clear();
     sendbuf->shrink_to_fit();
-
   }
 };
 
