@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
                                                                    sparse_coo, gROWs,
                                                                    gCols, gNNZ, batch_size,
                                             localARows, localBRows, false, false);
-
+    sparse_input->initialize_CSR_blocks();
     auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),
                                                                  sparse_coo, gROWs,
                                                                  gCols, gNNZ, batch_size,
