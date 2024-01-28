@@ -274,7 +274,7 @@ public:
       entry.inserted_batch_id = batch_id;
       entry.inserted_itr = iteration;
       if (tuple.col>=128){
-        cout<< " rank " << grid->rank_in_col <<" inserting wrong d"<<t.col<<endl;
+        cout<< " rank " << grid->rank_in_col <<" inserting wrong d"<<tuple.col<<endl;
       }
       entry.tuples.push_back(tuple);
       (*this->tempCachePtr)[rank][key]=entry;
