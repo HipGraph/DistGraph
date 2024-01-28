@@ -50,6 +50,8 @@ int main(int argc, char **argv) {
 
   bool fix_batch_training = false;
 
+  double density=0.5
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -84,6 +86,8 @@ int main(int argc, char **argv) {
     }else if (strcmp(argv[p], "-spgemm") == 0) {
       int enable_spgemm = atoi(argv[p + 1]);
       spgemm = enable_spgemm == 1 ? true : false;
+    }else if (strcmp(argv[p], "-density") == 0) {
+      density = atof(argv[p + 1]);
     }
   }
 
@@ -200,7 +204,7 @@ int main(int argc, char **argv) {
 
   }else if(spgemm){
     vector<Tuple<double>> sparse_coo;
-    build_sparse_random_matrix(localARows,dimension,0.5,0,sparse_coo);
+    build_sparse_random_matrix(localARows,dimension,density,0,sparse_coo);
 
     uint64_t  gROWs = static_cast<uint64_t>(localARows);
     uint64_t gCols = static_cast<uint64_t>(dimension);
@@ -255,6 +259,7 @@ int main(int argc, char **argv) {
   j_obj["beta"] = beta;
   j_obj["algo"] = "Embedding";
   j_obj["p"] = world_size;
+  j_obj["sparsity"] = density;
   j_obj["data_set"] = data_set_name;
   j_obj["perf_stats"] = json_perf_statistics();
   if (rank == 0) {
