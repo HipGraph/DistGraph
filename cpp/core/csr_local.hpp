@@ -96,6 +96,9 @@ public:
         }
         coords[i].row = rv;
         coords[i].col = col_idx[i];
+        if(coords[i].col>=128){
+          cout<<" rank "<<rank<<" worng index"<<coords[i].col<<endl;
+        }
         coords[i].value = static_cast<T>(values[i]);
       }
 

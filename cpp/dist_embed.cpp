@@ -205,6 +205,7 @@ int main(int argc, char **argv) {
     uint64_t  gROWs = static_cast<uint64_t>(localARows);
     uint64_t gCols = static_cast<uint64_t>(dimension);
     uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
+    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
     int localBRows = static_cast<int>(dimension);
     auto sparse_input =  make_shared<distblas::core::SpMat<double>>(grid.get(),
                                                                    sparse_coo, gROWs,
