@@ -235,8 +235,7 @@ public:
 
   inline void transfer_sparse_data(vector<Tuple<DENT>> *sendbuf_cyclic,
                                    vector<Tuple<DENT>> *receivebuf,int iteration,
-                                   int batch_id, int starting_proc, int end_proc,
-                                   bool temp_cache) {
+                                   int batch_id, int starting_proc, int end_proc) {
 
     int total_receive_count = 0;
     unique_ptr<vector<vector<Tuple<DENT>>>> data_buffer_ptr = make_unique<vector<vector<Tuple<DENT>>>>(grid->col_world_size);
