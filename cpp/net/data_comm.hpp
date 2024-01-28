@@ -285,7 +285,7 @@ public:
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           total_send_count += send_counts_cyclic[i];
-          (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[sending_procs[i]].begin(),(*data_buffer_ptr)[sending_procs[i]].end());
+          (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
     cout<<" rank "<<grid->rank_in_col<<" sendbuf_cyclic  filling  completed"<<endl;
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
