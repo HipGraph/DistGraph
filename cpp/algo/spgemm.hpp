@@ -154,8 +154,8 @@ public:
   }
 
   inline void execute_pull_model_computations(
-      std::vector<Tuple<DENT, embedding_dim>> *sendbuf,
-      std::vector<Tuple<DENT, embedding_dim>> *receivebuf, int iteration,
+      std::vector<Tuple<DENT>> *sendbuf,
+      std::vector<Tuple<DENT>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
       double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
@@ -345,7 +345,7 @@ public:
             vector<Tuple<DENT>> remote_tuples;
 
             if (fetch_from_cache) {
-              unordered_map<uint64_t, SparseCacheEntry<DENT, embedding_dim>>
+              unordered_map<uint64_t, SparseCacheEntry<DENT>>
                   &arrayMap = (*sparse_local->tempCachePtr)[target_rank];
               remote_tuples = arrayMap[dst_id].tuples;
             }
