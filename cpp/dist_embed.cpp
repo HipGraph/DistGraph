@@ -16,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "algo/spgemm.hpp"
 
 using json = nlohmann::json;
 
