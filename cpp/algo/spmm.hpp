@@ -21,20 +21,19 @@ private:
   distblas::core::SpMat<SPT> *sp_local_native;
   Process3DGrid *grid;
 
-  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
-      data_comm_cache;
+  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache;
 
   //cache size controlling hyper parameter
-  double alpha = 1.0;
+  double alpha = 0;
 
   //hyper parameter controls the  computation and communication overlapping
   double beta = 1.0;
 
   //hyper parameter controls the switching the sync vs async commiunication
-  bool sync = true;
+  bool sync = false;
 
   //hyper parameter controls the col major or row major  data access
-  bool col_major = true;
+  bool col_major = false;
 
 public:
   SpMMAlgo(distblas::core::SpMat<SPT> *sp_local_native,
@@ -109,7 +108,6 @@ public:
     for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
-        int seed = j + i;
 
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
@@ -221,8 +219,7 @@ public:
 
 
 
-  inline void
-  calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, bool col_major, int start_process,
                           int end_process, bool fetch_from_temp_cache) {
@@ -338,8 +335,7 @@ public:
     }
   }
 
-  inline void
-  calc_embedding_row_major(uint64_t source_start_index,
+  inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
                            DENT *prevCoordinates, DENT lr, int batch_id,
