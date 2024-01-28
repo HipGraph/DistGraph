@@ -260,9 +260,6 @@ public:
       receiving_procs.push_back(receiving_rank);
       (*data_buffer_ptr)[sending_rank]=vector<Tuple<DENT>>();
     }
-
-     cout<<" rank "<<grid->rank_in_col<<" transfer_sparse_data  process selection completed"<<endl;
-
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
@@ -281,20 +278,18 @@ public:
           }
         }
     }
-    cout<<" rank "<<grid->rank_in_col<<" data_buffer_ptr  filling  completed"<<endl;
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           total_send_count += send_counts_cyclic[i];
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
-    cout<<" rank "<<grid->rank_in_col<<" sendbuf_cyclic  filling  completed"<<endl;
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
 
     for (int i = 0; i < grid->col_world_size; i++) {
       rdispls_cyclic[i] =(i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]: rdispls_cyclic[i];
       total_receive_count += receive_counts_cyclic[i];
     }
-    cout<<" rank "<<grid->rank_in_col<<" rdispls_cyclic  filling  completed"<<endl;
+
     if (total_receive_count>0) {
       receivebuf->resize(total_receive_count);
     }
@@ -307,9 +302,7 @@ public:
                     sdispls_cyclic.data(), SPTUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
                     SPTUPLE, grid->col_world);
-    cout<<" rank "<<grid->rank_in_col<<" MPIALL_TOALL    completed"<<endl;
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
-    cout<<" rank "<<grid->rank_in_col<<" populate_sparse_cache    completed"<<endl;
     stop_clock_and_add(t, "Communication Time");
   }
 

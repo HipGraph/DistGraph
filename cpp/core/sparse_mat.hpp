@@ -253,9 +253,6 @@ public:
          Tuple<T> t;
          t.row=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
          t.col=handle->col_idx[j];
-         if (t.col>=128){
-           cout<< " rank " << grid->rank_in_col <<" fetching wrong d"<<t.col<<endl;
-         }
          t.value=handle->values[j];
          result.push_back(t);
        }
@@ -273,9 +270,6 @@ public:
       SparseCacheEntry<T> entry;
       entry.inserted_batch_id = batch_id;
       entry.inserted_itr = iteration;
-      if (tuple.col>=128){
-        cout<< " rank " << grid->rank_in_col <<" inserting wrong d"<<tuple.col<<endl;
-      }
       entry.tuples.push_back(tuple);
       (*this->tempCachePtr)[rank][key]=entry;
     }

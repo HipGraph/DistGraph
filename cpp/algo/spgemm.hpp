@@ -135,7 +135,6 @@ public:
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
-            cout << " rank " << grid->rank_in_col << " final execute_pull_model_computations completed " << batches << endl;
 //            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
             for (int k = 0; k < batch_size; k += 1) {
@@ -172,7 +171,6 @@ public:
       if (communication) {
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        cout << " rank " << grid->rank_in_col << " transfer_sparse_data completed "<< endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -190,17 +188,12 @@ public:
       }
       prev_start = k;
     }
-
-    cout << " rank " << grid->rank_in_col << " calc_t_dist_grad_rowptr completed " <<endl;
-
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
-
-    cout << " rank " << grid->rank_in_col << " final calc_t_dist_grad_rowptr completed "<< endl;
 
     // dense_local->invalidate_cache(i, j, true);
   }
@@ -330,7 +323,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -365,9 +358,6 @@ public:
             }else{
               for(Tuple<DENT> t: remote_tuples){
                 auto d = t.col;
-//                if (d>=128){
-//                  cout<< " rank " << grid->rank_in_col <<" invalid d"<<d<<endl;
-//                }
                 prevCoordinates[index * embedding_dim + d] += lr *t.value;
               }
             }
