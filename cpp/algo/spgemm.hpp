@@ -350,7 +350,7 @@ public:
               remote_tuples = arrayMap[dst_id].tuples;
             }
 
-            CSRHandle *handle = (sparse_local)->handler.get();
+            CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
             if (!fetch_from_cache) {
               for (auto d = handle->rowStart[local_dst]; d < handle->rowStart[local_dst + 1]; d++) {
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[d];
