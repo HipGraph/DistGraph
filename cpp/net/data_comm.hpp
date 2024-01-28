@@ -258,6 +258,7 @@ public:
               : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
+      (*data_buffer_ptr)[sending_rank]=vector<Tuple<DENT>>();
     }
 
      cout<<" rank "<<grid->rank_in_col<<" transfer_sparse_data  process selection completed"<<endl;
@@ -267,7 +268,6 @@ public:
         bool already_fetched = false;
         vector<Tuple<DENT>> sparse_vector;
         for (int i = 0; i < sending_procs.size(); i++) {
-          (*data_buffer_ptr)[sending_procs[i]]=vector<Tuple<DENT>>();
           if (pair.second.count(sending_procs[i]) > 0) {
             if (!already_fetched) {
               sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
