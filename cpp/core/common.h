@@ -178,7 +178,7 @@ DENT  scale(DENT v){
 }
 
 template <typename VALUE_TYPE>
-void build_sparse_random_matrix (int rows, int cols, float density, int seed, vector<Tuple<VALUE_TYPE>>* sparse_coo)
+void build_sparse_random_matrix (int rows, int cols, float density, int seed, vector<Tuple<VALUE_TYPE>>& sparse_coo)
 {
 
   std::mt19937 gen (seed);
@@ -199,7 +199,7 @@ void build_sparse_random_matrix (int rows, int cols, float density, int seed, ve
         t.row=j;
         t.col=i;
         t.value=val;
-        (*sparse_coo).push_back(t);
+        (sparse_coo).push_back(t);
       }
     }
   }

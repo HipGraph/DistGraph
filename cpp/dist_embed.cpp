@@ -23,6 +23,7 @@ using namespace std;
 using namespace distblas::io;
 using namespace distblas::partition;
 using namespace distblas::net;
+using namespace  distblas::core;
 
 int main(int argc, char **argv) {
 
@@ -40,6 +41,8 @@ int main(int argc, char **argv) {
   double lr = 0.02;
 
   bool spmm = false;
+
+  bool spgemm = false;
 
   bool col_major = false;
   bool sync_comm  = false;
@@ -77,6 +80,9 @@ int main(int argc, char **argv) {
     }else if (strcmp(argv[p], "-spmm") == 0) {
       int enable_spmm = atoi(argv[p + 1]);
       spmm = enable_spmm == 1 ? true : false;
+    }else if (strcmp(argv[p], "-spgemm") == 0) {
+      int enable_spgemm = atoi(argv[p + 1]);
+      spgemm = enable_spgemm == 1 ? true : false;
     }
   }
 
@@ -108,11 +114,16 @@ int main(int argc, char **argv) {
        << endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
-  reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(), true);
+
+  reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(),
+                                        true);
+
   auto end_io = std::chrono::high_resolution_clock::now();
 
   cout << " rank " << rank << " reading data from file path:  " << input_file
        << " completed " << endl;
+
+
 
   auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
                                         grid.get()->col_world_size);
@@ -122,7 +133,7 @@ int main(int argc, char **argv) {
 
 
   // To enable full batch size
-  if (spmm) {
+  if (spmm or spgemm) {
     batch_size = localARows;
   }
 
@@ -163,12 +174,13 @@ int main(int argc, char **argv) {
   shared_sparseMat_receiver.get()->initialize_CSR_blocks();
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
-  auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
-      new DenseMat<int, double, dimension>(grid.get(), localARows));
+
 //  dense_local->print_cache(i);
 //  dense_mat.get()->print_matrix_rowptr(-1);
 
   if (spmm) {
+    auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
+        new DenseMat<int, double, dimension>(grid.get(), localARows));
     auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(
         new DenseMat<int, double, dimension>(grid.get(), localARows));
 
@@ -185,7 +197,44 @@ int main(int argc, char **argv) {
     cout << " rank " << rank << " spmm algo started  " << endl;
     embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
-  } else {
+  }else if(spgemm){
+    vector<Tuple<double>> sparse_coo;
+    build_sparse_random_matrix(localARows,dimension,0.5,0,sparse_coo);
+
+    auto sparse_input = make_shared<distblas::core::SpMat<double>>(grid.get(),
+                                                                   sparse_coo,
+                                                                   localARows,
+                                                                   dimension,sparse_coo.size(),
+                                                                   batch_size,
+                                                                   localARows,
+                                                                   dimension,
+                                                                   false,
+                                                                   false);
+
+    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),
+                                                                   sparse_coo,
+                                                                   localARows,
+                                                                   dimension,sparse_coo.size(),
+                                                                   batch_size,
+                                                                   localARows,
+                                                                   dimension,
+                                                                   false,
+                                                                   false);
+
+    unique_ptr<SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<SpGEMMAlgo<int, double, dimension>>(
+                new SpGEMMAlgo<int, double, dimension>(
+                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                    shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+                    grid.get(),
+                    alpha, beta,col_major,sync_comm));
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    cout << " rank " << rank << " embedding algo started  " << endl;
+    spgemm_algo.get()->algo_spgemm(iterations, batch_size,lr);
+
+  }else {
+    auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
+        new DenseMat<int, double, dimension>(grid.get(), localARows));
 
     unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
 

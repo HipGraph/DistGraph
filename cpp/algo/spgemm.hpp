@@ -10,7 +10,7 @@ using namespace distblas::core;
 
 namespace distblas::algo {
 template <typename SPT, typename DENT, size_t embedding_dim>
-class SpMMAlgo {
+class SpGEMMAlgo {
 
 private:
   SpMat<DENT> *sparse_local_output;
@@ -125,7 +125,7 @@ public:
                                         batch_size, considering_batch_size,
                                         true,  0, 0);
 
-          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
         } else {
 
@@ -136,7 +136,7 @@ public:
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
 
-            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
             for (int k = 0; k < batch_size; k += 1) {
               int IDIM = k * embedding_dim;
