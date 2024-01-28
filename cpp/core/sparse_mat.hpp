@@ -252,7 +252,7 @@ public:
        for (auto j = handle->rowStart[local_key]; j < handle->rowStart[local_key + 1];j++) {
          Tuple<T> t;
          t.row=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
-         t.col=j;
+         t.col=handle->col_idx[j];
          t.value=handle->values[j];
          result.push_back(t);
        }
