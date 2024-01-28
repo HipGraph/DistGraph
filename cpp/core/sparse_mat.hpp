@@ -267,7 +267,7 @@ public:
     if ((*this->tempCachePtr)[rank].find(key) != (*this->tempCachePtr)[rank].end()){
       (*this->tempCachePtr)[rank][key].tuples.push_backpush_back(entry);
     } else {
-      SparseCacheEntry<DENT> entry;
+      SparseCacheEntry<T> entry;
       entry.inserted_batch_id = batch_id;
       entry.inserted_itr = iteration;
       entry.tuples.push_back(tuple);
@@ -284,7 +284,7 @@ public:
 
     if (it != arrayMap.end()) {
       auto temp = it->second;
-      value =  temp.value;
+      entries =  temp.value;
     }else {
       throw std::runtime_error("cannot find the given key");
     }
