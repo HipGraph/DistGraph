@@ -309,6 +309,7 @@ public:
                     SPTUPLE, grid->col_world);
     cout<<" rank "<<grid->rank_in_col<<" MPIALL_TOALL    completed"<<endl;
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
+    cout<<" rank "<<grid->rank_in_col<<" populate_sparse_cache    completed"<<endl;
     stop_clock_and_add(t, "Communication Time");
   }
 
