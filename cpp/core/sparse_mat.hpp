@@ -78,6 +78,9 @@ public:
         coords[i].col %= proc_col_width;
       } else {
         coords[i].row %= proc_row_width;
+        if(gCols==128 and coords[i].col>=128){
+          cout<<"rank "<<grid->rank_in_col<<" wrong index"<<coords[i].col<<endl;
+        }
       }
     }
     Tuple<T> *coords_ptr = coords.data();
