@@ -202,27 +202,19 @@ int main(int argc, char **argv) {
     vector<Tuple<double>> sparse_coo;
     build_sparse_random_matrix(localARows,dimension,0.5,0,sparse_coo);
 
-    auto sparse_input = make_shared<distblas::core::SpMat<double>>(grid.get(),
-                                                                   sparse_coo,
-                                                                   static_cast<uint64_t>(localARows),
-                                                                   static_cast<uint64_t>(dimension),
-                                                                   static_cast<uint64_t>(sparse_coo.size()),
-                                                                   batch_size,
-                                                                   localARows,
-                                                                   dimension,
-                                                                   false,
-                                                                   false);
+    uint64_t  gROWs = static_cast<uint64_t>(localARows);
+    uint64_t gCols = static_cast<uint64_t>(dimension);
+    uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
+    int localBRows = static_cast<int>(dimension);
+    auto sparse_input =  make_shared<distblas::core::SpMat<double>>(grid.get(),
+                                                                   sparse_coo, gROWs,
+                                                                   gCols, gNNZ, batch_size,
+                                            localARows, localBRows, false, false);
 
     auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),
-                                                                   sparse_coo,
-                                                                 static_cast<uint64_t>(localARows),
-                                                                 static_cast<uint64_t>(dimension),
-                                                                 static_cast<uint64_t>(sparse_coo.size()),
-                                                                   batch_size,
-                                                                   localARows,
-                                                                   dimension,
-                                                                   false,
-                                                                   false);
+                                                                 sparse_coo, gROWs,
+                                                                 gCols, gNNZ, batch_size,
+                                                                 localARows, localBRows, false, false);
 
     unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
                 new distblas::algo::SpGEMMAlgo<int, double, dimension>(
