@@ -300,7 +300,7 @@ public:
     add_datatransfers(total_receive_count, "Data transfers");
 
 
-    auto t = start_clock();
+     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), SPTUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
