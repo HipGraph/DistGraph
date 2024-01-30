@@ -258,7 +258,7 @@ public:
               : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
-      (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT>>();
+      (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT,embedding_dim>>();
     }
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
@@ -271,7 +271,7 @@ public:
               already_fetched = true;
             }
             if(sparse_vector.size()>0) {
-              if (send_counts_cyclic[sending_procs[i]==0){
+              if (send_counts_cyclic[sending_procs[i]]==0){
                 SpTuple<DENT,embedding_dim> current;
                 current.offset=0;
                 (*data_buffer_ptr)[sending_procs[i]].push_back(current);
@@ -280,6 +280,8 @@ public:
               SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
               for(Tuple<DENT> t: sparse_vector){
                 if (latest.offset>=embedding_dim){
+                  SpTuple<DENT,embedding_dim> current;
+                  current.offset=0;
                   send_counts_cyclic[sending_procs[i]]++;
                   (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                   latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
@@ -438,7 +440,7 @@ public:
       for (int j = base_index; j < base_index + count; j++) {
         SpTuple<DENT,embedding_dim> sp_tuple = (*receivebuf)[j];
         for(int k=0;k<t=sp_tuple.offset;k++) {
-          Tuple<T> t;
+          Tuple<DENT> t;
           t.row = sp_tuple.rows[k];
           t.col = sp_tuple.cols[k];
           t.value = sp_tuple.values[k];
