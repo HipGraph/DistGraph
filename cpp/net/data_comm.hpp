@@ -439,7 +439,7 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         SpTuple<DENT,embedding_dim> sp_tuple = (*receivebuf)[j];
-        for(int k=0;k<t=sp_tuple.offset;k++) {
+        for(int k=0;k<sp_tuple.offset;k++) {
           Tuple<DENT> t;
           t.row = sp_tuple.rows[k];
           t.col = sp_tuple.cols[k];
