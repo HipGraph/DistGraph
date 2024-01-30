@@ -276,7 +276,6 @@ public:
                 current.offset=0;
                 (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                 send_counts_cyclic[sending_procs[i]]++;
-                cout<<" rank "<<grid->rank_in_col<<" first assign completed for rank"<<sending_procs[i]<<endl;
               }
               SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
               for(Tuple<DENT> t: sparse_vector){
@@ -300,7 +299,6 @@ public:
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           total_send_count += send_counts_cyclic[i];
-          cout<<" rank "<<grid->rank_in_col<<" sending rank "<<i<<" count "<<send_counts_cyclic[i]<<endl;
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
     MPI_Barrier(grid->col_world);
