@@ -177,7 +177,6 @@ public:
       send_counts_cyclic[sending_procs[i]] = sendcounts[sending_procs[i]];
       receive_counts_cyclic[receiving_procs[i]] =
           receivecounts[receiving_procs[i]];
-      cout<<" rank "<<grid->rank_in_col<<" sending "<<send_counts_cyclic[sending_procs[i]]<<endl;
       total_send_count += send_counts_cyclic[sending_procs[i]];
       total_receive_count += receive_counts_cyclic[receiving_procs[i]];
     }
@@ -224,7 +223,6 @@ public:
 
     if (synchronous) {
       auto t = start_clock();
-      cout<<" synchrbouse enabled"<<endl;
       MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
