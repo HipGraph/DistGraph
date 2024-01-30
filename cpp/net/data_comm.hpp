@@ -223,6 +223,7 @@ public:
 
     if (synchronous) {
       auto t = start_clock();
+      cout<<" synchrbouse enabled"<<endl;
       MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
