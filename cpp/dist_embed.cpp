@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
 
   const int dimension = 128;
 
+  const int sparse_chunk_size = dimension;
+
   string input_file = "";
   string output_file = "embedding.txt";
   string data_set_name = "";
@@ -104,7 +106,9 @@ int main(int argc, char **argv) {
 
 
   // Initialize MPI DataTypes
-  initialize_mpi_datatypes<int, double, dimension>();
+
+    initialize_mpi_datatypes<int, double, dimension>();
+
 
   // Creating reader
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());

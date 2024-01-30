@@ -233,12 +233,12 @@ public:
     }
   }
 
-  inline void transfer_sparse_data(vector<Tuple<DENT>> *sendbuf_cyclic,
-                                   vector<Tuple<DENT>> *receivebuf,int iteration,
+  inline void transfer_sparse_data(vector<SpTuple<DENT.embedding_dim>> *sendbuf_cyclic,
+                                   vector<SpTuple<DENT,embedding_dim>> *receivebuf,int iteration,
                                    int batch_id, int starting_proc, int end_proc) {
 
     int total_receive_count = 0;
-    unique_ptr<vector<vector<Tuple<DENT>>>> data_buffer_ptr = make_unique<vector<vector<Tuple<DENT>>>>();
+    shared_ptr<vector<vector<SpTuple<DENT,embedding_dim>>>> data_buffer_ptr = make_shared<vector<vector<SpTuple<DENT,embedding_dim>>>>();
     data_buffer_ptr->resize(grid->col_world_size);
 
     int total_send_count = 0;
@@ -258,7 +258,7 @@ public:
               : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
-      (*data_buffer_ptr)[sending_rank]=vector<Tuple<DENT>>();
+      (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT>>();
     }
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
@@ -271,9 +271,24 @@ public:
               already_fetched = true;
             }
             if(sparse_vector.size()>0) {
-              send_counts_cyclic[sending_procs[i]] += sparse_vector.size();
-              (*data_buffer_ptr)[sending_procs[i]].insert((*data_buffer_ptr)[sending_procs[i]].end(),
-                                                          sparse_vector.begin(), sparse_vector.end());
+              if (send_counts_cyclic[sending_procs[i]==0){
+                SpTuple<DENT,embedding_dim> current;
+                current.offset=0;
+                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                send_counts_cyclic[sending_procs[i]]++;
+              }
+              SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+              for(Tuple<DENT> t: sparse_vector){
+                if (latest.offset>=embedding_dim){
+                  send_counts_cyclic[sending_procs[i]]++;
+                  (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                  latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+                }
+                latest.rows[latest.offset]=t.row;
+                latest.cols[latest.offset]=t.col;
+                latest.values[latest.offset]=t.value;
+                latest.offset+=1;
+              }
             }
           }
         }
@@ -302,9 +317,9 @@ public:
 
      t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
-                    sdispls_cyclic.data(), SPTUPLE, (*receivebuf).data(),
+                    sdispls_cyclic.data(), SPARSETUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                    SPTUPLE, grid->col_world);
+                   SPARSETUPLE, grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
   }
@@ -412,8 +427,8 @@ public:
 
   }
 
-  inline void populate_sparse_cache(vector<Tuple<DENT>> *sendbuf,
-                                    vector<Tuple<DENT>> *receivebuf,
+  inline void populate_sparse_cache(vector<SpTuple<DENT,embedding_dim>> *sendbuf,
+                                    vector<SpTuple<DENT,embedding_dim>> *receivebuf,
                                     int iteration,
                                     int batch_id) {
     for (int i = 0; i < this->grid->col_world_size; i++) {
@@ -421,8 +436,14 @@ public:
       int count = this->receive_counts_cyclic[i];
 
       for (int j = base_index; j < base_index + count; j++) {
-        Tuple<DENT> t = (*receivebuf)[j];
-        (this->sparse_local)->insert_cache(i, t.row, batch_id, iteration, t);
+        SpTuple<DENT,embedding_dim> sp_tuple = (*receivebuf)[j];
+        for(int k=0;k<t=sp_tuple.offset;k++) {
+          Tuple<T> t;
+          t.row = sp_tuple.rows[k];
+          t.col = sp_tuple.cols[k];
+          t.value = sp_tuple.values[k];
+          (this->sparse_local)->insert_cache(i, t.row, batch_id, iteration, t);
+        }
       }
     }
     receivebuf->clear();
@@ -430,6 +451,7 @@ public:
     sendbuf->clear();
     sendbuf->shrink_to_fit();
   }
+
 };
 
 } // namespace distblas::net

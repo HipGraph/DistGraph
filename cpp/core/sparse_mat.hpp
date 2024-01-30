@@ -255,7 +255,7 @@ public:
          t.col=handle->col_idx[j];
          t.value=handle->values[j];
          result.push_back(t);
-         break;
+
        }
      }
      return result;

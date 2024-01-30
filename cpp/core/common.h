@@ -73,6 +73,13 @@ template <typename T> struct CSR {
   T value;
 };
 
+template <typename T, size_t size> struct SpTuple {
+  size_t offset;
+  std::array<uint64_t, size> rows;
+  std::array<uint64_t, size> cols;
+  std::array<T, size> values;
+};
+
 template <typename T, size_t size> struct DataTuple {
   uint64_t col;
   std::array<T, size> value;
@@ -127,6 +134,7 @@ extern MPI_Datatype SPTUPLE;
 
 extern MPI_Datatype DENSETUPLE;
 
+extern MPI_Datatype SPARSETUPLE;
 
 extern vector<string> perf_counter_keys;
 
@@ -164,10 +172,17 @@ void initialize_mpi_datatype_DENSETUPLE() {
   DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
+template <typename T,size_t chunk_size>
+void initialize_mpi_datatype_SPARSETUPLE() {
+  SpTuple<T,chunk_size> p;
+  SPARSETUPLE = CreateCustomMpiType(p,p.offset,p.rows p.cols, p.values);
+}
+
 template <typename SPT, typename DENT, size_t embedding_dim>
 void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<SPT>();
   initialize_mpi_datatype_DENSETUPLE<DENT,embedding_dim>();
+  initialize_mpi_datatype_SPARSETUPLE<DENT,embedding_dim>();
 }
 
 template <typename DENT, size_t MAXBOUND>
