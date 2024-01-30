@@ -233,7 +233,7 @@ public:
     }
   }
 
-  inline void transfer_sparse_data(vector<SpTuple<DENT.embedding_dim>> *sendbuf_cyclic,
+  inline void transfer_sparse_data(vector<SpTuple<DENT,embedding_dim>> *sendbuf_cyclic,
                                    vector<SpTuple<DENT,embedding_dim>> *receivebuf,int iteration,
                                    int batch_id, int starting_proc, int end_proc) {
 
