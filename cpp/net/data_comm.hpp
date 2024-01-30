@@ -283,7 +283,10 @@ public:
           total_send_count += send_counts_cyclic[i];
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
+    MPI_Barrier(grid->col_world);
+    auto t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
 
     for (int i = 0; i < grid->col_world_size; i++) {
       rdispls_cyclic[i] =(i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]: rdispls_cyclic[i];
@@ -302,8 +305,8 @@ public:
                     sdispls_cyclic.data(), SPTUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
                     SPTUPLE, grid->col_world);
-    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
     stop_clock_and_add(t, "Communication Time");
+    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
   }
 
 

@@ -73,13 +73,10 @@ public:
     full_comm.get()->onboard_data();
 
     // Buffer used for receive MPI operations data
-    unique_ptr<std::vector<Tuple<DENT>>> update_ptr =
-        unique_ptr<std::vector<Tuple<DENT>>>(
-            new vector<Tuple<DENT>>());
+    unique_ptr<std::vector<Tuple<DENT>>> update_ptr = unique_ptr<std::vector<Tuple<DENT>>>(new vector<Tuple<DENT>>());
 
     //Buffer used for send MPI operations data
-    unique_ptr<vector<Tuple<DENT>>> sendbuf_ptr =
-        unique_ptr<vector<Tuple<DENT>>>(new vector<Tuple<DENT>>());
+    unique_ptr<vector<Tuple<DENT>>> sendbuf_ptr = unique_ptr<vector<Tuple<DENT>>>(new vector<Tuple<DENT>>());
 
 
     for (int i = 0; i < batches; i++) {
