@@ -260,10 +260,12 @@ public:
       receiving_procs.push_back(receiving_rank);
       (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT,embedding_dim>>();
     }
-    auto t = start_clock();
+
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
+        auto t = start_clock();
         auto col_id = pair.first;
         vector<Tuple<DENT>> sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
+        stop_clock_and_add(t, "Communication Time");
         #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
@@ -299,7 +301,7 @@ public:
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
     MPI_Barrier(grid->col_world);
-
+    auto t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 
