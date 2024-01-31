@@ -263,14 +263,10 @@ public:
     auto t = start_clock();
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
-        bool already_fetched = false;
-        vector<Tuple<DENT>> sparse_vector;
+        bool already_fetched = (this->sparse_local)->fetch_local_data(col_id);
+        #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
-            if (!already_fetched) {
-              sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
-              already_fetched = true;
-            }
             if(sparse_vector.size()>0) {
               if (send_counts_cyclic[sending_procs[i]]==0){
                 SpTuple<DENT,embedding_dim> current;
