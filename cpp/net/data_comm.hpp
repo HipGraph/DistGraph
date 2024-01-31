@@ -263,7 +263,7 @@ public:
 
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
-        CSRHandle sparse_tuple =   (this->sparse_local)->fetch_local_data<embedding_dim>(col_id);
+        CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
         #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
           auto t = start_clock();
