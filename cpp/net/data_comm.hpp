@@ -434,6 +434,8 @@ public:
                                     vector<SpTuple<DENT,embedding_dim>> *receivebuf,
                                     int iteration,
                                     int batch_id) {
+
+    #pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
       int base_index = this->rdispls_cyclic[i];
       int count = this->receive_counts_cyclic[i];
