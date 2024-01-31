@@ -267,7 +267,7 @@ public:
         (this->sparse_local)->fetch_local_data<embedding_dim>(col_id,sparse_tuple);
         #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
-
+          auto t = start_clock();
           if (pair.second.count(sending_procs[i]) > 0) {
 
             if (send_counts_cyclic[sending_procs[i]]==0){
@@ -289,7 +289,7 @@ public:
 
             //start filling from offset position
              int pending_pos = embedding_dim - latest.offset;
-             int num_of_copying_data = min(sparse_tuple.offset,pending_pos)
+             int num_of_copying_data = min(sparse_tuple.offset,pending_pos);
              int remaining_data_items = sparse_tuple.offset-num_of_copying_data;
 
              copy_n(sparse_tuple.rows, num_of_copying_data, latest.rows+ latest.offset);
