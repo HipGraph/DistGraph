@@ -249,13 +249,16 @@ public:
      CSRHandle *handle = (csr_local_data.get())->handler.get();
      vector<Tuple<T>> result;
      if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
+       int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
+       result.resize(count);
+       #pragma omp parallel for
        for (auto j = handle->rowStart[local_key]; j < handle->rowStart[local_key + 1];j++) {
+         int index = j-handle->rowStart[local_key];
          Tuple<T> t;
          t.row=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
          t.col=handle->col_idx[j];
          t.value=handle->values[j];
-         result.push_back(t);
-
+         result[index]=t;
        }
      }
      return result;

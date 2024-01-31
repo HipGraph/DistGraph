@@ -323,8 +323,8 @@ public:
                     sdispls_cyclic.data(), SPARSETUPLE, (*receivebuf).data(),
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
                    SPARSETUPLE, grid->col_world);
-    stop_clock_and_add(t, "Communication Time");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
+    stop_clock_and_add(t, "Communication Time");
   }
 
 
