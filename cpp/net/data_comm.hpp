@@ -266,7 +266,6 @@ public:
         CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
         #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
-          auto t = start_clock();
           if (pair.second.count(sending_procs[i]) > 0) {
 
             if (send_counts_cyclic[sending_procs[i]]==0){
@@ -310,25 +309,6 @@ public:
                latest.offset += remaining_data_items;
                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              }
-//            if(sparse_vector.size()>0) {
-//              auto t = start_clock();
-//              for(Tuple<DENT> t: sparse_vector){
-//                if (latest.offset>=embedding_dim){
-//                  SpTuple<DENT,embedding_dim> current;
-//                  current.offset=0;
-//                  (*data_buffer_ptr)[sending_procs[i]].push_back(current);
-//                  send_counts_cyclic[sending_procs[i]]++;
-//                  latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
-//                }
-//                latest.rows[latest.offset]=t.row;
-//                latest.cols[latest.offset]=t.col;
-//                latest.values[latest.offset]=t.value;
-//                latest.offset+=1;
-//                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
-//              }
-//
-//            }
-            stop_clock_and_add(t, "Communication Time");
           }
         }
     }
