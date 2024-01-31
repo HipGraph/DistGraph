@@ -263,8 +263,7 @@ public:
 
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
-        SpTuple<DENT,embedding_dim> sparse_tuple;
-        (this->sparse_local)->fetch_local_data<embedding_dim>(col_id,sparse_tuple);
+        CSRHandle sparse_tuple =   (this->sparse_local)->fetch_local_data<embedding_dim>(col_id);
         #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
           auto t = start_clock();
@@ -287,14 +286,16 @@ public:
               latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
             }
 
+            auto offset = sparse_tuple.row_idx.size();
             //start filling from offset position
              auto pending_pos = embedding_dim - latest.offset;
-             auto num_of_copying_data = min(sparse_tuple.offset,pending_pos);
-             auto remaining_data_items = sparse_tuple.offset-num_of_copying_data;
+             auto num_of_copying_data = min(offset,pending_pos);
+             auto remaining_data_items = offset-num_of_copying_data;
 
-             copy_n(sparse_tuple.rows, num_of_copying_data, latest.rows+ latest.offset);
-             copy_n(sparse_tuple.cols, num_of_copying_data, latest.cols+ latest.offset);
-             copy_n(sparse_tuple.values, num_of_copying_data, latest.values+ latest.offset);
+             copy(sparse_tuple.row_idx.begin(),sparse_tuple.row_idx.begin()+ num_of_copying_data, latest.rows.begin()+ latest.offset);
+             copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin()+ num_of_copying_data, latest.cols.begin()+ latest.offset);
+             copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ latest.offset);
+             latest.offset += num_of_copying_data;
              (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
 
              if (remaining_data_items>0){
@@ -303,9 +304,10 @@ public:
                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                send_counts_cyclic[sending_procs[i]]++;
                latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
-               copy_n(sparse_tuple.rows+num_of_copying_data-1, remaining_data_items, latest.rows);
-               copy_n(sparse_tuple.cols+num_of_copying_data-1, remaining_data_items, latest.cols);
-               copy_n(sparse_tuple.values+num_of_copying_data-1, remaining_data_items, latest.values);
+               copy(sparse_tuple.row_idx.begin()+num_of_copying_data-1, sparse_tuple.row_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.rows.begin());
+               copy(sparse_tuple.col_idx.begin()+num_of_copying_data-1, sparse_tuple.col_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.cols.begin());
+               copy(sparse_tuple.values.begin()+num_of_copying_data-1, sparse_tuple.values.begin()+num_of_copying_data-1+remaining_data_items, latest.values.begin());
+               latest.offset += remaining_data_items;
                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              }
 //            if(sparse_vector.size()>0) {

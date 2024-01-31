@@ -245,20 +245,23 @@ public:
   }
 
 
-  template<size_t dimension>
-  void fetch_local_data(uint64_t local_key, SpTuple<T,dimension>& sp_tuple) {
+CSRHandle  fetch_local_data(uint64_t local_key) {
      CSRHandle *handle = (csr_local_data.get())->handler.get();
+     CSRHandle new_handler;
      if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
        int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
-       sp_tuple.offset = count;
+       new_handler.row_idx.resize(count);
+       new_handler.col_idx.resize(count);
+       new_handler.values.resize(count);
        #pragma omp parallel for
        for (auto j = handle->rowStart[local_key]; j < handle->rowStart[local_key + 1];j++) {
          int index = j-handle->rowStart[local_key];
-         sp_tuple.rows[index]=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
-         sp_tuple.cols[index]=handle->col_idx[j];
-         sp_tuple.values[index]=handle->values[j];
+         new_handler.row_idx[index]=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
+         new_handler.col_idx[index]=handle->col_idx[j];
+         new_handler.values[index]=handle->values[j];
        }
      }
+     return new_handler;
   }
 
 
