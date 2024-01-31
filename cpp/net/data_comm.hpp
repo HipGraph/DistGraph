@@ -260,6 +260,7 @@ public:
       receiving_procs.push_back(receiving_rank);
       (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT,embedding_dim>>();
     }
+    auto t = start_clock();
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
@@ -302,7 +303,7 @@ public:
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
     MPI_Barrier(grid->col_world);
-    auto t = start_clock();
+
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 
