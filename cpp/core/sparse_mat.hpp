@@ -261,7 +261,6 @@ public:
          sp_tuple.values[index]=handle->values[j];
        }
      }
-     return result;
   }
 
 
