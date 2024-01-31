@@ -262,11 +262,9 @@ public:
     }
 
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
-        auto t = start_clock();
         auto col_id = pair.first;
         vector<Tuple<DENT>> sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
-        stop_clock_and_add(t, "Communication Time");
-        #pragma omp parallel for
+//        #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
             if(sparse_vector.size()>0) {
@@ -277,6 +275,7 @@ public:
                 send_counts_cyclic[sending_procs[i]]++;
               }
               SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+              auto t = start_clock();
               for(Tuple<DENT> t: sparse_vector){
                 if (latest.offset>=embedding_dim){
                   SpTuple<DENT,embedding_dim> current;
@@ -291,6 +290,7 @@ public:
                 latest.offset+=1;
                 (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
               }
+              stop_clock_and_add(t, "Communication Time");
             }
           }
         }
