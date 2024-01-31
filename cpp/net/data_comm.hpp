@@ -263,38 +263,71 @@ public:
 
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
-        vector<Tuple<DENT>> sparse_vector = (this->sparse_local)->fetch_local_data(col_id);
+        SpTuple<DENT,embedding_dim> sparse_tuple;
+        (this->sparse_local)->fetch_local_data<embedding_dim>(col_id,sparse_tuple);
         #pragma omp parallel for
         for (int i = 0; i < sending_procs.size(); i++) {
 
           if (pair.second.count(sending_procs[i]) > 0) {
-            if(sparse_vector.size()>0) {
-              if (send_counts_cyclic[sending_procs[i]]==0){
-                SpTuple<DENT,embedding_dim> current;
-                current.offset=0;
-                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
-                send_counts_cyclic[sending_procs[i]]++;
-              }
-              SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
-              auto t = start_clock();
-              for(Tuple<DENT> t: sparse_vector){
-                if (latest.offset>=embedding_dim){
-                  SpTuple<DENT,embedding_dim> current;
-                  current.offset=0;
-                  (*data_buffer_ptr)[sending_procs[i]].push_back(current);
-                  send_counts_cyclic[sending_procs[i]]++;
-                  latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
-                }
-                latest.rows[latest.offset]=t.row;
-                latest.cols[latest.offset]=t.col;
-                latest.values[latest.offset]=t.value;
-                latest.offset+=1;
-                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
-              }
-              stop_clock_and_add(t, "Communication Time");
-            }
-          }
 
+            if (send_counts_cyclic[sending_procs[i]]==0){
+              SpTuple<DENT,embedding_dim> current;
+              current.offset=0;
+              (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+              send_counts_cyclic[sending_procs[i]]++;
+            }
+
+            SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+
+            if (latest.offset>=embedding_dim){
+              SpTuple<DENT,embedding_dim> current;
+              current.offset=0;
+              (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+              send_counts_cyclic[sending_procs[i]]++;
+              latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+            }
+
+            //start filling from offset position
+             int pending_pos = embedding_dim - latest.offset;
+             int num_of_copying_data = min(sparse_tuple.offset,pending_pos)
+             int remaining_data_items = sparse_tuple.offset-num_of_copying_data;
+
+             copy_n(sparse_tuple.rows, num_of_copying_data, latest.rows+ latest.offset);
+             copy_n(sparse_tuple.cols, num_of_copying_data, latest.cols+ latest.offset);
+             copy_n(sparse_tuple.values, num_of_copying_data, latest.values+ latest.offset);
+             (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
+
+             if (remaining_data_items>0){
+               SpTuple<DENT,embedding_dim> current;
+               current.offset=0;
+               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+               send_counts_cyclic[sending_procs[i]]++;
+               latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+               copy_n(sparse_tuple.rows+num_of_copying_data-1, remaining_data_items, latest.rows);
+               copy_n(sparse_tuple.cols+num_of_copying_data-1, remaining_data_items, latest.cols);
+               copy_n(sparse_tuple.values+num_of_copying_data-1, remaining_data_items, latest.values);
+               (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
+             }
+//            if(sparse_vector.size()>0) {
+//              auto t = start_clock();
+//              for(Tuple<DENT> t: sparse_vector){
+//                if (latest.offset>=embedding_dim){
+//                  SpTuple<DENT,embedding_dim> current;
+//                  current.offset=0;
+//                  (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+//                  send_counts_cyclic[sending_procs[i]]++;
+//                  latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+//                }
+//                latest.rows[latest.offset]=t.row;
+//                latest.cols[latest.offset]=t.col;
+//                latest.values[latest.offset]=t.value;
+//                latest.offset+=1;
+//                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
+//              }
+//
+//            }
+            stop_clock_and_add(t, "Communication Time");
+          }
         }
     }
     for (int i = 0; i < grid->col_world_size; i++) {
