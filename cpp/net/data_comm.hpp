@@ -238,7 +238,6 @@ public:
                                    int batch_id, int starting_proc, int end_proc) {
 
     int total_receive_count = 0;
-    int total_send_count=0;
     shared_ptr<vector<vector<SpTuple<DENT,embedding_dim>>>> data_buffer_ptr = make_shared<vector<vector<SpTuple<DENT,embedding_dim>>>>();
     data_buffer_ptr->resize(grid->col_world_size);
 
