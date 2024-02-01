@@ -321,7 +321,7 @@ public:
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
     MPI_Barrier(grid->col_world);
-    auto t = start_clock();
+    t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 
