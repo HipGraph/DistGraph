@@ -325,13 +325,15 @@ public:
     cout<<" messge size "<<sizeInBytes<<endl;
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
-          const void* source = data_buffer_ptr->at(i).data();
-          void* destination = sendbuf_cyclic->data() + total_bytes_copied;
-          size_t source_size = send_counts_cyclic[i] * sizeInBytes;
-          total_bytes_copied +=source_size;
-          if (source_size>0) {
-            memcpy(destination, source, source_size);
-          }
+
+//          const void* source = data_buffer_ptr->at(i).data();
+//          void* destination = sendbuf_cyclic->data() + total_bytes_copied;
+//          size_t source_size = send_counts_cyclic[i] * sizeInBytes;
+//          total_bytes_copied +=source_size;
+//          if (source_size>0) {
+//            memcpy(destination, source, source_size);
+//          }
+          copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),  (*sendbuf_cyclic).begin()+ sdispls_cyclic[i]);
     }
     cout<<" rank "<<grid->rank_in_col<<" data copying completed "<<endl;
    MPI_Barrier(grid->col_world);
