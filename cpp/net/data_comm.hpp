@@ -238,6 +238,7 @@ public:
                                    int batch_id, int starting_proc, int end_proc) {
 
     int total_receive_count = 0;
+    int total_send_count=0;
     shared_ptr<vector<vector<SpTuple<DENT,embedding_dim>>>> data_buffer_ptr = make_shared<vector<vector<SpTuple<DENT,embedding_dim>>>>();
     data_buffer_ptr->resize(grid->col_world_size);
 
@@ -319,6 +320,11 @@ public:
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           total_send_count += send_counts_cyclic[i];
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
+    }
+    (*sendbuf_cyclic).reserve((*sendbuf_cyclic).size() + total_send_count);
+    for (int i = 0; i < grid->col_world_size; i++) {
+      (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(), std::make_move_iterator((*data_buffer_ptr)[i].begin()),
+                               std::make_move_iterator((*data_buffer_ptr)[i].end()));
     }
    MPI_Barrier(grid->col_world);
    stop_clock_and_add(t, "Transfer Data");
