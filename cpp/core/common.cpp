@@ -67,15 +67,13 @@ size_t distblas::core::get_memory_usage() {
 }
 
 void distblas::core::reset_performance_timers() {
-  for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
-       it++) {
+  for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();it++) {
     call_count[*it] = 0;
     total_time[*it] = 0.0;
   }
 }
 
-void distblas::core::stop_clock_and_add(my_timer_t &start,
-                                        string counter_name) {
+void distblas::core::stop_clock_and_add(my_timer_t &start,string counter_name) {
   int rank;
   int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -152,8 +150,7 @@ json distblas::core::json_perf_statistics() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-  for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();
-       it++) {
+  for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();it++) {
     double val = total_time[*it];
 
     MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
