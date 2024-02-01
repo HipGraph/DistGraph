@@ -250,16 +250,12 @@ CSRHandle  fetch_local_data(uint64_t local_key) {
      CSRHandle new_handler;
      if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
        int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
-       new_handler.row_idx.resize(count);
+       uint64_t global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
+       new_handler.row_idx.resize(count,global_key);
        new_handler.col_idx.resize(count);
        new_handler.values.resize(count);
-       #pragma omp parallel for
-       for (auto j = handle->rowStart[local_key]; j < handle->rowStart[local_key + 1];j++) {
-         int index = j-handle->rowStart[local_key];
-         new_handler.row_idx[index]=(col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
-         new_handler.col_idx[index]=handle->col_idx[j];
-         new_handler.values[index]=handle->values[j];
-       }
+       copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
+       copy(handle->values.begin(),handle->values.begin()+ count,new_handler.values.begin());
      }
      return new_handler;
   }
