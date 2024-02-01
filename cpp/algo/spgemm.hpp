@@ -173,12 +173,10 @@ public:
       }
       if (k == comm_initial_start) {
         // local computation
-        auto t = start_clock();
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution,
             first_execution_proc, prev_start);
-        stop_clock_and_add(t, "Compute  Local");
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
