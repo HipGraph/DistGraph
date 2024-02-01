@@ -326,7 +326,9 @@ public:
           void* destination = sendbuf_cyclic->data() + (sendbuf_cyclic->size() - data_buffer_ptr->at(i).size());
           size_t source_size = send_counts_cyclic[i] * sizeInBytes;
           cout<<" rank "<<grid->rank_in_col<<" totoal size for i "<<i<<" size "<<source_size<<endl;
-          memcpy(destination, source, source_size);
+          if (source_size>0) {
+            memcpy(destination, source, source_size);
+          }
     }
    MPI_Barrier(grid->col_world);
    stop_clock_and_add(t, "Transfer Data");
