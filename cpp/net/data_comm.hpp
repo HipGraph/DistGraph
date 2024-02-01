@@ -329,6 +329,7 @@ public:
           if (source_size>0) {
             memcpy(destination, source, source_size);
           }
+          cout<<" rank "<<grid->rank_in_col<<" totoal size for i "<<i<<" completed "<<endl;
     }
    MPI_Barrier(grid->col_world);
    stop_clock_and_add(t, "Transfer Data");
