@@ -134,12 +134,12 @@ public:
                 true, 0, true);
 //            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
-            for (int k = 0; k < batch_size; k += 1) {
-              int IDIM = k * embedding_dim;
-              for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[IDIM + d] = 0;
-              }
-            }
+//            for (int k = 0; k < batch_size; k += 1) {
+//              int IDIM = k * embedding_dim;
+//              for (int d = 0; d < embedding_dim; d++) {
+//                prevCoordinates[IDIM + d] = 0;
+//              }
+//            }
         }
         total_memory += get_memory_usage();
       }
@@ -166,10 +166,10 @@ public:
       MPI_Request req;
 
       if (communication) {
-
+        auto t = start_clock();
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-
+        stop_clock_and_add(t, "Compute  Local");
       }
       if (k == comm_initial_start) {
         // local computation

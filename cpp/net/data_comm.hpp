@@ -313,6 +313,7 @@ public:
           }
         }
     }
+    MPI_Barrier(grid->col_world);
     auto t= start_clock();
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
