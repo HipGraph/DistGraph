@@ -261,6 +261,7 @@ public:
       (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT,embedding_dim>>();
     }
 
+    auto t = start_clock();
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
@@ -312,6 +313,8 @@ public:
           }
         }
     }
+    stop_clock_and_add(t, "Transfer Data");
+
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           total_send_count += send_counts_cyclic[i];
