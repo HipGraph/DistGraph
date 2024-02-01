@@ -282,6 +282,7 @@ public:
               SpTuple<DENT,embedding_dim> current;
               current.offset=0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+              total_send_count++;
               send_counts_cyclic[sending_procs[i]]++;
               latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
             }
@@ -297,17 +298,18 @@ public:
              copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ latest.offset);
              latest.offset += num_of_copying_data;
              (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
-
              if (remaining_data_items>0){
                SpTuple<DENT,embedding_dim> current;
                current.offset=0;
                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+               total_send_count++;
                send_counts_cyclic[sending_procs[i]]++;
                latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
                copy(sparse_tuple.row_idx.begin()+num_of_copying_data-1, sparse_tuple.row_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.rows.begin());
                copy(sparse_tuple.col_idx.begin()+num_of_copying_data-1, sparse_tuple.col_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.cols.begin());
                copy(sparse_tuple.values.begin()+num_of_copying_data-1, sparse_tuple.values.begin()+num_of_copying_data-1+remaining_data_items, latest.values.begin());
                latest.offset += remaining_data_items;
+
                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              }
           }
@@ -315,15 +317,10 @@ public:
     }
     MPI_Barrier(grid->col_world);
     auto t= start_clock();
+    (*sendbuf_cyclic).resize(total_send_count);
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
-          total_send_count += send_counts_cyclic[i];
-          (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
-    }
-    (*sendbuf_cyclic).reserve((*sendbuf_cyclic).size() + total_send_count);
-    for (int i = 0; i < grid->col_world_size; i++) {
-      (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(), std::make_move_iterator((*data_buffer_ptr)[i].begin()),
-                               std::make_move_iterator((*data_buffer_ptr)[i].end()));
+          copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(), std::back_inserter(*sendbuf_cyclic));
     }
    MPI_Barrier(grid->col_world);
    stop_clock_and_add(t, "Transfer Data");
