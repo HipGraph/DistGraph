@@ -166,10 +166,10 @@ public:
       MPI_Request req;
 
       if (communication) {
-        auto t = start_clock();
+
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        stop_clock_and_add(t, "Transfer Data");
+
       }
       if (k == comm_initial_start) {
         // local computation
