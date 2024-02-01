@@ -318,9 +318,14 @@ public:
     MPI_Barrier(grid->col_world);
     auto t= start_clock();
     (*sendbuf_cyclic).resize(total_send_count);
+    SpTuple<DENT,embedding_dim> t;
+    size_t sizeInBytes = sizeof(t);
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
-          copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(), std::back_inserter(*sendbuf_cyclic));
+          const void* source = data_buffer_ptr->at(i).data();
+          void* destination = sendbuf_cyclic->data() + (sendbuf_cyclic->size() - data_buffer_ptr->at(i).size());
+          size_t source_size = data_buffer_ptr->at(i).size() * sizeInBytes;
+          memcpy(destination, source, source_size);
     }
    MPI_Barrier(grid->col_world);
    stop_clock_and_add(t, "Transfer Data");
