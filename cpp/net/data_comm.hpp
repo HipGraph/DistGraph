@@ -273,6 +273,7 @@ public:
               SpTuple<DENT,embedding_dim> current;
               current.offset=0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+              total_send_count++;
               send_counts_cyclic[sending_procs[i]]++;
             }
 
