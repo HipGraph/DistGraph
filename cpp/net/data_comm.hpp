@@ -264,10 +264,8 @@ public:
 
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
-        auto t= start_clock();
-        CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
-        stop_clock_and_add(t, "Transfer Data");
 
+        CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
 
@@ -315,13 +313,14 @@ public:
           }
         }
     }
+    auto t= start_clock();
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           total_send_count += send_counts_cyclic[i];
           (*sendbuf_cyclic).insert((*sendbuf_cyclic).end(),(*data_buffer_ptr)[i].begin(),(*data_buffer_ptr)[i].end());
     }
-
-
+   MPI_Barrier(grid->col_world);
+   stop_clock_and_add(t, "Transfer Data");
    auto t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
     stop_clock_and_add(t, "Communication Time");
