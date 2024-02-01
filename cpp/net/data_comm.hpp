@@ -318,26 +318,14 @@ public:
     MPI_Barrier(grid->col_world);
     auto t= start_clock();
     (*sendbuf_cyclic).resize(total_send_count);
-    cout<<" rank "<<grid->rank_in_col<<" total sending "<<total_send_count<<endl;
     SpTuple<DENT,embedding_dim> test;
     size_t sizeInBytes = sizeof(test);
     size_t total_bytes_copied = 0;
-    cout<<" messge size "<<sizeInBytes<<endl;
     for (int i = 0; i < grid->col_world_size; i++) {
-          sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
-
-//          const void* source = data_buffer_ptr->at(i).data();
-//          void* destination = sendbuf_cyclic->data() + total_bytes_copied;
-//          size_t source_size = send_counts_cyclic[i] * sizeInBytes;
-//          total_bytes_copied +=source_size;
-//          if (source_size>0) {
-//            memcpy(destination, source, source_size);
-//          }
-          copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),  (*sendbuf_cyclic).begin()+ sdispls_cyclic[i]);
+      sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
+      copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),  (*sendbuf_cyclic).begin()+ sdispls_cyclic[i]);
     }
-    cout<<" rank "<<grid->rank_in_col<<" data copying completed "<<endl;
    MPI_Barrier(grid->col_world);
-   stop_clock_and_add(t, "Transfer Data");
     t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1,MPI_INT,receive_counts_cyclic.data(),1,MPI_INT,grid->col_world);
     stop_clock_and_add(t, "Communication Time");
