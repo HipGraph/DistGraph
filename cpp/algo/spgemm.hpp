@@ -169,7 +169,7 @@ public:
         auto t = start_clock();
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        stop_clock_and_add(t, "transfer data");
+        stop_clock_and_add(t, "Transfer Data");
       }
       if (k == comm_initial_start) {
         // local computation
@@ -178,7 +178,7 @@ public:
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution,
             first_execution_proc, prev_start);
-        stop_clock_and_add(t, "compute local");
+        stop_clock_and_add(t, "Compute  Local");
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
@@ -195,7 +195,7 @@ public:
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
-    stop_clock_and_add(t, "compute remote");
+    stop_clock_and_add(t, "Compute  Remote");
     // dense_local->invalidate_cache(i, j, true);
   }
 
