@@ -309,7 +309,6 @@ public:
                copy(sparse_tuple.col_idx.begin()+num_of_copying_data-1, sparse_tuple.col_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.cols.begin());
                copy(sparse_tuple.values.begin()+num_of_copying_data-1, sparse_tuple.values.begin()+num_of_copying_data-1+remaining_data_items, latest.values.begin());
                latest.offset += remaining_data_items;
-
                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              }
           }
@@ -320,11 +319,13 @@ public:
     (*sendbuf_cyclic).resize(total_send_count);
     SpTuple<DENT,embedding_dim> test;
     size_t sizeInBytes = sizeof(test);
+    cout<<" messge size "<<sizeInBytes<<endl;
     for (int i = 0; i < grid->col_world_size; i++) {
           sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
           const void* source = data_buffer_ptr->at(i).data();
           void* destination = sendbuf_cyclic->data() + (sendbuf_cyclic->size() - data_buffer_ptr->at(i).size());
-          size_t source_size = data_buffer_ptr->at(i).size() * sizeInBytes;
+          size_t source_size = send_counts_cyclic[i] * sizeInBytes;
+          cout<<" rank "<<grid->rank_in_col<<" totoal size for i "<<i<<" size "<<source_size<<endl;
           memcpy(destination, source, source_size);
     }
    MPI_Barrier(grid->col_world);
