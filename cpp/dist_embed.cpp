@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
 
   }else if(spgemm){
     vector<Tuple<double>> sparse_coo;
-    build_sparse_random_matrix(localARows,dimension,density,0,sparse_coo);
+    reader->build_sparse_random_matrix(localARows,dimension,density,0,sparse_coo);
 
     uint64_t  gROWs = static_cast<uint64_t>(localARows);
     uint64_t gCols = static_cast<uint64_t>(dimension);

@@ -194,34 +194,6 @@ DENT  scale(DENT v){
   else return v;
 }
 
-template <typename VALUE_TYPE>
-void build_sparse_random_matrix (int rows, int cols, float density, int seed, vector<Tuple<VALUE_TYPE>>& sparse_coo)
-{
-
-  std::mt19937 gen (seed);
-  std::uniform_real_distribution<float> uni_dist (0, 1);
-  std::normal_distribution<float> norm_dist (0, 1);
-
-  //follow row major order
-  for (uint64_t j = 0; j < rows; ++j)
-  {
-    for (uint64_t i = 0; i < cols; ++i)
-    {
-      // take value at uniformly at random and check value is greater than density.If so make that entry empty
-      if (uni_dist (gen) <= density)
-      {
-        // normal distribution for generate projection matrix.
-        VALUE_TYPE val =   (VALUE_TYPE) norm_dist (gen);
-        Tuple<VALUE_TYPE> t;
-        t.row=j;
-        t.col=i;
-        t.value=val;
-        (sparse_coo).push_back(t);
-      }
-    }
-  }
-}
-
 
 
 }; // namespace distblas::core

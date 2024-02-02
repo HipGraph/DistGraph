@@ -1,11 +1,11 @@
 #pragma once
-#include <mpi.h>
-#include <string>
-#include <vector>
+#include "../core/dense_mat.hpp"
 #include "../core/sparse_mat.hpp"
 #include "../net/process_3D_grid.hpp"
 #include "CombBLAS/CombBLAS.h"
-#include "../core/dense_mat.hpp"
+#include <mpi.h>
+#include <string>
+#include <vector>
 
 using namespace std;
 using namespace distblas::core;
@@ -19,9 +19,7 @@ typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
  */
 class ParallelIO {
 private:
-
 public:
-
   ParallelIO();
   ~ParallelIO();
 
@@ -30,7 +28,8 @@ public:
    * @param file_path
    */
   template <typename T>
-  void parallel_read_MM(string file_path, distblas::core::SpMat<T> *sp_mat, bool copy_col_to_value) {
+  void parallel_read_MM(string file_path, distblas::core::SpMat<T> *sp_mat,
+                        bool copy_col_to_value) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
@@ -62,18 +61,17 @@ public:
     for (int i = 0; i < tups.getnnz(); i++) {
       coords[i].row = get<0>(values[i]);
       coords[i].col = get<1>(values[i]);
-      if (copy_col_to_value){
+      if (copy_col_to_value) {
         coords[i].value = get<1>(values[i]);
-      }else {
+      } else {
         coords[i].value = get<2>(values[i]);
       }
     }
 
     int rowIncrement = G->getnrow() / num_procs;
 
-
 #pragma omp parallel for
-    for(int i = 0; i < coords.size(); i++) {
+    for (int i = 0; i < coords.size(); i++) {
       coords[i].row += rowIncrement * proc_rank;
     }
 
@@ -81,26 +79,30 @@ public:
     sp_mat->gRows = G.get()->getnrow();
     sp_mat->gCols = G.get()->getncol();
     sp_mat->gNNz = G.get()->getnnz();
-
   }
 
   template <typename T, typename SPT>
-  void parallel_write(string file_path, T *nCoordinates, uint64_t rows, uint64_t cols, Process3DGrid *grid, distblas::core::SpMat<SPT> *sp_mat) {
+  void parallel_write(string file_path, T *nCoordinates, uint64_t rows,
+                      uint64_t cols, Process3DGrid *grid,
+                      distblas::core::SpMat<SPT> *sp_mat) {
     MPI_File fh;
-    MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_open(grid->col_world, file_path.c_str(),
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    uint64_t  expected_rows = rows;
-    if (grid->rank_in_col == grid->col_world_size -1){
-      auto expected_last_rows = sp_mat->gRows- rows*grid->rank_in_col;
-      cout<<" expected rows " << expected_last_rows<<endl;
-      expected_rows = min(expected_last_rows,rows);
+    uint64_t expected_rows = rows;
+    if (grid->rank_in_col == grid->col_world_size - 1) {
+      auto expected_last_rows = sp_mat->gRows - rows * grid->rank_in_col;
+      cout << " expected rows " << expected_last_rows << endl;
+      expected_rows = min(expected_last_rows, rows);
     }
 
-//    int offset= rows-expected_rows;
-    cout<<" rank :"<<grid->rank_in_col<<" expected rows " << expected_rows<<endl;
+    //    int offset= rows-expected_rows;
+    cout << " rank :" << grid->rank_in_col << " expected rows " << expected_rows
+         << endl;
     size_t total_size = 0;
     for (uint64_t i = 0; i < expected_rows; ++i) {
-      total_size += snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
+      total_size +=
+          snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
         total_size += snprintf(nullptr, 0, " %.5f", nCoordinates[i * cols + j]);
       }
@@ -108,7 +110,8 @@ public:
     }
 
     // Allocate memory dynamically
-    char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
+    char *buffer =
+        (char *)malloc(total_size + 1); // +1 for the null-terminating character
     if (buffer == nullptr) {
       // Handle allocation failure
       cout << "Memory allocation failed." << endl;
@@ -118,14 +121,17 @@ public:
     char *current_position = buffer;
 
     for (uint64_t i = 0; i < expected_rows; ++i) {
-      current_position += snprintf(current_position, total_size, "%lu", i + 1 + grid->rank_in_col * rows);
+      current_position += snprintf(current_position, total_size, "%lu",
+                                   i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
-        current_position += snprintf(current_position, total_size, " %.5f", nCoordinates[i * cols + j]);
+        current_position += snprintf(current_position, total_size, " %.5f",
+                                     nCoordinates[i * cols + j]);
       }
       current_position += snprintf(current_position, total_size, "\n");
     }
 
-    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,
+                           MPI_STATUS_IGNORE);
 
     // Free the dynamically allocated memory
     free(buffer);
@@ -133,5 +139,64 @@ public:
     MPI_File_close(&fh);
   }
 
+  template <typename VALUE_TYPE>
+  void build_sparse_random_matrix(int rows, int cols, float density, int seed,
+                                  vector<Tuple<VALUE_TYPE>> &sparse_coo,
+                                  Process3DGrid *grid, string output = "random.txt",
+                                  bool save_output) {
+
+    std::mt19937 gen(seed);
+    std::uniform_real_distribution<float> uni_dist(0, 1);
+    std::normal_distribution<float> norm_dist(0, 1);
+
+    size_t total_size = 0;
+    // follow row major order
+    for (uint64_t j = 0; j < rows; ++j) {
+      for (uint64_t i = 0; i < cols; ++i) {
+        // take value at uniformly at random and check value is greater than
+        // density.If so make that entry empty
+        if (uni_dist(gen) <= density) {
+          // normal distribution for generate projection matrix.
+          VALUE_TYPE val = (VALUE_TYPE)norm_dist(gen);
+          Tuple<VALUE_TYPE> t;
+          t.row = j;
+          t.col = i;
+          t.value = val;
+          (sparse_coo).push_back(t);
+          total_size += snprintf(nullptr, 0, "%lu", t.row + 1 + grid->rank_in_col * rows);
+          total_size += snprintf(nullptr, 0, "%lu", t.col + 1);
+          total_size += snprintf(nullptr, 0, " %.5f", t.value);
+          total_size += snprintf(nullptr, 0, "\n");
+        }
+      }
+    }
+
+    if (save_output) {
+      MPI_File fh;
+      MPI_File_open(grid->col_world, output.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+      char *buffer = (char *)malloc(total_size +1); // +1 for the null-terminating character
+      if (buffer == nullptr) {
+        // Handle allocation failure
+        cout << "Memory allocation failed." << endl;
+        return;
+      }
+      char *current_position = buffer;
+
+      for (auto i = 0; i < sparse_coo.size(); ++i) {
+        current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
+        current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
+        current_position += snprintf(current_position, total_size, " %.5f", t.value);
+        current_position += snprintf(current_position, total_size, "\n");
+      }
+
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,
+                             MPI_STATUS_IGNORE);
+
+      // Free the dynamically allocated memory
+      free(buffer);
+
+      MPI_File_close(&fh);
+    }
+  }
 };
 } // namespace distblas::io
