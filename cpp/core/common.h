@@ -177,7 +177,7 @@ void initialize_mpi_datatype_DENSETUPLE() {
 template <typename T,size_t embedding_dim>
 void initialize_mpi_datatype_SPARSETUPLE() {
   SpTuple<T,embedding_dim> p;
-  SPARSETUPLE = CreateCustomMpiType(p,p.offset,p.rows, p.cols, p.values);
+  SPARSETUPLE = CreateCustomMpiType(p,p.rows, p.cols, p.values);
 }
 
 template <typename SPT, typename DENT, size_t embedding_dim>

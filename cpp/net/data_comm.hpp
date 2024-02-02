@@ -303,9 +303,11 @@ public:
              latest.rows[0]=row_index_offset+2;
              latest.rows[1]=latest.rows[1]+num_of_copying_data;
 
+             row_index_offset  = latest.rows[0];
+             col_index_offset = latest.rows[1];
 //             copy(sparse_tuple.row_idx.begin(),sparse_tuple.row_idx.begin()+ num_of_copying_data, latest.rows.begin()+ latest.offset);
-             copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin()+ num_of_copying_data, latest.cols.begin()+ latest.offset);
-             copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ latest.offset);
+             copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin()+ num_of_copying_data, latest.cols.begin()+ col_index_offset);
+             copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ col_index_offset);
              (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              if (remaining_data_items>0){
                SpTuple<DENT,embedding_dim> current;
@@ -485,8 +487,8 @@ public:
           auto count = sp_tuple.rows[i+1];
           if ((*(this->sparse_local)->tempCachePtr)[i].find(key)==(*(this->sparse_local)->tempCachePtr)[i].end()){
             SparseCacheEntry<DENT> sp_entry;
-            sp_entry.iteration=iteration;
-            sp_entry.batch_id = batch_id;
+            sp_entry.inserted_itr=iteration;
+            sp_entry.inserted_batch_id = batch_id;
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
           SparseCacheEntry<DENT> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
