@@ -143,7 +143,7 @@ public:
   void build_sparse_random_matrix(int rows, int cols, float density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
                                   Process3DGrid *grid, string output = "random.txt",
-                                  bool save_output) {
+                                  bool save_output=false) {
 
     std::mt19937 gen(seed);
     std::uniform_real_distribution<float> uni_dist(0, 1);
@@ -185,7 +185,7 @@ public:
       for (auto i = 0; i < sparse_coo.size(); ++i) {
         current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
         current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
-        current_position += snprintf(current_position, total_size, " %.5f", t.value);
+        current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
         current_position += snprintf(current_position, total_size, "\n");
       }
 
