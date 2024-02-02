@@ -340,12 +340,14 @@ public:
             bool fetch_from_cache =
                 target_rank == (grid)->rank_in_col ? false : true;
 
-            vector<Tuple<DENT>> remote_tuples;
+            vector<uint64_t> remote_cols;
+            vector<DENT> remote_values;
 
             if (fetch_from_cache) {
               unordered_map<uint64_t, SparseCacheEntry<DENT>>
                   &arrayMap = (*sparse_local->tempCachePtr)[target_rank];
-              remote_tuples = arrayMap[dst_id].tuples;
+              remote_cols = arrayMap[dst_id].cols;
+              remote_values =arrayMap[dst_id].values;
             }
 
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
@@ -355,10 +357,12 @@ public:
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
-              for(Tuple<DENT> t: remote_tuples){
-                auto d = t.col;
-                prevCoordinates[index * embedding_dim + d] += lr *t.value;
+
+              for(int m=0;m<remote_cols.size();m++){
+                auto d = remote_cols[m];
+                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
               }
+
             }
           }
         }

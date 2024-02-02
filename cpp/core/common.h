@@ -76,7 +76,6 @@ template <typename T> struct CSR {
 };
 
 template <typename T, size_t size> struct SpTuple {
-  size_t offset;
   std::array<uint64_t, row_max> rows;
   std::array<uint64_t, size> cols;
   std::array<T, size> values;
@@ -94,7 +93,8 @@ template <typename T, size_t size> struct CacheEntry {
 };
 
 template <typename T> struct SparseCacheEntry {
-  vector<Tuple<T>> tuples;
+  vector<T> values;
+  vector<uint64_t> cols;
   int inserted_batch_id;
   int inserted_itr;
 };

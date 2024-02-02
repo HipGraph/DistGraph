@@ -270,45 +270,61 @@ public:
 
             if (send_counts_cyclic[sending_procs[i]]==0){
               SpTuple<DENT,embedding_dim> current;
-              current.offset=0;
+              current.rows[0]=2;//rows first two indices are already taken for metadata
+              current.rows[1]=0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
               send_counts_cyclic[sending_procs[i]]++;
             }
 
             SpTuple<DENT,embedding_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
-
-            if (latest.offset>=embedding_dim){
+             auto row_index_offset  = latest.rows[0];
+             auto col_index_offset = latest.rows[1];
+            if (row_index_offset>=row_max or col_index_offset>= embedding_dim){
               SpTuple<DENT,embedding_dim> current;
-              current.offset=0;
+              current.rows[0]=2;//rows first two indices are already taken for metadata
+              current.rows[1]=0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
               send_counts_cyclic[sending_procs[i]]++;
               latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+              row_index_offset  = latest.rows[0];
+              col_index_offset = latest.rows[1];
             }
 
-            auto offset = sparse_tuple.row_idx.size();
+             auto offset = sparse_tuple.row_idx.size();
             //start filling from offset position
-             auto pending_pos = embedding_dim - latest.offset;
-             auto num_of_copying_data = min(offset,pending_pos);
+             auto pending_col_pos = embedding_dim - col_index_offset;
+             auto num_of_copying_data = min(offset,pending_col_pos);
              auto remaining_data_items = offset-num_of_copying_data;
 
-             copy(sparse_tuple.row_idx.begin(),sparse_tuple.row_idx.begin()+ num_of_copying_data, latest.rows.begin()+ latest.offset);
+             latest.rows[row_index_offset]=sparse_tuple.row_idx[0];
+             latest.rows[row_index_offset+1]=num_of_copying_data;
+             latest.rows[0]=row_index_offset+2;
+             latest.rows[1]=latest.rows[1]+num_of_copying_data;
+
+//             copy(sparse_tuple.row_idx.begin(),sparse_tuple.row_idx.begin()+ num_of_copying_data, latest.rows.begin()+ latest.offset);
              copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin()+ num_of_copying_data, latest.cols.begin()+ latest.offset);
              copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ latest.offset);
-             latest.offset += num_of_copying_data;
              (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              if (remaining_data_items>0){
                SpTuple<DENT,embedding_dim> current;
-               current.offset=0;
+               current.rows[0]=2;//rows first two indices are already taken for metadata
+               current.rows[1]=0;
                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                total_send_count++;
                send_counts_cyclic[sending_procs[i]]++;
                latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
-               copy(sparse_tuple.row_idx.begin()+num_of_copying_data-1, sparse_tuple.row_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.rows.begin());
+               row_index_offset  = latest.rows[0];
+               col_index_offset = latest.rows[1];
+               latest.rows[row_index_offset]=sparse_tuple.row_idx[0];
+               latest.rows[row_index_offset+1]=remaining_data_items;
+               latest.rows[0]=row_index_offset+2;
+               latest.rows[1]=latest.rows[1]+remaining_data_items;
+
+//               copy(sparse_tuple.row_idx.begin()+num_of_copying_data-1, sparse_tuple.row_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.rows.begin());
                copy(sparse_tuple.col_idx.begin()+num_of_copying_data-1, sparse_tuple.col_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.cols.begin());
                copy(sparse_tuple.values.begin()+num_of_copying_data-1, sparse_tuple.values.begin()+num_of_copying_data-1+remaining_data_items, latest.values.begin());
-               latest.offset += remaining_data_items;
                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              }
           }
@@ -462,12 +478,24 @@ public:
 
       for (int j = base_index; j < base_index + count; j++) {
         SpTuple<DENT,embedding_dim> sp_tuple = (*receivebuf)[j];
-        for(int k=0;k<sp_tuple.offset;k++) {
-          Tuple<DENT> t;
-          t.row = sp_tuple.rows[k];
-          t.col = sp_tuple.cols[k];
-          t.value = sp_tuple.values[k];
-          (this->sparse_local)->insert_cache(i, t.row, batch_id, iteration, t);
+        auto row_offset = sp_tuple.rows[0];
+        auto offset_so_far=0;
+        for(auto i=2;i<row_offset;i=i+2){
+          auto key = sp_tuple.rows[i];
+          auto count = sp_tuple.rows[i+1];
+          if ((*(this->sparse_local)->tempCachePtr)[i].find(key)==(*(this->sparse_local)->tempCachePtr)[i].end()){
+            SparseCacheEntry<DENT> sp_entry;
+            sp_entry.iteration=iteration;
+            sp_entry.batch_id = batch_id;
+            (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
+          }
+          SparseCacheEntry<DENT> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
+          auto entry_offset = cache_entry.cols.size();
+          cache_entry.cols.resize(entry_offset+count);
+          copy(sp_tuple.cols.begin()+offset_so_far,sp_tuple.cols.begin()+offset_so_far+ count, cache_entry.cols.begin()+ entry_offset);
+          copy(sp_tuple.values.begin()+offset_so_far,sp_tuple.values.begin()+offset_so_far+ count, cache_entry.values.begin()+ entry_offset);
+          offset_so_far+=count;
+          (*(this->sparse_local)->tempCachePtr)[i][key]=cache_entry;
         }
       }
     }
