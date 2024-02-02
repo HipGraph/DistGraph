@@ -261,19 +261,13 @@ CSRHandle  fetch_local_data(uint64_t local_key) {
   }
 
 
-//  void insert_cache(int rank, uint64_t key, int batch_id, int iteration,
-//                    distblas::core::SpTuple<T> tuple) {
-//
-//    if ((*this->tempCachePtr)[rank].find(key) != (*this->tempCachePtr)[rank].end()){
-//      (*this->tempCachePtr)[rank][key]=SparseCacheEntry<T> entry
-//    } else {
-//      SparseCacheEntry<T> entry;
-//      entry.inserted_batch_id = batch_id;
-//      entry.inserted_itr = iteration;
-//      entry.tuples.push_back(tuple);
-//      (*this->tempCachePtr)[rank][key]=entry;
-//    }
-//  }
+  void purge_cache() {
+    for (int i = 0; i < grid->col_world_size; i++) {
+      (*this->tempCachePtr)[i].clear();
+      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<T>>().swap(
+          (*this->tempCachePtr)[i]);
+    }
+  }
 
   auto fetch_data_vector_from_cache( vector<Tuple<T>>& entries,int rank, uint64_t key) {
 

@@ -360,7 +360,6 @@ public:
                    SPARSETUPLE, grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     t = start_clock();
-    cout<<" rank "<<grid->rank_in_col<<" data transfer completed"<<endl;
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
     stop_clock_and_add(t, "Transfer Data");
   }

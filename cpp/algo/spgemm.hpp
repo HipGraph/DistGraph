@@ -367,6 +367,7 @@ public:
           }
         }
       }
+      (sparse_local)->purge_cache();
     }
   }
 
