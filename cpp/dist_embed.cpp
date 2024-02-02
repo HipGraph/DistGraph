@@ -156,8 +156,8 @@ int main(int argc, char **argv) {
   vector<Tuple<double>> sparse_coo;
   auto sparse_input = shared_ptr<distblas::core::SpMat<double>>(new distblas::core::SpMat<double>(grid.get()));
   if (spgemm & save_results) {
-    reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, grid.get(),
-                                       output_file + "/random.txt",save_results);
+    reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, grid.get(),save_results,
+                                       output_file + "/random.txt");
     uint64_t  gROWs = static_cast<uint64_t>(localARows);
     uint64_t gCols = static_cast<uint64_t>(dimension);
     uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
 //
   fout.close();
   //
-//  reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
+// reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
 
 
   MPI_Finalize();

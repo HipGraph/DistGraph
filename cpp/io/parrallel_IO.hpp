@@ -142,8 +142,11 @@ public:
   template <typename VALUE_TYPE>
   void build_sparse_random_matrix(int rows, int cols, float density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
-                                  Process3DGrid *grid, string output = "random.txt",
-                                  bool save_output=false) {
+                                  Process3DGrid *grid, bool save_output,
+                                  string output = "random.txt",
+                                 ) {
+    MPI_File fh;
+    MPI_File_open(grid->col_world, output.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     std::mt19937 gen(seed);
     std::uniform_real_distribution<float> uni_dist(0, 1);
@@ -170,10 +173,8 @@ public:
         }
       }
     }
-
+    cout<<" total file size "<<total_size<<endl;
     if (save_output) {
-      MPI_File fh;
-      MPI_File_open(grid->col_world, output.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
       char *buffer = (char *)malloc(total_size +1); // +1 for the null-terminating character
       if (buffer == nullptr) {
         // Handle allocation failure
@@ -189,12 +190,10 @@ public:
         current_position += snprintf(current_position, total_size, "\n");
       }
 
-      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,
-                             MPI_STATUS_IGNORE);
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,MPI_STATUS_IGNORE);
 
       // Free the dynamically allocated memory
       free(buffer);
-
       MPI_File_close(&fh);
     }
   }
