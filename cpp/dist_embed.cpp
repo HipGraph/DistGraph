@@ -282,6 +282,7 @@ int main(int argc, char **argv) {
   j_obj["p"] = world_size;
   j_obj["sparsity"] = density;
   j_obj["data_set"] = data_set_name;
+  j_obj["d"] = dimension;
   j_obj["perf_stats"] = json_perf_statistics();
   if (rank == 0) {
     fout << j_obj.dump(4) << "," << endl;
