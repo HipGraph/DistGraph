@@ -143,8 +143,7 @@ public:
   void build_sparse_random_matrix(int rows, int cols, float density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
                                   Process3DGrid *grid, bool save_output,
-                                  string output = "random.txt",
-                                 ) {
+                                  string output = "random.txt") {
     MPI_File fh;
     MPI_File_open(grid->col_world, output.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
