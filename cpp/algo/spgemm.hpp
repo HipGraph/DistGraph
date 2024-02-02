@@ -143,6 +143,7 @@ public:
         }
         total_memory += get_memory_usage();
       }
+      (sparse_local)->purge_cache();
     }
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
@@ -367,7 +368,6 @@ public:
           }
         }
       }
-      (sparse_local)->purge_cache();
     }
   }
 
