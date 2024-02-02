@@ -54,6 +54,10 @@ int main(int argc, char **argv) {
 
   double density=0.5;
 
+  bool save_results = false;
+
+  string sparse_data_file =""
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -90,6 +94,11 @@ int main(int argc, char **argv) {
       spgemm = enable_spgemm == 1 ? true : false;
     }else if (strcmp(argv[p], "-density") == 0) {
       density = atof(argv[p + 1]);
+    }else if (strcmp(argv[p], "-save_results") == 0) {
+      int save_res = atoi(argv[p + 1]);
+      save_results = save_res == 1 ? true : false;
+    }else if (strcmp(argv[p], "-input_sparse_file") == 0) {
+      sparse_data_file = argv[p + 1];
     }
   }
 
@@ -124,10 +133,8 @@ int main(int argc, char **argv) {
 
   auto start_io = std::chrono::high_resolution_clock::now();
 
-  reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(),
-                                        true);
+  reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(),true);
 
-  auto end_io = std::chrono::high_resolution_clock::now();
 
   cout << " rank " << rank << " reading data from file path:  " << input_file
        << " completed " << endl;
@@ -139,15 +146,35 @@ int main(int argc, char **argv) {
   auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
                                         grid.get()->col_world_size);
 
-
-
   // To enable full batch size
   if (spmm or spgemm) {
     batch_size = localARows;
   }
 
-  cout << " rank " << rank << " localBRows  " << localBRows << " localARows "
-       << localARows << endl;
+  cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
+
+  auto sparse_input = shared_ptr<distblas::core::SpMat<double>>(new distblas::core::SpMat<double>(grid.get()));
+
+  if (spgemm & save_results) {
+    vector<Tuple<double>> sparse_coo;
+    reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, output_file + "/random.txt",save_results);
+    uint64_t  gROWs = static_cast<uint64_t>(localARows);
+    uint64_t gCols = static_cast<uint64_t>(dimension);
+    uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
+    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
+    int localBRows = static_cast<int>(dimension);
+    sparse_input =  make_shared<distblas::core::SpMat<double>>(grid.get(),
+                                                                   sparse_coo, gROWs,
+                                                                   gCols, gNNZ, batch_size,
+                                                                   localARows, localBRows, false, false);
+  }else if (spgemm){
+    reader.get()->parallel_read_MM<int>(sparse_data_file, sparse_input.get(),false);
+    sparse_input.get()->batch_size = batch_size;
+    sparse_input.get()->proc_row_width = localARows;
+    sparse_input.get()->proc_col_width = static_cast<int>(dimension);
+  }
+
+  auto end_io = std::chrono::high_resolution_clock::now();
 
   shared_sparseMat.get()->batch_size = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
@@ -182,6 +209,10 @@ int main(int argc, char **argv) {
   shared_sparseMat_sender.get()->initialize_CSR_blocks();
   shared_sparseMat_receiver.get()->initialize_CSR_blocks();
 
+  if (spgemm){
+    sparse_input->initialize_CSR_blocks();
+  }
+
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
 
 //  dense_local->print_cache(i);
@@ -207,22 +238,7 @@ int main(int argc, char **argv) {
     embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
   }else if(spgemm){
-    vector<Tuple<double>> sparse_coo;
-    reader->build_sparse_random_matrix(localARows,dimension,density,0,sparse_coo,output_file+"/random.txt",true);
-
-    uint64_t  gROWs = static_cast<uint64_t>(localARows);
-    uint64_t gCols = static_cast<uint64_t>(dimension);
-    uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
-    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
-    int localBRows = static_cast<int>(dimension);
-    auto sparse_input =  make_shared<distblas::core::SpMat<double>>(grid.get(),
-                                                                   sparse_coo, gROWs,
-                                                                   gCols, gNNZ, batch_size,
-                                            localARows, localBRows, false, false);
-    sparse_input->initialize_CSR_blocks();
-    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),
-                                                                 sparse_coo, gROWs,
-                                                                 gCols, gNNZ, batch_size,
+    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),sparse_coo, gROWs,gCols, gNNZ, batch_size,
                                                                  localARows, localBRows, false, false);
 
     unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
