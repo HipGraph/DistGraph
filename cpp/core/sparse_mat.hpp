@@ -264,8 +264,8 @@ CSRHandle  fetch_local_data(uint64_t local_key) {
   void purge_cache() {
     for (int i = 0; i < grid->col_world_size; i++) {
       (*this->tempCachePtr)[i].clear();
-      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<T>>().swap(
-          (*this->tempCachePtr)[i]);
+//      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<T>>().swap(
+//          (*this->tempCachePtr)[i]);
     }
   }
 
