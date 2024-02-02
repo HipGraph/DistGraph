@@ -482,9 +482,9 @@ public:
         SpTuple<DENT,embedding_dim> sp_tuple = (*receivebuf)[j];
         auto row_offset = sp_tuple.rows[0];
         auto offset_so_far=0;
-        for(auto i=2;i<row_offset;i=i+2){
-          auto key = sp_tuple.rows[i];
-          auto count = sp_tuple.rows[i+1];
+        for(auto k=2;k<row_offset;k=k+2){
+          auto key = sp_tuple.rows[k];
+          auto count = sp_tuple.rows[k+1];
           if ((*(this->sparse_local)->tempCachePtr)[i].find(key)==(*(this->sparse_local)->tempCachePtr)[i].end()){
             SparseCacheEntry<DENT> sp_entry;
             sp_entry.inserted_itr=iteration;
