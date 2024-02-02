@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
 
   }else if(spgemm){
     auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),sparse_coo, sparse_input->gRows,
-                                                                 sparse_input->gCols, sparse_input->gNNZ, batch_size,
+                                                                 sparse_input->gCols, sparse_input->gNNz, batch_size,
                                                                  localARows, localBRows, false, false);
 
     unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
