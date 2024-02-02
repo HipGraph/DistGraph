@@ -75,7 +75,8 @@ template <typename T> struct CSR {
 
 template <typename T, size_t size> struct SpTuple {
   size_t offset;
-  std::array<uint64_t, size> rows;
+  size_t row_size = size*0.1;
+  std::array<uint64_t, row_size> rows;
   std::array<uint64_t, size> cols;
   std::array<T, size> values;
 };
