@@ -172,7 +172,7 @@ public:
         }
       }
     }
-    cout<<" total file size "<<total_size<<endl;
+    cout<<" total file size "<<total_size<<" nnz "<<sparse_coo.size()<<endl;
     if (save_output) {
       char *buffer = (char *)malloc(total_size +1); // +1 for the null-terminating character
       if (buffer == nullptr) {
@@ -188,7 +188,7 @@ public:
         current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
         current_position += snprintf(current_position, total_size, "\n");
       }
-
+      cout<<" current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
       MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,MPI_STATUS_IGNORE);
 
       // Free the dynamically allocated memory
