@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 
   bool save_results = false;
 
-  string sparse_data_file =""
+  string sparse_data_file ="";
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
@@ -153,11 +153,11 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
 
+  vector<Tuple<double>> sparse_coo;
   auto sparse_input = shared_ptr<distblas::core::SpMat<double>>(new distblas::core::SpMat<double>(grid.get()));
-
   if (spgemm & save_results) {
-    vector<Tuple<double>> sparse_coo;
-    reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, output_file + "/random.txt",save_results);
+    reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, grid.get(),
+                                       output_file + "/random.txt",save_results);
     uint64_t  gROWs = static_cast<uint64_t>(localARows);
     uint64_t gCols = static_cast<uint64_t>(dimension);
     uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
                                                                    gCols, gNNZ, batch_size,
                                                                    localARows, localBRows, false, false);
   }else if (spgemm){
-    reader.get()->parallel_read_MM<int>(sparse_data_file, sparse_input.get(),false);
+    reader.get()->parallel_read_MM<double>(sparse_data_file, sparse_input.get(),false);
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
@@ -238,7 +238,8 @@ int main(int argc, char **argv) {
     embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
   }else if(spgemm){
-    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),sparse_coo, gROWs,gCols, gNNZ, batch_size,
+    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),sparse_coo, sparse_input->gRows,
+                                                                 sparse_input->gCols, sparse_input->gNNZ, batch_size,
                                                                  localARows, localBRows, false, false);
 
     unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
