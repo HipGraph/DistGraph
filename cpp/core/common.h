@@ -23,6 +23,8 @@ using namespace std;
 using namespace std::chrono;
 using json = nlohmann::json;
 
+const int row_max = 22;
+
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
@@ -75,8 +77,7 @@ template <typename T> struct CSR {
 
 template <typename T, size_t size> struct SpTuple {
   size_t offset;
-  size_t row_size = size*0.1;
-  std::array<uint64_t, row_size> rows;
+  std::array<uint64_t, row_max> rows;
   std::array<uint64_t, size> cols;
   std::array<T, size> values;
 };
