@@ -267,7 +267,7 @@ CSRHandle  fetch_local_data(uint64_t local_key) {
 //      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<T>>().swap(
 //          (*this->tempCachePtr)[i]);
     }
-    (*this->tempCachePtr) = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
   }
 
   auto fetch_data_vector_from_cache( vector<Tuple<T>>& entries,int rank, uint64_t key) {
