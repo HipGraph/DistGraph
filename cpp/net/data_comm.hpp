@@ -331,7 +331,7 @@ public:
         }
     }
     MPI_Barrier(grid->col_world);
-    cout<<" rank "<<grid->rank_in_col<<" sendbuf population completed"<<endl;
+
     (*sendbuf_cyclic).resize(total_send_count);
     for (int i = 0; i < grid->col_world_size; i++) {
       sdispls_cyclic[i] = (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
@@ -360,6 +360,7 @@ public:
                    SPARSETUPLE, grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     t = start_clock();
+    cout<<" rank "<<grid->rank_in_col<<" data transfer completed"<<endl;
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
     stop_clock_and_add(t, "Transfer Data");
   }
@@ -488,6 +489,8 @@ public:
             SparseCacheEntry<DENT> sp_entry;
             sp_entry.inserted_itr=iteration;
             sp_entry.inserted_batch_id = batch_id;
+            sp_entry.cols = vector<uint64_t>();
+            sp_entry.values = vector<DENT>();
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
           SparseCacheEntry<DENT> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
