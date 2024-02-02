@@ -167,10 +167,8 @@ public:
       MPI_Request req;
 
       if (communication) {
-        auto t = start_clock();
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        stop_clock_and_add(t, "Compute  Local");
       }
       if (k == comm_initial_start) {
         // local computation
@@ -190,11 +188,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    auto t = start_clock();
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
-    stop_clock_and_add(t, "Compute  Remote");
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -358,12 +354,10 @@ public:
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
-
               for(int m=0;m<remote_cols.size();m++){
                 auto d = remote_cols[m];
                 prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
               }
-
             }
           }
         }
