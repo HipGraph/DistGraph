@@ -303,8 +303,6 @@ public:
              latest.rows[0]=row_index_offset+2;
              latest.rows[1]=latest.rows[1]+num_of_copying_data;
 
-             row_index_offset  = latest.rows[0];
-             col_index_offset = latest.rows[1];
 //             copy(sparse_tuple.row_idx.begin(),sparse_tuple.row_idx.begin()+ num_of_copying_data, latest.rows.begin()+ latest.offset);
              copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin()+ num_of_copying_data, latest.cols.begin()+ col_index_offset);
              copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ col_index_offset);
