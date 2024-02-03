@@ -166,14 +166,23 @@ public:
   }
 
   template <typename T>
-  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows) {
+  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows, uint64_t global_rows) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    int chunk_size = 10000; // Number of elements to write at a time
+    int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
 
+    uint64_t  global_sum = 0;
+    uint64_t local_sum = sparse_coo.size();
+
+    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM, grid->col_world);
+
+
     for (uint64_t i = 0; i < sparse_coo.size(); i += chunk_size) {
+      if (grid->rank_in_col==0 and i==0){
+        total_size += snprintf(nullptr, 0, "%%MatrixMarket matrix coordinate real general\n%lu %lu %.5f\n", global_rows, global_rows, global_sum);
+      }
       int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
       for (int j = 0; j < elements_in_chunk; ++j) {
@@ -191,6 +200,9 @@ public:
       }
 
       char *current_position = buffer;
+      if (i==0 and grid->rank_in_col==0){
+        current_position += snprintf(nullptr, 0, "%%MatrixMarket matrix coordinate real general\n%lu %lu %.5f\n", global_rows, global_rows, global_sum);
+      }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<T> t = sparse_coo[i + j];
