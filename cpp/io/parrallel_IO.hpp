@@ -180,7 +180,7 @@ public:
         Tuple<T> t = sparse_coo[i + j];
         int col = static_cast<int>(t.col + 1);
         uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * rows);
-        total_size += snprintf(nullptr, o, "%lu %lu %.5f\n", row, col, t.value);
+        total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
       }
 
       char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
