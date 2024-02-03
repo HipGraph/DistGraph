@@ -210,7 +210,7 @@ public:
 //    }
 
     MPI_Status status;
-    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, &MPI_STATUS_IGNORE);
+    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
 
     // Ensure that all processes have completed their writes
 
