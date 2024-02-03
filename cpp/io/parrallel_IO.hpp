@@ -205,7 +205,7 @@ public:
       // Now you can use the 'status' variable to get information about the completed operation
       int error_code;
       MPI_Error_class(status.MPI_ERROR, &error_code);
-
+      cout<<"error code"<<error_code<<endl;
       if (error_code != MPI_SUCCESS) {
         char error_string[MPI_MAX_ERROR_STRING];
         int length;
