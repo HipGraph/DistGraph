@@ -170,7 +170,7 @@ public:
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    int chunk_size = 1000; // Number of elements to write at a time
+    int chunk_size = 10000; // Number of elements to write at a time
     size_t total_size = 0;
 
     for (uint64_t i = 0; i < sparse_coo.size(); i += chunk_size) {
