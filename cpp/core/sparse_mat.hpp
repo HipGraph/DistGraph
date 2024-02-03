@@ -248,10 +248,10 @@ public:
 CSRHandle  fetch_local_data(uint64_t local_key) {
      CSRHandle *handle = (csr_local_data.get())->handler.get();
      CSRHandle new_handler;
+     uint64_t global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
+     int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
+     new_handler.row_idx.resize(1,global_key);
      if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
-       int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
-       uint64_t global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
-       new_handler.row_idx.resize(count,global_key);
        new_handler.col_idx.resize(count);
        new_handler.values.resize(count);
        copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());

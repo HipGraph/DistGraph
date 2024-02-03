@@ -237,9 +237,7 @@ int main(int argc, char **argv) {
     embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
   }else if(spgemm){
-    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),sparse_coo, sparse_input->gRows,
-                                                                 sparse_input->gCols, sparse_input->gNNz, batch_size,
-                                                                 localARows, localBRows, false, false);
+    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get());
 
     unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
                 new distblas::algo::SpGEMMAlgo<int, double, dimension>(

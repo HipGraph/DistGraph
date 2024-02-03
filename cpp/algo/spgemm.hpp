@@ -22,6 +22,8 @@ private:
 
   std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache;
 
+//  unique_ptr<vector<unordered_map<uint64_t,>>>
+
   //cache size controlling hyper parameter
   double alpha = 0;
 

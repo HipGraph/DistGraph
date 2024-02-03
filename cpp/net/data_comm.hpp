@@ -292,7 +292,7 @@ public:
               col_index_offset = latest.rows[1];
             }
 
-             auto offset = sparse_tuple.row_idx.size();
+             auto offset = sparse_tuple.col_idx.size();
             //start filling from offset position
              auto pending_col_pos = embedding_dim - col_index_offset;
              auto num_of_copying_data = min(offset,pending_col_pos);
