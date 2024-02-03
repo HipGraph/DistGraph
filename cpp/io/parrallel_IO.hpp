@@ -176,8 +176,8 @@ public:
           Tuple<T> t  = sparse_coo[i];
           uint64_t col = static_cast<uint64_t>(t.col+1);
           uint64_t row = static_cast<uint64_t>(t.row+1 + grid->rank_in_col * rows);
-          current_position += snprintf(nullptr, 0, "%lu", row);
-          current_position += snprintf(nullptr, 0, "%lu", col);
+          total_size += snprintf(nullptr, 0, "%lu", row);
+          total_size += snprintf(nullptr, 0, "%lu", col);
           total_size += snprintf(nullptr, 0, " %.5f", t.value);
           total_size += snprintf(nullptr, 0, "\n");
     }
