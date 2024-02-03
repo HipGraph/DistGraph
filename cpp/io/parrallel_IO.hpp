@@ -180,9 +180,9 @@ public:
     for (uint64_t i = 0; i < rows; ++i) {
       total_size +=
           snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
-//      for (int j = 0; j < cols; ++j) {
-//        total_size += snprintf(nullptr, 0, " %.5f", nCoordinates[i * cols + j]);
-//      }
+      for (int j = 0; j < 128; ++j) {
+        total_size += snprintf(nullptr, 0, " %.5f", j);
+      }
       total_size += snprintf(nullptr, 0, "\n");
     }
 
@@ -197,9 +197,9 @@ public:
     for (uint64_t i = 0; i < rows; ++i) {
       current_position +=
           snprintf(current_position, total_size, "%lu", i + 1 + grid->rank_in_col * rows);
-      //      for (int j = 0; j < cols; ++j) {
-      //        total_size += snprintf(nullptr, 0, " %.5f", nCoordinates[i * cols + j]);
-      //      }
+      for (int j = 0; j < 128; ++j) {
+        current_position += snprintf(current_position, total_size, " %.5f", j);
+      }
       current_position += snprintf(current_position, total_size, "\n");
     }
 //    for (size_t i = 0; i < sparse_coo.size(); ++i){
