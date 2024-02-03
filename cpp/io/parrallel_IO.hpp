@@ -142,10 +142,9 @@ public:
   template <typename VALUE_TYPE>
   void build_sparse_random_matrix(int rows, int cols, float density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
-                                  Process3DGrid *grid, bool save_output,
-                                  string output = "random.txt") {
+                                  Process3DGrid *grid, bool save_output,string output) {
     MPI_File fh;
-    MPI_File_open(grid->col_world, (char*)output.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_open(grid->col_world, output.c_str(),MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
     std::mt19937 gen(seed);
     std::uniform_real_distribution<float> uni_dist(0, 1);
