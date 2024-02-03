@@ -171,20 +171,15 @@ public:
     MPI_File_open(grid->col_world, file_path.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     size_t total_size=0;
-//    for (Tuple<T> t: sparse_coo) {
-//          total_size += snprintf(nullptr, 0, "%lu", t.row + 1 + grid->rank_in_col * rows);
-//          total_size += snprintf(nullptr, 0, "%lu", t.col + 1);
-//          total_size += snprintf(nullptr, 0, " %.5f", t.value);
-//          total_size += snprintf(nullptr, 0, "\n");
-//    }
-    for (uint64_t i = 0; i < rows; ++i) {
-      total_size +=
-          snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
-      for (int j = 0; j < 128; ++j) {
-        total_size += snprintf(nullptr, 0, " %.5f", j);
-      }
-      total_size += snprintf(nullptr, 0, "\n");
+
+    for (uint64_t i=0;i<sparse_coo.size();i++) {
+          Tuple<T> t  = sparse_coo[i];
+          total_size += snprintf(nullptr, 0, "%ld", static_cast<long>(t.row + 1 + grid->rank_in_col * rows));
+          total_size += snprintf(nullptr, 0, "%ld", static_cast<long>(t.col + 1));
+          total_size += snprintf(nullptr, 0, " %.5f", t.value);
+          total_size += snprintf(nullptr, 0, "\n");
     }
+
 
     char *buffer = (char *)malloc(total_size +1); // +1 for the null-terminating character
     if (buffer == nullptr) {
@@ -194,20 +189,14 @@ public:
     }
 
     char *current_position = buffer;
-    for (uint64_t i = 0; i < rows; ++i) {
-      current_position +=
-          snprintf(current_position, total_size, "%lu", i + 1 + grid->rank_in_col * rows);
-      for (int j = 0; j < 128; ++j) {
-        current_position += snprintf(current_position, total_size, " %.5f", j);
-      }
+
+    for (uint64_t i = 0; i < sparse_coo.size(); ++i){
+      Tuple<T> t  = sparse_coo[i];
+      current_position += snprintf(current_position, total_size, "%ld", static_cast<long>(t.row + 1 + grid->rank_in_col * rows));
+      current_position += snprintf(current_position, total_size, "%ld", static_cast<long>(t.col + 1));
+      current_position += snprintf(current_position, total_size, " %.5f", t.value);
       current_position += snprintf(current_position, total_size, "\n");
     }
-//    for (size_t i = 0; i < sparse_coo.size(); ++i){
-//      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
-//      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
-//      current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
-//      current_position += snprintf(current_position, total_size, "\n");
-//    }
 
     MPI_Status status;
     MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
