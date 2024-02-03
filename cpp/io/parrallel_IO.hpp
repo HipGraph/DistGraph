@@ -194,11 +194,27 @@ public:
         current_position += snprintf(current_position, remain, "\n");
       }
       cout<<" final current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
-      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,MPI_STATUS_IGNORE);
 
+      MPI_Status status;
+
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, &status);
+
+      // Ensure that all processes have completed their writes
+      MPI_Barrier(MPI_COMM_WORLD);
+
+      // Now you can use the 'status' variable to get information about the completed operation
+      int error_code;
+      MPI_Error_class(status.MPI_ERROR, &error_code);
+
+      if (error_code != MPI_SUCCESS) {
+        char error_string[MPI_MAX_ERROR_STRING];
+        int length;
+        MPI_Error_string(error_code, error_string, &length);
+        cout<<"MPI error: %s"<<error_string<<endl;
+      }
       // Free the dynamically allocated memory
-      free(buffer);
       MPI_File_close(&fh);
+      free(buffer);
     }
   }
 };
