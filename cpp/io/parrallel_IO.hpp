@@ -201,14 +201,13 @@ public:
 
       char *current_position = buffer;
       if (i==0 and grid->rank_in_col==0){
-        current_position += snprintf(nullptr, 0, "%%MatrixMarket matrix coordinate real general\n%lu %lu %.5f\n", global_rows, global_rows, global_sum);
+        current_position += snprintf(current_position, total_size, "%%MatrixMarket matrix coordinate real general\n%lu %lu %.5f\n", global_rows, global_rows, global_sum);
       }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<T> t = sparse_coo[i + j];
         uint64_t col = static_cast<int>(t.col + 1);
         uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * rows);
-
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
       }
 
