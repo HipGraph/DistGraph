@@ -174,11 +174,10 @@ public:
 
     for (uint64_t i=0;i<sparse_coo.size();i++) {
           Tuple<T> t  = sparse_coo[i];
-          uint64_t col = static_cast<uint64_t>(t.col+1);
-//          uint64_t row = static_cast<uint64_t>(t.row+1 + grid->rank_in_col * rows);
-          uint64_t row = static_cast<uint64_t>(t.row+1);
-//          total_size += snprintf(nullptr, 0, "%lu", row);
-          total_size += snprintf(nullptr, 0, "%lu", col);
+//          uint64_t col = static_cast<uint64_t>(t.col+1);
+          uint64_t row = static_cast<uint64_t>(t.row+1 + grid->rank_in_col * rows);
+          total_size += snprintf(nullptr, 0, "%lu", row);
+//          total_size += snprintf(nullptr, 0, "%lu", col);
           total_size += snprintf(nullptr, 0, " %.5f", t.value);
           total_size += snprintf(nullptr, 0, "\n");
     }
@@ -197,10 +196,10 @@ public:
       Tuple<T> t  = sparse_coo[i];
 //      current_position += snprintf(current_position, total_size, "%ld", static_cast<long>(t.row + 1 + grid->rank_in_col * rows));
       uint64_t col = static_cast<uint64_t>(t.col+1);
-//      uint64_t row = static_cast<uint64_t>(t.row+1 + grid->rank_in_col * rows);
-      uint64_t row = static_cast<uint64_t>(t.row+1);
-//      current_position += snprintf(current_position, total_size, "%lu", row);
-      current_position += snprintf(current_position, total_size, "%lu", col);
+      uint64_t row = static_cast<uint64_t>(t.row+1 + grid->rank_in_col * rows);
+
+      current_position += snprintf(current_position, total_size, "%lu", row);
+//      current_position += snprintf(current_position, total_size, "%lu", col);
       current_position += snprintf(current_position, total_size, " %.5f", t.value);
       current_position += snprintf(current_position, total_size, "\n");
     }
