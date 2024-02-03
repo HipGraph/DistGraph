@@ -171,11 +171,19 @@ public:
     MPI_File_open(grid->col_world, file_path.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     size_t total_size=0;
-    for (Tuple<T> t: sparse_coo) {
-          total_size += snprintf(nullptr, 0, "%lu", t.row + 1 + grid->rank_in_col * rows);
-          total_size += snprintf(nullptr, 0, "%lu", t.col + 1);
-          total_size += snprintf(nullptr, 0, " %.5f", t.value);
-          total_size += snprintf(nullptr, 0, "\n");
+//    for (Tuple<T> t: sparse_coo) {
+//          total_size += snprintf(nullptr, 0, "%lu", t.row + 1 + grid->rank_in_col * rows);
+//          total_size += snprintf(nullptr, 0, "%lu", t.col + 1);
+//          total_size += snprintf(nullptr, 0, " %.5f", t.value);
+//          total_size += snprintf(nullptr, 0, "\n");
+//    }
+    for (uint64_t i = 0; i < rows; ++i) {
+      total_size +=
+          snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
+//      for (int j = 0; j < cols; ++j) {
+//        total_size += snprintf(nullptr, 0, " %.5f", nCoordinates[i * cols + j]);
+//      }
+      total_size += snprintf(nullptr, 0, "\n");
     }
 
     char *buffer = (char *)malloc(total_size +1); // +1 for the null-terminating character
@@ -186,32 +194,29 @@ public:
     }
 
     char *current_position = buffer;
-    for (size_t i = 0; i < sparse_coo.size(); ++i){
-      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
-      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
-      current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
+    for (uint64_t i = 0; i < rows; ++i) {
+      current_position +=
+          snprintf(current_position, total_size, "%lu", i + 1 + grid->rank_in_col * rows);
+      //      for (int j = 0; j < cols; ++j) {
+      //        total_size += snprintf(nullptr, 0, " %.5f", nCoordinates[i * cols + j]);
+      //      }
       current_position += snprintf(current_position, total_size, "\n");
     }
+//    for (size_t i = 0; i < sparse_coo.size(); ++i){
+//      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
+//      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
+//      current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
+//      current_position += snprintf(current_position, total_size, "\n");
+//    }
 
     MPI_Status status;
-    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, &status);
+    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, &MPI_STATUS_IGNORE);
 
     // Ensure that all processes have completed their writes
-    MPI_Barrier(MPI_COMM_WORLD);
 
-    // Now you can use the 'status' variable to get information about the completed operation
-    int error_code;
-    MPI_Error_class(status.MPI_ERROR, &error_code);
-    cout<<"error code"<<error_code<<endl;
-    if (error_code != MPI_SUCCESS) {
-      char error_string[MPI_MAX_ERROR_STRING];
-      int length;
-      MPI_Error_string(error_code, error_string, &length);
-      cout<<"MPI error: %s"<<error_string<<endl;
-    }
     // Free the dynamically allocated memory
     MPI_File_close(&fh);
-    free(buffer);
+//    free(buffer);
   }
 
 };
