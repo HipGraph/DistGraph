@@ -37,8 +37,7 @@ public:
   unique_ptr<CSRLocal<T>> csr_local_data;
   Process3DGrid *grid;
 
-  unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>>
-      tempCachePtr;
+  unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -65,6 +64,7 @@ public:
 
   SpMat(Process3DGrid *grid) {
     this->grid = grid;
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
   }
 
   /**
