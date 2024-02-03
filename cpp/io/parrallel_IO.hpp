@@ -186,14 +186,12 @@ public:
     }
 
     char *current_position = buffer;
-    cout<<" intial current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
-    for (size_t i = 0; i < sparse_coo.size(); ++i)
+    for (size_t i = 0; i < sparse_coo.size(); ++i){
       current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
       current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
       current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
       current_position += snprintf(current_position, total_size, "\n");
     }
-    cout<<" final current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
 
     MPI_Status status;
     MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, &status);
