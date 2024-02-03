@@ -261,9 +261,9 @@ public:
       (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT,embedding_dim>>();
     }
 
-
       for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
+        cout<<" rank "<<grid->rank_in_col<<" requesting global key "<<col_id<<endl;
         CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
