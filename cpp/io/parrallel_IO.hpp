@@ -178,7 +178,7 @@ public:
           int row = static_cast<int>(t.row+1);
 //          uint64_t row = 100;
 //          uint64_t col = 900;
-          total_size += snprintf(nullptr, 0, "%lu", row);
+          total_size += snprintf(nullptr, 0, "%d", row);
 //          total_size += snprintf(nullptr, 0, "%lu", col);
           total_size += snprintf(nullptr, 0, " %.5f", t.value);
           total_size += snprintf(nullptr, 0, "\n");
@@ -201,7 +201,7 @@ public:
       int row = static_cast<int>(t.row+1);
 //      uint64_t row = 1000000;
 //      uint64_t col = 900;
-      current_position += snprintf(current_position, total_size, "%lu", row);
+      current_position += snprintf(current_position, total_size, "%d", row);
 //      current_position += snprintf(current_position, total_size, "%lu", col);
       current_position += snprintf(current_position, total_size, " %.5f", t.value);
       current_position += snprintf(current_position, total_size, "\n");
