@@ -166,47 +166,50 @@ public:
   }
 
   template <typename T>
-  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo,  Process3DGrid *grid, int rows) {
+  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows) {
     MPI_File fh;
-    MPI_File_open(grid->col_world, file_path.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    size_t total_size=0;
+    int chunk_size = 1000; // Number of elements to write at a time
+    size_t total_size = 0;
 
-    for (uint64_t i=0;i<5;i++) {
-          Tuple<T> t  = sparse_coo[i];
-          uint64_t col = static_cast<int>(t.col+1);
-          uint64_t row = static_cast<uint64_t>(t.row+1+grid->rank_in_col*rows);
-          total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
-          total_size += snprintf(nullptr, 0, "\n");
+    for (uint64_t i = 0; i < sparse_coo.size(); i += chunk_size) {
+      int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
+
+      for (int j = 0; j < elements_in_chunk; ++j) {
+        Tuple<T> t = sparse_coo[i + j];
+        int col = static_cast<int>(t.col + 1);
+        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * rows);
+        total_size += snprintf(nullptr, o, "%lu %lu %.5f\n", row, col, t.value);
+      }
+
+      char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
+      if (buffer == nullptr) {
+        // Handle allocation failure
+        cout << "Memory allocation failed." << endl;
+        return;
+      }
+
+      char *current_position = buffer;
+
+      for (int j = 0; j < elements_in_chunk; ++j) {
+        Tuple<T> t = sparse_coo[i + j];
+        uint64_t col = static_cast<int>(t.col + 1);
+        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * rows);
+
+        current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
+      }
+
+      MPI_Status status;
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
+
+      // Free the dynamically allocated memory for each chunk
+      free(buffer);
+      total_size = 0; // Reset total_size for the next chunk
     }
-
-
-    char *buffer = (char *)malloc(total_size +1); // +1 for the null-terminating character
-    if (buffer == nullptr) {
-      // Handle allocation failure
-      cout << "Memory allocation failed." << endl;
-      return;
-    }
-
-    char *current_position = buffer;
-
-    for (uint64_t i = 0; i < 5; ++i){
-      Tuple<T> t  = sparse_coo[i];
-      uint64_t col = static_cast<int>(t.col+1);
-      uint64_t row = static_cast<uint64_t>(t.row+1 + grid->rank_in_col*rows);
-
-      current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
-      current_position += snprintf(current_position, total_size, "\n");
-    }
-
-    MPI_Status status;
-    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
 
     // Ensure that all processes have completed their writes
-
-    // Free the dynamically allocated memory
     MPI_File_close(&fh);
-//    free(buffer);
   }
 
 };
