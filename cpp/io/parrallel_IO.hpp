@@ -181,7 +181,7 @@ public:
 
     for (uint64_t i = 0; i < sparse_coo.size(); i += chunk_size) {
       if (grid->rank_in_col==0 and i==0){
-        total_size += snprintf(nullptr, 0, "%%MatrixMarket matrix coordinate real general\n%lu %lu %.5f\n", global_rows, global_rows, global_sum);
+        total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_rows, global_sum);
       }
       int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
@@ -201,7 +201,7 @@ public:
 
       char *current_position = buffer;
       if (i==0 and grid->rank_in_col==0){
-        current_position += snprintf(current_position, total_size, "%%MatrixMarket matrix coordinate real general\n%lu %lu %.5f\n", global_rows, global_rows, global_sum);
+        current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_rows, global_sum);
       }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
