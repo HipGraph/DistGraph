@@ -142,8 +142,6 @@ public:
   template <typename T>
   void build_sparse_random_matrix(int rows, int cols, float density, int seed,
                                   vector<Tuple<T>> &sparse_coo,Process3DGrid *grid) {
-    MPI_File fh;
-    MPI_File_open(grid->col_world, output.c_str(),MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
     std::mt19937 gen(seed);
     std::uniform_real_distribution<float> uni_dist(0, 1);
@@ -168,7 +166,7 @@ public:
   }
 
   template <typename T>
-  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo,  Process3DGrid *grid) {
+  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo,  Process3DGrid *grid, int rows) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
@@ -189,16 +187,11 @@ public:
 
     char *current_position = buffer;
     cout<<" intial current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
-    size_t remain =  total_size - current_position;
-    for (size_t i = 0; i < sparse_coo.size(); ++i) {
-      remain =  total_size - (current_position - buffer);
-      current_position += snprintf(current_position, remain, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
-      remain =  total_size - (current_position - buffer);
-      current_position += snprintf(current_position, remain, "%lu",sparse_coo[i].col+ 1);
-      remain =  total_size - (current_position - buffer);
-      current_position += snprintf(current_position, remain, " %.5f", sparse_coo[i].value);
-      remain =  total_size - (current_position - buffer);
-      current_position += snprintf(current_position, remain, "\n");
+    for (size_t i = 0; i < sparse_coo.size(); ++i)
+      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
+      current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
+      current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
+      current_position += snprintf(current_position, total_size, "\n");
     }
     cout<<" final current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
 
