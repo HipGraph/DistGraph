@@ -182,13 +182,16 @@ public:
       }
       char *current_position = buffer;
 
-      for (auto i = 0; i < sparse_coo.size(); ++i) {
+      for (size_t i = 0; i < sparse_coo.size(); ++i) {
         current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].row+ 1 + grid->rank_in_col * rows);
+        if (grid->rank_in_col==0){
+          cout<<" current_position "<<current_position<<endl;
+        }
         current_position += snprintf(current_position, total_size, "%lu",sparse_coo[i].col+ 1);
         current_position += snprintf(current_position, total_size, " %.5f", sparse_coo[i].value);
         current_position += snprintf(current_position, total_size, "\n");
       }
-      cout<<" current_position "<<*current_position<<" "<<"buffer"<< *buffer<<endl;
+      cout<<" current_position "<<current_position<<" "<<"buffer"<< *buffer<<endl;
       MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,MPI_STATUS_IGNORE);
 
       // Free the dynamically allocated memory
