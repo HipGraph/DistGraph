@@ -39,6 +39,8 @@ public:
 
   unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
+  T *sparse_input_as_dense;
+
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
    * @param coords  (src, dst, value) Tuple vector loaded as input
@@ -65,6 +67,12 @@ public:
   SpMat(Process3DGrid *grid) {
     this->grid = grid;
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+  }
+
+  SpMat(Process3DGrid *grid, int &batch_size, int &proc_col_width) {
+    this->grid = grid;
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[batch_size * proc_col_width])));
   }
 
   /**

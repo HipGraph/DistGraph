@@ -98,8 +98,7 @@ public:
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
-    DENT *prevCoordinates = static_cast<DENT *>(
-        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+    DENT *prevCoordinates = sparse_local_output->sparse_input_as_dense;
 
     size_t total_memory = 0;
 
@@ -370,24 +369,6 @@ public:
             }
           }
         }
-      }
-    }
-  }
-
-
-  inline void update_data_matrix_rowptr(DENT *prevCoordinates, int batch_id,
-                                        int batch_size) {
-
-    int row_base_index = batch_id * batch_size;
-    int end_row = std::min((batch_id + 1) * batch_size,
-                           ((this->sp_local_receiver)->proc_row_width));
-
-#pragma omp parallel for schedule(static)
-    for (int i = 0; i < (end_row - row_base_index); i++) {
-      for (int d = 0; d < embedding_dim; d++) {
-        (this->dense_local_output)
-            ->nCoordinates[(row_base_index + i) * embedding_dim + d] =
-            prevCoordinates[i * embedding_dim + d];
       }
     }
   }
