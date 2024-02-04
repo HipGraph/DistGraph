@@ -167,13 +167,13 @@ public:
       if (k == comm_initial_start) {
         // local computation
         this->calc_t_dist_grad_rowptr(
-            csr_block, prevCoordinates, lr, batch, batch_size,
+            csr_block,  lr, batch, batch_size,
             considering_batch_size, local_execution,
             first_execution_proc, prev_start);
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
+        this->calc_t_dist_grad_rowptr(csr_block, lr, batch,
                                       batch_size, considering_batch_size, false,
                                        prev_start, prev_end_process);
       }
@@ -182,7 +182,7 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
     // dense_local->invalidate_cache(i, j, true);
