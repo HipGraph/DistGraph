@@ -97,6 +97,8 @@ public:
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
+    DENT *prevCoordinates = static_cast<DENT *>(
+        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
     size_t total_memory = 0;
 
@@ -117,8 +119,14 @@ public:
 
         // One process computations without MPI operations
         if (grid->col_world_size == 1) {
+          for (int k = 0; k < batch_size; k += 1) {
+            int IDIM = k * embedding_dim;
+            for (int d = 0; d < embedding_dim; d++) {
+              prevCoordinates[IDIM + d] = 0;
+            }
+          }
           // local computations for 1 process
-          this->calc_t_dist_grad_rowptr(csr_block,  lr, j,
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
                                         true,  0, 0);
 
@@ -130,10 +138,17 @@ public:
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
-                considering_batch_size, lr,  1,
+                considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
 //            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
+            for (int k = 0; k < batch_size; k += 1) {
+              int IDIM = k * embedding_dim;
+               #pragma omp parallel for
+              for (int d = 0; d < embedding_dim; d++) {
+                prevCoordinates[IDIM + d] = 0;
+              }
+            }
         }
         total_memory += get_memory_usage();
       }
@@ -149,7 +164,7 @@ public:
       std::vector<SpTuple<DENT,embedding_dim>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, int comm_initial_start, bool local_execution,
+      double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
     int proc_length = get_proc_length(beta, grid->col_world_size);
@@ -167,13 +182,13 @@ public:
       if (k == comm_initial_start) {
         // local computation
         this->calc_t_dist_grad_rowptr(
-            csr_block,  lr, batch, batch_size,
+            csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution,
             first_execution_proc, prev_start);
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
-        this->calc_t_dist_grad_rowptr(csr_block, lr, batch,
+        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                       batch_size, considering_batch_size, false,
                                        prev_start, prev_end_process);
       }
@@ -182,7 +197,7 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
+    this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
     // dense_local->invalidate_cache(i, j, true);
@@ -190,8 +205,8 @@ public:
 
 
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,DENT lr,
-                                      int batch_id, int batch_size, int block_size,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+                          DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, int start_process,int end_process) {
 
     auto source_start_index = batch_id * batch_size;
@@ -214,7 +229,8 @@ public:
 //                       batch_size, block_size, fetch_from_temp_cache);
 //      } else {
         calc_embedding_row_major(source_start_index, source_end_index,
-                                 dst_start_index, dst_end_index, csr_block, lr, batch_id, batch_size,
+                                 dst_start_index, dst_end_index, csr_block,
+                                 prevCoordinates, lr, batch_id, batch_size,
                                  block_size);
 //      }
     } else {
@@ -241,7 +257,7 @@ public:
 //          } else {
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
-                                   lr, batch_id, batch_size,
+                                     prevCoordinates, lr, batch_id, batch_size,
                                      block_size);
 //          }
         }
@@ -305,7 +321,8 @@ public:
 
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
-                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,DENT lr, int batch_id,
+                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
+                           DENT *prevCoordinates, DENT lr, int batch_id,
                            int batch_size, int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
@@ -343,12 +360,12 @@ public:
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
-                (*output_ptr)[index][d] += lr *handle->values[k];
+                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 auto d = remote_cols[m];
-                (*output_ptr)[index][d] += lr *remote_values[m];
+                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
               }
             }
           }
@@ -358,7 +375,8 @@ public:
   }
 
 
-  inline void update_data_matrix_rowptr(int batch_id,int batch_size) {
+  inline void update_data_matrix_rowptr(DENT *prevCoordinates, int batch_id,
+                                        int batch_size) {
 
     int row_base_index = batch_id * batch_size;
     int end_row = std::min((batch_id + 1) * batch_size,
@@ -366,8 +384,10 @@ public:
 
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
-      for(auto it = (*output_ptr)[index].begin();it != (*output_ptr)[index].end();++it){
-
+      for (int d = 0; d < embedding_dim; d++) {
+        (this->dense_local_output)
+            ->nCoordinates[(row_base_index + i) * embedding_dim + d] =
+            prevCoordinates[i * embedding_dim + d];
       }
     }
   }
