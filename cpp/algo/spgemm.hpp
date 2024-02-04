@@ -97,6 +97,7 @@ public:
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
+    // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
     DENT *prevCoordinates = static_cast<DENT *>(
         ::operator new(sizeof(DENT[batch_size * embedding_dim])));
 
@@ -144,7 +145,6 @@ public:
 
             for (int k = 0; k < batch_size; k += 1) {
               int IDIM = k * embedding_dim;
-               #pragma omp parallel for
               for (int d = 0; d < embedding_dim; d++) {
                 prevCoordinates[IDIM + d] = 0;
               }
