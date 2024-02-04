@@ -343,17 +343,11 @@ public:
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
-                if ((*output_ptr)[index].find(d)==(*output_ptr)[index].end(d)){
-                  (*output_ptr)[index][d]=0;
-                }
                 (*output_ptr)[index][d] += lr *handle->values[k];
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 auto d = remote_cols[m];
-                if ((*output_ptr)[index].find(d)==(*output_ptr)[index].end(d)){
-                  (*output_ptr)[index][d]=0;
-                }
                 (*output_ptr)[index][d] += lr *remote_values[m];
               }
             }
