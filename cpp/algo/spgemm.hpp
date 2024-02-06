@@ -159,19 +159,15 @@ public:
       MPI_Request req;
 
       if (communication) {
-        cout<<grid->rank_in_col <<" transfer sparse data inititated "<<endl;
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        cout<<grid->rank_in_col <<" transfer sparse data completed "<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
-        cout<<grid->rank_in_col <<" starting local computation  "<<endl;
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution,
             first_execution_proc, prev_start);
-        cout<<grid->rank_in_col <<" local computation completed "<<endl;
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
@@ -184,11 +180,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    cout<<grid->rank_in_col <<" started remote computation  "<<endl;
     this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
-    cout<<grid->rank_in_col <<"  remote computation  completed "<<endl;
     // dense_local->invalidate_cache(i, j, true);
   }
 
