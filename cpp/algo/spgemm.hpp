@@ -98,7 +98,7 @@ public:
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
-    vector<vector<DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
+    vector<unordered_map<int,DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
 
     size_t total_memory = 0;
 
@@ -147,7 +147,7 @@ public:
       std::vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, vector<vector<DENT>> *prevCoordinates, int comm_initial_start, bool local_execution,
+      double lr, vector<unordered_map<int,DENT>> *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
     int proc_length = get_proc_length(beta, grid->col_world_size);
@@ -194,7 +194,7 @@ public:
 
 
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, vector<vector<DENT>> *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, vector<unordered_map<int,DENT>> *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, int start_process,int end_process) {
 
@@ -244,7 +244,7 @@ public:
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
-                           vector<vector<DENT>> *prevCoordinates, DENT lr, int batch_id,
+                           vector<unordered_map<int,DENT>> *prevCoordinates, DENT lr, int batch_id,
                            int batch_size, int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
