@@ -178,6 +178,7 @@ public:
       }
       if (k == comm_initial_start) {
         // local computation
+        cout<<grid->rank_in_col <<" starting local computation completed "<<endl;
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution,
