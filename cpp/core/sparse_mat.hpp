@@ -69,10 +69,13 @@ public:
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
   }
 
-  SpMat(Process3DGrid *grid, int &batch_size, const int &proc_col_width) {
+  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width) {
     this->grid = grid;
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
-    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[batch_size * proc_col_width])));
+    this->proc_col_width = proc_col_width;
+    this->proc_row_width = proc_row_width;
+    this->batch_size = proc_row_width;
+    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
   }
 
   /**

@@ -297,7 +297,9 @@ public:
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
-                auto val = lr *handle->values[k];
+                if (d>=12800){
+                  cout<<" rank "<<grid->rank_in_col<<" larger value "<<d<<endl;
+                }
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
