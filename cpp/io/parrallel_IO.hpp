@@ -165,7 +165,7 @@ public:
 //    }
     std::uniform_real_distribution<double> uni_dist(0, cols);
         for (int i = 0; i < rows; ++i) {
-          for(int j=0;<expected_non_zeros;j++){
+          for(int j=0;j<expected_non_zeros;j++){
             T val = static_cast<T>(norm_dist(gen));
             int index = uni_dist(gen);
             Tuple<T> t;
