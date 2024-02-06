@@ -179,7 +179,7 @@ public:
 
 
   template <typename T>
-  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows, uint64_t global_rows) {
+  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows, uint64_t global_rows, uint64_t global_cols) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
@@ -194,7 +194,7 @@ public:
 
     for (uint64_t i = 0; i < sparse_coo.size(); i += chunk_size) {
       if (grid->rank_in_col==0 and i==0){
-        total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_rows, global_sum);
+        total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
       }
       int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
