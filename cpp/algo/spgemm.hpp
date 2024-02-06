@@ -298,7 +298,7 @@ public:
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
                 auto val = lr *handle->values[k];
-//                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
+                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
