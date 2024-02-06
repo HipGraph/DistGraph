@@ -39,7 +39,7 @@ public:
 
   unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
-  T *sparse_input_as_dense;
+  unique_ptr<vector<vector<T>>> sparse_data_collector;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -75,7 +75,8 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
-    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
+//    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
+    sparse_data_collector = make_unique<vector<vector<T>>>(proc_row_width,vector<T>(proc_col_width,0));
   }
 
   /**

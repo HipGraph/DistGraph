@@ -98,7 +98,7 @@ public:
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
-    DENT *prevCoordinates = sparse_local_output->sparse_input_as_dense;
+    vector<vector<DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector;
 
     size_t total_memory = 0;
 
@@ -109,12 +109,6 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
-      for (int k = 0; k < batch_size; k += 1) {
-        int IDIM = k * embedding_dim;
-        for (int d = 0; d < embedding_dim; d++) {
-          prevCoordinates[IDIM + d] = 0;
-        }
-      }
 
       for (int j = 0; j < batches; j++) {
 
@@ -125,12 +119,6 @@ public:
 
         // One process computations without MPI operations
         if (grid->col_world_size == 1) {
-          for (int k = 0; k < batch_size; k += 1) {
-            int IDIM = k * embedding_dim;
-            for (int d = 0; d < embedding_dim; d++) {
-              prevCoordinates[IDIM + d] = 0;
-            }
-          }
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
@@ -206,7 +194,7 @@ public:
 
 
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, vector<vector<DENT>> *prevCoordinates,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, int start_process,int end_process) {
 
@@ -256,7 +244,7 @@ public:
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
-                           DENT *prevCoordinates, DENT lr, int batch_id,
+                           vector<vector<DENT>> *prevCoordinates, DENT lr, int batch_id,
                            int batch_size, int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
@@ -294,13 +282,13 @@ public:
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
-                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
+                prevCoordinates[index][d] += lr *handle->values[k];
 
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 auto d = remote_cols[m];
-                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
+                prevCoordinates[index][d] += lr *remote_values[m];
               }
             }
           }
