@@ -109,6 +109,12 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
+      for (int k = 0; k < batch_size; k += 1) {
+        int IDIM = k * embedding_dim;
+        for (int d = 0; d < embedding_dim; d++) {
+          prevCoordinates[IDIM + d] = 0;
+        }
+      }
 
       for (int j = 0; j < batches; j++) {
 
@@ -138,12 +144,6 @@ public:
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
-            for (int k = 0; k < batch_size; k += 1) {
-              int IDIM = k * embedding_dim;
-              for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[IDIM + d] = 0;
-              }
-            }
         }
         total_memory += get_memory_usage();
       }
@@ -286,28 +286,16 @@ public:
             if (fetch_from_cache) {
               unordered_map<uint64_t, SparseCacheEntry<DENT>>
                   &arrayMap = (*sparse_local->tempCachePtr)[target_rank];
-              if (arrayMap.find(dst_id)==arrayMap.end(dst_id)){
-                cout<<" rank "<<grid->rank_in_col<<" cannot find value "<<dst_id<<endl;
-              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
             }
-            cout<< grid->rank_in_col<<" starting calculation"<<endl;
+
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
-                if ((index * embedding_dim + d)>=(sparse_local_output->proc_row_width*sparse_local_output->proc_col_width)) {
-                  cout << " rank " << grid->rank_in_col << " wrong index "
-                       << index << " max value " << (index * embedding_dim + d)
-                       << " d " << d << " expected "
-                       << (sparse_local_output->proc_row_width *
-                           sparse_local_output->proc_col_width)
-                       << endl;
-                }
-//                cout<< grid->rank_in_col<<" updating index"<<index<<" d "<<d<<endl;
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
-//                cout<< grid->rank_in_col<<" completed index"<<index<<" d "<<d<<endl;
+
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
