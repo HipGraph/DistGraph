@@ -148,22 +148,21 @@ public:
     std::normal_distribution<float> norm_dist(0, 1);
 
     // follow row major order
-    for (uint64_t j = 0; j < rows; ++j) {
-      for (uint64_t i = 0; i < cols; ++i) {
-        // take value at uniformly at random and check value is greater than
-        // density.If so make that entry empty
-        if (uni_dist(gen) <= density) {
-          // normal distribution for generate projection matrix.
-          T val = (T)norm_dist(gen);
-          Tuple<T> t;
-          t.row = j;
-          t.col = i;
-          t.value = val;
-          (sparse_coo).push_back(t);
-        }
+    #pragma omp parallel for
+    for (int i = 0; i < rows * cols; ++i) {
+      if (uni_dist(gen) <= density) {
+        T val = static_cast<T>(norm_dist(gen));
+        Tuple<T> t;
+        t.row = i / cols;  // Calculate row index
+        t.col = i % cols;  // Calculate column index
+        t.value = val;
+
+        #pragma omp critical
+        sparse_coo.push_back(t);
       }
     }
   }
+
 
   template <typename T>
   void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows, uint64_t global_rows) {
