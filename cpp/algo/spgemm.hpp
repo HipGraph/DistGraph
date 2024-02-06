@@ -98,7 +98,7 @@ public:
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
-    vector<vector<DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector;
+    vector<vector<DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
 
     size_t total_memory = 0;
 
@@ -147,7 +147,7 @@ public:
       std::vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
+      double lr, vector<vector<DENT>> *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
     int proc_length = get_proc_length(beta, grid->col_world_size);
