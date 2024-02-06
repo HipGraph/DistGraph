@@ -302,9 +302,10 @@ public:
              latest.rows[0]=row_index_offset+2;
              latest.rows[1]=latest.rows[1]+num_of_copying_data;
 
-//             copy(sparse_tuple.row_idx.begin(),sparse_tuple.row_idx.begin()+ num_of_copying_data, latest.rows.begin()+ latest.offset);
-             copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin()+ num_of_copying_data, latest.cols.begin()+ col_index_offset);
-             copy(sparse_tuple.values.begin(),sparse_tuple.values.begin()+ num_of_copying_data, latest.values.begin()+ col_index_offset);
+             if (num_of_copying_data>0) {
+               copy(sparse_tuple.col_idx.begin(),sparse_tuple.col_idx.begin() + num_of_copying_data,latest.cols.begin() + col_index_offset);
+               copy(sparse_tuple.values.begin(),sparse_tuple.values.begin() + num_of_copying_data,latest.values.begin() + col_index_offset);
+             }
              (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              if (remaining_data_items>0){
                SpTuple<DENT,sp_tuple_max_dim> current;
@@ -321,7 +322,6 @@ public:
                latest.rows[0]=row_index_offset+2;
                latest.rows[1]=latest.rows[1]+remaining_data_items;
 
-//               copy(sparse_tuple.row_idx.begin()+num_of_copying_data-1, sparse_tuple.row_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.rows.begin());
                copy(sparse_tuple.col_idx.begin()+num_of_copying_data-1, sparse_tuple.col_idx.begin()+num_of_copying_data-1+remaining_data_items, latest.cols.begin());
                copy(sparse_tuple.values.begin()+num_of_copying_data-1, sparse_tuple.values.begin()+num_of_copying_data-1+remaining_data_items, latest.values.begin());
                (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;

@@ -171,10 +171,10 @@ public:
       MPI_Request req;
 
       if (communication) {
-        cout<<grid->col_world_size <<" transfer sparse data inititated "<<endl;
+        cout<<grid->rank_in_col <<" transfer sparse data inititated "<<endl;
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        cout<<grid->col_world_size <<" transfer sparse data completed "<<endl;
+        cout<<grid->rank_in_col <<" transfer sparse data completed "<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -295,7 +295,7 @@ public:
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 auto d = remote_cols[m];
-                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
+//                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
               }
             }
           }
