@@ -28,7 +28,7 @@ using namespace  distblas::core;
 
 int main(int argc, char **argv) {
 
-  const int dimension = 128;
+  const int dimension = 1280000;
 
   const int sparse_chunk_size = dimension;
 
