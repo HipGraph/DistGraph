@@ -144,23 +144,37 @@ public:
                                   vector<Tuple<T>> &sparse_coo,Process3DGrid *grid) {
 
     std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> uni_dist(0, 1);
+//    std::uniform_real_distribution<double> uni_dist(0, 1);
     std::normal_distribution<double> norm_dist(0, 1);
 
-    // follow row major order
-    #pragma omp parallel for
-    for (int i = 0; i < rows * cols; ++i) {
-      if (uni_dist(gen) <= density) {
-        T val = static_cast<T>(norm_dist(gen));
-        Tuple<T> t;
-        t.row = i / cols;  // Calculate row index
-        t.col = i % cols;  // Calculate column index
-        t.value = val;
+    int expected_non_zeros  = cols*density;
 
-        #pragma omp critical
-        sparse_coo.push_back(t);
-      }
-    }
+//    // follow row major order
+//    #pragma omp parallel for
+//    for (int i = 0; i < rows * cols; ++i) {
+//      if (uni_dist(gen) <= density) {
+//        T val = static_cast<T>(norm_dist(gen));
+//        Tuple<T> t;
+//        t.row = i / cols;  // Calculate row index
+//        t.col = i % cols;  // Calculate column index
+//        t.value = val;
+//
+//        #pragma omp critical
+//        sparse_coo.push_back(t);
+//      }
+//    }
+    std::uniform_real_distribution<double> uni_dist(0, cols);
+        for (int i = 0; i < rows; ++i) {
+          for(int j=0;<expected_non_zeros;j++){
+            T val = static_cast<T>(norm_dist(gen));
+            int index = uni_dist(gen);
+            Tuple<T> t;
+            t.row = i ;  // Calculate row index
+            t.col = index;  // Calculate column index
+            t.value = val;
+            sparse_coo.push_back(t);
+          }
+        }
   }
 
 
