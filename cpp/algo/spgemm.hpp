@@ -178,7 +178,7 @@ public:
       }
       if (k == comm_initial_start) {
         // local computation
-        cout<<grid->rank_in_col <<" starting local computation completed "<<endl;
+        cout<<grid->rank_in_col <<" starting local computation  "<<endl;
         this->calc_t_dist_grad_rowptr(
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution,
@@ -297,7 +297,8 @@ public:
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 auto d = handle->col_idx[k];
-                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
+                auto val = lr *handle->values[k]
+//                prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
