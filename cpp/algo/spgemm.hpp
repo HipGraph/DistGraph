@@ -282,6 +282,9 @@ public:
             if (fetch_from_cache) {
               unordered_map<uint64_t, SparseCacheEntry<DENT>>
                   &arrayMap = (*sparse_local->tempCachePtr)[target_rank];
+              if (arrayMap.find(dst_id)==arrayMap.end(dst_id)){
+                cout<<" rank "<<grid->rank_in_col<<" cannot find value "<<dst_id<<endl;
+              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
             }
@@ -295,7 +298,7 @@ public:
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 auto d = remote_cols[m];
-//                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
+                prevCoordinates[index * embedding_dim + d] += lr *remote_values[m];
               }
             }
           }

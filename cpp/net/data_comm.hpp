@@ -489,14 +489,20 @@ public:
             sp_entry.values = vector<DENT>();
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
-          SparseCacheEntry<DENT> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
-          auto entry_offset = cache_entry.cols.size();
-          cache_entry.cols.resize(entry_offset+count);
-          cache_entry.values.resize(entry_offset+count);
-          copy(sp_tuple.cols.begin()+offset_so_far,sp_tuple.cols.begin()+offset_so_far+ count, cache_entry.cols.begin()+ entry_offset);
-          copy(sp_tuple.values.begin()+offset_so_far,sp_tuple.values.begin()+offset_so_far+ count, cache_entry.values.begin()+ entry_offset);
-          offset_so_far+=count;
-          (*(this->sparse_local)->tempCachePtr)[i][key]=cache_entry;
+          if (count>0) {
+            SparseCacheEntry<DENT> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
+            auto entry_offset = cache_entry.cols.size();
+            cache_entry.cols.resize(entry_offset + count);
+            cache_entry.values.resize(entry_offset + count);
+            copy(sp_tuple.cols.begin() + offset_so_far,
+                 sp_tuple.cols.begin() + offset_so_far + count,
+                 cache_entry.cols.begin() + entry_offset);
+            copy(sp_tuple.values.begin() + offset_so_far,
+                 sp_tuple.values.begin() + offset_so_far + count,
+                 cache_entry.values.begin() + entry_offset);
+            offset_so_far += count;
+            (*(this->sparse_local)->tempCachePtr)[i][key] = cache_entry;
+          }
         }
       }
     }
