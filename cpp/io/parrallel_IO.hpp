@@ -179,7 +179,7 @@ public:
 
 
   template <typename T>
-  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, int rows, uint64_t global_rows, uint64_t global_cols) {
+  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, uint64_t local_rows, uint64_t global_rows, uint64_t global_cols) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
@@ -201,7 +201,7 @@ public:
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<T> t = sparse_coo[i + j];
         int col = static_cast<int>(t.col + 1);
-        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * rows);
+        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * local_rows);
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
       }
 
@@ -214,13 +214,13 @@ public:
 
       char *current_position = buffer;
       if (i==0 and grid->rank_in_col==0){
-        current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_rows, global_sum);
+        current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
       }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<T> t = sparse_coo[i + j];
         uint64_t col = static_cast<int>(t.col + 1);
-        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * rows);
+        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * local_rows);
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
       }
 
