@@ -305,9 +305,9 @@ public:
                            sparse_local_output->proc_col_width)
                        << endl;
                 }
-                cout<< grid->rank_in_col<<" updating index"<<index<<" d "<<d<<endl;
+//                cout<< grid->rank_in_col<<" updating index"<<index<<" d "<<d<<endl;
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
-                cout<< grid->rank_in_col<<" completed index"<<index<<" d "<<d<<endl;
+//                cout<< grid->rank_in_col<<" completed index"<<index<<" d "<<d<<endl;
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
