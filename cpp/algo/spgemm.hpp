@@ -281,13 +281,13 @@ public:
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
-                auto d = handle->col_idx[k];
+                int  d = static_cast<int>(handle->col_idx[k]);
                 prevCoordinates[index][d] += lr *handle->values[k];
 
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
-                auto d = remote_cols[m];
+                int d = static_cast<int>(remote_cols[m]);
                 prevCoordinates[index][d] += lr *remote_values[m];
               }
             }
