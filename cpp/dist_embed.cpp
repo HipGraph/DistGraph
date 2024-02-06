@@ -93,7 +93,6 @@ int main(int argc, char **argv) {
       spgemm = enable_spgemm == 1 ? true : false;
     }else if (strcmp(argv[p], "-density") == 0) {
       density = atof(argv[p + 1]);
-      cout<<" density "<<density<<endl;
     }else if (strcmp(argv[p], "-save_results") == 0) {
       int save_res = atoi(argv[p + 1]);
       save_results = save_res == 1 ? true : false;
