@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
   // Initialize MPI DataTypes
 
-    initialize_mpi_datatypes<int, double, dimension>();
+//    initialize_mpi_datatypes<int, double, dimension>();
 
 
   // Creating reader
