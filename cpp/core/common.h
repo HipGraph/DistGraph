@@ -24,6 +24,7 @@ using namespace std::chrono;
 using json = nlohmann::json;
 
 const int row_max = 22;
+const int sp_tuple_max_dim= 512;
 
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
