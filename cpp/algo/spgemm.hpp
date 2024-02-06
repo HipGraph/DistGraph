@@ -81,10 +81,10 @@ public:
     full_comm.get()->onboard_data();
 
     // Buffer used for receive MPI operations data
-    unique_ptr<std::vector<SpTuple<DENT,embedding_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<DENT,embedding_dim>>>(new vector<SpTuple<DENT,embedding_dim>>());
+    unique_ptr<std::vector<SpTuple<DENT,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<DENT,sp_tuple_max_dim>>>(new vector<SpTuple<DENT,sp_tuple_max_dim>>());
 
     //Buffer used for send MPI operations data
-    unique_ptr<vector<SpTuple<DENT,embedding_dim>>> sendbuf_ptr = unique_ptr<vector<SpTuple<DENT,embedding_dim>>>(new vector<SpTuple<DENT,embedding_dim>>());
+    unique_ptr<vector<SpTuple<DENT,sp_tuple_max_dim>>> sendbuf_ptr = unique_ptr<vector<SpTuple<DENT,sp_tuple_max_dim>>>(new vector<SpTuple<DENT,sp_tuple_max_dim>>());
 
 
     for (int i = 0; i < batches; i++) {
@@ -159,8 +159,8 @@ public:
   }
 
   inline void execute_pull_model_computations(
-      std::vector<SpTuple<DENT,embedding_dim>> *sendbuf,
-      std::vector<SpTuple<DENT,embedding_dim>> *receivebuf, int iteration,
+      std::vector<SpTuple<DENT,sp_tuple_max_dim>> *sendbuf,
+      std::vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
       double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
