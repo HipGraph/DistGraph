@@ -130,8 +130,6 @@ public:
                                         batch_size, considering_batch_size,
                                         true,  0, 0);
 
-//          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-
         } else {
 
           //  pull model code
@@ -140,8 +138,6 @@ public:
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
-//            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-
             for (int k = 0; k < batch_size; k += 1) {
               int IDIM = k * embedding_dim;
               for (int d = 0; d < embedding_dim; d++) {
@@ -175,8 +171,10 @@ public:
       MPI_Request req;
 
       if (communication) {
+        cout<<grid->col_world_size <<" transfer sparse data inititated "<<endl;
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
+        cout<<grid->col_world_size <<" transfer sparse data completed "<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -222,16 +220,10 @@ public:
         1;
 
     if (local) {
-//      if (col_major) {
-//        calc_embedding(source_start_index, source_end_index, dst_start_index,
-//                       dst_end_index, csr_block, prevCoordinates, lr, batch_id,
-//                       batch_size, block_size, fetch_from_temp_cache);
-//      } else {
         calc_embedding_row_major(source_start_index, source_end_index,
                                  dst_start_index, dst_end_index, csr_block,
                                  prevCoordinates, lr, batch_id, batch_size,
                                  block_size);
-//      }
     } else {
       for (int r = start_process; r < end_process; r++) {
 
@@ -248,75 +240,14 @@ public:
                        this->sp_local_receiver->gCols) -
               1;
 
-//          if (col_major) {
-//            calc_embedding(source_start_index, source_end_index,
-//                           dst_start_index, dst_end_index, csr_block,
-//                           prevCoordinates, lr, batch_id, batch_size,
-//                           block_size, fetch_from_temp_cache);
-//          } else {
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
                                      prevCoordinates, lr, batch_id, batch_size,
                                      block_size);
-//          }
         }
       }
     }
   }
-
-//  inline void calc_embedding(uint64_t source_start_index,
-//                             uint64_t source_end_index,
-//                             uint64_t dst_start_index, uint64_t dst_end_index,
-//                             CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
-//                             DENT lr, int batch_id, int batch_size,
-//                             int block_size, bool temp_cache) {
-//    if (csr_block->handler != nullptr) {
-//      CSRHandle *csr_handle = csr_block->handler.get();
-//
-//#pragma omp parallel for schedule(static)
-//      for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
-//
-//        uint64_t local_dst = i - (grid)->rank_in_col *
-//                                     (this->sp_local_receiver)->proc_row_width;
-//        int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
-//        bool fetch_from_cache =
-//            target_rank == (grid)->rank_in_col ? false : true;
-//
-//
-//        bool matched = false;
-//        std::array<DENT, embedding_dim> array_ptr;
-//        bool col_inserted = false;
-//        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-//             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
-//          if (csr_handle->col_idx[j] >= source_start_index and
-//              csr_handle->col_idx[j] <= source_end_index) {
-//            auto source_id = csr_handle->col_idx[j];
-//            auto index = source_id - batch_id * batch_size;
-//
-//            if (!matched) {
-//              if (fetch_from_cache) {
-//                unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>
-//                    &arrayMap =
-//                        (temp_cache)
-//                            ? (*this->dense_local->tempCachePtr)[target_rank]
-//                            : (*this->dense_local->cachePtr)[target_rank];
-//                array_ptr = arrayMap[i].value;
-//              }
-//              matched = true;
-//            }
-//            for (int d = 0; d < embedding_dim; d++) {
-//              if (!fetch_from_cache) {
-//                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
-//                                                                       ->nCoordinates[local_dst * embedding_dim + d];
-//              } else {
-//                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
-//              }
-//            }
-//          }
-//        }
-//      }
-//    }
-//  }
 
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
