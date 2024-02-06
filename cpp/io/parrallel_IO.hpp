@@ -140,12 +140,12 @@ public:
   }
 
   template <typename T>
-  void build_sparse_random_matrix(int rows, int cols, float density, int seed,
+  void build_sparse_random_matrix(int rows, int cols, double density, int seed,
                                   vector<Tuple<T>> &sparse_coo,Process3DGrid *grid) {
 
     std::mt19937 gen(seed);
-    std::uniform_real_distribution<float> uni_dist(0, 1);
-    std::normal_distribution<float> norm_dist(0, 1);
+    std::uniform_real_distribution<double> uni_dist(0, 1);
+    std::normal_distribution<double> norm_dist(0, 1);
 
     // follow row major order
     #pragma omp parallel for
