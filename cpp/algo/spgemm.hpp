@@ -262,7 +262,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+//#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -292,7 +292,7 @@ public:
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
             }
-
+            cout<< grid->rank_in_col<<" starting calculation"<<endl;
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
@@ -305,7 +305,9 @@ public:
                            sparse_local_output->proc_col_width)
                        << endl;
                 }
+                cout<< grid->rank_in_col<<" updating index"<<index<<" d "<<d<<endl;
                 prevCoordinates[index * embedding_dim + d] += lr *handle->values[k];
+                cout<< grid->rank_in_col<<" completed index"<<index<<" d "<<d<<endl;
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
