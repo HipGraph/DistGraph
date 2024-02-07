@@ -244,7 +244,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
