@@ -244,7 +244,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -276,13 +276,14 @@ public:
             if (!fetch_from_cache) {
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 int  d = static_cast<int>(handle->col_idx[k]);
-                (*prevCoordinates)[index][d] += lr *handle->values[k];
-
+//                (*prevCoordinates)[index][d] += lr *handle->values[k];
+                sparse_data_counter[index].insert(d);
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 int d = static_cast<int>(remote_cols[m]);
-                (*prevCoordinates)[index][d] += lr *remote_values[m];
+//                (*prevCoordinates)[index][d] += lr *remote_values[m];
+                sparse_data_counter[index].insert(d);
               }
             }
           }
