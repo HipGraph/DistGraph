@@ -77,6 +77,12 @@ public:
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     sparse_data_collector = make_unique<vector<unordered_map<int,T>>>(proc_row_width,unordered_map<int,T>());
+    for(int i=0;i<proc_row_width;i++){
+      unordered_map<int,T> col_value_mapper;
+      col_value_mapper.reserve(64);
+      (*sparse_data_collector)[i]=col_value_mapper;
+    }
+
   }
 
   /**
