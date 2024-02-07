@@ -42,7 +42,7 @@ public:
 
   unique_ptr<vector<unordered_map<int,T>>> sparse_data_collector;
 
-  unique_ptr<vector<set<uint64_t>>> sparse_data_counter;
+  unique_ptr<vector<unordered_set<uint64_t>>> sparse_data_counter;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
