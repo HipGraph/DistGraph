@@ -42,7 +42,7 @@ public:
 
   unique_ptr<vector<unordered_map<int,T>>> sparse_data_collector;
 
-  unique_ptr<vector<unordered_set<uint64_t>>> sparse_data_counter;
+  unique_ptr<vector<uint64_t>> sparse_data_counter;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -81,7 +81,7 @@ public:
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     sparse_data_collector = make_unique<vector<unordered_map<int,T>>>(proc_row_width,unordered_map<int,T>());
 
-    sparse_data_counter = make_unique<vector<unordered_set<uint64_t>>>(proc_row_width,unordered_set<uint64_t>());
+    sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width,0);
     for(int i=0;i<proc_row_width;i++){
       unordered_map<int,T> col_value_mapper;
       col_value_mapper.reserve(64);
