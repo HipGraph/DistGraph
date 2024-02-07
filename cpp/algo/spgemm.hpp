@@ -277,13 +277,13 @@ public:
               for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                 int  d = static_cast<int>(handle->col_idx[k]);
 //                (*prevCoordinates)[index][d] += lr *handle->values[k];
-                (*(sparse_local_output->sparse_data_counter)).[index].insert(d);
+                (*(sparse_local_output->sparse_data_counter))[index].insert(d);
               }
             }else{
               for(int m=0;m<remote_cols.size();m++){
                 int d = static_cast<int>(remote_cols[m]);
 //                (*prevCoordinates)[index][d] += lr *remote_values[m];
-                (*(sparse_local_output->sparse_data_counter)).[index].insert(d);
+                (*(sparse_local_output->sparse_data_counter))[index].insert(d);
               }
             }
           }
