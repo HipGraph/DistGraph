@@ -132,6 +132,7 @@ public:
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
+            (sparse_local_output)->initialize_hashtables();
         }
         total_memory += get_memory_usage();
       }

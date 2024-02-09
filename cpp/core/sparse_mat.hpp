@@ -16,6 +16,7 @@
 #include "common.h"
 #include "../net/process_3D_grid.hpp"
 #include <set>
+#include <math.h>
 
 using namespace std;
 using namespace distblas::net;
@@ -40,7 +41,7 @@ public:
 
   unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
-  unique_ptr<vector<unordered_map<int,T>>> sparse_data_collector;
+  unique_ptr<vector<vector<uint64_t,T>> sparse_data_collector;
 
   unique_ptr<vector<uint64_t>> sparse_data_counter;
 
@@ -79,15 +80,9 @@ public:
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
-    sparse_data_collector = make_unique<vector<unordered_map<int,T>>>(proc_row_width,unordered_map<int,T>());
+    sparse_data_collector = make_unique<vector<vector<pair<uint64_t, T>>(proc_row_width,vector<pair<uint64_t,T>>());
 
     sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width,0);
-    for(int i=0;i<proc_row_width;i++){
-      unordered_map<int,T> col_value_mapper;
-      col_value_mapper.reserve(64);
-      (*sparse_data_collector)[i]=col_value_mapper;
-    }
-
   }
 
   /**
@@ -115,6 +110,17 @@ public:
       csr_local_data =
           make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
                                    coords_ptr, coords.size(), transpose);
+    }
+  }
+
+
+  void initialize_hashtables(){
+    #pragma  omp parallel for
+    for(auto i=0;i<proc_row_width;i++){
+      auto count = sparse_data_counter[i];
+      auto resize_count = pow(2,log2(count)+1);
+      sparse_data_collector[i].clear();
+      sparse_data_collector[i].resize(resize_count,{ -1, T{} });
     }
   }
 
