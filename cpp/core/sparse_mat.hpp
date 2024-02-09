@@ -120,7 +120,6 @@ public:
       auto count = (*sparse_data_counter)[i];
       auto resize_count = pow(2,log2(count)+1);
       (*sparse_data_collector)[i].clear();
-      (*sparse_data_collector)[i].shrink_to_fit();
       (*sparse_data_collector)[i].resize(resize_count,{ -1, T{} });
       (*sparse_data_counter)[i]=0;
     }
