@@ -80,7 +80,7 @@ public:
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
-    sparse_data_collector = make_unique<vector<vector<pair<uint64_t, T>>>(proc_row_width,vector<pair<uint64_t,T>>());
+    sparse_data_collector = make_unique<vector<vector<pair<uint64_t, T>>>>(proc_row_width,vector<pair<uint64_t,T>>());
 
     sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width,0);
   }
