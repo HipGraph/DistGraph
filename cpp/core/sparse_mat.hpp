@@ -41,7 +41,7 @@ public:
 
   unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
-  unique_ptr<vector<vector<pair<uint64_t,T>>> sparse_data_collector;
+  unique_ptr<vector<vector<pair<uint64_t,T>>>> sparse_data_collector;
 
   unique_ptr<vector<uint64_t>> sparse_data_counter;
 
