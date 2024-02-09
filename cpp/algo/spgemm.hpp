@@ -294,12 +294,12 @@ public:
                    auto hash = (d*hashScale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
                    auto value =  lr *handle->values[k];
                    while(1){
-                     if ((*sparse_local_output)[index][hash].first==d){
-                       (*sparse_local_output)[index][hash].second = (*sparse_local_output)[index][hash].second + value;
+                     if ((*(sparse_local_output->sparse_data_counter))[index][hash].first==d){
+                       (*(sparse_local_output->sparse_data_counter))[index][hash].second = (*(sparse_local_output->sparse_data_counter))[index][hash].second + value;
                        break;
-                     }else if ((*sparse_local_output)[index][hash].first==-1){
-                       (*sparse_local_output)[index][hash].first = d;
-                       (*sparse_local_output)[index][hash].second =   value;
+                     }else if ((*(sparse_local_output->sparse_data_counter))[index][hash].first==-1){
+                       (*(sparse_local_output->sparse_data_counter))[index][hash].first = d;
+                       (*(sparse_local_output->sparse_data_counter))[index][hash].second =   value;
                        break;
                      }else {
                        hash = (hash+1)& ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
@@ -323,12 +323,12 @@ public:
                   auto value =  lr *remote_values[m];
                   auto hash = (d*hashScale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
                   while (1) {
-                    if ((*sparse_local_output)[index][hash].first == d) {
-                      (*sparse_local_output)[index][hash].second = (*sparse_local_output)[index][hash].second + value;
+                    if ((*(sparse_local_output->sparse_data_counter))[index][hash].first == d) {
+                      (*(sparse_local_output->sparse_data_counter))[index][hash].second = (*(sparse_local_output->sparse_data_counter))[index][hash].second + value;
                       break;
-                    } else if ((*sparse_local_output)[index][hash].first ==-1) {
-                      (*sparse_local_output)[index][hash].first = d;
-                      (*sparse_local_output)[index][hash].second = value;
+                    } else if ((*(sparse_local_output->sparse_data_counter))[index][hash].first ==-1) {
+                      (*(sparse_local_output->sparse_data_counter))[index][hash].first = d;
+                      (*(sparse_local_output->sparse_data_counter))[index][hash].second = value;
                       break;
                     } else {
                       hash =(hash + 1) &((*(sparse_local_output->sparse_data_counter))[index].size() -1);
