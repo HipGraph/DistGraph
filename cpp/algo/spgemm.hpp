@@ -131,8 +131,13 @@ public:
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr,  1,
-                true, 0, true);
+                true, 0, true, true);
             (sparse_local_output)->initialize_hashtables();
+            this->execute_pull_model_computations(
+                sendbuf_ptr.get(), update_ptr.get(), i, j,
+                this->data_comm_cache[j].get(), csr_block, batch_size,
+                considering_batch_size, lr,  1,
+                true, 0, true,false);
         }
         total_memory += get_memory_usage();
       }
@@ -149,7 +154,7 @@ public:
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
       double lr,  int comm_initial_start, bool local_execution,
-      int first_execution_proc, bool communication) {
+      int first_execution_proc, bool communication, bool symbolic) {
 
     int proc_length = get_proc_length(beta, grid->col_world_size);
     int prev_start = comm_initial_start;
@@ -159,7 +164,7 @@ public:
 
       MPI_Request req;
 
-      if (communication) {
+      if (communication and symbolic) {
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
       }
@@ -168,13 +173,13 @@ public:
         this->calc_t_dist_grad_rowptr(
             csr_block,  lr, batch, batch_size,
             considering_batch_size, local_execution,
-            first_execution_proc, prev_start);
+            first_execution_proc, prev_start,symbolic);
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
         this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
                                       batch_size, considering_batch_size, false,
-                                       prev_start, prev_end_process);
+                                       prev_start, prev_end_process,symbolic);
       }
       prev_start = k;
     }
@@ -183,7 +188,7 @@ public:
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
                                   batch_size, considering_batch_size,
-                                  false,prev_start, prev_end_process);
+                                  false,prev_start, prev_end_process,symbolic);
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -191,7 +196,7 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
                           DENT lr, int batch_id, int batch_size, int block_size,
-                          bool local, int start_process,int end_process) {
+                          bool local, int start_process,int end_process, bool symbolic) {
 
     auto source_start_index = batch_id * batch_size;
     auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -210,7 +215,7 @@ public:
         calc_embedding_row_major(source_start_index, source_end_index,
                                  dst_start_index, dst_end_index, csr_block,
                                   lr, batch_id, batch_size,
-                                 block_size);
+                                 block_size,symbolic);
     } else {
       for (int r = start_process; r < end_process; r++) {
 
@@ -230,7 +235,7 @@ public:
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
                                       lr, batch_id, batch_size,
-                                     block_size);
+                                     block_size,symbolic);
         }
       }
     }
@@ -239,7 +244,7 @@ public:
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
                            uint64_t dst_end_index, CSRLocal<SPT> *csr_block,DENT lr, int batch_id,
-                           int batch_size, int block_size) {
+                           int batch_size, int block_size, bool symbolic) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -280,8 +285,15 @@ public:
 ////                (*prevCoordinates)[index][d] += lr *handle->values[k];
 //                (*(sparse_local_output->sparse_data_counter))[index];
 //              }
-              auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
-              (*(sparse_local_output->sparse_data_counter))[index] = std::max(val,embedding_dim);
+              if (symbolic) {
+                auto val =(*(sparse_local_output->sparse_data_counter))[index] +
+                    count;
+                (*(sparse_local_output->sparse_data_counter))[index] =std::max(val, embedding_dim);
+              }else {
+
+
+
+              }
             }else{
               int count = remote_cols.size();
 //              for(int m=0;m<remote_cols.size();m++){
@@ -289,8 +301,14 @@ public:
 ////                (*prevCoordinates)[index][d] += lr *remote_values[m];
 //                (*(sparse_local_output->sparse_data_counter))[index].insert(d);
 //              }
-              auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
-              (*(sparse_local_output->sparse_data_counter))[index] = std::max(val,embedding_dim);
+              if (symbolic){
+                auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
+                (*(sparse_local_output->sparse_data_counter))[index] = std::max(val,embedding_dim);
+              }else {
+
+
+              }
+
             }
           }
         }
