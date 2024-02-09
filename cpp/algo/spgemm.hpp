@@ -291,7 +291,7 @@ public:
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                    auto  d = (handle->col_idx[k]);
-                   auto hash = (d*hashScale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                   uint64_t hash = (d*hash_scale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
                    auto value =  lr *handle->values[k];
                    while(1){
                      if ((*(sparse_local_output->sparse_data_counter))[index][hash].first==d){
@@ -321,7 +321,7 @@ public:
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
-                  auto hash = (d*hashScale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                  uint64_t hash = (d*hash_scale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
                   while (1) {
                     if ((*(sparse_local_output->sparse_data_counter))[index][hash].first == d) {
                       (*(sparse_local_output->sparse_data_counter))[index][hash].second = (*(sparse_local_output->sparse_data_counter))[index][hash].second + value;
