@@ -115,7 +115,7 @@ public:
 
 
   void initialize_hashtables(){
-//    #pragma  omp parallel for
+    #pragma  omp parallel for
     for(auto i=0;i<proc_row_width;i++){
       auto count = (*sparse_data_counter)[i];
       auto resize_count = pow(2,log2(count)+1);
