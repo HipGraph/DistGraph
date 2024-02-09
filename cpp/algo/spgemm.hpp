@@ -278,7 +278,7 @@ public:
             }
 
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
-            uint64_t ht_size = (*(sparse_local_output->sparse_data_counter))[index].size();
+            uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
             if (!fetch_from_cache) {
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
 //              for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
@@ -295,12 +295,12 @@ public:
                    uint64_t hash = (d*hash_scale) & (ht_size-1);
                    auto value =  lr *handle->values[k];
                    while(1){
-                     if ((*(sparse_local_output->sparse_data_counter))[index][hash].first==d){
-                       (*(sparse_local_output->sparse_data_counter))[index][hash].second = (*(sparse_local_output->sparse_data_counter))[index][hash].second + value;
+                     if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==d){
+                       (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                        break;
-                     }else if ((*(sparse_local_output->sparse_data_counter))[index][hash].first==-1){
-                       (*(sparse_local_output->sparse_data_counter))[index][hash].first = d;
-                       (*(sparse_local_output->sparse_data_counter))[index][hash].second =   value;
+                     }else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==-1){
+                       (*(sparse_local_output->sparse_data_collector))[index][hash].first = d;
+                       (*(sparse_local_output->sparse_data_collector))[index][hash].second =   value;
                        break;
                      }else {
                        hash = (hash+1)& (ht_size-1);
@@ -324,12 +324,12 @@ public:
                   auto value =  lr *remote_values[m];
                   uint64_t hash = (d*hash_scale) & (ht_size-1);
                   while (1) {
-                    if ((*(sparse_local_output->sparse_data_counter))[index][hash].first == d) {
-                      (*(sparse_local_output->sparse_data_counter))[index][hash].second = (*(sparse_local_output->sparse_data_counter))[index][hash].second + value;
+                    if ((*(sparse_local_output->sparse_data_collector))[index][hash].first == d) {
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                       break;
-                    } else if ((*(sparse_local_output->sparse_data_counter))[index][hash].first ==-1) {
-                      (*(sparse_local_output->sparse_data_counter))[index][hash].first = d;
-                      (*(sparse_local_output->sparse_data_counter))[index][hash].second = value;
+                    } else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first ==-1) {
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].first = d;
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].second = value;
                       break;
                     } else {
                       hash =(hash + 1) &(ht_size -1);
