@@ -278,6 +278,7 @@ public:
             }
 
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
+            uint64_t ht_size = (*(sparse_local_output->sparse_data_counter))[index].size();
             if (!fetch_from_cache) {
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
 //              for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
@@ -291,7 +292,7 @@ public:
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                    auto  d = (handle->col_idx[k]);
-                   uint64_t hash = (d*hash_scale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                   uint64_t hash = (d*hash_scale) & (ht_size-1);
                    auto value =  lr *handle->values[k];
                    while(1){
                      if ((*(sparse_local_output->sparse_data_counter))[index][hash].first==d){
@@ -302,7 +303,7 @@ public:
                        (*(sparse_local_output->sparse_data_counter))[index][hash].second =   value;
                        break;
                      }else {
-                       hash = (hash+1)& ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                       hash = (hash+1)& (ht_size-1);
                      }
                    }
                 }
@@ -321,7 +322,7 @@ public:
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
-                  uint64_t hash = (d*hash_scale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                  uint64_t hash = (d*hash_scale) & (ht_size-1);
                   while (1) {
                     if ((*(sparse_local_output->sparse_data_counter))[index][hash].first == d) {
                       (*(sparse_local_output->sparse_data_counter))[index][hash].second = (*(sparse_local_output->sparse_data_counter))[index][hash].second + value;
@@ -331,7 +332,7 @@ public:
                       (*(sparse_local_output->sparse_data_counter))[index][hash].second = value;
                       break;
                     } else {
-                      hash =(hash + 1) &((*(sparse_local_output->sparse_data_counter))[index].size() -1);
+                      hash =(hash + 1) &(ht_size -1);
                     }
                   }
                 }
