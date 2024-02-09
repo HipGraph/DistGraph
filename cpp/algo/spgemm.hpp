@@ -133,11 +133,11 @@ public:
                 considering_batch_size, lr,  1,
                 true, 0, true, true);
             (sparse_local_output)->initialize_hashtables();
-//            this->execute_pull_model_computations(
-//                sendbuf_ptr.get(), update_ptr.get(), i, j,
-//                this->data_comm_cache[j].get(), csr_block, batch_size,
-//                considering_batch_size, lr,  1,
-//                true, 0, true,false);
+            this->execute_pull_model_computations(
+                sendbuf_ptr.get(), update_ptr.get(), i, j,
+                this->data_comm_cache[j].get(), csr_block, batch_size,
+                considering_batch_size, lr,  1,
+                true, 0, true,false);
         }
         total_memory += get_memory_usage();
       }
@@ -281,11 +281,6 @@ public:
             uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
             if (!fetch_from_cache) {
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
-//              for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
-//                int  d = static_cast<int>(handle->col_idx[k]);
-////                (*prevCoordinates)[index][d] += lr *handle->values[k];
-//                (*(sparse_local_output->sparse_data_counter))[index];
-//              }
               if (symbolic) {
                 auto val =(*(sparse_local_output->sparse_data_counter))[index] +count;
                 (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, embedding_dim);
@@ -310,11 +305,6 @@ public:
               }
             }else{
               int count = remote_cols.size();
-//              for(int m=0;m<remote_cols.size();m++){
-//                int d = static_cast<int>(remote_cols[m]);
-////                (*prevCoordinates)[index][d] += lr *remote_values[m];
-//                (*(sparse_local_output->sparse_data_counter))[index].insert(d);
-//              }
               if (symbolic){
                 auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
                 (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,embedding_dim);
