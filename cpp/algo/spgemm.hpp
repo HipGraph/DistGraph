@@ -98,7 +98,7 @@ public:
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
-    vector<unordered_map<int,DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
+//    vector<unordered_map<int,DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
 
     size_t total_memory = 0;
 
