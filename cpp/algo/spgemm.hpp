@@ -120,7 +120,7 @@ public:
         // One process computations without MPI operations
         if (grid->col_world_size == 1) {
           // local computations for 1 process
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+          this->calc_t_dist_grad_rowptr(csr_block,  lr, j,
                                         batch_size, considering_batch_size,
                                         true,  0, 0);
 
@@ -130,7 +130,7 @@ public:
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
-                considering_batch_size, lr, prevCoordinates, 1,
+                considering_batch_size, lr,  1,
                 true, 0, true);
             (sparse_local_output)->initialize_hashtables();
         }
@@ -148,7 +148,7 @@ public:
       std::vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
       CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, vector<unordered_map<int,DENT>> *prevCoordinates, int comm_initial_start, bool local_execution,
+      double lr,  int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
     int proc_length = get_proc_length(beta, grid->col_world_size);
@@ -172,7 +172,7 @@ public:
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
-        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
+        this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
                                       batch_size, considering_batch_size, false,
                                        prev_start, prev_end_process);
       }
@@ -181,7 +181,7 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process);
     // dense_local->invalidate_cache(i, j, true);
@@ -189,7 +189,7 @@ public:
 
 
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, vector<unordered_map<int,DENT>> *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
                           DENT lr, int batch_id, int batch_size, int block_size,
                           bool local, int start_process,int end_process) {
 
@@ -209,7 +209,7 @@ public:
     if (local) {
         calc_embedding_row_major(source_start_index, source_end_index,
                                  dst_start_index, dst_end_index, csr_block,
-                                 prevCoordinates, lr, batch_id, batch_size,
+                                  lr, batch_id, batch_size,
                                  block_size);
     } else {
       for (int r = start_process; r < end_process; r++) {
@@ -229,7 +229,7 @@ public:
 
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
-                                     prevCoordinates, lr, batch_id, batch_size,
+                                      lr, batch_id, batch_size,
                                      block_size);
         }
       }
@@ -238,8 +238,7 @@ public:
 
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
-                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
-                           vector<unordered_map<int,DENT>> *prevCoordinates, DENT lr, int batch_id,
+                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,DENT lr, int batch_id,
                            int batch_size, int block_size) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
