@@ -299,8 +299,8 @@ public:
                        break;
                      }else {
                        cout<<" index "<<index<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" "<<endl;
-                       hash = (hash+1)& (ht_size-1);
-                       cout<<" index "<<index<<" updated hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" "<<endl;
+                       hash = (hash+1) & (ht_size-1);
+                       cout<<" index "<<index<<" updated hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" ht_size "<<ht_size<<endl;
                      }
                    }
                 }
@@ -324,7 +324,7 @@ public:
                       (*(sparse_local_output->sparse_data_collector))[index][hash].second = value;
                       break;
                     } else {
-                      cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" "<<endl;
+                      cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<"  ht_size "<<ht_size<<endl;
                       hash =(hash + 1) &(ht_size -1);
                     }
                   }
