@@ -280,7 +280,8 @@ public:
 ////                (*prevCoordinates)[index][d] += lr *handle->values[k];
 //                (*(sparse_local_output->sparse_data_counter))[index];
 //              }
-              (*(sparse_local_output->sparse_data_counter))[index] +=count;
+              auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
+              (*(sparse_local_output->sparse_data_counter))[index] = std::max(val,embedding_dim);
             }else{
               int count = remote_cols.size();
 //              for(int m=0;m<remote_cols.size();m++){
@@ -288,7 +289,8 @@ public:
 ////                (*prevCoordinates)[index][d] += lr *remote_values[m];
 //                (*(sparse_local_output->sparse_data_counter))[index].insert(d);
 //              }
-              (*(sparse_local_output->sparse_data_counter))[index] +=count;
+              auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
+              (*(sparse_local_output->sparse_data_counter))[index] = std::max(val,embedding_dim);
             }
           }
         }
