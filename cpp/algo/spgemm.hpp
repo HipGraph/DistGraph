@@ -286,13 +286,26 @@ public:
 //                (*(sparse_local_output->sparse_data_counter))[index];
 //              }
               if (symbolic) {
-                auto val =(*(sparse_local_output->sparse_data_counter))[index] +
-                    count;
+                auto val =(*(sparse_local_output->sparse_data_counter))[index] +count;
                 (*(sparse_local_output->sparse_data_counter))[index] =std::max(val, embedding_dim);
               }else {
-
-
-
+                for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
+                   auto  d = (handle->col_idx[k]);
+                   auto hash = (d*hashScale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                   auto value =  lr *handle->values[k];
+                   while(1){
+                     if ((*sparse_local_output)[index][hash].first==d){
+                       (*sparse_local_output)[index][hash].second = (*sparse_local_output)[index][hash].second + value;
+                       break;
+                     }else if ((*sparse_local_output)[index][hash].first==-1){
+                       (*sparse_local_output)[index][hash].first = d;
+                       (*sparse_local_output)[index][hash].second =   value;
+                       break;
+                     }else {
+                       hash = (hash+1)& ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                     }
+                   }
+                }
               }
             }else{
               int count = remote_cols.size();
@@ -305,10 +318,24 @@ public:
                 auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
                 (*(sparse_local_output->sparse_data_counter))[index] = std::max(val,embedding_dim);
               }else {
-
-
+                for (int m = 0; m < remote_cols.size(); m++) {
+                  auto d = remote_cols[m];
+                  auto value =  lr *remote_values[m];
+                  auto hash = (d*hashScale) & ((*(sparse_local_output->sparse_data_counter))[index].size()-1);
+                  while (1) {
+                    if ((*sparse_local_output)[index][hash].first == d) {
+                      (*sparse_local_output)[index][hash].second = (*sparse_local_output)[index][hash].second + value;
+                      break;
+                    } else if ((*sparse_local_output)[index][hash].first ==-1) {
+                      (*sparse_local_output)[index][hash].first = d;
+                      (*sparse_local_output)[index][hash].second = value;
+                      break;
+                    } else {
+                      hash =(hash + 1) &((*(sparse_local_output->sparse_data_counter))[index].size() -1);
+                    }
+                  }
+                }
               }
-
             }
           }
         }
