@@ -299,6 +299,7 @@ public:
                        break;
                      }else {
                        hash = (hash+1)& (ht_size-1);
+                       break;
                      }
                    }
                 }
@@ -323,6 +324,7 @@ public:
                       break;
                     } else {
                       hash =(hash + 1) &(ht_size -1);
+                      break;
                     }
                   }
                 }
