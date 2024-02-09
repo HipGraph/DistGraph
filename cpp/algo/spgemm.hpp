@@ -298,7 +298,7 @@ public:
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second =   value;
                        break;
                      }else {
-                       cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" "<<endl;
+                       cout<<" index "<<index<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" "<<endl;
                        hash = (hash+1)& (ht_size-1);
                      }
                    }
