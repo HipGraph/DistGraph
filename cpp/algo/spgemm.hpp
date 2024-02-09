@@ -133,11 +133,11 @@ public:
                 considering_batch_size, lr,  1,
                 true, 0, true, true);
             (sparse_local_output)->initialize_hashtables();
-            this->execute_pull_model_computations(
-                sendbuf_ptr.get(), update_ptr.get(), i, j,
-                this->data_comm_cache[j].get(), csr_block, batch_size,
-                considering_batch_size, lr,  1,
-                true, 0, true,false);
+//            this->execute_pull_model_computations(
+//                sendbuf_ptr.get(), update_ptr.get(), i, j,
+//                this->data_comm_cache[j].get(), csr_block, batch_size,
+//                considering_batch_size, lr,  1,
+//                true, 0, true,false);
         }
         total_memory += get_memory_usage();
       }
