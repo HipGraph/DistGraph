@@ -298,7 +298,9 @@ public:
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second =   value;
                        break;
                      }else {
+                       cout<<" hash "<<hash<< " "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" "<<d<<" "<<endl;
                        hash = (hash+1)& (ht_size-1);
+
                      }
                    }
                 }
@@ -322,6 +324,7 @@ public:
                       (*(sparse_local_output->sparse_data_collector))[index][hash].second = value;
                       break;
                     } else {
+                      cout<<" hash "<<hash<< " "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" "<<d<<" "<<endl;
                       hash =(hash + 1) &(ht_size -1);
                     }
                   }
