@@ -122,7 +122,7 @@ public:
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block,  lr, j,
                                         batch_size, considering_batch_size,
-                                        true,  0, 0);
+                                        true,  0, 0,false);
 
         } else {
 
