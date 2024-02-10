@@ -305,7 +305,7 @@ public:
                        count++;
                      }
                    }
-                   if (max_count==count){
+                   if (count>=max_count){
                      max_reach++;
                    }
                 }
@@ -335,7 +335,7 @@ public:
                       count++;
                     }
                   }
-                  if (max_count==count){
+                  if (count>=max_count){
                     max_reach++;
                   }
                 }
