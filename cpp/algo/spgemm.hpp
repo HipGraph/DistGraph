@@ -249,7 +249,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -293,7 +293,6 @@ public:
                    int count=0;
                    while(count<max_count){
                      if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==d){
-                       cout<<" already occupied "<<endl;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                        break;
                      }else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==-1){
@@ -304,9 +303,6 @@ public:
                        hash = (hash+100) & (ht_size-1);
                        count++;
                      }
-                   }
-                   if (count>=max_count){
-                     max_reach++;
                    }
                 }
               }
@@ -335,15 +331,11 @@ public:
                       count++;
                     }
                   }
-                  if (count>=max_count){
-                    max_reach++;
-                  }
                 }
               }
             }
           }
         }
-        cout<<" index "<<index<<" max reached "<<max_reach<<endl;
       }
     }
   }
