@@ -291,9 +291,11 @@ public:
                    auto value =  lr *handle->values[k];
                    while(1){
                      if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==d){
+                       cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<"  occupied "<<endl;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                        break;
                      }else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==-1){
+                       cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<"  registered "<<endl;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].first = d;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second =   value;
                        break;
