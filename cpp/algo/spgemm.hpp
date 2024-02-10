@@ -305,9 +305,9 @@ public:
                        count++;
                      }
                    }
-                }
-                if (max_count==count){
-                  max_reach++;
+                   if (max_count==count){
+                     max_reach++;
+                   }
                 }
               }
             }else{
