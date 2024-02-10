@@ -249,7 +249,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (uint64_t i = source_start_index; i <= source_end_index; i++) {
 
         uint64_t index = i - batch_id * batch_size;
@@ -289,20 +289,19 @@ public:
                    auto  d = (handle->col_idx[k]);
                    uint64_t hash = (d*hash_scale) & (ht_size-1);
                    auto value =  lr *handle->values[k];
-                   while(1){
+                   int max_count=10;
+                   int count=0;
+                   while(count<max_count){
                      if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==d){
-                       cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<"  occupied "<<endl;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                        break;
                      }else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==-1){
-                       cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<"  registered "<<endl;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].first = d;
                        (*(sparse_local_output->sparse_data_collector))[index][hash].second =   value;
                        break;
                      }else {
-                       cout<<" index "<<index<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" "<<endl;
                        hash = (hash+100) & (ht_size-1);
-                       cout<<" index "<<index<<" updated hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<" ht_size "<<ht_size<<endl;
+                       count++;
                      }
                    }
                 }
@@ -317,7 +316,9 @@ public:
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
                   uint64_t hash = (d*hash_scale) & (ht_size-1);
-                  while (1) {
+                  int max_count=10;
+                  int count=0;
+                  while (count<max_count) {
                     if ((*(sparse_local_output->sparse_data_collector))[index][hash].first == d) {
                       (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                       break;
@@ -326,8 +327,8 @@ public:
                       (*(sparse_local_output->sparse_data_collector))[index][hash].second = value;
                       break;
                     } else {
-                      cout<<"hash "<< hash<< " key "<<(*(sparse_local_output->sparse_data_collector))[index][hash].first<<" d "<<d<<"  ht_size "<<ht_size<<endl;
                       hash =(hash + 100) &(ht_size -1);
+                      count++;
                     }
                   }
                 }
