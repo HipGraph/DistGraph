@@ -86,7 +86,7 @@ private:
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       // Remove elements where the first element is -1
       auto it = std::remove_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
-                               [](const PairType &pair) {
+                               [](const pair<int64_t,T> &pair) {
                                  return pair.first == -1;
                                });
 
@@ -95,7 +95,7 @@ private:
 
       // Sort the remaining elements based on the first element of the pairs
       std::sort((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
-                [](const PairType &a, const PairType &b) {
+                [](const pair<int64_t,T> &a, const pair<int64_t,T> &b) {
                   return a.first < b.first;
                 });
     }
