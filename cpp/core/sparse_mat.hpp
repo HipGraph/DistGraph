@@ -97,7 +97,8 @@ private:
           coords_local.push_back(t);
         }
       }
-
+    #pragma omp critical
+      coords.insert(coords.end(),coords_local.begin(),coords_local.end());
       // Erase the removed elements from the vector
 //      (*sparse_data_collector)[i].erase(it, (*sparse_data_collector)[i].end());
 
