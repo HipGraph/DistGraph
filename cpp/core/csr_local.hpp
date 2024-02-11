@@ -132,7 +132,8 @@ public:
   }
 
   CSRLocal(vector<vector<pair<int64_t, T>>> *sparse_data_collector) {
-    (handler.get())->rowStart.resize(sparse_data_collector->size() + 1, 0);
+     handler = unique_ptr<CSRHandle>(new CSRHandle());
+     handler->rowStart.resize(sparse_data_collector->size() + 1, 0);
     cout<<" resized  rowStart creation "<<endl;
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       auto  size = (*sparse_data_collector)[i].size();
@@ -151,9 +152,9 @@ public:
                      });
 
       // Insert the first values into ((handler.get())->col_idx)
-      ((handler.get())->col_idx).insert(((handler.get())->col_idx).end(), firstValues.begin(), firstValues.end());
-      ((handler.get())->values).insert(((handler.get())->values).end(), Values.begin(), Values.end());
-      (handler.get())->rowStart[i+1]=size+(handler.get())->rowStart[i];
+       handler->col_idx.insert((handler->col_idx).end(), firstValues.begin(), firstValues.end());
+       handler->values.insert((handler->values).end(), Values.begin(), Values.end());
+       handler->rowStart[i+1]=size+handler->rowStart[i];
     }
     cout<<" resized  compledted creation "<<endl;
   }
