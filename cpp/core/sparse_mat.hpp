@@ -90,7 +90,7 @@ private:
       vector<Tuple<T>> coords_local;
       for(auto j=0;j<(*sparse_data_collector)[i].size();j++){
         if ((*sparse_data_collector)[i][j].first>=0){
-          Tuple t;
+          Tuple<T> t;
           t.row=i;
           t.col=(*sparse_data_collector)[i][j].first;
           t.value=(*sparse_data_collector)[i][j].value;
