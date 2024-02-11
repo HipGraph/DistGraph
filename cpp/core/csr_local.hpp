@@ -132,20 +132,20 @@ public:
   }
 
   CSRLocal(vector<vector<pair<int64_t, T>>> *sparse_data_collector) {
-    (handler.get())->rowStart.resize(sparse_data_collector.size() + 1, 0);
+    (handler.get())->rowStart.resize(sparse_data_collector->size() + 1, 0);
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       auto  size = (*sparse_data_collector)[i].size();
       std::vector<MKL_INT> firstValues;
       std::vector<double> Values;
       std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                      std::back_inserter(firstValues),
-                     [](const PairType &pair) {
+                     [](const pair<int64_t,T> &pair) {
                        return pair.first;
                      });
 
       std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                      std::back_inserter(Values),
-                     [](const PairType &pair) {
+                     [](const pair<int64_t,T> &pair) {
                        return pair.second;
                      });
 

@@ -26,7 +26,7 @@ namespace distblas::core {
 /**
  * This class represents the Sparse Matrix
  */
-using PairType = std::pair<int, int>;
+
 template <typename T> class SpMat : public DistributedMat {
 
 private:
