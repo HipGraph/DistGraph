@@ -61,13 +61,13 @@ private:
     #pragma omp parallel for
     for(auto i=0;i<dense_collector->size();i++) {
       for (auto j = 0; j < (*dense_collector)[i]->size(); j++) {
-        if (dense_collector[i][j] != 0) {
+        if ((*dense_collector)[i][j] != 0) {
           Tuple<T> t;
           t.col = j;
           t.row = i;
-          t.value = dense_collector[i][j];
+          t.value = (*dense_collector)[i][j];
           coords_index[i].push_back(t);
-          dense_collector[i][j]=0;
+          (*dense_collector)[i][j]=0;
         }
       }
       #pragma omp critical
