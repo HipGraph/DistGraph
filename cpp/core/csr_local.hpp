@@ -131,23 +131,30 @@ public:
     }
   }
 
-  CSRLocal(vector<vector<pair<int64_t, T>>> *sparse_data_collector) {
+  CSRLocal(vector<vector<Tuple<T>>> *sparse_data_collector) {
      handler = unique_ptr<CSRHandle>(new CSRHandle());
      handler->rowStart.resize(sparse_data_collector->size() + 1, 0);
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       auto  size = (*sparse_data_collector)[i].size();
       std::vector<MKL_INT> firstValues;
       std::vector<double> Values;
+      vector<Tuple<T>> filtered;
+      std::copy_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                     std::back_inserter(filtered),
+                     [](const Tuple<T> &tuple) {
+                         return tuple.col>=0;
+                     });
+
       std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                      std::back_inserter(firstValues),
-                     [](const pair<int64_t,T> &pair) {
-                       return pair.first;
+                     [](const Tuple<T> &tuple) {
+                       return tuple.col;
                      });
 
       std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                      std::back_inserter(Values),
-                     [](const pair<int64_t,T> &pair) {
-                       return pair.second;
+                     [](const Tuple<T> &tuple) {
+                       return tuple.value;
                      });
 
       // Insert the first values into ((handler.get())->col_idx)

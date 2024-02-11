@@ -293,12 +293,12 @@ public:
                    int max_count=10;
                    int count=0;
                    while(count<max_count){
-                     if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==d){
-                       (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
+                     if ((*(sparse_local_output->sparse_data_collector))[index][hash].col==d){
+                       (*(sparse_local_output->sparse_data_collector))[index][hash].value = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                        break;
-                     }else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first==-1){
-                       (*(sparse_local_output->sparse_data_collector))[index][hash].first = d;
-                       (*(sparse_local_output->sparse_data_collector))[index][hash].second =   value;
+                     }else if ((*(sparse_local_output->sparse_data_collector))[index][hash].col==-1){
+                       (*(sparse_local_output->sparse_data_collector))[index][hash].col = d;
+                       (*(sparse_local_output->sparse_data_collector))[index][hash].value =   value;
                        break;
                      }else {
                        hash = (hash+100) & (ht_size-1);
@@ -320,12 +320,12 @@ public:
                   int max_count=10;
                   int count=0;
                   while (count<max_count) {
-                    if ((*(sparse_local_output->sparse_data_collector))[index][hash].first == d) {
-                      (*(sparse_local_output->sparse_data_collector))[index][hash].second = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
+                    if ((*(sparse_local_output->sparse_data_collector))[index][hash].col == d) {
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].value = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
                       break;
-                    } else if ((*(sparse_local_output->sparse_data_collector))[index][hash].first ==-1) {
-                      (*(sparse_local_output->sparse_data_collector))[index][hash].first = d;
-                      (*(sparse_local_output->sparse_data_collector))[index][hash].second = value;
+                    } else if ((*(sparse_local_output->sparse_data_collector))[index][hash].col ==-1) {
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].col = d;
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].value = value;
                       break;
                     } else {
                       hash =(hash + 100) &(ht_size -1);

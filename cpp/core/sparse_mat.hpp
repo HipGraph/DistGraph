@@ -83,32 +83,7 @@ private:
 
   void initialize_CSR_from_sparse_collector() {
 
-     vector<Tuple<T>> coords;
-    #pragma omp parallel for
-    for (auto i = 0; i < sparse_data_collector->size(); i++) {
-      // Remove elements where the first element is -1
-      vector<Tuple<T>> coords_local;
-      for(auto j=0;j<(*sparse_data_collector)[i].size();j++){
-        if ((*sparse_data_collector)[i][j].first>=0){
-          Tuple<T> t;
-          t.row=i;
-          t.col=(*sparse_data_collector)[i][j].first;
-          t.value=(*sparse_data_collector)[i][j].second;
-          coords_local.push_back(t);
-        }
-      }
-    #pragma omp critical
-      coords.insert(coords.end(),coords_local.begin(),coords_local.end());
-      // Erase the removed elements from the vector
-//      (*sparse_data_collector)[i].erase(it, (*sparse_data_collector)[i].end());
-
-      // Sort the remaining elements based on the first element of the pairs
-//      std::sort((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
-//                [](const pair<int64_t,T> &a, const pair<int64_t,T> &b) {
-//                  return a.first < b.first;
-//                });
-    }
-//    csr_local_data = make_unique<CSRLocal<T>>(sparse_data_collector.get());
+   csr_local_data = make_unique<CSRLocal<T>>(sparse_data_collector.get());
   }
 
 
@@ -124,7 +99,7 @@ public:
 
   unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
-  shared_ptr<vector<vector<pair<int64_t ,T>>>> sparse_data_collector;
+  shared_ptr<vector<vector<Tuple<T>>>> sparse_data_collector;
 
   unique_ptr<vector<uint64_t>> sparse_data_counter;
 
@@ -169,8 +144,8 @@ public:
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     if (hash_spgemm) {
-      sparse_data_collector = make_shared<vector<vector<pair<int64_t, T>>>>(
-          proc_row_width, vector<pair<int64_t, T>>());
+      sparse_data_collector = make_shared<vector<vector<Tuple<T>>>>(
+          proc_row_width, vector<Tuple<T>>());
 
       sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width, 0);
       this->hash_spgemm = true;
@@ -200,7 +175,11 @@ public:
       auto count = (*sparse_data_counter)[i];
       auto resize_count = pow(2,log2(count)+1);
       (*sparse_data_collector)[i].clear();
-      (*sparse_data_collector)[i].resize(resize_count,{-1,T{}});
+      Tuple<T> t;
+      t.row=i;
+      t.col=-1;
+      t.value=0;
+      (*sparse_data_collector)[i].resize(resize_count,t);
       (*sparse_data_counter)[i]=0;
     }
   }
