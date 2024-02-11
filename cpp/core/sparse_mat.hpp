@@ -90,7 +90,7 @@ private:
       vector<Tuple<T>> coords_local;
       std::copy_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                    std::back_inserter(coords_local),
-                   [i](const pair<int64_t,T> &pair) -> Tuple {
+                   [i](const pair<int64_t,T> &pair) -> Tuple<T> {
                      if (pair.first >= 0) {
                        return {static_cast<int64_t>(i), static_cast<int64_t>(pair.first), pair.second};
                      } else {
