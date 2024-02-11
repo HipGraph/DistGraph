@@ -151,7 +151,7 @@ public:
 
       // Insert the first values into ((handler.get())->col_idx)
       ((handler.get())->col_idx).insert(((handler.get())->col_idx).end(), firstValues.begin(), firstValues.end());
-      ((handler.get())->col_idx).insert(((handler.get())->values).end(), Values.begin(), Values.end());
+      ((handler.get())->values).insert(((handler.get())->values).end(), Values.begin(), Values.end());
       (handler.get())->rowStart[i+1]=size+(handler.get())->rowStart[i];
     }
   }
