@@ -138,6 +138,7 @@ public:
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr,  1,
                 true, 0, true,false);
+            (sparse_local_output)->initialize_CSR_blocks();
         }
         total_memory += get_memory_usage();
       }

@@ -26,9 +26,83 @@ namespace distblas::core {
 /**
  * This class represents the Sparse Matrix
  */
+using PairType = std::pair<int, int>;
 template <typename T> class SpMat : public DistributedMat {
 
 private:
+
+  void initialize_CSR_from_tuples() {
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < coords.size(); i++) {
+      if (col_partitioned) {
+        coords[i].col %= proc_col_width;
+      } else {
+        coords[i].row %= proc_row_width;
+      }
+    }
+    Tuple<T> *coords_ptr = coords.data();
+
+    if (col_partitioned) {
+      // This is used to find sending indices
+      csr_local_data =
+          make_unique<CSRLocal<T>>(gRows, proc_col_width, coords.size(),
+                                   coords_ptr, coords.size(), transpose);
+    } else {
+      // This is used to find receiving indices and computations
+      csr_local_data =
+          make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
+                                   coords_ptr, coords.size(), transpose);
+    }
+  }
+
+  void initialize_CSR_from_dense_collector(){
+    vector<Tuple<T>> coords;
+    vector<vector<Tuple<T>>> coords_index(proc_row_width);
+    #pragma omp parallel for
+    for(auto i=0;i<dense_collector->size();i++) {
+      for (auto j = 0; j < (*dense_collector)[i]->size(); j++) {
+        if (dense_collector[i][j] != 0) {
+          Tuple<T> t;
+          t.col = j;
+          t.row = i;
+          t.value = dense_collector[i][j];
+          coords_index[i].push_back(t);
+          dense_collector[i][j]=0;
+        }
+      }
+      #pragma omp critical
+      coords.insert(coords.end(), coords_index.begin(), coords_index.end());
+    }
+    Tuple<T> *coords_ptr = coords.data();
+    csr_local_data =
+        make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
+                                 coords_ptr, coords.size(), false);
+
+  }
+
+  void initialize_CSR_from_sparse_collector() {
+
+    #pragma omp parallel for
+    for (auto i = 0; i < sparse_data_collector->size(); i++) {
+      // Remove elements where the first element is -1
+      auto it = std::remove_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                               [](const PairType &pair) {
+                                 return pair.first == -1;
+                               });
+
+      // Erase the removed elements from the vector
+      (*sparse_data_collector)[i].erase(it, (*sparse_data_collector)[i].end());
+
+      // Sort the remaining elements based on the first element of the pairs
+      std::sort((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                [](const PairType &a, const PairType &b) {
+                  return a.first < b.first;
+                });
+    }
+    csr_local_data = make_unique<CSRLocal<T>>(sparse_data_collector.get());
+  }
+
+
 public:
   uint64_t gRows, gCols, gNNz;
   vector<Tuple<T>> coords;
@@ -41,9 +115,14 @@ public:
 
   unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
 
-  unique_ptr<vector<vector<pair<int64_t ,T>>>> sparse_data_collector;
+  shared_ptr<vector<vector<pair<int64_t ,T>>>> sparse_data_collector;
 
   unique_ptr<vector<uint64_t>> sparse_data_counter;
+
+  unique_ptr<vector<vector<T>>> dense_collector;
+
+  bool  hash_spgemm=false;
+
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -73,16 +152,22 @@ public:
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
   }
 
-  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width) {
+  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm) {
     this->grid = grid;
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
-    sparse_data_collector = make_unique<vector<vector<pair<int64_t, T>>>>(proc_row_width,vector<pair<int64_t,T>>());
+    if (hash_spgemm) {
+      sparse_data_collector = make_shared<vector<vector<pair<int64_t, T>>>>(
+          proc_row_width, vector<pair<int64_t, T>>());
 
-    sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width,0);
+      sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width, 0);
+      this->hash_spgemm = true;
+    }else{
+      dense_collector = make_unique<vector<vector<T>>>(proc_row_width,vector<T>(proc_col_width,0));
+    }
   }
 
   /**
@@ -90,26 +175,12 @@ public:
    */
   void initialize_CSR_blocks() {
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < coords.size(); i++) {
-      if (col_partitioned) {
-        coords[i].col %= proc_col_width;
-      } else {
-        coords[i].row %= proc_row_width;
-      }
-    }
-    Tuple<T> *coords_ptr = coords.data();
-
-    if (col_partitioned) {
-      // This is used to find sending indices
-      csr_local_data =
-          make_unique<CSRLocal<T>>(gRows, proc_col_width, coords.size(),
-                                   coords_ptr, coords.size(), transpose);
-    } else {
-      // This is used to find receiving indices and computations
-      csr_local_data =
-          make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
-                                   coords_ptr, coords.size(), transpose);
+    if (coords.size()>0) {
+      initialize_CSR_from_tuples();
+    }else if (hash_spgemm and sparse_data_collector.size()>0){
+      initialize_CSR_from_sparse_collector();
+    }else if (dense_collector.size()>0){
+      initialize_CSR_from_dense_collector();
     }
   }
 

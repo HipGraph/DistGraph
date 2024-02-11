@@ -1,5 +1,6 @@
 /**
- * This implements the CSR data structure. We use MKL routines to create CSR from COO.
+ * This implements the CSR data structure. We use MKL routines to create CSR
+ * from COO.
  */
 #pragma once
 #include "common.h"
@@ -25,7 +26,7 @@ template <typename T> class CSRLocal {
 public:
   MKL_INT rows, cols;
 
-  int max_nnz, num_coords=0;
+  int max_nnz, num_coords = 0;
 
   bool transpose;
 
@@ -35,7 +36,7 @@ public:
 
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
            int num_coords, bool transpose) {
-    if (num_coords>0) {
+    if (num_coords > 0) {
       this->transpose = transpose;
       this->num_coords = num_coords;
       this->rows = rows;
@@ -51,9 +52,8 @@ public:
       vector<MKL_INT> cArray(num_coords, 0);
       vector<double> vArray(num_coords, 0.0);
 
-
-//    cout << " number of coordinates " << num_coords << endl;
-      #pragma omp parallel for schedule (static)
+      //    cout << " number of coordinates " << num_coords << endl;
+#pragma omp parallel for schedule(static)
       for (int i = 0; i < num_coords; i++) {
         rArray[i] = coords[i].row;
         cArray[i] = coords[i].col;
@@ -99,15 +99,15 @@ public:
         coords[i].value = static_cast<T>(values[i]);
       }
 
-//      assert(num_coords <= max_nnz);
+      //      assert(num_coords <= max_nnz);
 
       (handler.get())->values.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->rowStart.resize(this->rows + 1);
 
-// Copy over row indices
-      #pragma omp parallel for schedule (static)
+      // Copy over row indices
+#pragma omp parallel for schedule(static)
       for (int i = 0; i < num_coords; i++) {
         (handler.get())->row_idx[i] = coords[i].row;
       }
@@ -131,8 +131,33 @@ public:
     }
   }
 
+  CSRLocal(vector<vector<pair<int64_t, T>>> *sparse_data_collector) {
+    (handler.get())->rowStart.resize(sparse_data_collector.size() + 1, 0);
+    for (auto i = 0; i < sparse_data_collector->size(); i++) {
+      auto  size = (*sparse_data_collector)[i].size();
+      std::vector<MKL_INT> firstValues;
+      std::vector<double> Values;
+      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                     std::back_inserter(firstValues),
+                     [](const PairType &pair) {
+                       return pair.first;
+                     });
+
+      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                     std::back_inserter(Values),
+                     [](const PairType &pair) {
+                       return pair.second;
+                     });
+
+      // Insert the first values into ((handler.get())->col_idx)
+      ((handler.get())->col_idx).insert(((handler.get())->col_idx).end(), firstValues.begin(), firstValues.end());
+      ((handler.get())->col_idx).insert(((handler.get())->values).end(), Values.begin(), Values.end());
+      (handler.get())->rowStart[i+1]=size+(handler.get())->rowStart[i];
+    }
+  }
+
   ~CSRLocal() {
-//    mkl_sparse_destroy((handler.get())->mkl_handle);
+    //    mkl_sparse_destroy((handler.get())->mkl_handle);
   }
 };
 
