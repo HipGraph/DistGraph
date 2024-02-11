@@ -100,6 +100,7 @@ private:
                   return a.first < b.first;
                 });
     }
+    cout<<" rank "<<grid->rank_in_col<<" passing creation "<<endl;
     csr_local_data = make_unique<CSRLocal<T>>(sparse_data_collector.get());
   }
 
