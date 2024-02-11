@@ -83,22 +83,31 @@ private:
 
   void initialize_CSR_from_sparse_collector() {
 
+     vector<Tuple<T>> coords;
     #pragma omp parallel for
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       // Remove elements where the first element is -1
-      auto it = std::remove_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
-                               [](const pair<int64_t,T> &pair) {
-                                 return pair.first == -1;
-                               });
+      vector<Tuple<T>> coords_local;
+      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                     std::back_inserter(coords_local),
+                     [i](const pair<int64_t,T> &pair) {
+                        if(pair.first!=0){
+                          Tuple t;
+                          t.row = i;
+                          t.col = pair.first.
+                          t.value=paor.value;
+                          return t;
+                        };
+                     });
 
       // Erase the removed elements from the vector
-      (*sparse_data_collector)[i].erase(it, (*sparse_data_collector)[i].end());
+//      (*sparse_data_collector)[i].erase(it, (*sparse_data_collector)[i].end());
 
       // Sort the remaining elements based on the first element of the pairs
-      std::sort((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
-                [](const pair<int64_t,T> &a, const pair<int64_t,T> &b) {
-                  return a.first < b.first;
-                });
+//      std::sort((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+//                [](const pair<int64_t,T> &a, const pair<int64_t,T> &b) {
+//                  return a.first < b.first;
+//                });
     }
 //    csr_local_data = make_unique<CSRLocal<T>>(sparse_data_collector.get());
   }
