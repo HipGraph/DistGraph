@@ -93,7 +93,7 @@ private:
           Tuple<T> t;
           t.row=i;
           t.col=(*sparse_data_collector)[i][j].first;
-          t.value=(*sparse_data_collector)[i][j].value;
+          t.value=(*sparse_data_collector)[i][j].second;
           coords_local.push_back(t);
         }
       }
