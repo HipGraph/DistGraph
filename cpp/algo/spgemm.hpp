@@ -321,7 +321,7 @@ public:
                   int count=0;
                   while (count<max_count) {
                     if ((*(sparse_local_output->sparse_data_collector))[index][hash].col == d) {
-                      (*(sparse_local_output->sparse_data_collector))[index][hash].value = (*(sparse_local_output->sparse_data_collector))[index][hash].second + value;
+                      (*(sparse_local_output->sparse_data_collector))[index][hash].value = (*(sparse_local_output->sparse_data_collector))[index][hash].value + value;
                       break;
                     } else if ((*(sparse_local_output->sparse_data_collector))[index][hash].col ==-1) {
                       (*(sparse_local_output->sparse_data_collector))[index][hash].col = d;
