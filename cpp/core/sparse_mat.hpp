@@ -88,7 +88,7 @@ private:
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       // Remove elements where the first element is -1
       vector<Tuple<T>> coords_local;
-      std::copy_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                    std::back_inserter(coords_local),
                    [i](const pair<int64_t,T> &pair) -> Tuple<T> {
                      if (pair.first >= 0) {
