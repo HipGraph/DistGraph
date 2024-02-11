@@ -88,17 +88,16 @@ private:
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       // Remove elements where the first element is -1
       vector<Tuple<T>> coords_local;
-      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
-                     std::back_inserter(coords_local),
-                     [i](const pair<int64_t,T> &pair) {
-                        if(pair.first>=0){
-                          Tuple t;
-                          t.row = i;
-                          t.col = pair.first.
-                          t.value=paor.value;
-                          return t;
-                        };
-                     });
+      std::copy_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+                   std::back_inserter(coords_local),
+                   [i](const pair<int64_t,T> &pair) -> Tuple {
+                     if (pair.first >= 0) {
+                       return {static_cast<int64_t>(i), static_cast<int64_t>(pair.first), pair.second};
+                     } else {
+                       // Return a default-constructed Tuple if the condition is not met
+                       return Tuple<T>{};
+                     }
+                   });
 
       // Erase the removed elements from the vector
 //      (*sparse_data_collector)[i].erase(it, (*sparse_data_collector)[i].end());
