@@ -57,21 +57,22 @@ private:
 
   void initialize_CSR_from_dense_collector(){
     vector<Tuple<T>> coords;
-    vector<vector<Tuple<T>>> coords_index(proc_row_width);
+
     #pragma omp parallel for
     for(auto i=0;i<dense_collector->size();i++) {
+      vector<Tuple<T>> coords_local;
       for (auto j = 0; j < (*dense_collector)[i].size(); j++) {
         if ((*dense_collector)[i][j] != 0) {
           Tuple<T> t;
           t.col = j;
           t.row = i;
           t.value = (*dense_collector)[i][j];
-          coords_index[i].push_back(t);
+          coords_local[i].push_back(t);
           (*dense_collector)[i][j]=0;
         }
       }
       #pragma omp critical
-      coords.insert(coords.end(), coords_index.begin(), coords_index.end());
+      coords.insert(coords.end(), coords_local.begin(), coords_local.end());
     }
     Tuple<T> *coords_ptr = coords.data();
     csr_local_data =
