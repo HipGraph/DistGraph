@@ -67,7 +67,7 @@ private:
           t.col = j;
           t.row = i;
           t.value = (*dense_collector)[i][j];
-          coords_local[i].push_back(t);
+          coords_local.push_back(t);
           (*dense_collector)[i][j]=0;
         }
       }
