@@ -177,9 +177,9 @@ public:
 
     if (coords.size()>0) {
       initialize_CSR_from_tuples();
-    }else if (hash_spgemm and sparse_data_collector.size()>0){
+    }else if (hash_spgemm and sparse_data_collector->size()>0){
       initialize_CSR_from_sparse_collector();
-    }else if (dense_collector.size()>0){
+    }else if (dense_collector->size()>0){
       initialize_CSR_from_dense_collector();
     }
   }
