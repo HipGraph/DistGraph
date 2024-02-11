@@ -134,7 +134,6 @@ public:
   CSRLocal(vector<vector<pair<int64_t, T>>> *sparse_data_collector) {
      handler = unique_ptr<CSRHandle>(new CSRHandle());
      handler->rowStart.resize(sparse_data_collector->size() + 1, 0);
-    cout<<" resized  rowStart creation "<<endl;
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       auto  size = (*sparse_data_collector)[i].size();
       std::vector<MKL_INT> firstValues;
@@ -156,7 +155,6 @@ public:
        handler->values.insert((handler->values).end(), Values.begin(), Values.end());
        handler->rowStart[i+1]=size+handler->rowStart[i];
     }
-    cout<<" resized  compledted creation "<<endl;
   }
 
   ~CSRLocal() {
