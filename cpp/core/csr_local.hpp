@@ -133,7 +133,7 @@ public:
 
   CSRLocal(vector<vector<pair<int64_t, T>>> *sparse_data_collector) {
     (handler.get())->rowStart.resize(sparse_data_collector->size() + 1, 0);
-    cout<<" rank "<<grid->rank_in_col<<" resized  rowStart creation "<<endl;
+    cout<<" resized  rowStart creation "<<endl;
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
       auto  size = (*sparse_data_collector)[i].size();
       std::vector<MKL_INT> firstValues;
@@ -155,7 +155,7 @@ public:
       ((handler.get())->values).insert(((handler.get())->values).end(), Values.begin(), Values.end());
       (handler.get())->rowStart[i+1]=size+(handler.get())->rowStart[i];
     }
-    cout<<" rank "<<grid->rank_in_col<<" resized  compledted creation "<<endl;
+    cout<<" resized  compledted creation "<<endl;
   }
 
   ~CSRLocal() {
