@@ -91,7 +91,7 @@ private:
       std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                      std::back_inserter(coords_local),
                      [i](const pair<int64_t,T> &pair) {
-                        if(pair.first!=0){
+                        if(pair.first>=0){
                           Tuple t;
                           t.row = i;
                           t.col = pair.first.
