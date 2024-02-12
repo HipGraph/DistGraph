@@ -57,6 +57,8 @@ int main(int argc, char **argv) {
 
   string sparse_data_file ="";
 
+  uint64_t output_sparsity=0;
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -252,6 +254,7 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
     spgemm_algo.get()->algo_spgemm(iterations, batch_size,lr);
+    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[rowStart.size()-1];
 
   }else {
     auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
@@ -283,6 +286,9 @@ int main(int argc, char **argv) {
   j_obj["sparsity"] = density;
   j_obj["data_set"] = data_set_name;
   j_obj["d"] = dimension;
+  if (spgemm){
+    j_obj["output_nnz"] = output_sparsity;
+  }
   j_obj["perf_stats"] = json_perf_statistics();
   if (rank == 0) {
     fout << j_obj.dump(4) << "," << endl;
