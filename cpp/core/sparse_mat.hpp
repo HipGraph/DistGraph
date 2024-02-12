@@ -164,7 +164,6 @@ public:
     }else if (hash_spgemm and sparse_data_collector->size()>0){
       initialize_CSR_from_sparse_collector();
     }else if (dense_collector->size()>0){
-      cout<<" initializing CSR "<<endl;
       initialize_CSR_from_dense_collector();
     }
   }
