@@ -127,12 +127,13 @@ public:
         } else {
 
           //  pull model code
-            this->execute_pull_model_computations(
-                sendbuf_ptr.get(), update_ptr.get(), i, j,
-                this->data_comm_cache[j].get(), csr_block, batch_size,
-                considering_batch_size, lr,  1,
-                true, 0, true, true);
-            (sparse_local_output)->initialize_hashtables();
+           if( (sparse_local_output)->hash_spgemm) {
+             this->execute_pull_model_computations(
+                 sendbuf_ptr.get(), update_ptr.get(), i, j,
+                 this->data_comm_cache[j].get(), csr_block, batch_size,
+                 considering_batch_size, lr, 1, true, 0, true, true);
+             (sparse_local_output)->initialize_hashtables();
+           }
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
@@ -166,7 +167,7 @@ public:
 
       MPI_Request req;
 
-      if (communication and symbolic) {
+      if (communication and (symbolic or !sparse_local_output->hash_spgemm)) {
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
       }
@@ -286,7 +287,7 @@ public:
               if (symbolic) {
                 auto val =(*(sparse_local_output->sparse_data_counter))[index] +count;
                 (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, embedding_dim);
-              }else {
+              }else if (sparse_local_output->hash_spgemm) {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                    auto  d = (handle->col_idx[k]);
                    uint64_t hash = (d*hash_scale) & (ht_size-1);
@@ -307,13 +308,18 @@ public:
                      }
                    }
                 }
+              }else {
+                for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
+                  auto d = (handle->col_idx[k]);
+                  (*(sparse_local_output->dense_collector))[index * embedding_dim + d] += lr*(handle->values[k]);
+                }
               }
             }else{
               int count = remote_cols.size();
               if (symbolic){
                 auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
                 (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,embedding_dim);
-              }else {
+              }else if (sparse_local_output->hash_spgemm) {
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
@@ -334,6 +340,12 @@ public:
                     }
                   }
                 }
+              }else{
+                for (int m = 0; m < remote_cols.size(); m++) {
+                  auto d = remote_cols[m];
+                  (*(sparse_local_output->dense_collector))[index * embedding_dim + d] += lr*remote_values[m];
+                }
+
               }
             }
           }

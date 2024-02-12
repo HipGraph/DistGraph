@@ -28,6 +28,8 @@ const int sp_tuple_max_dim= 512;
 
 const int hash_scale = 107;
 
+const int spa_threshold=1024;
+
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
