@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
   string sparse_data_file ="";
 
-  uint64_t output_sparsity=0;
+  double output_sparsity=0;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
