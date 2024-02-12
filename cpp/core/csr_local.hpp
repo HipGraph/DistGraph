@@ -135,7 +135,7 @@ public:
      handler = unique_ptr<CSRHandle>(new CSRHandle());
      handler->rowStart.resize(sparse_data_collector->size() + 1, 0);
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
-      auto  size = (*sparse_data_collector)[i].size();
+
       std::vector<MKL_INT> firstValues;
       std::vector<double> Values;
       vector<Tuple<T>> filtered;
@@ -145,13 +145,13 @@ public:
                          return tuple.col>=0;
                      });
 
-      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+      std::transform(filtered.begin(), filtered.end(),
                      std::back_inserter(firstValues),
                      [](const Tuple<T> &tuple) {
                        return tuple.col;
                      });
 
-      std::transform((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
+      std::transform(filtered.begin(), filtered.end(),
                      std::back_inserter(Values),
                      [](const Tuple<T> &tuple) {
                        return tuple.value;
@@ -160,7 +160,7 @@ public:
       // Insert the first values into ((handler.get())->col_idx)
        handler->col_idx.insert((handler->col_idx).end(), firstValues.begin(), firstValues.end());
        handler->values.insert((handler->values).end(), Values.begin(), Values.end());
-       handler->rowStart[i+1]=size+handler->rowStart[i];
+       handler->rowStart[i+1]=filtered.size()+handler->rowStart[i];
     }
   }
 
