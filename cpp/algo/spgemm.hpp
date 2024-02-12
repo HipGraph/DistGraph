@@ -128,6 +128,7 @@ public:
 
           //  pull model code
            if( (sparse_local_output)->hash_spgemm) {
+             cout<<" executing hash spgemm"<<endl;
              this->execute_pull_model_computations(
                  sendbuf_ptr.get(), update_ptr.get(), i, j,
                  this->data_comm_cache[j].get(), csr_block, batch_size,
@@ -168,8 +169,10 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !sparse_local_output->hash_spgemm)) {
+
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
+        cout<<" transfer success"<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -281,13 +284,14 @@ public:
             }
 
             CSRHandle *handle = ((sparse_local)->csr_local_data)->handler.get();
-            uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
+
             if (!fetch_from_cache) {
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
               if (symbolic) {
                 auto val =(*(sparse_local_output->sparse_data_counter))[index] +count;
                 (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, embedding_dim);
               }else if (sparse_local_output->hash_spgemm) {
+                uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                    auto  d = (handle->col_idx[k]);
                    uint64_t hash = (d*hash_scale) & (ht_size-1);
@@ -320,6 +324,7 @@ public:
                 auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
                 (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,embedding_dim);
               }else if (sparse_local_output->hash_spgemm) {
+                uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
