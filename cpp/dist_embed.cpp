@@ -255,6 +255,7 @@ int main(int argc, char **argv) {
     cout << " rank " << rank << " spgemm algo started  " << endl;
     spgemm_algo.get()->algo_spgemm(iterations, batch_size,lr);
     output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
+    output_sparsity = 100*(output_sparsity/((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension);
 
   }else {
     auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
