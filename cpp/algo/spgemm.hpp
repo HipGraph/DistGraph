@@ -311,7 +311,7 @@ public:
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
-                  (*(sparse_local_output->dense_collector))[index][d] += lr*(handle->values[k]);
+//                  (*(sparse_local_output->dense_collector))[index][d] += lr*(handle->values[k]);
                 }
               }
             }else{
@@ -343,7 +343,7 @@ public:
               }else{
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
-                  (*(sparse_local_output->dense_collector))[index][d] += lr*remote_values[m];
+//                  (*(sparse_local_output->dense_collector))[index][d] += lr*remote_values[m];
                 }
 
               }
