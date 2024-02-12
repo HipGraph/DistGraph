@@ -132,16 +132,13 @@ public:
                  sendbuf_ptr.get(), update_ptr.get(), i, j,
                  this->data_comm_cache[j].get(), csr_block, batch_size,
                  considering_batch_size, lr, 1, true, 0, true, true);
-             cout<<" symobolic phase completed"<<endl;
              (sparse_local_output)->initialize_hashtables();
-             cout<<" symobolic initialize_hashtables completed"<<endl;
            }
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr,  1,
                 true, 0, true,false);
-            cout<<" symobolic calculation completed"<<endl;
         }
         total_memory += get_memory_usage();
       }
