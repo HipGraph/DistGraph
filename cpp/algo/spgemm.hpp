@@ -128,7 +128,6 @@ public:
 
           //  pull model code
            if( (sparse_local_output)->hash_spgemm) {
-             cout<<" executing hash spgemm"<<endl;
              this->execute_pull_model_computations(
                  sendbuf_ptr.get(), update_ptr.get(), i, j,
                  this->data_comm_cache[j].get(), csr_block, batch_size,
@@ -146,7 +145,7 @@ public:
       }
       (sparse_local)->purge_cache();
     }
-//    (sparse_local_output)->initialize_CSR_blocks();
+    (sparse_local_output)->initialize_CSR_blocks();
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
@@ -172,7 +171,7 @@ public:
 
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        cout<<" transfer success"<<endl;
+
       }
       if (k == comm_initial_start) {
         // local computation
@@ -315,7 +314,7 @@ public:
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
-//                  (*(sparse_local_output->dense_collector))[index][d] += lr*(handle->values[k]);
+                  (*(sparse_local_output->dense_collector))[index][d] += lr*(handle->values[k]);
                 }
               }
             }else{
@@ -348,7 +347,7 @@ public:
               }else{
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
-//                  (*(sparse_local_output->dense_collector))[index][d] += lr*remote_values[m];
+                  (*(sparse_local_output->dense_collector))[index][d] += lr*remote_values[m];
                 }
 
               }
