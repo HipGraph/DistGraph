@@ -145,7 +145,7 @@ public:
       }
       (sparse_local)->purge_cache();
     }
-    (sparse_local_output)->initialize_CSR_blocks();
+//    (sparse_local_output)->initialize_CSR_blocks();
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
