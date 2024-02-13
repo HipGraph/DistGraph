@@ -27,7 +27,7 @@ namespace distblas::core {
  * This class represents the Sparse Matrix
  */
 
-template <typename T> class SpMat : public DistributedMat {
+template <typename VALUE_TYPE> class SpMat : public DistributedMat {
 
 private:
 
@@ -40,30 +40,30 @@ private:
         coords[i].row %= proc_row_width;
       }
     }
-    Tuple<T> *coords_ptr = coords.data();
+    Tuple<VALUE_TYPE> *coords_ptr = coords.data();
 
     if (col_partitioned) {
       // This is used to find sending indices
       csr_local_data =
-          make_unique<CSRLocal<T>>(gRows, proc_col_width, coords.size(),
+          make_unique<CSRLocal<VALUE_TYPE>>(gRows, proc_col_width, coords.size(),
                                    coords_ptr, coords.size(), transpose);
     } else {
       // This is used to find receiving indices and computations
       csr_local_data =
-          make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
+          make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
                                    coords_ptr, coords.size(), transpose);
     }
   }
 
   void initialize_CSR_from_dense_collector(){
-    vector<Tuple<T>> coords;
+    vector<Tuple<VALUE_TYPE>> coords;
 
     #pragma omp parallel for
     for(auto i=0;i<dense_collector->size();i++) {
-      vector<Tuple<T>> coords_local;
+      vector<Tuple<VALUE_TYPE>> coords_local;
       for (auto j = 0; j < (*dense_collector)[i].size(); j++) {
         if ((*dense_collector)[i][j] != 0) {
-          Tuple<T> t;
+          Tuple<VALUE_TYPE> t;
           t.col = j;
           t.row = i;
           t.value = (*dense_collector)[i][j];
@@ -74,36 +74,36 @@ private:
       #pragma omp critical
       coords.insert(coords.end(), coords_local.begin(), coords_local.end());
     }
-    Tuple<T> *coords_ptr = coords.data();
+    Tuple<VALUE_TYPE> *coords_ptr = coords.data();
     csr_local_data =
-        make_unique<CSRLocal<T>>(proc_row_width, gCols, coords.size(),
+        make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
                                  coords_ptr, coords.size(), false);
 
   }
 
   void initialize_CSR_from_sparse_collector() {
 
-   csr_local_data = make_unique<CSRLocal<T>>(sparse_data_collector.get());
+   csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
 
 public:
   uint64_t gRows, gCols, gNNz;
-  vector<Tuple<T>> coords;
+  vector<Tuple<VALUE_TYPE>> coords;
   int batch_size;
   int proc_col_width, proc_row_width;
   bool transpose = false;
   bool col_partitioned = false;
-  unique_ptr<CSRLocal<T>> csr_local_data;
+  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
   Process3DGrid *grid;
 
-  unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<T>>>> tempCachePtr;
+  unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
-  shared_ptr<vector<vector<Tuple<T>>>> sparse_data_collector;
+  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 
   unique_ptr<vector<uint64_t>> sparse_data_counter;
 
-  unique_ptr<vector<vector<T>>> dense_collector;
+  unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
   bool  hash_spgemm=false;
 
@@ -115,7 +115,7 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(Process3DGrid *grid, vector<Tuple<T>> &coords, uint64_t &gRows, uint64_t &gCols,
+  SpMat(Process3DGrid *grid, vector<Tuple<VALUE_TYPE>> &coords, uint64_t &gRows, uint64_t &gCols,
         uint64_t &gNNz, int &batch_size, int &proc_row_width,
         int &proc_col_width, bool transpose, bool col_partitioned) {
     this->gRows = gRows;
@@ -128,29 +128,29 @@ public:
     this->transpose = transpose;
     this->col_partitioned = col_partitioned;
     this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
   SpMat(Process3DGrid *grid) {
     this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
   SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm) {
     this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     if (hash_spgemm) {
-      sparse_data_collector = make_shared<vector<vector<Tuple<T>>>>(
-          proc_row_width, vector<Tuple<T>>());
+      sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
+          proc_row_width, vector<Tuple<VALUE_TYPE>>());
 
       sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width, 0);
       this->hash_spgemm = true;
     }else{
-      dense_collector = make_unique<vector<vector<T>>>(proc_row_width,vector<T>(proc_col_width,0));
+      dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(proc_row_width,vector<VALUE_TYPE>(proc_col_width,0));
     }
   }
 
@@ -175,7 +175,7 @@ public:
       auto count = (*sparse_data_counter)[i];
       auto resize_count = pow(2,log2(count)+1);
       (*sparse_data_collector)[i].clear();
-      Tuple<T> t;
+      Tuple<VALUE_TYPE> t;
       t.row=i;
       t.col=-1;
       t.value=0;
@@ -353,13 +353,13 @@ CSRHandle  fetch_local_data(uint64_t local_key) {
   void purge_cache() {
     for (int i = 0; i < grid->col_world_size; i++) {
       (*this->tempCachePtr)[i].clear();
-//      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<T>>().swap(
+//      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<VALUE_TYPE>>().swap(
 //          (*this->tempCachePtr)[i]);
     }
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<T>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
-  auto fetch_data_vector_from_cache( vector<Tuple<T>>& entries,int rank, uint64_t key) {
+  auto fetch_data_vector_from_cache( vector<Tuple<VALUE_TYPE>>& entries,int rank, uint64_t key) {
 
     // Access the array using the provided rank and key
 
