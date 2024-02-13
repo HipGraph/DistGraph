@@ -51,9 +51,9 @@ protected:
   bool col_major = true;
 
 public:
-  EmbeddingAlgo(distblas::core::SpMat<INDEX_TYPE> *sp_local_native,
-                distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver,
-                distblas::core::SpMat<INDEX_TYPE> *sp_local_sender,
+  EmbeddingAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
+                distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
+                distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                 DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
                 Process3DGrid *grid, double alpha, double beta, VALUE_TYPE MAX_BOUND,
                 VALUE_TYPE MIN_BOUND, bool col_major, bool sync_comm)
