@@ -27,8 +27,8 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  template <typename T>
-  void parallel_read_MM(string file_path, distblas::core::SpMat<T> *sp_mat,
+  template <typename VALUE_TYPE>
+  void parallel_read_MM(string file_path, distblas::core::SpMat<VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
@@ -45,7 +45,7 @@ public:
 
     uint64_t nnz;
 
-    G.get()->ParallelReadMM(file_path, true, maximum<T>());
+    G.get()->ParallelReadMM(file_path, true, maximum<VALUE_TYPE>());
 
     nnz = G.get()->getnnz();
     if (proc_rank == 0) {
@@ -54,7 +54,7 @@ public:
     SpTuples<int64_t, T> tups(G.get()->seq());
     tuple<int64_t, int64_t, T> *values = tups.tuples;
 
-    vector<Tuple<T>> coords;
+    vector<Tuple<VALUE_TYPE>> coords;
     coords.resize(tups.getnnz());
 
 #pragma omp parallel for
@@ -141,7 +141,7 @@ public:
 
   template <typename T>
   void build_sparse_random_matrix(int rows, int cols, double density, int seed,
-                                  vector<Tuple<T>> &sparse_coo,Process3DGrid *grid) {
+                                  vector<Tuple<VALUE_TYPE>> &sparse_coo,Process3DGrid *grid) {
 
     std::mt19937 gen(seed);
 //    std::uniform_real_distribution<double> uni_dist(0, 1);
@@ -153,8 +153,8 @@ public:
 //    #pragma omp parallel for
 //    for (int i = 0; i < rows * cols; ++i) {
 //      if (uni_dist(gen) <= density) {
-//        T val = static_cast<T>(norm_dist(gen));
-//        Tuple<T> t;
+//        T val = static_cast<VALUE_TYPE>(norm_dist(gen));
+//        Tuple<VALUE_TYPE> t;
 //        t.row = i / cols;  // Calculate row index
 //        t.col = i % cols;  // Calculate column index
 //        t.value = val;
@@ -166,9 +166,9 @@ public:
     std::uniform_real_distribution<double> uni_dist(0, cols);
         for (int i = 0; i < rows; ++i) {
           for(int j=0;j<expected_non_zeros;j++){
-            T val = static_cast<T>(norm_dist(gen));
+            T val = static_cast<VALUE_TYPE>(norm_dist(gen));
             int index = uni_dist(gen);
-            Tuple<T> t;
+            Tuple<VALUE_TYPE> t;
             t.row = i ;  // Calculate row index
             t.col = index;  // Calculate column index
             t.value = val;
@@ -179,7 +179,7 @@ public:
 
 
   template <typename T>
-  void parallel_write(string file_path, vector<Tuple<T>> &sparse_coo, Process3DGrid *grid, uint64_t local_rows, uint64_t global_rows, uint64_t global_cols) {
+  void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo, Process3DGrid *grid, uint64_t local_rows, uint64_t global_rows, uint64_t global_cols) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
@@ -199,7 +199,7 @@ public:
       int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
       for (int j = 0; j < elements_in_chunk; ++j) {
-        Tuple<T> t = sparse_coo[i + j];
+        Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         int col = static_cast<int>(t.col + 1);
         uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * local_rows);
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
@@ -218,7 +218,7 @@ public:
       }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
-        Tuple<T> t = sparse_coo[i + j];
+        Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         uint64_t col = static_cast<int>(t.col + 1);
         uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * local_rows);
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
