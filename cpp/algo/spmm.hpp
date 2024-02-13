@@ -37,7 +37,7 @@ private:
 
 public:
   SpMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-           distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver
+           distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
            DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
            DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output,
