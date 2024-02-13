@@ -86,7 +86,6 @@ public:
 
       mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                               &rows_start, &rows_end, &col_idx, &values);
-      cout << " csr  completed "  << endl;
       int rv = 0;
       for (int i = 0; i < num_coords; i++) {
         while (rv < this->rows && i >= rows_start[rv + 1]) {
@@ -103,7 +102,6 @@ public:
       (handler.get())->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->rowStart.resize(this->rows + 1);
-      cout << " resizing  completed "  << endl;
       // Copy over row indices
 #pragma omp parallel for schedule(static)
       for (int i = 0; i < num_coords; i++) {
@@ -119,7 +117,6 @@ public:
 
       (handler.get())->rowStart[this->rows] = max(num_coords, 1);
 
-      cout << " copying  completed "  << endl;
       mkl_sparse_d_create_csr(
           &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
           this->cols, (handler.get())->rowStart.data(),
