@@ -169,7 +169,7 @@ public:
         }
 
         // negative samples generation
-        vector<uint64_t> random_number_vec = generate_random_numbers(
+        vector<INDEX_TYPE> random_number_vec = generate_random_numbers(
             0, (this->sp_local_receiver)->gRows, seed, ns);
 
         // One process computations without MPI operations
@@ -399,7 +399,7 @@ public:
     auto dst_start_index =
         this->sp_local_receiver->proc_col_width * grid->rank_in_col;
     auto dst_end_index =
-        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
+        std::min(static_cast<INDEX_TYPE>(this->sp_local_receiver->proc_col_width *
                                        (grid->rank_in_col + 1)),
                  this->sp_local_receiver->gCols) -
         1;
@@ -447,9 +447,9 @@ public:
     }
   }
 
-  inline void calc_embedding(uint64_t source_start_index,
-                             uint64_t source_end_index,
-                             uint64_t dst_start_index, uint64_t dst_end_index,
+  inline void calc_embedding(INDEX_TYPE source_start_index,
+                             INDEX_TYPE source_end_index,
+                             INDEX_TYPE dst_start_index, INDEX_TYPE dst_end_index,
                              CSRLocal<INDEX_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
                              VALUE_TYPE lr, int batch_id, int batch_size,
                              int block_size, bool temp_cache) {
@@ -457,9 +457,9 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 #pragma omp parallel for schedule(static)
-      for (uint64_t i = dst_start_index; i <= dst_end_index; i++) {
+      for (INDEX_TYPE i = dst_start_index; i <= dst_end_index; i++) {
 
-        uint64_t local_dst = i - (grid)->rank_in_col *
+        INDEX_TYPE local_dst = i - (grid)->rank_in_col *
                                      (this->sp_local_receiver)->proc_row_width;
         int target_rank = (int)(i / (this->sp_local_receiver)->proc_row_width);
         bool fetch_from_cache =
@@ -469,8 +469,8 @@ public:
         bool matched = false;
         std::array<VALUE_TYPE, embedding_dim> array_ptr;
         bool col_inserted = false;
-        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+        for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
+             j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
               csr_handle->col_idx[j] <= source_end_index) {
             VALUE_TYPE forceDiff[embedding_dim];
