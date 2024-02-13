@@ -426,7 +426,7 @@ public:
 
           dst_start_index = this->sp_local_receiver->proc_row_width * computing_rank;
           dst_end_index =
-              std::min(static_cast<uint64_t>(
+              std::min(static_cast<INDEX_TYPE>(
                            this->sp_local_receiver->proc_row_width * (computing_rank + 1)),
                        this->sp_local_receiver->gCols) -
               1;

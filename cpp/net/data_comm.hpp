@@ -33,10 +33,10 @@ private:
   vector<int> sendcounts;
   vector<int> rdispls;
   vector<int> receivecounts;
-  vector<unordered_set<uint64_t>> receive_col_ids_list;
-  vector<unordered_set<uint64_t>> send_col_ids_list;
-  unordered_map<uint64_t, unordered_map<int,bool>> send_indices_to_proc_map;
-  unordered_map<uint64_t, unordered_map<int,bool>> receive_indices_to_proc_map;
+  vector<unordered_set<INDEX_TYPE>> receive_col_ids_list;
+  vector<unordered_set<INDEX_TYPE>> send_col_ids_list;
+  unordered_map<INDEX_TYPE, unordered_map<int,bool>> send_indices_to_proc_map;
+  unordered_map<INDEX_TYPE, unordered_map<int,bool>> receive_indices_to_proc_map;
 
   int batch_id;
 
@@ -449,10 +449,10 @@ public:
     }
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
-      int base_index = this->rdispls_cyclic[i];
-      int count = this->receive_counts_cyclic[i];
+      INDEX_TYPE base_index = this->rdispls_cyclic[i];
+      INDEX_TYPE count = this->receive_counts_cyclic[i];
 
-      for (int j = base_index; j < base_index + count; j++) {
+      for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         DataTuple<VALUE_TYPE, embedding_dim> t = (*receivebuf)[j];
         (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
@@ -471,10 +471,10 @@ public:
 
     #pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
-      int base_index = this->rdispls_cyclic[i];
-      int count = this->receive_counts_cyclic[i];
+      INDEX_TYPE base_index = this->rdispls_cyclic[i];
+      INDEX_TYPE count = this->receive_counts_cyclic[i];
 
-      for (int j = base_index; j < base_index + count; j++) {
+      for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         SpTuple<VALUE_TYPE,sp_tuple_max_dim> sp_tuple = (*receivebuf)[j];
         auto row_offset = sp_tuple.rows[0];
         auto offset_so_far=0;
@@ -485,7 +485,7 @@ public:
             SparseCacheEntry<VALUE_TYPE> sp_entry;
             sp_entry.inserted_itr=iteration;
             sp_entry.inserted_batch_id = batch_id;
-            sp_entry.cols = vector<uint64_t>();
+            sp_entry.cols = vector<INDEX_TYPE>();
             sp_entry.values = vector<VALUE_TYPE>();
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
