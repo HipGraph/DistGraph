@@ -62,6 +62,8 @@ public:
       }
 
       cout << " vector filling completed "  << endl;
+      MPI_Barrier(MPI_COMM_WORLD, &rank);
+      cout << " passing  MPI barrier "  << endl;
       sparse_operation_t op;
       if (transpose) {
         op = SPARSE_OPERATION_TRANSPOSE;
@@ -70,7 +72,7 @@ public:
       }
 
       sparse_matrix_t tempCOO, tempCSR;
-
+      cout << " mkl_sparse_d_create_coo  "  << endl;
       sparse_status_t status_coo = mkl_sparse_d_create_coo(
           &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
           rArray.data(), cArray.data(), vArray.data());
