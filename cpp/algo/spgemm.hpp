@@ -166,10 +166,10 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !sparse_local_output->hash_spgemm)) {
-        cout << " rank " << grid->rank_in_col << " running transfer_sparse_data " << i << endl;
+        cout << " rank " << grid->rank_in_col << " running transfer_sparse_data "  << endl;
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
-        cout << " rank " << grid->rank_in_col << " running transfer_sparse_data completed " << i << endl;
+        cout << " rank " << grid->rank_in_col << " running transfer_sparse_data completed " << endl;
 
       }
       if (k == comm_initial_start) {
