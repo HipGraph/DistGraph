@@ -30,7 +30,7 @@ const int hash_scale = 107;
 
 const int spa_threshold=1024;
 
-using INDEX_TYPE = uint64_t;
+using INDEX_TYPE = int;
 
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 

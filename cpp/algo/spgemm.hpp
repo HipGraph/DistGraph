@@ -212,8 +212,7 @@ public:
     auto dst_end_index =
         std::min(static_cast<INDEX_TYPE>(this->sp_local_receiver->proc_col_width *
                                        (grid->rank_in_col + 1)),
-                 this->sp_local_receiver->gCols) -
-        1;
+                 this->sp_local_receiver->gCols) -1;
 
     if (local) {
         calc_embedding_row_major(source_start_index, source_end_index,
