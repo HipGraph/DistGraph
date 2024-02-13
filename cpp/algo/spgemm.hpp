@@ -121,20 +121,23 @@ public:
                                         true,  0, 0,false);
 
         } else {
-
+          cout << " rank " << grid->rank_in_col << " running iteration " << i << endl;
           //  pull model code
            if( (sparse_local_output)->hash_spgemm) {
              this->execute_pull_model_computations(
                  sendbuf_ptr.get(), update_ptr.get(), i, j,
                  this->data_comm_cache[j].get(), csr_block, batch_size,
                  considering_batch_size, lr, 1, true, 0, true, true);
+
              (sparse_local_output)->initialize_hashtables();
            }
+           cout << " rank " << grid->rank_in_col << " running execute_pull_model_computations " << i << endl;
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr,  1,
                 true, 0, true,false);
+            cout << " rank " << grid->rank_in_col << " running execute_pull_model_computations " << i << endl;
         }
         total_memory += get_memory_usage();
       }
@@ -163,9 +166,10 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !sparse_local_output->hash_spgemm)) {
-
+        cout << " rank " << grid->rank_in_col << " running transfer_sparse_data " << i << endl;
         data_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process);
+        cout << " rank " << grid->rank_in_col << " running transfer_sparse_data completed " << i << endl;
 
       }
       if (k == comm_initial_start) {
