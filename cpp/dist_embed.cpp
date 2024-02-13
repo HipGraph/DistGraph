@@ -28,7 +28,7 @@ using namespace  distblas::core;
 
 int main(int argc, char **argv) {
 
-  const int dimension = 1280000;
+  const int dimension = 1280;
 
 
   string input_file = "";
