@@ -60,8 +60,8 @@ public:
     this->receive_counts_cyclic = vector<int>(grid->world_size, 0);
     this->sdispls_cyclic = vector<int>(grid->world_size, 0);
     this->rdispls_cyclic = vector<int>(grid->world_size, 0);
-    this->receive_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
-    this->send_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
+    this->receive_col_ids_list = vector<unordered_set<INDEX_TYPE>>(grid->world_size);
+    this->send_col_ids_list = vector<unordered_set<INDEX_TYPE>>(grid->world_size);
     this->batch_id = batch_id;
     this->alpha = alpha;
 
@@ -84,8 +84,8 @@ public:
     this->receive_counts_cyclic = vector<int>(grid->world_size, 0);
     this->sdispls_cyclic = vector<int>(grid->world_size, 0);
     this->rdispls_cyclic = vector<int>(grid->world_size, 0);
-    this->receive_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
-    this->send_col_ids_list = vector<unordered_set<uint64_t>>(grid->world_size);
+    this->receive_col_ids_list = vector<unordered_set<INDEX_TYPE>>(grid->world_size);
+    this->send_col_ids_list = vector<unordered_set<INDEX_TYPE>>(grid->world_size);
     this->batch_id = batch_id;
     this->alpha = alpha;
 
