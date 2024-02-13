@@ -51,8 +51,8 @@ public:
     if (proc_rank == 0) {
       cout << "File reader read " << nnz << " nonzeros." << endl;
     }
-    SpTuples<int64_t, T> tups(G.get()->seq());
-    tuple<int64_t, int64_t, T> *values = tups.tuples;
+    SpTuples<int64_t, VALUE_TYPE> tups(G.get()->seq());
+    tuple<int64_t, int64_t, VALUE_TYPE> *values = tups.tuples;
 
     vector<Tuple<VALUE_TYPE>> coords;
     coords.resize(tups.getnnz());
@@ -81,8 +81,8 @@ public:
     sp_mat->gNNz = G.get()->getnnz();
   }
 
-  template <typename T, typename SPT>
-  void parallel_write(string file_path, T *nCoordinates, uint64_t rows,
+  template <typename VALUE_TYPE, typename SPT>
+  void parallel_write(string file_path, VALUE_TYPE *nCoordinates, uint64_t rows,
                       uint64_t cols, Process3DGrid *grid,
                       distblas::core::SpMat<SPT> *sp_mat) {
     MPI_File fh;
@@ -139,7 +139,7 @@ public:
     MPI_File_close(&fh);
   }
 
-  template <typename T>
+  template <typename VALUE_TYPE>
   void build_sparse_random_matrix(int rows, int cols, double density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,Process3DGrid *grid) {
 
@@ -166,7 +166,7 @@ public:
     std::uniform_real_distribution<double> uni_dist(0, cols);
         for (int i = 0; i < rows; ++i) {
           for(int j=0;j<expected_non_zeros;j++){
-            T val = static_cast<VALUE_TYPE>(norm_dist(gen));
+            VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
             int index = uni_dist(gen);
             Tuple<VALUE_TYPE> t;
             t.row = i ;  // Calculate row index
@@ -178,7 +178,7 @@ public:
   }
 
 
-  template <typename T>
+  template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo, Process3DGrid *grid, uint64_t local_rows, uint64_t global_rows, uint64_t global_cols) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
