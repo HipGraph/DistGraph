@@ -319,7 +319,7 @@ public:
               int count = remote_cols.size();
               if (symbolic){
                 INDEX_TYPE val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
-                (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,embedding_dim);
+                (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,static_cast<INDEX_TYPE>(embedding_dim));
               }else if (sparse_local_output->hash_spgemm) {
                 INDEX_TYPE ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
                 for (int m = 0; m < remote_cols.size(); m++) {
