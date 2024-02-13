@@ -3,6 +3,8 @@
 #include <memory>
 #include "../net/process_3D_grid.hpp"
 
+using namespace distblas::net;
+
 namespace distblas::core {
 
 template <typename INDEX_TYPE, typename VALUE_TYPE> class SparseTile {
@@ -26,8 +28,6 @@ public:
       : grid(grid),id(id), row_starting_index(row_starting_index),
         row_end_index(row_end_index), col_start_index(col_start_index),
         col_end_index(col_end_index) {
-    col_indices = make_unique<std::vector<INDEX_TYPE>>();
-    id_to_proc_mapping =  ;
     proc_to_id_mapping =  vector<unordered_set<INDEX_TYPE>>(grid->world_size);
   }
 };
