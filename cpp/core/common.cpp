@@ -15,7 +15,7 @@ vector<string> distblas::core::perf_counter_keys = {
 map<string, int> distblas::core::call_count;
 map<string, double> distblas::core::total_time;
 
-int distblas::core::divide_and_round_up(uint64_t num, int denom) {
+int distblas::core::divide_and_round_up(INDEX_TYPE num, int denom) {
   if (num % denom > 0) {
     return num / denom + 1;
   } else {
@@ -44,7 +44,7 @@ vector<uint64_t> distblas::core::generate_random_numbers(int lower_bound,
   //#pragma omp parallel
   for (int i = 0; i < ns; ++i) {
     int random_number = distribution(generator);
-    vec[i] = static_cast<uint64_t>(random_number);
+    vec[i] = static_cast<INDEX_TYPE>(random_number);
   }
   return vec;
 }
