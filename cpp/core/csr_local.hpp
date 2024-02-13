@@ -36,6 +36,7 @@ public:
 
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<VALUE_TYPE> *coords,
            int num_coords, bool transpose) {
+    cout << " number of coordinates " << num_coords << endl;
     if (num_coords > 0) {
       this->transpose = transpose;
       this->num_coords = num_coords;
@@ -52,7 +53,7 @@ public:
       vector<MKL_INT> cArray(num_coords, 0);
       vector<double> vArray(num_coords, 0.0);
 
-      //    cout << " number of coordinates " << num_coords << endl;
+      cout << " vector creation completed "  << endl;
 #pragma omp parallel for schedule(static)
       for (int i = 0; i < num_coords; i++) {
         rArray[i] = coords[i].row;
@@ -60,6 +61,7 @@ public:
         vArray[i] = static_cast<double>(coords[i].value);
       }
 
+      cout << " vector filling completed "  << endl;
       sparse_operation_t op;
       if (transpose) {
         op = SPARSE_OPERATION_TRANSPOSE;
@@ -77,7 +79,7 @@ public:
           mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
       mkl_sparse_destroy(tempCOO);
-
+      cout << " coo  completed "  << endl;
       vector<MKL_INT>().swap(rArray);
       vector<MKL_INT>().swap(cArray);
       vector<double>().swap(vArray);
@@ -88,7 +90,7 @@ public:
 
       mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                               &rows_start, &rows_end, &col_idx, &values);
-
+      cout << " csr  completed "  << endl;
       int rv = 0;
       for (int i = 0; i < num_coords; i++) {
         while (rv < this->rows && i >= rows_start[rv + 1]) {
@@ -105,7 +107,7 @@ public:
       (handler.get())->col_idx.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->row_idx.resize(max_nnz == 0 ? 1 : max_nnz);
       (handler.get())->rowStart.resize(this->rows + 1);
-
+      cout << " resizing  completed "  << endl;
       // Copy over row indices
 #pragma omp parallel for schedule(static)
       for (int i = 0; i < num_coords; i++) {
@@ -121,6 +123,7 @@ public:
 
       (handler.get())->rowStart[this->rows] = max(num_coords, 1);
 
+      cout << " copying  completed "  << endl;
       mkl_sparse_d_create_csr(
           &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
           this->cols, (handler.get())->rowStart.data(),
