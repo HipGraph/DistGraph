@@ -20,17 +20,17 @@ namespace distblas::core {
 /**
  * This class represents  the dense matrix.
  */
-template <typename SPT, typename DENT, size_t embedding_dim>
+template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class DenseMat : DistributedMat {
 
 private:
 public:
   uint64_t rows;
-  unique_ptr<vector<unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>
+  unique_ptr<vector<unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>>>
       cachePtr;
-  unique_ptr<vector<unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>
+  unique_ptr<vector<unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>>>
       tempCachePtr;
-  DENT *nCoordinates;
+  VALUE_TYPE *nCoordinates;
   Process3DGrid *grid;
 
   /**
@@ -49,17 +49,17 @@ public:
     cout<<" col world size "<<grid->col_world_size<<endl;
 
     this->cachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
+        std::unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>>>(
         grid->col_world_size);
     this->tempCachePtr = std::make_unique<std::vector<
-        std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>>>(
+        std::unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>>>(
         grid->col_world_size);
     nCoordinates =
-        static_cast<DENT *>(::operator new(sizeof(DENT[rows * embedding_dim])));
+        static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[rows * embedding_dim])));
 //    std::srand(this->grid->global_rank);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < embedding_dim; j++) {
-        DENT val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
+        VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
         nCoordinates[i * embedding_dim + j] = val;
       }
     }
@@ -68,8 +68,8 @@ public:
   ~DenseMat() {}
 
   void insert_cache(int rank, uint64_t key, int batch_id, int iteration,
-                    std::array<DENT, embedding_dim> &arr, bool temp) {
-    distblas::core::CacheEntry<DENT, embedding_dim> entry;
+                    std::array<VALUE_TYPE, embedding_dim> &arr, bool temp) {
+    distblas::core::CacheEntry<VALUE_TYPE, embedding_dim> entry;
     entry.inserted_batch_id = batch_id;
     entry.inserted_itr = iteration;
     entry.value = arr;
@@ -80,7 +80,7 @@ public:
     }
   }
 
-  auto fetch_data_vector_from_cache(std::array<DENT, embedding_dim> &value,int rank, uint64_t key, bool temp) {
+  auto fetch_data_vector_from_cache(std::array<VALUE_TYPE, embedding_dim> &value,int rank, uint64_t key, bool temp) {
 
     // Access the array using the provided rank and key
 
@@ -96,8 +96,8 @@ public:
 
   }
 
-  std::array<DENT, embedding_dim> fetch_local_data(int local_key) {
-    std::array<DENT, embedding_dim> stdArray;
+  std::array<VALUE_TYPE, embedding_dim> fetch_local_data(int local_key) {
+    std::array<VALUE_TYPE, embedding_dim> stdArray;
 
     int base_index = local_key * embedding_dim;
     std::copy(nCoordinates + base_index,
@@ -112,7 +112,7 @@ public:
       for (int i = 0; i < grid->col_world_size; i++) {
         auto &arrayMap = (*cachePtr)[i];
         for (auto it = arrayMap.begin(); it != arrayMap.end();) {
-          distblas::core::CacheEntry<DENT, embedding_dim> cache_ent =
+          distblas::core::CacheEntry<VALUE_TYPE, embedding_dim> cache_ent =
               it->second;
           if (cache_ent.inserted_itr < current_itr and
               cache_ent.inserted_batch_id <= current_batch) {
@@ -129,7 +129,7 @@ public:
   void purge_temp_cache() {
     for (int i = 0; i < grid->col_world_size; i++) {
       (*this->tempCachePtr)[i].clear();
-      std::unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>().swap(
+      std::unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>().swap(
           (*this->tempCachePtr)[i]);
     }
   }
@@ -172,7 +172,7 @@ public:
     int rank = grid->rank_in_col;
 
     for (int i = 0; i < (*this->cachePtr).size(); i++) {
-      unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> map =
+      unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>> map =
           (*this->cachePtr)[i];
 //      (*this->tempCachePtr)[i];
 
@@ -184,7 +184,7 @@ public:
 
       for (const auto &kvp : map) {
         uint64_t key = kvp.first;
-        const std::array<DENT, embedding_dim> &value = kvp.second.value;
+        const std::array<VALUE_TYPE, embedding_dim> &value = kvp.second.value;
         fout << key << " ";
         for (int i = 0; i < embedding_dim; ++i) {
           fout << value[i] << " ";
