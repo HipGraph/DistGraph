@@ -19,7 +19,7 @@ public:
 
   Process3DGrid* grid;
 
-  unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping
+  unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping;
   vector<unordered_set<INDEX_TYPE>> proc_to_id_mapping;
   int mode = 0; // mode=0 local and mode=1 remote
 
