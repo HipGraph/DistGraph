@@ -26,6 +26,8 @@ using namespace distblas::partition;
 using namespace distblas::net;
 using namespace  distblas::core;
 
+
+
 int main(int argc, char **argv) {
 
   const int dimension = 1280;
@@ -118,9 +120,9 @@ int main(int argc, char **argv) {
   // Initialize MPI DataTypes
 
   if (!spgemm) {
-    initialize_mpi_datatypes<int, double, dimension>();
+    initialize_mpi_datatypes<VALUE_TYPE, dimension>();
   }else{
-    initialize_mpi_datatypes<int, double, sp_tuple_max_dim>();
+    initialize_mpi_datatypes<VALUE_TYPE, sp_tuple_max_dim>();
   }
 
 
@@ -131,14 +133,14 @@ int main(int argc, char **argv) {
   auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(world_size, 1, 1, 1));
 
   auto shared_sparseMat =
-      shared_ptr<distblas::core::SpMat<int>>(new distblas::core::SpMat<int>(grid.get()));
+      shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
 
   cout << " rank " << rank << " reading data from file path:  " << input_file
        << endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
 
-  reader.get()->parallel_read_MM<int>(input_file, shared_sparseMat.get(),true);
+  reader.get()->parallel_read_MM<VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
 
 
   cout << " rank " << rank << " reading data from file path:  " << input_file
@@ -158,8 +160,8 @@ int main(int argc, char **argv) {
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
 
-  vector<Tuple<double>> sparse_coo;
-  auto sparse_input = shared_ptr<distblas::core::SpMat<double>>(new distblas::core::SpMat<double>(grid.get()));
+  vector<Tuple<VALUE_TYPE>> sparse_coo;
+  auto sparse_input = shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
   if (spgemm & save_results) {
     reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, grid.get());
     INDEX_TYPE gROWs = static_cast<INDEX_TYPE>(localARows);
@@ -167,12 +169,12 @@ int main(int argc, char **argv) {
     INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
     cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
     int localBRows = static_cast<int>(dimension);
-    sparse_input =  make_shared<distblas::core::SpMat<double>>(grid.get(),
+    sparse_input =  make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
                                                                    sparse_coo, gROWs,
                                                                    gCols, gNNZ, batch_size,
                                                                    localARows, localBRows, false, false);
   }else if (spgemm){
-    reader.get()->parallel_read_MM<double>(sparse_data_file, sparse_input.get(),false);
+    reader.get()->parallel_read_MM<VALUE_TYPE>(sparse_data_file, sparse_input.get(),false);
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
@@ -187,13 +189,13 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
        << "gCols" << shared_sparseMat.get()->gCols << endl;
 
-  vector<Tuple<int>> copiedVector(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<int>>(grid.get(),
+  vector<Tuple<VALUE_TYPE>> copiedVector(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
       localARows, localBRows, false, true);
 
-  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<int>>(grid.get(),
+  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
       copiedVector, shared_sparseMat.get()->gRows,
       shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
       localARows, localBRows, true, false);
@@ -223,16 +225,16 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix_rowptr(-1);
 
   if (spmm) {
-    auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
-        new DenseMat<int, double, dimension>(grid.get(), localARows));
-    auto dense_mat_output = shared_ptr<DenseMat<int, double, dimension>>(
-        new DenseMat<int, double, dimension>(grid.get(), localARows));
+    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
+        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
+    auto dense_mat_output = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
+        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
 
-    unique_ptr<distblas::algo::SpMMAlgo<int, double, dimension>>
+    unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
 
         embedding_algo =
-            unique_ptr<distblas::algo::SpMMAlgo<int, double, dimension>>(
-                new distblas::algo::SpMMAlgo<int, double, dimension>(
+            unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+                new distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), dense_mat.get(),
                     dense_mat_output.get(), grid.get(), alpha, beta, col_major, sync_comm));
@@ -243,10 +245,10 @@ int main(int argc, char **argv) {
 
   }else if(spgemm){
     bool has_spgemm =dimension>spa_threshold?true:false;
-    auto sparse_out = make_shared<distblas::core::SpMat<double>>(grid.get(),localARows,dimension,has_spgemm);
+    auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm);
 
-    unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<int, double, dimension>>(
-                new distblas::algo::SpGEMMAlgo<int, double, dimension>(
+    unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+                new distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
                     grid.get(),
@@ -260,14 +262,14 @@ int main(int argc, char **argv) {
     output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
 
   }else {
-    auto dense_mat = shared_ptr<DenseMat<int, double, dimension>>(
-        new DenseMat<int, double, dimension>(grid.get(), localARows));
+    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
+        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
 
-    unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>
+    unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
 
         embedding_algo =
-            unique_ptr<distblas::algo::EmbeddingAlgo<int, double, dimension>>(
-                new distblas::algo::EmbeddingAlgo<int, double, dimension>(
+            unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+                new distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), dense_mat.get(), grid.get(),
                     alpha, beta, 5, -5,col_major,sync_comm));

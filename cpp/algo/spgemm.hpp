@@ -15,9 +15,9 @@ class SpGEMMAlgo {
 private:
   distblas::core::SpMat<VALUE_TYPE> *sparse_local_output;
   distblas::core::SpMat<VALUE_TYPE> *sparse_local;
-  distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver;
-  distblas::core::SpMat<INDEX_TYPE> *sp_local_sender;
-  distblas::core::SpMat<INDEX_TYPE> *sp_local_native;
+  distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
+  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
+  distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
   std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
@@ -38,9 +38,9 @@ private:
   bool col_major = false;
 
 public:
-  SpGEMMAlgo(distblas::core::SpMat<INDEX_TYPE> *sp_local_native,
-             distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver,
-             distblas::core::SpMat<INDEX_TYPE> *sp_local_sender,
+  SpGEMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
+             distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
+             distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
              distblas::core::SpMat<VALUE_TYPE> *sparse_local,
              distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
            Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)

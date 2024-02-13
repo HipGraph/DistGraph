@@ -30,7 +30,9 @@ const int hash_scale = 107;
 
 const int spa_threshold=1024;
 
-using INDEX_TYPE = int;
+using INDEX_TYPE = uint64_t;
+
+using VALUE_TYPE = double;
 
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
@@ -187,9 +189,9 @@ void initialize_mpi_datatype_SPARSETUPLE() {
   SPARSETUPLE = CreateCustomMpiType(p,p.rows, p.cols, p.values);
 }
 
-template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
+template <typename VALUE_TYPE, size_t embedding_dim>
 void initialize_mpi_datatypes() {
-  initialize_mpi_datatype_SPTUPLE<INDEX_TYPE>();
+  initialize_mpi_datatype_SPTUPLE<VALUE_TYPE>();
   initialize_mpi_datatype_DENSETUPLE<VALUE_TYPE,embedding_dim>();
   initialize_mpi_datatype_SPARSETUPLE<VALUE_TYPE,embedding_dim>();
 }
