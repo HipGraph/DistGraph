@@ -21,7 +21,7 @@ using namespace std;
 
 namespace distblas::core {
 
-template <typename T> class CSRLocal {
+template <typename VALUE_TYPE> class CSRLocal {
 
 public:
   MKL_INT rows, cols;
@@ -131,29 +131,29 @@ public:
     }
   }
 
-  CSRLocal(vector<vector<Tuple<T>>> *sparse_data_collector) {
+  CSRLocal(vector<vector<Tuple<VALUE_TYPE>>> *sparse_data_collector) {
      handler = unique_ptr<CSRHandle>(new CSRHandle());
      handler->rowStart.resize(sparse_data_collector->size() + 1, 0);
     for (auto i = 0; i < sparse_data_collector->size(); i++) {
 
       std::vector<MKL_INT> firstValues;
       std::vector<double> Values;
-      vector<Tuple<T>> filtered;
+      vector<Tuple<VALUE_TYPE>> filtered;
       std::copy_if((*sparse_data_collector)[i].begin(), (*sparse_data_collector)[i].end(),
                      std::back_inserter(filtered),
-                     [](const Tuple<T> &tuple) {
+                     [](const Tuple<VALUE_TYPE> &tuple) {
                          return tuple.col>=0;
                      });
 
       std::transform(filtered.begin(), filtered.end(),
                      std::back_inserter(firstValues),
-                     [](const Tuple<T> &tuple) {
+                     [](const Tuple<VALUE_TYPE> &tuple) {
                        return tuple.col;
                      });
 
       std::transform(filtered.begin(), filtered.end(),
                      std::back_inserter(Values),
-                     [](const Tuple<T> &tuple) {
+                     [](const Tuple<VALUE_TYPE> &tuple) {
                        return tuple.value;
                      });
 
