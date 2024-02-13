@@ -34,8 +34,8 @@ public:
 
   int block_owner(int row_block, int col_block);
 
-  int get_owner_Process(uint64_t row, uint64_t column, uint64_t  proc_row_width,
-                        uint64_t  proc_col_width, uint64_t gCols,bool transpose);
+  int get_owner_Process(INDEX_TYPE row, INDEX_TYPE column, INDEX_TYPE  proc_row_width,
+                        INDEX_TYPE  proc_col_width, INDEX_TYPE gCols,bool transpose);
 
   template <typename T>
   void partition_data(distblas::core::SpMat<T> *sp_mat) {

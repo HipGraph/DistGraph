@@ -19,8 +19,8 @@ int GlobalAdjacency1DPartitioner::block_owner(int row_block, int col_block) {
 
 }
 
-int GlobalAdjacency1DPartitioner::get_owner_Process(uint64_t row, uint64_t column, uint64_t  proc_row_width,
-                                                    uint64_t  proc_col_width, uint64_t gCols,bool transpose) {
+int GlobalAdjacency1DPartitioner::get_owner_Process(INDEX_TYPE row, INDEX_TYPE column, INDEX_TYPE  proc_row_width,
+                                                    INDEX_TYPE  proc_col_width, INDEX_TYPE gCols,bool transpose) {
   if(!transpose) {
     return block_owner(static_cast<int>(row / proc_row_width),  static_cast<int>(column/gCols));
   }
