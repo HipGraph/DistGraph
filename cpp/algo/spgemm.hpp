@@ -75,10 +75,6 @@ public:
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto full_comm = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-        new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha));
-    full_comm.get()->onboard_data();
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
