@@ -81,10 +81,10 @@ public:
     sp_mat->gNNz = G.get()->getnnz();
   }
 
-  template <typename VALUE_TYPE, typename SPT>
-  void parallel_write(string file_path, VALUE_TYPE *nCoordinates, uint64_t rows,
+  template <typename VALUE_TYPE>
+  void parallel_write(string file_path, VALUE_TYPE *nCoordinates, INDEX_TYPE rows,
                       uint64_t cols, Process3DGrid *grid,
-                      distblas::core::SpMat<SPT> *sp_mat) {
+                      distblas::core::SpMat<VALUE_TYPE> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
@@ -100,7 +100,7 @@ public:
     cout << " rank :" << grid->rank_in_col << " expected rows " << expected_rows
          << endl;
     size_t total_size = 0;
-    for (uint64_t i = 0; i < expected_rows; ++i) {
+    for (INDEX_TYPE i = 0; i < expected_rows; ++i) {
       total_size +=
           snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
@@ -120,7 +120,7 @@ public:
 
     char *current_position = buffer;
 
-    for (uint64_t i = 0; i < expected_rows; ++i) {
+    for (INDEX_TYPE i = 0; i < expected_rows; ++i) {
       current_position += snprintf(current_position, total_size, "%lu",
                                    i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
@@ -140,12 +140,12 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void build_sparse_random_matrix(int rows, int cols, double density, int seed,
+  void build_sparse_random_matrix(INDEX_TYPE rows, INDEX_TYPE cols, double density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,Process3DGrid *grid) {
 
     std::mt19937 gen(seed);
 //    std::uniform_real_distribution<double> uni_dist(0, 1);
-    std::normal_distribution<double> norm_dist(0, 1);
+    std::normal_distribution<VALUE_TYPE> norm_dist(0, 1);
 
     int expected_non_zeros  = cols*density;
 
@@ -163,7 +163,7 @@ public:
 //        sparse_coo.push_back(t);
 //      }
 //    }
-    std::uniform_real_distribution<double> uni_dist(0, cols);
+    std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols);
         for (int i = 0; i < rows; ++i) {
           for(int j=0;j<expected_non_zeros;j++){
             VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
@@ -179,20 +179,20 @@ public:
 
 
   template <typename VALUE_TYPE>
-  void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo, Process3DGrid *grid, uint64_t local_rows, uint64_t global_rows, uint64_t global_cols) {
+  void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo, Process3DGrid *grid, INDEX_TYPE local_rows, INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
 
-    uint64_t  global_sum = 0;
-    uint64_t local_sum = sparse_coo.size();
+    INDEX_TYPE  global_sum = 0;
+    INDEX_TYPE local_sum = sparse_coo.size();
 
     MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM, grid->col_world);
 
 
-    for (uint64_t i = 0; i < sparse_coo.size(); i += chunk_size) {
+    for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += chunk_size) {
       if (grid->rank_in_col==0 and i==0){
         total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
       }
@@ -201,7 +201,7 @@ public:
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         int col = static_cast<int>(t.col + 1);
-        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * local_rows);
+        INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
       }
 
@@ -219,8 +219,8 @@ public:
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
-        uint64_t col = static_cast<int>(t.col + 1);
-        uint64_t row = static_cast<uint64_t>(t.row + 1 + grid->rank_in_col * local_rows);
+        INDEX_TYPE col = static_cast<int>(t.col + 1);
+        INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
       }
 
