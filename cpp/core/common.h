@@ -38,7 +38,7 @@ namespace distblas::core {
 
 int divide_and_round_up(INDEX_TYPE num, int denom);
 
-vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int seed,
+vector<INDEX_TYPE> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                     int ns);
 
 void prefix_sum(vector<int> &values, vector<int> &offsets);
