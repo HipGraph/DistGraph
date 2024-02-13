@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <memory>
-#include "process_3D_grid.hpp"
+#include "../net/process_3D_grid.hpp"
 
 namespace distblas::core {
 
