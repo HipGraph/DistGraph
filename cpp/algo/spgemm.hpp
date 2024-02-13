@@ -286,7 +286,7 @@ public:
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
               if (symbolic) {
                 INDEX_TYPE val =(*(sparse_local_output->sparse_data_counter))[index] +count;
-                (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, embedding_dim);
+                (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
               }else if (sparse_local_output->hash_spgemm) {
                 INDEX_TYPE ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
