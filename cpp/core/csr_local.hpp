@@ -34,7 +34,7 @@ public:
 
   CSRLocal() {}
 
-  CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<T> *coords,
+  CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<VALUE_TYPE> *coords,
            int num_coords, bool transpose) {
     if (num_coords > 0) {
       this->transpose = transpose;
@@ -96,7 +96,7 @@ public:
         }
         coords[i].row = rv;
         coords[i].col = col_idx[i];
-        coords[i].value = static_cast<T>(values[i]);
+        coords[i].value = static_cast<VALUE_TYPE>(values[i]);
       }
 
       //      assert(num_coords <= max_nnz);
