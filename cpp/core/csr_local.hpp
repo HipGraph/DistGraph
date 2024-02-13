@@ -36,7 +36,6 @@ public:
 
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<VALUE_TYPE> *coords,
            int num_coords, bool transpose) {
-    cout << " number of coordinates " << num_coords << endl;
     if (num_coords > 0) {
       this->transpose = transpose;
       this->num_coords = num_coords;
@@ -53,7 +52,6 @@ public:
       vector<MKL_INT> cArray(num_coords, 0);
       vector<double> vArray(num_coords, 0.0);
 
-      cout << " vector creation completed "  << endl;
 #pragma omp parallel for schedule(static)
       for (int i = 0; i < num_coords; i++) {
         rArray[i] = coords[i].row;
@@ -61,9 +59,6 @@ public:
         vArray[i] = static_cast<double>(coords[i].value);
       }
 
-      cout << " vector filling completed "  << endl;
-      MPI_Barrier(MPI_COMM_WORLD);
-      cout << " passing  MPI barrier "  << endl;
       sparse_operation_t op;
       if (transpose) {
         op = SPARSE_OPERATION_TRANSPOSE;
@@ -72,7 +67,7 @@ public:
       }
 
       sparse_matrix_t tempCOO, tempCSR;
-      cout << " mkl_sparse_d_create_coo  "  << endl;
+
       sparse_status_t status_coo = mkl_sparse_d_create_coo(
           &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
           rArray.data(), cArray.data(), vArray.data());
@@ -81,7 +76,6 @@ public:
           mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
       mkl_sparse_destroy(tempCOO);
-      cout << " coo  completed "  << endl;
       vector<MKL_INT>().swap(rArray);
       vector<MKL_INT>().swap(cArray);
       vector<double>().swap(vArray);

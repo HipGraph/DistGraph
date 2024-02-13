@@ -99,7 +99,7 @@ public:
 
     size_t total_memory = 0;
 
-    CSRLocal<INDEX_TYPE> *csr_block =
+    CSRLocal<VALUE_TYPE> *csr_block =
         (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
                     : (this->sp_local_native)->csr_local_data.get();
 
@@ -159,7 +159,7 @@ public:
       std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf,
       std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf, int iteration,
       int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
-      CSRLocal<INDEX_TYPE> *csr_block, int batch_size, int considering_batch_size,
+      CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
       double lr, VALUE_TYPE *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
@@ -219,7 +219,7 @@ public:
 
 
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<INDEX_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
                           VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
                           bool local, bool col_major, int start_process,
                           int end_process, bool fetch_from_temp_cache) {
@@ -283,7 +283,7 @@ public:
   inline void calc_embedding(INDEX_TYPE source_start_index,
                              INDEX_TYPE source_end_index,
                              INDEX_TYPE dst_start_index, INDEX_TYPE dst_end_index,
-                             CSRLocal<INDEX_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
+                             CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
                              VALUE_TYPE lr, int batch_id, int batch_size,
                              int block_size, bool temp_cache) {
     if (csr_block->handler != nullptr) {
@@ -337,7 +337,7 @@ public:
 
   inline void calc_embedding_row_major(INDEX_TYPE source_start_index,
                            INDEX_TYPE source_end_index, INDEX_TYPE dst_start_index,
-                           INDEX_TYPE dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,
+                           INDEX_TYPE dst_end_index, CSRLocal<VALUE_TYPE> *csr_block,
                            VALUE_TYPE *prevCoordinates, VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool temp_cache) {
     if (csr_block->handler != nullptr) {
