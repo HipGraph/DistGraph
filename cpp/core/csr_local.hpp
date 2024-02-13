@@ -62,7 +62,7 @@ public:
       }
 
       cout << " vector filling completed "  << endl;
-      MPI_Barrier(MPI_COMM_WORLD, &rank);
+      MPI_Barrier(MPI_COMM_WORLD);
       cout << " passing  MPI barrier "  << endl;
       sparse_operation_t op;
       if (transpose) {
