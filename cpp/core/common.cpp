@@ -101,7 +101,7 @@ void distblas::core::add_memory(size_t mem, string counter_name) {
   }
 }
 
-void distblas::core::add_datatransfers(uint64_t count, string counter_name) {
+void distblas::core::add_datatransfers(INDEX_TYPE count, string counter_name) {
   int rank;
   int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -176,7 +176,7 @@ double distblas::core::stop_clock_get_elapsed(my_timer_t &start) {
 }
 
 std::unordered_set<uint64_t>
-distblas::core::random_select(const std::unordered_set<uint64_t> &originalSet, int count) {
+distblas::core::random_select(const std::unordered_set<INDEX_TYPE> &originalSet, int count) {
   std::unordered_set<uint64_t> result;
 
   // Check if the count is greater than the size of the original set
