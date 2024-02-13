@@ -86,7 +86,7 @@ public:
     //Buffer used for send MPI operations data
     unique_ptr<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> sendbuf_ptr = unique_ptr<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
 
-
+    cout << " rank " << grid->rank_in_col << " starting onboard_data  " << batches << endl;
     for (int i = 0; i < batches; i++) {
       auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
           new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
