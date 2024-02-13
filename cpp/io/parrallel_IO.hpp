@@ -43,7 +43,7 @@ public:
     unique_ptr<PSpMat_s32p64_Int> G =
         unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
 
-    uint64_t nnz;
+    INDEX_TYPE nnz;
 
     G.get()->ParallelReadMM(file_path, true, maximum<VALUE_TYPE>());
 
@@ -147,7 +147,7 @@ public:
 //    std::uniform_real_distribution<double> uni_dist(0, 1);
     std::normal_distribution<VALUE_TYPE> norm_dist(0, 1);
 
-    int expected_non_zeros  = cols*density;
+    auto expected_non_zeros  = cols*density;
 
 //    // follow row major order
 //    #pragma omp parallel for
@@ -164,10 +164,10 @@ public:
 //      }
 //    }
     std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols);
-        for (int i = 0; i < rows; ++i) {
-          for(int j=0;j<expected_non_zeros;j++){
+        for (INDEX_TYPE i = 0; i < rows; ++i) {
+          for(INDEX_TYPE j=0;j<expected_non_zeros;j++){
             VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
-            int index = uni_dist(gen);
+            auto index = uni_dist(gen);
             Tuple<VALUE_TYPE> t;
             t.row = i ;  // Calculate row index
             t.col = index;  // Calculate column index
@@ -219,7 +219,7 @@ public:
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
-        INDEX_TYPE col = static_cast<int>(t.col + 1);
+        int col = static_cast<int>(t.col + 1);
         INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
       }
