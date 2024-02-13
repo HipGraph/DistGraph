@@ -33,7 +33,7 @@ private:
 
   void initialize_CSR_from_tuples() {
     #pragma omp parallel for
-    for (uint64_t i = 0; i < coords.size(); i++) {
+    for (INDEX_TYPE i = 0; i < coords.size(); i++) {
       if (col_partitioned) {
         coords[i].col %= proc_col_width;
       } else {
@@ -88,7 +88,7 @@ private:
 
 
 public:
-  uint64_t gRows, gCols, gNNz;
+  INDEX_TYPE gRows, gCols, gNNz;
   vector<Tuple<VALUE_TYPE>> coords;
   int batch_size;
   int proc_col_width, proc_row_width;
@@ -97,11 +97,11 @@ public:
   unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
   Process3DGrid *grid;
 
-  unique_ptr<vector<unordered_map<uint64_t, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
+  unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
   shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 
-  unique_ptr<vector<uint64_t>> sparse_data_counter;
+  unique_ptr<vector<INDEX_TYPE>> sparse_data_counter;
 
   unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
@@ -115,8 +115,8 @@ public:
    * @param gCols   total number of Cols in Distributed global Adj matrix
    * @param gNNz     total number of NNz in Distributed global Adj matrix
    */
-  SpMat(Process3DGrid *grid, vector<Tuple<VALUE_TYPE>> &coords, uint64_t &gRows, uint64_t &gCols,
-        uint64_t &gNNz, int &batch_size, int &proc_row_width,
+  SpMat(Process3DGrid *grid, vector<Tuple<VALUE_TYPE>> &coords, INDEX_TYPE &gRows, INDEX_TYPE &gCols,
+        INDEX_TYPE &gNNz, int &batch_size, int &proc_row_width,
         int &proc_col_width, bool transpose, bool col_partitioned) {
     this->gRows = gRows;
     this->gCols = gCols;
@@ -128,17 +128,17 @@ public:
     this->transpose = transpose;
     this->col_partitioned = col_partitioned;
     this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
   SpMat(Process3DGrid *grid) {
     this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
   SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm) {
     this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
@@ -147,7 +147,7 @@ public:
       sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
           proc_row_width, vector<Tuple<VALUE_TYPE>>());
 
-      sparse_data_counter = make_unique<vector<uint64_t>>(proc_row_width, 0);
+      sparse_data_counter = make_unique<vector<INDEX_TYPE>>(proc_row_width, 0);
       this->hash_spgemm = true;
     }else{
       dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(proc_row_width,vector<VALUE_TYPE>(proc_col_width,0));
@@ -185,8 +185,8 @@ public:
   }
 
   // if batch_id<0 it will fetch all the batches
-  void fill_col_ids(int batch_id, int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
-                    unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
+  void fill_col_ids(int batch_id, int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
+                    unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
 
     if (mode == 0) {
 
@@ -199,8 +199,8 @@ public:
   /*
    * This method computes all indicies for pull based approach
    */
-  void fill_col_ids_for_pulling(int batch_id, int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
-                                unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
+  void fill_col_ids_for_pulling(int batch_id, int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
+                                unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
 
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
@@ -216,9 +216,9 @@ public:
 
     if (col_partitioned) {
       for (int r = 0 ; r < procs.size(); r++) {
-        uint64_t starting_index = batch_id * batch_size + proc_row_width * procs[r];
+        INDEX_TYPE starting_index = batch_id * batch_size + proc_row_width * procs[r];
         auto end_index =
-            std::min(std::min((starting_index+batch_size),static_cast<uint64_t>((procs[r] + 1) * proc_row_width)), gRows);
+            std::min(std::min((starting_index+batch_size),static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width)), gRows);
 
         for (int i = starting_index; i < end_index; i++) {
           if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
@@ -233,16 +233,16 @@ public:
       }
     } else if (transpose) {
       for (int r = 0 ; r < procs.size(); r++) {
-        uint64_t starting_index = proc_col_width * procs[r];
+        INDEX_TYPE starting_index = proc_col_width * procs[r];
         auto end_index =
-            std::min(static_cast<uint64_t>((procs[r] + 1) * proc_col_width), gCols);
+            std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_col_width), gCols);
         for (int i = starting_index; i < end_index; i++) {
           if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
               auto col_val = handle->col_idx[j];
-              uint64_t dst_start = batch_id * batch_size;
-              uint64_t dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
+              INDEX_TYPE dst_start = batch_id * batch_size;
+              INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
                 { proc_to_id_mapping[procs[r]].insert(i);
                 }
@@ -257,8 +257,8 @@ public:
   /*
    * This method computes all indicies for push based approach
    */
-  void fill_col_ids_for_pushing(int batch_id,int starting_proc, int end_proc, vector<unordered_set<uint64_t>> &proc_to_id_mapping,
-                                unordered_map<uint64_t, unordered_map<int,bool>> &id_to_proc_mapping) {
+  void fill_col_ids_for_pushing(int batch_id,int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
+                                unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
 
@@ -279,15 +279,15 @@ public:
     if (col_partitioned) {
       // calculation of sender col_ids
       for (int r = 0 ; r < procs.size(); r++) {
-        uint64_t starting_index = proc_row_width * procs[r];
-        auto end_index = std::min(static_cast<uint64_t>((procs[r] + 1) * proc_row_width), gRows) -1;
+        INDEX_TYPE starting_index = proc_row_width * procs[r];
+        auto end_index = std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width), gRows) -1;
 
         auto eligible_col_id_start =
             (batch_id >= 0) ? batch_id * batch_size : 0;
         auto eligible_col_id_end =
             (batch_id >= 0)
-                ? std::min(static_cast<uint64_t>((batch_id + 1) * batch_size),
-                           static_cast<uint64_t>(proc_col_width))
+                ? std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
+                           static_cast<INDEX_TYPE>(proc_col_width))
                 : proc_col_width;
 
         for (auto i = starting_index; i <= (end_index); i++) {
@@ -311,17 +311,17 @@ public:
     } else if (transpose) {
       // calculation of receiver col_ids
       for (int r = 0 ; r < procs.size(); r++) {
-        uint64_t starting_index =
+        INDEX_TYPE starting_index =
             (batch_id >= 0) ? batch_id * batch_size + proc_col_width * procs[r]
                             : proc_col_width *  procs[r];
         auto end_index =
             (batch_id >= 0)
                 ? std::min(
                       starting_index + batch_size,
-                      std::min(static_cast<uint64_t>(( procs[r] + 1) * proc_col_width),
+                      std::min(static_cast<INDEX_TYPE>(( procs[r] + 1) * proc_col_width),
                                gCols)) -
                       1
-                : std::min(static_cast<uint64_t>(( procs[r] + 1) * proc_col_width),
+                : std::min(static_cast<INDEX_TYPE>(( procs[r] + 1) * proc_col_width),
                            gCols) -
                       1;
         for (auto i = starting_index; i <= (end_index); i++) {
@@ -334,10 +334,10 @@ public:
   }
 
 
-CSRHandle  fetch_local_data(uint64_t local_key) {
+CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
      CSRHandle *handle = (csr_local_data.get())->handler.get();
      CSRHandle new_handler;
-     uint64_t global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
+     INDEX_TYPE global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
      int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
      new_handler.row_idx.resize(1,global_key);
      if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
@@ -353,13 +353,13 @@ CSRHandle  fetch_local_data(uint64_t local_key) {
   void purge_cache() {
     for (int i = 0; i < grid->col_world_size; i++) {
       (*this->tempCachePtr)[i].clear();
-//      std::unordered_map<uint64_t, distblas::core::SparseCacheEntry<VALUE_TYPE>>().swap(
+//      std::unordered_map<INDEX_TYPE, distblas::core::SparseCacheEntry<VALUE_TYPE>>().swap(
 //          (*this->tempCachePtr)[i]);
     }
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<uint64_t,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
-  auto fetch_data_vector_from_cache( vector<Tuple<VALUE_TYPE>>& entries,int rank, uint64_t key) {
+  auto fetch_data_vector_from_cache( vector<Tuple<VALUE_TYPE>>& entries,int rank, INDEX_TYPE key) {
 
     // Access the array using the provided rank and key
 
