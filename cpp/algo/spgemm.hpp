@@ -23,7 +23,7 @@ private:
   std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
 
   //record temp local output
-  unique_ptr<vector<unordered_map<uint64_t,VALUE_TYPE>>> output_ptr;
+  unique_ptr<vector<unordered_map<INDEX_TYPE,VALUE_TYPE>>> output_ptr;
 
   //cache size controlling hyper parameter
   double alpha = 0;
@@ -49,7 +49,7 @@ public:
         alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),
         sparse_local_output(sparse_local_output) {
 
-    output_ptr =  make_unique<vector<unordered_map<uint64_t,VALUE_TYPE>>>(sparse_local->proc_row_width);
+    output_ptr =  make_unique<vector<unordered_map<INDEX_TYPE,VALUE_TYPE>>>(sparse_local->proc_row_width);
 
   }
 
@@ -210,7 +210,7 @@ public:
     auto dst_start_index =
         this->sp_local_receiver->proc_col_width * grid->rank_in_col;
     auto dst_end_index =
-        std::min(static_cast<uint64_t>(this->sp_local_receiver->proc_col_width *
+        std::min(static_cast<INDEX_TYPE>(this->sp_local_receiver->proc_col_width *
                                        (grid->rank_in_col + 1)),
                  this->sp_local_receiver->gCols) -
         1;
@@ -231,7 +231,7 @@ public:
 
           dst_start_index = this->sp_local_receiver->proc_row_width * computing_rank;
           dst_end_index =
-              std::min(static_cast<uint64_t>(
+              std::min(static_cast<INDEX_TYPE>(
                            this->sp_local_receiver->proc_row_width * (computing_rank + 1)),
                        this->sp_local_receiver->gCols) -
               1;
@@ -245,25 +245,25 @@ public:
     }
   }
 
-  inline void calc_embedding_row_major(uint64_t source_start_index,
-                           uint64_t source_end_index, uint64_t dst_start_index,
-                           uint64_t dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,VALUE_TYPE lr, int batch_id,
+  inline void calc_embedding_row_major(INDEX_TYPE source_start_index,
+                           INDEX_TYPE source_end_index, INDEX_TYPE dst_start_index,
+                           INDEX_TYPE dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool symbolic) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
       #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
-      for (uint64_t i = source_start_index; i <= source_end_index; i++) {
+      for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
-        uint64_t index = i - batch_id * batch_size;
+        INDEX_TYPE index = i - batch_id * batch_size;
         int max_reach=0;
 
-        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+        for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
+             j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
-            uint64_t local_dst =
+            INDEX_TYPE local_dst =
                 dst_id - (grid)->rank_in_col *
                              (this->sp_local_receiver)->proc_col_width;
             int target_rank =
@@ -271,11 +271,11 @@ public:
             bool fetch_from_cache =
                 target_rank == (grid)->rank_in_col ? false : true;
 
-            vector<uint64_t> remote_cols;
+            vector<INDEX_TYPE> remote_cols;
             vector<VALUE_TYPE> remote_values;
 
             if (fetch_from_cache) {
-              unordered_map<uint64_t, SparseCacheEntry<VALUE_TYPE>>
+              unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*sparse_local->tempCachePtr)[target_rank];
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
@@ -289,10 +289,10 @@ public:
                 auto val =(*(sparse_local_output->sparse_data_counter))[index] +count;
                 (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, embedding_dim);
               }else if (sparse_local_output->hash_spgemm) {
-                uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
+                INDEX_TYPE ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                    auto  d = (handle->col_idx[k]);
-                   uint64_t hash = (d*hash_scale) & (ht_size-1);
+                   INDEX_TYPE hash = (d*hash_scale) & (ht_size-1);
                    auto value =  lr *handle->values[k];
                    int max_count=10;
                    int count=0;
@@ -322,11 +322,11 @@ public:
                 auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
                 (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,embedding_dim);
               }else if (sparse_local_output->hash_spgemm) {
-                uint64_t ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
+                INDEX_TYPE ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
-                  uint64_t hash = (d*hash_scale) & (ht_size-1);
+                  INDEX_TYPE hash = (d*hash_scale) & (ht_size-1);
                   int max_count=10;
                   int count=0;
                   while (count<max_count) {
