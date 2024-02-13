@@ -57,7 +57,7 @@ private:
 
   void initialize_CSR_from_dense_collector(){
     vector<Tuple<VALUE_TYPE>> coords;
-
+    cout<<" rank "<<grid->rank_in_col<<" initialize_CSR_from_dense_collector started "<<endl;
     #pragma omp parallel for
     for(auto i=0;i<dense_collector->size();i++) {
       vector<Tuple<VALUE_TYPE>> coords_local;
@@ -74,6 +74,7 @@ private:
       #pragma omp critical
       coords.insert(coords.end(), coords_local.begin(), coords_local.end());
     }
+    cout<<" rank "<<grid->rank_in_col<<" tuple creation completed "<<endl;
     Tuple<VALUE_TYPE> *coords_ptr = coords.data();
     csr_local_data =
         make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
