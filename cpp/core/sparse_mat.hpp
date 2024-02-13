@@ -79,6 +79,7 @@ private:
     csr_local_data =
         make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
                                  coords_ptr, coords.size(), false);
+    cout<<" rank "<<grid->rank_in_col<<" tuple csr_local_data completed "<<endl;
 
   }
 
