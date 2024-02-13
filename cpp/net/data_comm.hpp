@@ -363,10 +363,10 @@ public:
 
 
 
-  void transfer_data(vector<uint64_t> &col_ids, int iteration, int batch_id) {
+  void transfer_data(vector<INDEX_TYPE> &col_ids, int iteration, int batch_id) {
 
-    vector<vector<uint64_t>> receive_col_ids_list(grid->col_world_size);
-    vector<uint64_t> send_col_ids_list;
+    vector<vector<INDEX_TYPE>> receive_col_ids_list(grid->col_world_size);
+    vector<INDEX_TYPE> send_col_ids_list;
 
     int total_send_count = 0;
     int total_receive_count = 0;
