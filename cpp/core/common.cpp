@@ -175,9 +175,9 @@ double distblas::core::stop_clock_get_elapsed(my_timer_t &start) {
   return diff.count();
 }
 
-std::unordered_set<uint64_t>
+std::unordered_set<INDEX_TYPE>
 distblas::core::random_select(const std::unordered_set<INDEX_TYPE> &originalSet, int count) {
-  std::unordered_set<uint64_t> result;
+  std::unordered_set<INDEX_TYPE> result;
 
   // Check if the count is greater than the size of the original set
   if (count >= originalSet.size()) {
