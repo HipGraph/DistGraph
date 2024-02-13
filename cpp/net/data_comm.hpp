@@ -108,8 +108,9 @@ public:
 
     if (alpha==0) {
       // This represents the case for pulling
+         cout<<" rank "<<grid->rank_in_col<< " starting fill_col_ids "<<endl;
          this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
-
+          cout<<" rank "<<grid->rank_in_col<< " completed fill_col_ids "<<endl;
          // calculating sending data cols
          this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
     } else if (alpha == 1.0) {
