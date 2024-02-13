@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
     spgemm_algo.get()->algo_spgemm(iterations, batch_size,lr);
-
+    cout << " rank " << rank << " spgemm algo completed  " << endl;
     output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
     output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
 
