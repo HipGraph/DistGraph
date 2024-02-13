@@ -162,9 +162,9 @@ int main(int argc, char **argv) {
   auto sparse_input = shared_ptr<distblas::core::SpMat<double>>(new distblas::core::SpMat<double>(grid.get()));
   if (spgemm & save_results) {
     reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, grid.get());
-    uint64_t  gROWs = static_cast<uint64_t>(localARows);
-    uint64_t gCols = static_cast<uint64_t>(dimension);
-    uint64_t gNNZ =     static_cast<uint64_t>(sparse_coo.size());
+    INDEX_TYPE gROWs = static_cast<INDEX_TYPE>(localARows);
+    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
+    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
     cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
     int localBRows = static_cast<int>(dimension);
     sparse_input =  make_shared<distblas::core::SpMat<double>>(grid.get(),
