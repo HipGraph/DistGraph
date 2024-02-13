@@ -479,7 +479,7 @@ public:
 
             if (!matched) {
               if (fetch_from_cache) {
-                unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>
+                unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
                     &arrayMap =
                         (temp_cache)
                             ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -518,9 +518,9 @@ public:
   }
 
   inline void
-  calc_embedding_row_major(uint64_t source_start_index,
-                           uint64_t source_end_index, uint64_t dst_start_index,
-                           uint64_t dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,
+  calc_embedding_row_major(INDEX_TYPE source_start_index,
+                           INDEX_TYPE source_end_index, INDEX_TYPE dst_start_index,
+                           INDEX_TYPE dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,
                            VALUE_TYPE *prevCoordinates, VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool temp_cache) {
     if (csr_block->handler != nullptr) {
@@ -528,15 +528,15 @@ public:
 
 
 #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
-      for (uint64_t i = source_start_index; i <= source_end_index; i++) {
+      for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
-        uint64_t index = i - batch_id * batch_size;
+        INDEX_TYPE index = i - batch_id * batch_size;
 
-        for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
-             j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
+        for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
+             j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
-            uint64_t local_dst =
+            INDEX_TYPE local_dst =
                 dst_id - (grid)->rank_in_col *
                              (this->sp_local_receiver)->proc_col_width;
             int target_rank =
@@ -548,7 +548,7 @@ public:
             std::array<VALUE_TYPE, embedding_dim> array_ptr;
 
             if (fetch_from_cache) {
-              unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>
+              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
                   &arrayMap =
                       (temp_cache)
                           ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -584,7 +584,7 @@ public:
   }
 
   inline void calc_t_dist_replus_rowptr(VALUE_TYPE *prevCoordinates,
-                                        vector<uint64_t> &col_ids, VALUE_TYPE lr,
+                                        vector<INDEX_TYPE> &col_ids, VALUE_TYPE lr,
                                         int batch_id, int batch_size,
                                         int block_size) {
 
@@ -592,13 +592,13 @@ public:
 
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
-      uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
+      INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
       VALUE_TYPE forceDiff[embedding_dim];
       for (int j = 0; j < col_ids.size(); j++) {
-        uint64_t global_col_id = col_ids[j];
-        uint64_t local_col_id =
+        INDEX_TYPE global_col_id = col_ids[j];
+        INDEX_TYPE local_col_id =
             global_col_id -
-            static_cast<uint64_t>(((grid)->rank_in_col *
+            static_cast<INDEX_TYPE>(((grid)->rank_in_col *
                                    (this->sp_local_receiver)->proc_row_width));
         bool fetch_from_cache = false;
 
@@ -611,7 +611,7 @@ public:
 
         if (fetch_from_cache) {
           VALUE_TYPE repuls = 0;
-          unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>> &arrayMap =
+          unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>> &arrayMap =
               (*this->dense_local->tempCachePtr)[owner_rank];
           std::array<VALUE_TYPE, embedding_dim> &colvec =
               arrayMap[global_col_id].value;
