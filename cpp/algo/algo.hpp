@@ -24,18 +24,18 @@ using namespace distblas::net;
 using namespace Eigen;
 
 namespace distblas::algo {
-template <typename SPT, typename DENT, size_t embedding_dim>
+template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 
 class EmbeddingAlgo {
 
 protected:
-  DenseMat<SPT, DENT, embedding_dim> *dense_local;
-  distblas::core::SpMat<SPT> *sp_local_receiver;
-  distblas::core::SpMat<SPT> *sp_local_sender;
-  distblas::core::SpMat<SPT> *sp_local_native;
+  DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
+  distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver;
+  distblas::core::SpMat<INDEX_TYPE> *sp_local_sender;
+  distblas::core::SpMat<INDEX_TYPE> *sp_local_native;
   Process3DGrid *grid;
-  DENT MAX_BOUND, MIN_BOUND;
-  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>>
+  VALUE_TYPE MAX_BOUND, MIN_BOUND;
+  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>>
       data_comm_cache;
 
   //cache size controlling hyper parameter
@@ -51,18 +51,18 @@ protected:
   bool col_major = true;
 
 public:
-  EmbeddingAlgo(distblas::core::SpMat<SPT> *sp_local_native,
-                distblas::core::SpMat<SPT> *sp_local_receiver,
-                distblas::core::SpMat<SPT> *sp_local_sender,
-                DenseMat<SPT, DENT, embedding_dim> *dense_local,
-                Process3DGrid *grid, double alpha, double beta, DENT MAX_BOUND,
-                DENT MIN_BOUND, bool col_major, bool sync_comm)
+  EmbeddingAlgo(distblas::core::SpMat<INDEX_TYPE> *sp_local_native,
+                distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver,
+                distblas::core::SpMat<INDEX_TYPE> *sp_local_sender,
+                DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
+                Process3DGrid *grid, double alpha, double beta, VALUE_TYPE MAX_BOUND,
+                VALUE_TYPE MIN_BOUND, bool col_major, bool sync_comm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
         alpha(alpha), beta(beta), MAX_BOUND(MAX_BOUND), MIN_BOUND(MIN_BOUND),
         col_major(col_major),sync(sync_comm) {}
 
-  DENT scale(DENT v) {
+  VALUE_TYPE scale(VALUE_TYPE v) {
     if (v > MAX_BOUND)
       return MAX_BOUND;
     else if (v < -MAX_BOUND)
@@ -71,7 +71,7 @@ public:
       return v;
   }
 
-  void algo_force2_vec_ns(int iterations, int batch_size, int ns, DENT lr) {
+  void algo_force2_vec_ns(int iterations, int batch_size, int ns, VALUE_TYPE lr) {
     auto t = start_clock();
 
     int batches = 0;
@@ -92,20 +92,20 @@ public:
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto full_comm = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-        new DataComm<SPT, DENT, embedding_dim>(
+    auto full_comm = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+        new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
     full_comm.get()->onboard_data();
 
     // Buffer used for receive MPI operations data
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> update_ptr =
+        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
 
     //Buffer used for send MPI operations data
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> sendbuf_ptr =
+        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
 
     if (alpha > 0 and grid->col_world_size > 1) {
       MPI_Request fetch_batch_full;
@@ -114,8 +114,8 @@ public:
     }
 
     for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-          new DataComm<SPT, DENT, embedding_dim>(
+      auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+          new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
               sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
@@ -123,12 +123,12 @@ public:
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
-    DENT *prevCoordinates = static_cast<DENT *>(
-        ::operator new(sizeof(DENT[batch_size * embedding_dim])));
+    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
+        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
 
     size_t total_memory = 0;
 
-    CSRLocal<SPT> *csr_block =
+    CSRLocal<INDEX_TYPE> *csr_block =
         (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
                     : (this->sp_local_native)->csr_local_data.get();
 
@@ -262,11 +262,11 @@ public:
   }
 
   inline void execute_pull_model_computations(
-      std::vector<DataTuple<DENT, embedding_dim>> *sendbuf,
-      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf, int iteration,
-      int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
-      CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
-      double lr, DENT *prevCoordinates, int comm_initial_start, bool local_execution,
+      std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf,
+      std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf, int iteration,
+      int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+      CSRLocal<INDEX_TYPE> *csr_block, int batch_size, int considering_batch_size,
+      double lr, VALUE_TYPE *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
 
     int proc_length = get_proc_length(beta, grid->col_world_size);
@@ -324,11 +324,11 @@ public:
   }
 
   inline int execute_push_model_computations(
-      std::vector<DataTuple<DENT, embedding_dim>> *sendbuf,
-      std::vector<DataTuple<DENT, embedding_dim>> *receivebuf, int iteration,
-      int batch, int batches, DataComm<SPT, DENT, embedding_dim> *data_comm,
-      CSRLocal<SPT> *csr_block, int batch_size, int last_batch_size,
-      int considering_batch_size, double lr, DENT *prevCoordinates,
+      std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf,
+      std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf, int iteration,
+      int batch, int batches, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+      CSRLocal<INDEX_TYPE> *csr_block, int batch_size, int last_batch_size,
+      int considering_batch_size, double lr, VALUE_TYPE *prevCoordinates,
       int next_batch_id, int next_iteration, int next_considering_batch_size,
       bool communication) {
 
@@ -386,8 +386,8 @@ public:
   }
 
   inline void
-  calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
-                          DENT lr, int batch_id, int batch_size, int block_size,
+  calc_t_dist_grad_rowptr(CSRLocal<INDEX_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
+                          VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
                           bool local, bool col_major, int start_process,
                           int end_process, bool fetch_from_temp_cache) {
 
@@ -450,8 +450,8 @@ public:
   inline void calc_embedding(uint64_t source_start_index,
                              uint64_t source_end_index,
                              uint64_t dst_start_index, uint64_t dst_end_index,
-                             CSRLocal<SPT> *csr_block, DENT *prevCoordinates,
-                             DENT lr, int batch_id, int batch_size,
+                             CSRLocal<INDEX_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
+                             VALUE_TYPE lr, int batch_id, int batch_size,
                              int block_size, bool temp_cache) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
@@ -467,19 +467,19 @@ public:
 
 
         bool matched = false;
-        std::array<DENT, embedding_dim> array_ptr;
+        std::array<VALUE_TYPE, embedding_dim> array_ptr;
         bool col_inserted = false;
         for (uint64_t j = static_cast<uint64_t>(csr_handle->rowStart[i]);
              j < static_cast<uint64_t>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
               csr_handle->col_idx[j] <= source_end_index) {
-            DENT forceDiff[embedding_dim];
+            VALUE_TYPE forceDiff[embedding_dim];
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
 
             if (!matched) {
               if (fetch_from_cache) {
-                unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>
+                unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>
                     &arrayMap =
                         (temp_cache)
                             ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -488,7 +488,7 @@ public:
               }
               matched = true;
             }
-            DENT attrc = 0;
+            VALUE_TYPE attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
                 forceDiff[d] =
@@ -504,10 +504,10 @@ public:
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
-            DENT d1 = -2.0 / (1.0 + attrc);
+            VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
 
             for (int d = 0; d < embedding_dim; d++) {
-              DENT l = scale(forceDiff[d] * d1);
+              VALUE_TYPE l = scale(forceDiff[d] * d1);
               prevCoordinates[index * embedding_dim + d] =
                   prevCoordinates[index * embedding_dim + d] + (lr)*l;
             }
@@ -520,8 +520,8 @@ public:
   inline void
   calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
-                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,
-                           DENT *prevCoordinates, DENT lr, int batch_id,
+                           uint64_t dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,
+                           VALUE_TYPE *prevCoordinates, VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool temp_cache) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
@@ -544,11 +544,11 @@ public:
             bool fetch_from_cache =
                 target_rank == (grid)->rank_in_col ? false : true;
 
-            DENT forceDiff[embedding_dim];
-            std::array<DENT, embedding_dim> array_ptr;
+            VALUE_TYPE forceDiff[embedding_dim];
+            std::array<VALUE_TYPE, embedding_dim> array_ptr;
 
             if (fetch_from_cache) {
-              unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>>
+              unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>>
                   &arrayMap =
                       (temp_cache)
                           ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -556,7 +556,7 @@ public:
               array_ptr = arrayMap[dst_id].value;
             }
 
-            DENT attrc = 0;
+            VALUE_TYPE attrc = 0;
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
                 forceDiff[d] =
@@ -570,10 +570,10 @@ public:
               }
               attrc += forceDiff[d] * forceDiff[d];
             }
-            DENT d1 = -2.0 / (1.0 + attrc);
+            VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
 
             for (int d = 0; d < embedding_dim; d++) {
-              DENT l = scale(forceDiff[d] * d1);
+              VALUE_TYPE l = scale(forceDiff[d] * d1);
               prevCoordinates[index * embedding_dim + d] =
                   prevCoordinates[index * embedding_dim + d] + (lr)*l;
             }
@@ -583,8 +583,8 @@ public:
     }
   }
 
-  inline void calc_t_dist_replus_rowptr(DENT *prevCoordinates,
-                                        vector<uint64_t> &col_ids, DENT lr,
+  inline void calc_t_dist_replus_rowptr(VALUE_TYPE *prevCoordinates,
+                                        vector<uint64_t> &col_ids, VALUE_TYPE lr,
                                         int batch_id, int batch_size,
                                         int block_size) {
 
@@ -593,7 +593,7 @@ public:
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       uint64_t row_id = static_cast<uint64_t>(i + row_base_index);
-      DENT forceDiff[embedding_dim];
+      VALUE_TYPE forceDiff[embedding_dim];
       for (int j = 0; j < col_ids.size(); j++) {
         uint64_t global_col_id = col_ids[j];
         uint64_t local_col_id =
@@ -610,10 +610,10 @@ public:
         }
 
         if (fetch_from_cache) {
-          DENT repuls = 0;
-          unordered_map<uint64_t, CacheEntry<DENT, embedding_dim>> &arrayMap =
+          VALUE_TYPE repuls = 0;
+          unordered_map<uint64_t, CacheEntry<VALUE_TYPE, embedding_dim>> &arrayMap =
               (*this->dense_local->tempCachePtr)[owner_rank];
-          std::array<DENT, embedding_dim> &colvec =
+          std::array<VALUE_TYPE, embedding_dim> &colvec =
               arrayMap[global_col_id].value;
 
           for (int d = 0; d < embedding_dim; d++) {
@@ -623,14 +623,14 @@ public:
             repuls += forceDiff[d] * forceDiff[d];
           }
 
-          DENT d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
+          VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = scale(forceDiff[d] * d1);
             prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
           }
 
         } else {
-          DENT repuls = 0;
+          VALUE_TYPE repuls = 0;
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] =
                 (this->dense_local)->nCoordinates[row_id * embedding_dim + d] -
@@ -638,7 +638,7 @@ public:
                     ->nCoordinates[local_col_id * embedding_dim + d];
             repuls += forceDiff[d] * forceDiff[d];
           }
-          DENT d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
+          VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for (int d = 0; d < embedding_dim; d++) {
             forceDiff[d] = scale(forceDiff[d] * d1);
             prevCoordinates[i * embedding_dim + d] += (lr)*forceDiff[d];
@@ -648,7 +648,7 @@ public:
     }
   }
 
-  inline void update_data_matrix_rowptr(DENT *prevCoordinates, int batch_id,
+  inline void update_data_matrix_rowptr(VALUE_TYPE *prevCoordinates, int batch_id,
                                         int batch_size) {
 
     int row_base_index = batch_id * batch_size;
