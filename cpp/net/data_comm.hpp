@@ -21,13 +21,13 @@ namespace distblas::net {
  * with 1D partitioning of Sparse Matrix and 1D partitioning of Dense Matrix.
  */
 
-template <typename SPT, typename DENT, size_t embedding_dim> class DataComm {
+template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim> class DataComm {
 
 private:
-  SpMat<SPT> *sp_local_receiver;
-  SpMat<SPT> *sp_local_sender;
-  DenseMat<SPT, DENT, embedding_dim> *dense_local;
-  SpMat<DENT> *sparse_local;
+  SpMat<INDEX_TYPE> *sp_local_receiver;
+  SpMat<INDEX_TYPE> *sp_local_sender;
+  DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
+  SpMat<VALUE_TYPE> *sparse_local;
   Process3DGrid *grid;
   vector<int> sdispls;
   vector<int> sendcounts;
@@ -43,9 +43,9 @@ private:
   double alpha;
 
 public:
-  DataComm(distblas::core::SpMat<SPT> *sp_local_receiver,
-           distblas::core::SpMat<SPT> *sp_local_sender,
-           DenseMat<SPT, DENT, embedding_dim> *dense_local,
+  DataComm(distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver,
+           distblas::core::SpMat<INDEX_TYPE> *sp_local_sender,
+           DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
            Process3DGrid *grid,
            int batch_id, double alpha) {
     this->sp_local_receiver = sp_local_receiver;
@@ -67,9 +67,9 @@ public:
 
   }
 
-  DataComm(SpMat<SPT> *sp_local_receiver,
-           SpMat<SPT> *sp_local_sender,
-           SpMat<DENT> *sparse_local,
+  DataComm(SpMat<INDEX_TYPE> *sp_local_receiver,
+           SpMat<INDEX_TYPE> *sp_local_sender,
+           SpMat<VALUE_TYPE> *sparse_local,
            Process3DGrid *grid,
            int batch_id, double alpha) {
     this->sp_local_receiver = sp_local_receiver;
@@ -145,8 +145,8 @@ public:
     }
   }
 
- inline void transfer_data(std::vector<DataTuple<DENT, embedding_dim>> *sendbuf_cyclic,
-                            std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+ inline void transfer_data(std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf_cyclic,
+                            std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf,
                             bool synchronous,MPI_Request* req, int iteration,
                             int batch_id, int starting_proc, int end_proc,
                             bool temp_cache) {
@@ -193,10 +193,10 @@ public:
 
     if (total_send_count > 0) {
       sendbuf_cyclic->resize(total_send_count);
-      for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
+      for (const auto &pair : DataComm<INDEX_TYPE,VALUE_TYPE,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         bool already_fetched = false;
-        std::array<DENT, embedding_dim> dense_vector;
+        std::array<VALUE_TYPE, embedding_dim> dense_vector;
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
             if (!already_fetched) {
@@ -233,12 +233,12 @@ public:
     }
   }
 
-  inline void transfer_sparse_data(vector<SpTuple<DENT,sp_tuple_max_dim>> *sendbuf_cyclic,
-                                   vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf,int iteration,
+  inline void transfer_sparse_data(vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *sendbuf_cyclic,
+                                   vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *receivebuf,int iteration,
                                    int batch_id, int starting_proc, int end_proc) {
 
     int total_receive_count = 0;
-    shared_ptr<vector<vector<SpTuple<DENT,sp_tuple_max_dim>>>> data_buffer_ptr = make_shared<vector<vector<SpTuple<DENT,sp_tuple_max_dim>>>>();
+    shared_ptr<vector<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>> data_buffer_ptr = make_shared<vector<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>>();
     data_buffer_ptr->resize(grid->col_world_size);
 
     int total_send_count = 0;
@@ -258,17 +258,17 @@ public:
               : (grid->col_world_size - i + grid->rank_in_col) % grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
-      (*data_buffer_ptr)[sending_rank]=vector<SpTuple<DENT,sp_tuple_max_dim>>();
+      (*data_buffer_ptr)[sending_rank]=vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>();
     }
 
-      for (const auto &pair : DataComm<SPT,DENT,embedding_dim>::send_indices_to_proc_map) {
+      for (const auto &pair : DataComm<INDEX_TYPE,VALUE_TYPE,embedding_dim>::send_indices_to_proc_map) {
         auto col_id = pair.first;
         CSRHandle sparse_tuple =  (this->sparse_local)->fetch_local_data(col_id);
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0) {
 
             if (send_counts_cyclic[sending_procs[i]]==0){
-              SpTuple<DENT,sp_tuple_max_dim> current;
+              SpTuple<VALUE_TYPE,sp_tuple_max_dim> current;
               current.rows[0]=2;//rows first two indices are already taken for metadata
               current.rows[1]=0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
@@ -276,11 +276,11 @@ public:
               send_counts_cyclic[sending_procs[i]]++;
             }
 
-            SpTuple<DENT,sp_tuple_max_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
+            SpTuple<VALUE_TYPE,sp_tuple_max_dim> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1];
              auto row_index_offset  = latest.rows[0];
              auto col_index_offset = latest.rows[1];
             if (row_index_offset>=row_max or col_index_offset>= sp_tuple_max_dim){
-              SpTuple<DENT,sp_tuple_max_dim> current;
+              SpTuple<VALUE_TYPE,sp_tuple_max_dim> current;
               current.rows[0]=2;//rows first two indices are already taken for metadata
               current.rows[1]=0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
@@ -308,7 +308,7 @@ public:
              }
              (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]]-1]=latest;
              if (remaining_data_items>0){
-               SpTuple<DENT,sp_tuple_max_dim> current;
+               SpTuple<VALUE_TYPE,sp_tuple_max_dim> current;
                current.rows[0]=2;//rows first two indices are already taken for metadata
                current.rows[1]=0;
                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
@@ -401,15 +401,15 @@ public:
       total_receive_count = total_receive_count + receive_counts_cyclic[i];
     }
 
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> sendbuf =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> sendbuf =
+        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
 
     sendbuf->resize(total_send_count);
 
-    unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>> receivebuf_ptr =
-        unique_ptr<std::vector<DataTuple<DENT, embedding_dim>>>(
-            new vector<DataTuple<DENT, embedding_dim>>());
+    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> receivebuf_ptr =
+        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
 
     receivebuf_ptr.get()->resize(total_receive_count);
 
@@ -417,7 +417,7 @@ public:
       int local_key =
           send_col_ids_list[j] -
           (grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
-      std::array<DENT, embedding_dim> val_arr =
+      std::array<VALUE_TYPE, embedding_dim> val_arr =
           (this->dense_local)->fetch_local_data(local_key);
         int index = j;
         (*sendbuf)[index].col = send_col_ids_list[j];
@@ -437,8 +437,8 @@ public:
   }
 
 
-  inline void populate_cache(std::vector<DataTuple<DENT, embedding_dim>> *sendbuf,
-                             std::vector<DataTuple<DENT, embedding_dim>> *receivebuf,
+  inline void populate_cache(std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf,
+                             std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf,
                       MPI_Request *req, bool synchronous, int iteration,
                       int batch_id, bool temp) {
     if (!synchronous) {
@@ -453,7 +453,7 @@ public:
       int count = this->receive_counts_cyclic[i];
 
       for (int j = base_index; j < base_index + count; j++) {
-        DataTuple<DENT, embedding_dim> t = (*receivebuf)[j];
+        DataTuple<VALUE_TYPE, embedding_dim> t = (*receivebuf)[j];
         (this->dense_local)->insert_cache(i, t.col, batch_id, iteration, t.value, temp);
       }
     }
@@ -464,8 +464,8 @@ public:
 
   }
 
-  inline void populate_sparse_cache(vector<SpTuple<DENT,sp_tuple_max_dim>> *sendbuf,
-                                    vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf,
+  inline void populate_sparse_cache(vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *sendbuf,
+                                    vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *receivebuf,
                                     int iteration,
                                     int batch_id) {
 
@@ -475,22 +475,22 @@ public:
       int count = this->receive_counts_cyclic[i];
 
       for (int j = base_index; j < base_index + count; j++) {
-        SpTuple<DENT,sp_tuple_max_dim> sp_tuple = (*receivebuf)[j];
+        SpTuple<VALUE_TYPE,sp_tuple_max_dim> sp_tuple = (*receivebuf)[j];
         auto row_offset = sp_tuple.rows[0];
         auto offset_so_far=0;
         for(auto k=2;k<row_offset;k=k+2){
           auto key = sp_tuple.rows[k];
           auto count = sp_tuple.rows[k+1];
           if ((*(this->sparse_local)->tempCachePtr)[i].find(key)==(*(this->sparse_local)->tempCachePtr)[i].end()){
-            SparseCacheEntry<DENT> sp_entry;
+            SparseCacheEntry<VALUE_TYPE> sp_entry;
             sp_entry.inserted_itr=iteration;
             sp_entry.inserted_batch_id = batch_id;
             sp_entry.cols = vector<uint64_t>();
-            sp_entry.values = vector<DENT>();
+            sp_entry.values = vector<VALUE_TYPE>();
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
           if (count>0) {
-            SparseCacheEntry<DENT> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
+            SparseCacheEntry<VALUE_TYPE> cache_entry = (*(this->sparse_local)->tempCachePtr)[i][key];
             auto entry_offset = cache_entry.cols.size();
             cache_entry.cols.resize(entry_offset + count);
             cache_entry.values.resize(entry_offset + count);
