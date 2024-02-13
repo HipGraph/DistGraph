@@ -285,7 +285,7 @@ public:
             if (!fetch_from_cache) {
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
               if (symbolic) {
-                auto val =(*(sparse_local_output->sparse_data_counter))[index] +count;
+                INDEX_TYPE val =(*(sparse_local_output->sparse_data_counter))[index] +count;
                 (*(sparse_local_output->sparse_data_counter))[index] =std::min(val, embedding_dim);
               }else if (sparse_local_output->hash_spgemm) {
                 INDEX_TYPE ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();
@@ -318,7 +318,7 @@ public:
             }else{
               int count = remote_cols.size();
               if (symbolic){
-                auto val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
+                INDEX_TYPE val  = (*(sparse_local_output->sparse_data_counter))[index]+ count;
                 (*(sparse_local_output->sparse_data_counter))[index] = std::min(val,embedding_dim);
               }else if (sparse_local_output->hash_spgemm) {
                 INDEX_TYPE ht_size = (*(sparse_local_output->sparse_data_collector))[index].size();

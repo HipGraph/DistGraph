@@ -291,11 +291,11 @@ public:
               col_index_offset = latest.rows[1];
             }
 
-             auto offset = sparse_tuple.col_idx.size();
+             INDEX_TYPE offset = sparse_tuple.col_idx.size();
             //start filling from offset position
-             auto pending_col_pos = sp_tuple_max_dim - col_index_offset;
-             auto num_of_copying_data = min(offset,pending_col_pos);
-             auto remaining_data_items = offset-num_of_copying_data;
+             INDEX_TYPE pending_col_pos = sp_tuple_max_dim - col_index_offset;
+             INDEX_TYPE num_of_copying_data = min(offset,pending_col_pos);
+             INDEX_TYPE remaining_data_items = offset-num_of_copying_data;
 
              latest.rows[row_index_offset]=sparse_tuple.row_idx[0];
              latest.rows[row_index_offset+1]=num_of_copying_data;
