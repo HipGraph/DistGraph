@@ -9,21 +9,21 @@ using namespace Eigen;
 using namespace distblas::core;
 
 namespace distblas::algo {
-template <typename SPT, typename DENT, size_t embedding_dim>
+template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class SpGEMMAlgo {
 
 private:
-  distblas::core::SpMat<DENT> *sparse_local_output;
-  distblas::core::SpMat<DENT> *sparse_local;
-  distblas::core::SpMat<SPT> *sp_local_receiver;
-  distblas::core::SpMat<SPT> *sp_local_sender;
-  distblas::core::SpMat<SPT> *sp_local_native;
+  distblas::core::SpMat<VALUE_TYPE> *sparse_local_output;
+  distblas::core::SpMat<VALUE_TYPE> *sparse_local;
+  distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver;
+  distblas::core::SpMat<INDEX_TYPE> *sp_local_sender;
+  distblas::core::SpMat<INDEX_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
-  std::unordered_map<int, unique_ptr<DataComm<SPT, DENT, embedding_dim>>> data_comm_cache;
+  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
 
   //record temp local output
-  unique_ptr<vector<unordered_map<uint64_t,DENT>>> output_ptr;
+  unique_ptr<vector<unordered_map<uint64_t,VALUE_TYPE>>> output_ptr;
 
   //cache size controlling hyper parameter
   double alpha = 0;
@@ -38,24 +38,24 @@ private:
   bool col_major = false;
 
 public:
-  SpGEMMAlgo(distblas::core::SpMat<SPT> *sp_local_native,
-             distblas::core::SpMat<SPT> *sp_local_receiver,
-             distblas::core::SpMat<SPT> *sp_local_sender,
-             distblas::core::SpMat<DENT> *sparse_local,
-             distblas::core::SpMat<DENT> *sparse_local_output,
+  SpGEMMAlgo(distblas::core::SpMat<INDEX_TYPE> *sp_local_native,
+             distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver,
+             distblas::core::SpMat<INDEX_TYPE> *sp_local_sender,
+             distblas::core::SpMat<VALUE_TYPE> *sparse_local,
+             distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
            Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local), grid(grid),
         alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),
         sparse_local_output(sparse_local_output) {
 
-    output_ptr =  make_unique<vector<unordered_map<uint64_t,DENT>>>(sparse_local->proc_row_width);
+    output_ptr =  make_unique<vector<unordered_map<uint64_t,VALUE_TYPE>>>(sparse_local->proc_row_width);
 
   }
 
 
 
-  void algo_spgemm(int iterations, int batch_size, DENT lr) {
+  void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr) {
     auto t = start_clock();
 
     int batches = 0;
@@ -75,21 +75,21 @@ public:
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto full_comm = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-        new DataComm<SPT, DENT, embedding_dim>(
+    auto full_comm = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+        new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha));
     full_comm.get()->onboard_data();
 
     // Buffer used for receive MPI operations data
-    unique_ptr<std::vector<SpTuple<DENT,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<DENT,sp_tuple_max_dim>>>(new vector<SpTuple<DENT,sp_tuple_max_dim>>());
+    unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
 
     //Buffer used for send MPI operations data
-    unique_ptr<vector<SpTuple<DENT,sp_tuple_max_dim>>> sendbuf_ptr = unique_ptr<vector<SpTuple<DENT,sp_tuple_max_dim>>>(new vector<SpTuple<DENT,sp_tuple_max_dim>>());
+    unique_ptr<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> sendbuf_ptr = unique_ptr<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
 
 
     for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<SPT, DENT, embedding_dim>>(
-          new DataComm<SPT, DENT, embedding_dim>(
+      auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+          new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
               sp_local_receiver, sp_local_sender, sparse_local, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
@@ -98,11 +98,11 @@ public:
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
     // output is accumalated in a dense array for performance.It won't be an issue with tall and skinny
-//    vector<unordered_map<int,DENT>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
+//    vector<unordered_map<int,VALUE_TYPE>> *prevCoordinates = sparse_local_output->sparse_data_collector.get();
 
     size_t total_memory = 0;
 
-    CSRLocal<SPT> *csr_block =
+    CSRLocal<INDEX_TYPE> *csr_block =
         (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
                     : (this->sp_local_native)->csr_local_data.get();
 
@@ -151,10 +151,10 @@ public:
   }
 
   inline void execute_pull_model_computations(
-      std::vector<SpTuple<DENT,sp_tuple_max_dim>> *sendbuf,
-      std::vector<SpTuple<DENT,sp_tuple_max_dim>> *receivebuf, int iteration,
-      int batch, DataComm<SPT, DENT, embedding_dim> *data_comm,
-      CSRLocal<SPT> *csr_block, int batch_size, int considering_batch_size,
+      std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *sendbuf,
+      std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *receivebuf, int iteration,
+      int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+      CSRLocal<INDEX_TYPE> *csr_block, int batch_size, int considering_batch_size,
       double lr,  int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication, bool symbolic) {
 
@@ -198,8 +198,8 @@ public:
 
 
 
-  inline void calc_t_dist_grad_rowptr(CSRLocal<SPT> *csr_block,
-                          DENT lr, int batch_id, int batch_size, int block_size,
+  inline void calc_t_dist_grad_rowptr(CSRLocal<INDEX_TYPE> *csr_block,
+                          VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
                           bool local, int start_process,int end_process, bool symbolic) {
 
     auto source_start_index = batch_id * batch_size;
@@ -247,7 +247,7 @@ public:
 
   inline void calc_embedding_row_major(uint64_t source_start_index,
                            uint64_t source_end_index, uint64_t dst_start_index,
-                           uint64_t dst_end_index, CSRLocal<SPT> *csr_block,DENT lr, int batch_id,
+                           uint64_t dst_end_index, CSRLocal<INDEX_TYPE> *csr_block,VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool symbolic) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
@@ -272,10 +272,10 @@ public:
                 target_rank == (grid)->rank_in_col ? false : true;
 
             vector<uint64_t> remote_cols;
-            vector<DENT> remote_values;
+            vector<VALUE_TYPE> remote_values;
 
             if (fetch_from_cache) {
-              unordered_map<uint64_t, SparseCacheEntry<DENT>>
+              unordered_map<uint64_t, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*sparse_local->tempCachePtr)[target_rank];
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
