@@ -109,30 +109,30 @@ public:
     if (alpha==0) {
       // This represents the case for pulling
 
-         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+         this->sp_local_receiver->find_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+         this->sp_local_sender->find_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
     } else if (alpha == 1.0) {
       // This represents the case for pushing
-         this->sp_local_receiver->fill_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
+         this->sp_local_receiver->find_col_ids(batch_id, 0, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 1);
 
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 1);
+         this->sp_local_sender->find_col_ids(batch_id,0,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 1);
     } else if (alpha> 0 and alpha < 1.0){
 
       // This represents the case for pull and pushing
           int end_process = get_end_proc(1,alpha, grid->col_world_size);
 
-         this->sp_local_receiver->fill_col_ids(batch_id, 1, end_process, receive_col_ids_list,receive_indices_to_proc_map, 1);
+         this->sp_local_receiver->find_col_ids(batch_id, 1, end_process, receive_col_ids_list,receive_indices_to_proc_map, 1);
 
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
+         this->sp_local_sender->find_col_ids(batch_id,1,end_process, send_col_ids_list,send_indices_to_proc_map, 1);
 
       if (batch_id>=0) {
-         this->sp_local_receiver->fill_col_ids(batch_id, end_process, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
+         this->sp_local_receiver->find_col_ids(batch_id, end_process, grid->col_world_size, receive_col_ids_list,receive_indices_to_proc_map, 0);
 
          // calculating sending data cols
-         this->sp_local_sender->fill_col_ids(batch_id, end_process,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
+         this->sp_local_sender->find_col_ids(batch_id, end_process,grid->col_world_size, send_col_ids_list,send_indices_to_proc_map, 0);
       }
 
     } else {

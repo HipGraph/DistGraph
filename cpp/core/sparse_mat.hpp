@@ -17,6 +17,7 @@
 #include "../net/process_3D_grid.hpp"
 #include <set>
 #include <math.h>
+#include "sparse_mat_tile.hpp"
 
 using namespace std;
 using namespace distblas::net;
@@ -77,13 +78,159 @@ private:
     csr_local_data =
         make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
                                  coords_ptr, coords.size(), false);
+  }
+
+  void initialize_CSR_from_sparse_collector() {
+   csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+  }
+
+  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc, int tile_width,
+                                            unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>>& tile_map) {
 
 
   }
 
-  void initialize_CSR_from_sparse_collector() {
+  void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc, int tile_width,
+                                            unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>>& tile_map) {
 
-   csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+
+  }
+
+  /*
+   * This method computes all indicies for pull based approach
+   */
+  void find_col_ids_for_pulling(int batch_id, int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
+                                unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
+
+    int rank= grid->rank_in_col;
+    int world_size = grid->col_world_size;
+
+    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+
+    vector<int> procs;
+    for (int i = starting_proc; i < end_proc; i++) {
+      int  target   = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
+      procs.push_back(target);
+    }
+
+
+    if (col_partitioned) {
+      for (int r = 0 ; r < procs.size(); r++) {
+        INDEX_TYPE starting_index = batch_id * batch_size + proc_row_width * procs[r];
+        auto end_index =
+            std::min(std::min((starting_index+batch_size),static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width)), gRows);
+
+        for (int i = starting_index; i < end_index; i++) {
+          if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
+              auto col_val = handle->col_idx[j];
+              { proc_to_id_mapping[procs[r]].insert(col_val);
+                id_to_proc_mapping[col_val][procs[r]] = true;
+              }
+            }
+          }
+        }
+      }
+    } else if (transpose) {
+      for (int r = 0 ; r < procs.size(); r++) {
+        INDEX_TYPE starting_index = proc_col_width * procs[r];
+        auto end_index =
+            std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_col_width), gCols);
+        for (int i = starting_index; i < end_index; i++) {
+          if (rank != procs[r] and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+              auto col_val = handle->col_idx[j];
+              INDEX_TYPE dst_start = batch_id * batch_size;
+              INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
+              if (col_val >= dst_start and col_val < dst_end_index) {
+                { proc_to_id_mapping[procs[r]].insert(i);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /*
+   * This method computes all indicies for push based approach
+   */
+  void find_col_ids_for_pushing(int batch_id,int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
+                                unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
+    int rank= grid->rank_in_col;
+    int world_size = grid->col_world_size;
+
+    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+
+    auto batches = (proc_row_width / batch_size);
+
+    if (!(proc_row_width % batch_size == 0)) {
+      batches = (proc_row_width / batch_size) + 1;
+    }
+
+    vector<int> procs;
+    for (int i = starting_proc; i < end_proc; i++) {
+      int  target  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
+      procs.push_back(target);
+    }
+
+    if (col_partitioned) {
+      // calculation of sender col_ids
+      for (int r = 0 ; r < procs.size(); r++) {
+        INDEX_TYPE starting_index = proc_row_width * procs[r];
+        auto end_index = std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width), gRows) -1;
+
+        auto eligible_col_id_start =
+            (batch_id >= 0) ? batch_id * batch_size : 0;
+        auto eligible_col_id_end =
+            (batch_id >= 0)
+                ? std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
+                           static_cast<INDEX_TYPE>(proc_col_width))
+                : proc_col_width;
+
+        for (auto i = starting_index; i <= (end_index); i++) {
+
+          if (rank != procs[r] and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
+                 j++) {
+              auto col_val = handle->col_idx[j];
+              if (col_val >= eligible_col_id_start and
+                  col_val < eligible_col_id_end) {
+                // calculation of sender col_ids
+                { proc_to_id_mapping[procs[r]].insert(col_val);
+                  id_to_proc_mapping[col_val][procs[r]] = true;
+                }
+              }
+            }
+          }
+        }
+      }
+    } else if (transpose) {
+      // calculation of receiver col_ids
+      for (int r = 0 ; r < procs.size(); r++) {
+        INDEX_TYPE starting_index =
+            (batch_id >= 0) ? batch_id * batch_size + proc_col_width * procs[r]
+                            : proc_col_width *  procs[r];
+        auto end_index =
+            (batch_id >= 0)
+                ? std::min(
+                      starting_index + batch_size,
+                      std::min(static_cast<INDEX_TYPE>(( procs[r] + 1) * proc_col_width),
+                               gCols)) -
+                      1
+                : std::min(static_cast<INDEX_TYPE>(( procs[r] + 1) * proc_col_width),
+                           gCols) -
+                      1;
+        for (auto i = starting_index; i <= (end_index); i++) {
+          if (rank !=  procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 ) {
+            proc_to_id_mapping[procs[r]].insert(i);
+          }
+        }
+      }
+    }
   }
 
 
@@ -185,153 +332,17 @@ public:
   }
 
   // if batch_id<0 it will fetch all the batches
-  void fill_col_ids(int batch_id, int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
+  void find_col_ids(int batch_id, int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
                     unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
 
     if (mode == 0) {
-
-      fill_col_ids_for_pulling(batch_id,starting_proc,end_proc, proc_to_id_mapping,id_to_proc_mapping);
+      find_col_ids_for_pulling(batch_id,starting_proc,end_proc, proc_to_id_mapping,id_to_proc_mapping);
     } else {
-      fill_col_ids_for_pushing(batch_id, starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
+      find_col_ids_for_pushing(batch_id, starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
     }
   }
 
-  /*
-   * This method computes all indicies for pull based approach
-   */
-  void fill_col_ids_for_pulling(int batch_id, int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
-                                unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
 
-    int rank= grid->rank_in_col;
-    int world_size = grid->col_world_size;
-
-    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
-
-    vector<int> procs;
-    for (int i = starting_proc; i < end_proc; i++) {
-      int  target   = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
-      procs.push_back(target);
-    }
-
-
-    if (col_partitioned) {
-      for (int r = 0 ; r < procs.size(); r++) {
-        INDEX_TYPE starting_index = batch_id * batch_size + proc_row_width * procs[r];
-        auto end_index =
-            std::min(std::min((starting_index+batch_size),static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width)), gRows);
-
-        for (int i = starting_index; i < end_index; i++) {
-          if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
-              auto col_val = handle->col_idx[j];
-              { proc_to_id_mapping[procs[r]].insert(col_val);
-                id_to_proc_mapping[col_val][procs[r]] = true;
-              }
-            }
-          }
-        }
-      }
-    } else if (transpose) {
-      for (int r = 0 ; r < procs.size(); r++) {
-        INDEX_TYPE starting_index = proc_col_width * procs[r];
-        auto end_index =
-            std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_col_width), gCols);
-        for (int i = starting_index; i < end_index; i++) {
-          if (rank != procs[r] and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
-              auto col_val = handle->col_idx[j];
-              INDEX_TYPE dst_start = batch_id * batch_size;
-              INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
-              if (col_val >= dst_start and col_val < dst_end_index) {
-                { proc_to_id_mapping[procs[r]].insert(i);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /*
-   * This method computes all indicies for push based approach
-   */
-  void fill_col_ids_for_pushing(int batch_id,int starting_proc, int end_proc, vector<unordered_set<INDEX_TYPE>> &proc_to_id_mapping,
-                                unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
-    int rank= grid->rank_in_col;
-    int world_size = grid->col_world_size;
-
-    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
-
-    auto batches = (proc_row_width / batch_size);
-
-    if (!(proc_row_width % batch_size == 0)) {
-      batches = (proc_row_width / batch_size) + 1;
-    }
-
-    vector<int> procs;
-    for (int i = starting_proc; i < end_proc; i++) {
-      int  target  = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
-      procs.push_back(target);
-    }
-
-    if (col_partitioned) {
-      // calculation of sender col_ids
-      for (int r = 0 ; r < procs.size(); r++) {
-        INDEX_TYPE starting_index = proc_row_width * procs[r];
-        auto end_index = std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width), gRows) -1;
-
-        auto eligible_col_id_start =
-            (batch_id >= 0) ? batch_id * batch_size : 0;
-        auto eligible_col_id_end =
-            (batch_id >= 0)
-                ? std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
-                           static_cast<INDEX_TYPE>(proc_col_width))
-                : proc_col_width;
-
-        for (auto i = starting_index; i <= (end_index); i++) {
-
-          if (rank != procs[r] and
-              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
-            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
-                 j++) {
-              auto col_val = handle->col_idx[j];
-              if (col_val >= eligible_col_id_start and
-                  col_val < eligible_col_id_end) {
-                // calculation of sender col_ids
-                { proc_to_id_mapping[procs[r]].insert(col_val);
-                  id_to_proc_mapping[col_val][procs[r]] = true;
-                }
-              }
-            }
-          }
-        }
-      }
-    } else if (transpose) {
-      // calculation of receiver col_ids
-      for (int r = 0 ; r < procs.size(); r++) {
-        INDEX_TYPE starting_index =
-            (batch_id >= 0) ? batch_id * batch_size + proc_col_width * procs[r]
-                            : proc_col_width *  procs[r];
-        auto end_index =
-            (batch_id >= 0)
-                ? std::min(
-                      starting_index + batch_size,
-                      std::min(static_cast<INDEX_TYPE>(( procs[r] + 1) * proc_col_width),
-                               gCols)) -
-                      1
-                : std::min(static_cast<INDEX_TYPE>(( procs[r] + 1) * proc_col_width),
-                           gCols) -
-                      1;
-        for (auto i = starting_index; i <= (end_index); i++) {
-          if (rank !=  procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0 ) {
-            proc_to_id_mapping[procs[r]].insert(i);
-          }
-        }
-      }
-    }
-  }
 
 
 CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
