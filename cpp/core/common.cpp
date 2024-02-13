@@ -31,10 +31,10 @@ void distblas::core::prefix_sum(vector<int> &values, vector<int> &offsets) {
   }
 }
 
-vector<uint64_t> distblas::core::generate_random_numbers(int lower_bound,
+vector<INDEX_TYPE> distblas::core::generate_random_numbers(int lower_bound,
                                                          int upper_bound,
                                                          int seed, int ns) {
-  vector<uint64_t> vec(ns);
+  vector<INDEX_TYPE> vec(ns);
   std::minstd_rand generator(seed);
 
   // Define the range of the uniform distribution
