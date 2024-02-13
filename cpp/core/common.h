@@ -30,11 +30,13 @@ const int hash_scale = 107;
 
 const int spa_threshold=1024;
 
+using INDEX_TYPE = uint64_t;
+
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
 
-int divide_and_round_up(uint64_t num, int denom);
+int divide_and_round_up(INDEX_TYPE num, int denom);
 
 vector<uint64_t> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                     int ns);
@@ -49,7 +51,7 @@ void stop_clock_and_add(my_timer_t &start, string counter_name);
 
 void add_memory(size_t mem, string counter_name);
 
-void add_datatransfers(uint64_t count, string counter_name);
+void add_datatransfers(INDEX_TYPE count, string counter_name);
 
 void print_performance_statistics();
 
@@ -63,43 +65,43 @@ int get_proc_length(double beta, int world_size);
 
 int get_end_proc(int  starting_index, double beta, int world_size);
 
-std::unordered_set<uint64_t> random_select(const std::unordered_set<uint64_t>& originalSet, int count);
+std::unordered_set<INDEX_TYPE> random_select(const std::unordered_set<INDEX_TYPE>& originalSet, int count);
 
 
 
 
-template <typename T> struct Tuple {
+template <typename VALUE_TYPE> struct Tuple {
   int64_t row;
   int64_t col;
-  T value;
+  VALUE_TYPE value;
 };
 
-template <typename T> struct CSR {
+template <typename VALUE_TYPE> struct CSR {
   int64_t row;
   int64_t col;
-  T value;
+  VALUE_TYPE value;
 };
 
-template <typename T, size_t size> struct SpTuple {
-  std::array<uint64_t, row_max> rows;
-  std::array<uint64_t, size> cols;
-  std::array<T, size> values;
+template <typename VALUE_TYPE, size_t size> struct SpTuple {
+  std::array<INDEX_TYPE, row_max> rows;
+  std::array<INDEX_TYPE, size> cols;
+  std::array<VALUE_TYPE, size> values;
 };
 
-template <typename T, size_t size> struct DataTuple {
-  uint64_t col;
-  std::array<T, size> value;
+template <typename VALUE_TYPE, size_t size> struct DataTuple {
+  INDEX_TYPE col;
+  std::array<VALUE_TYPE, size> value;
 };
 
-template <typename T, size_t size> struct CacheEntry {
-  std::array<T, size> value;
+template <typename VALUE_TYPE, size_t size> struct CacheEntry {
+  std::array<VALUE_TYPE, size> value;
   int inserted_batch_id;
   int inserted_itr;
 };
 
-template <typename T> struct SparseCacheEntry {
-  vector<T> values;
-  vector<uint64_t> cols;
+template <typename VALUE_TYPE> struct SparseCacheEntry {
+  vector<VALUE_TYPE> values;
+  vector<INDEX_TYPE> cols;
   int inserted_batch_id;
   int inserted_itr;
 };
@@ -148,14 +150,14 @@ extern vector<string> perf_counter_keys;
 extern map<string, int> call_count;
 extern map<string, double> total_time;
 
-template <typename T> void initialize_mpi_datatype_SPTUPLE() {
+template <typename VALUE_TYPE> void initialize_mpi_datatype_SPTUPLE() {
   const int nitems = 3;
   int blocklengths[3] = {1, 1, 1};
   MPI_Datatype *types = new MPI_Datatype[3];
   types[0] = MPI_UINT64_T;
   types[1] = MPI_UINT64_T;
   MPI_Aint offsets[3];
-  if (std::is_same<T, int>::value) {
+  if (std::is_same<VALUE_TYPE, int>::value) {
     types[2] = MPI_INT;
     offsets[0] = offsetof(Tuple<int>, row);
     offsets[1] = offsetof(Tuple<int>, col);
@@ -173,27 +175,27 @@ template <typename T> void initialize_mpi_datatype_SPTUPLE() {
   delete[] types;
 }
 
-template <typename T,size_t embedding_dim>
+template <typename VALUE_TYPE,size_t embedding_dim>
 void initialize_mpi_datatype_DENSETUPLE() {
-  DataTuple<T,embedding_dim> p;
+  DataTuple<VALUE_TYPE,embedding_dim> p;
   DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
 }
 
-template <typename T,size_t embedding_dim>
+template <typename VALUE_TYPE,size_t embedding_dim>
 void initialize_mpi_datatype_SPARSETUPLE() {
-  SpTuple<T,embedding_dim> p;
+  SpTuple<VALUE_TYPE,embedding_dim> p;
   SPARSETUPLE = CreateCustomMpiType(p,p.rows, p.cols, p.values);
 }
 
-template <typename SPT, typename DENT, size_t embedding_dim>
+template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 void initialize_mpi_datatypes() {
-  initialize_mpi_datatype_SPTUPLE<SPT>();
-  initialize_mpi_datatype_DENSETUPLE<DENT,embedding_dim>();
-  initialize_mpi_datatype_SPARSETUPLE<DENT,embedding_dim>();
+  initialize_mpi_datatype_SPTUPLE<INDEX_TYPE>();
+  initialize_mpi_datatype_DENSETUPLE<VALUE_TYPE,embedding_dim>();
+  initialize_mpi_datatype_SPARSETUPLE<VALUE_TYPE,embedding_dim>();
 }
 
-template <typename DENT, size_t MAXBOUND>
-DENT  scale(DENT v){
+template <typename VALUE_TYPE, size_t MAXBOUND>
+VALUE_TYPE  scale(VALUE_TYPE v){
   if(v > MAXBOUND) return MAXBOUND;
   else if(v < -MAXBOUND) return -MAXBOUND;
   else return v;
