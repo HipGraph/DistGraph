@@ -24,8 +24,8 @@ namespace distblas::net {
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim> class DataComm {
 
 private:
-  SpMat<INDEX_TYPE> *sp_local_receiver;
-  SpMat<INDEX_TYPE> *sp_local_sender;
+  SpMat<VALUE_TYPE> *sp_local_receiver;
+  SpMat<VALUE_TYPE> *sp_local_sender;
   DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
   SpMat<VALUE_TYPE> *sparse_local;
   Process3DGrid *grid;
@@ -43,8 +43,8 @@ private:
   double alpha;
 
 public:
-  DataComm(distblas::core::SpMat<INDEX_TYPE> *sp_local_receiver,
-           distblas::core::SpMat<INDEX_TYPE> *sp_local_sender,
+  DataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
+           distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
            DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
            Process3DGrid *grid,
            int batch_id, double alpha) {
@@ -67,8 +67,8 @@ public:
 
   }
 
-  DataComm(SpMat<INDEX_TYPE> *sp_local_receiver,
-           SpMat<INDEX_TYPE> *sp_local_sender,
+  DataComm(SpMat<VALUE_TYPE> *sp_local_receiver,
+           SpMat<VALUE_TYPE> *sp_local_sender,
            SpMat<VALUE_TYPE> *sparse_local,
            Process3DGrid *grid,
            int batch_id, double alpha) {
