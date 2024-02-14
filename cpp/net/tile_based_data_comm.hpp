@@ -7,9 +7,9 @@ class TileDataComm : public DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> {
 
 private:
 public:
-  TileDataComm(SpMat<VALUE_TYPE> *sp_local_receiver,
-               SpMat<VALUE_TYPE> *sp_local_sender,
-               SpMat<VALUE_TYPE> *sparse_local, Process3DGrid *grid,
+  TileDataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
+               distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+               distblas::core::SpMat<VALUE_TYPE> *sparse_local, Process3DGrid *grid,
                int batch_id, double alpha)
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, batch_id,alpha) {
