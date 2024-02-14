@@ -420,7 +420,7 @@ public:
   }
 
 
-  void find_col_ids_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<distblas::core::SparseTile<INDEX_TYPE,VALUE_TYPE>>>* proc_to_id_mapping,
+  void find_col_ids_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<distblas::core::SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* proc_to_id_mapping,
                     unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
 
     if (mode == 0) {
