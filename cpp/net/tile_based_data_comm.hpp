@@ -87,16 +87,21 @@ public:
 
   ~TileDataComm() {}
 
-  void onboard_data() override {
+
+
+  void onboard_all_data()  {
     if (this->alpha == 0) {
+      for(int i = 0; i < total_batches; i++){
+        this->sp_local_receiver->find_col_ids_with_tiling(
+            i, 0, this->grid->col_world_size,
+            receiver_proc_tile_map.get(), this->receive_indices_to_proc_map, 0);
+        // calculating sending data cols
+        this->sp_local_sender->find_col_ids_with_tiling(
+            i, 0, this->grid->col_world_size,
+            sender_proc_tile_map.get(), this->send_indices_to_proc_map, 0);
+      }
       // This represents the case for pulling
-      this->sp_local_receiver->find_col_ids(
-          this->batch_id, 0, this->grid->col_world_size,
-          this->receive_col_ids_list, this->receive_indices_to_proc_map, 0);
-      // calculating sending data cols
-      this->sp_local_sender->find_col_ids(
-          this->batch_id, 0, this->grid->col_world_size,
-          this->send_col_ids_list, this->send_indices_to_proc_map, 0);
+
     }
   }
 };

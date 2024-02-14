@@ -145,8 +145,8 @@ private:
 
   }
 
-  void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc, int tile_width,
-                                            unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>>& tile_map) {
+  void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map,
+                                            unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>>& id_to_proc_mapping) {
 
 
   }
@@ -420,7 +420,15 @@ public:
   }
 
 
+  void find_col_ids_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<distblas::core::SparseTile<INDEX_TYPE,VALUE_TYPE>>>* proc_to_id_mapping,
+                    unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
 
+    if (mode == 0) {
+      find_col_ids_for_pulling_with_tiling(batch_id,starting_proc,end_proc, proc_to_id_mapping,id_to_proc_mapping);
+    } else {
+      find_col_ids_for_pushing_with_tiling(batch_id, starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
+    }
+  }
 
 CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
      CSRHandle *handle = (csr_local_data.get())->handler.get();
