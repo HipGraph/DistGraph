@@ -84,9 +84,8 @@ private:
    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
-  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,
-                                            vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map,
-                                            unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
+  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping,
+                                            vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map) {
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
 
@@ -145,11 +144,12 @@ private:
 
   }
 
-  void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map,
-                                            unordered_map<INDEX_TYPE , SparseTile<INDEX_TYPE,VALUE_TYPE>>& id_to_proc_mapping) {
-
-
-  }
+//  void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc,
+//                                            vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map,
+//                                            unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
+//
+//
+//  }
 
   /*
    * This method computes all indicies for pull based approach
@@ -424,9 +424,9 @@ public:
                     unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping, bool mode) {
 
     if (mode == 0) {
-      find_col_ids_for_pulling_with_tiling(batch_id,starting_proc,end_proc, proc_to_id_mapping,id_to_proc_mapping);
+      find_col_ids_for_pulling_with_tiling(batch_id,starting_proc,end_proc, id_to_proc_mapping,proc_to_id_mapping);
     } else {
-      find_col_ids_for_pushing_with_tiling(batch_id, starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
+//      find_col_ids_for_pushing_with_tiling(batch_id, starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
     }
   }
 
