@@ -53,7 +53,7 @@ public:
 
 
 
-  void algo_spmm(int iterations, int batch_size, VALUE_TYPE lr) {
+  void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr) {
     auto t = start_clock();
 
     int batches = 0;
@@ -75,7 +75,7 @@ public:
     // fetch initial embeddings
     auto main_comm = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha,batches,0.5));
+            sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha,batches,0.5));
     main_comm.get()->onboard_data();
 
 
