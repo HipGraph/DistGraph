@@ -146,7 +146,7 @@ private:
   }
 
   void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map,
-                                            unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>>& id_to_proc_mapping) {
+                                            unordered_map<INDEX_TYPE , SparseTile<INDEX_TYPE,VALUE_TYPE>>& id_to_proc_mapping) {
 
 
   }
