@@ -1,5 +1,5 @@
 #pragma once
-
+#include "data_comm.hpp"
 namespace distblas::net {
 
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
