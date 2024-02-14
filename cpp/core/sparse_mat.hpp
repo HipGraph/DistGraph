@@ -106,8 +106,9 @@ private:
           if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
-              { proc_to_id_mapping[procs[r]].insert(col_val);
-                id_to_proc_mapping[col_val][procs[r]] = true;
+              {
+//                proc_to_id_mapping[procs[r]].insert(col_val);
+//                id_to_proc_mapping[col_val][procs[r]] = true;
               }
             }
           }
