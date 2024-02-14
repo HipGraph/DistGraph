@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include "algo/spgemm.hpp"
+#include "net/tile_based_data_comm.hpp"
 
 using json = nlohmann::json;
 
