@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
 //                    alpha, beta,col_major,sync_comm));
 
     unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new distblas::algo::SpMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
+        new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
             shared_sparseMat.get(), shared_sparseMat_receiver.get(),
             shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
             grid.get(),
