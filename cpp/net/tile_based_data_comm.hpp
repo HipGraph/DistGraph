@@ -33,13 +33,13 @@ public:
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
                                grid->col_world_size,
                                vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
-                                   tiles_per_process_row, SparseTile(grid))));
+                                   tiles_per_process_row, SparseTile<INDEX_TYPE,VALUE_TYPE>(grid))));
     sender_proc_tile_map =
         make_shared<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>(
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
                                grid->col_world_size,
                                vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
-                                   tiles_per_process_row, SparseTile(grid))));
+                                   tiles_per_process_row, SparseTile<INDEX_TYPE,VALUE_TYPE>(grid))));
 
     if (alpha == 0) {
       #pragma omp parallel for
