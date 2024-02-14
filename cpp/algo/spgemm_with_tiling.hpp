@@ -12,7 +12,7 @@ using namespace distblas::core;
 
 namespace distblas::algo {
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
-class SpMMAlgoWithTiling {
+class SpGEMMAlgoWithTiling {
 
 private:
   DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output;
@@ -38,15 +38,16 @@ private:
   bool col_major = false;
 
 public:
-  SpMMAlgoWithTiling(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-           distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-           distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-           DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
-           DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output,
-           Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
+  SpGEMMAlgoWithTiling(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
+             distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
+             distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+             distblas::core::SpMat<VALUE_TYPE> *sparse_local,
+             distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
+             Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
-        sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
-        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),dense_local_output(dense_local_output) {}
+        sp_local_sender(sp_local_sender), sparse_local(sparse_local), grid(grid),
+        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),
+        sparse_local_output(sparse_local_output) {}
 
 
 
@@ -76,8 +77,6 @@ public:
     main_comm.get()->onboard_data();
 
 
-    total_memory = total_memory / (iterations * batches);
-    add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
   }
 };
