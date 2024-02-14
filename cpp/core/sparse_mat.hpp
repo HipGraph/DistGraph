@@ -110,7 +110,6 @@ private:
               {
                 int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r],  tile_width_fraction);
                 SparseTile<INDEX_TYPE,VALUE_TYPE>* tile = (*tile_map)[procs[r]][tile_id];
-//                proc_to_id_mapping[procs[r]].insert(col_val);
                 tile->insert(col_val);
                 id_to_proc_mapping[col_val][procs[r]] = true;
               }
@@ -351,6 +350,25 @@ public:
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
+    if (hash_spgemm) {
+      sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
+          proc_row_width, vector<Tuple<VALUE_TYPE>>());
+
+      sparse_data_counter = make_unique<vector<INDEX_TYPE>>(proc_row_width, 0);
+      this->hash_spgemm = true;
+    }else{
+      dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(proc_row_width,vector<VALUE_TYPE>(proc_col_width,0));
+    }
+  }
+
+  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm,double tile_with_fraction) {
+    this->grid = grid;
+    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+    this->proc_col_width = proc_col_width;
+    this->proc_row_width = proc_row_width;
+    this->batch_size = proc_row_width;
+    this->tile_width_fraction=tile_with_fraction;
+    //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     if (hash_spgemm) {
       sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
           proc_row_width, vector<Tuple<VALUE_TYPE>>());
