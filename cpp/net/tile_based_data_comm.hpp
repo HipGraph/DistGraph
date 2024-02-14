@@ -4,7 +4,7 @@
 #include <math.h>
 
 using namespace distblas::core;
-using namespace std:
+using namespace std;
 
 namespace distblas::net {
 
