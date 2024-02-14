@@ -21,7 +21,7 @@ public:
   Process3DGrid* grid;
 
   unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping;
-  vector<unordered_set<INDEX_TYPE>> proc_to_id_mapping;
+  unordered_set<INDEX_TYPE> col_id_set;
   int mode = 0; // mode=0 local and mode=1 remote
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index, INDEX_TYPE row_end_index,
@@ -29,11 +29,10 @@ public:
       : grid(grid),id(id), row_starting_index(row_starting_index),
         row_end_index(row_end_index), col_start_index(col_start_index),
         col_end_index(col_end_index) {
-    proc_to_id_mapping =  vector<unordered_set<INDEX_TYPE>>(grid->world_size);
   }
 
-  void insert(int rank, INDEX_TYPE col_index){
-    proc_to_id_mapping[rank].insert(col_index);
+  void insert(INDEX_TYPE col_index){
+    col_id_set.insert(col_index);
   }
 
   static int get_tile_id(int batch_id, INDEX_TYPE col_index, INDEX_TYPE proc_col_width, int rank, double tile_width_fraction){

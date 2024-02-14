@@ -85,7 +85,8 @@ private:
   }
 
   void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,
-                                            vector<unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>*>>* tile_map) {
+                                            vector<unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>*>>* tile_map,
+                                            unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping) {
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
 
@@ -107,8 +108,11 @@ private:
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               {
+                int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r],  tile_width_fraction);
+                SparseTile<INDEX_TYPE,VALUE_TYPE>* tile = (*tile_map)[procs[r]][tile_id];
 //                proc_to_id_mapping[procs[r]].insert(col_val);
-//                id_to_proc_mapping[col_val][procs[r]] = true;
+                tile->insert(col_val);
+                id_to_proc_mapping[col_val][procs[r]] = true;
               }
             }
           }
@@ -131,7 +135,7 @@ private:
               INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
                 {
-                  tile->insert(procs[r],i);
+                  tile->insert(i);
                 }
               }
             }
@@ -199,7 +203,8 @@ private:
               INDEX_TYPE dst_start = batch_id * batch_size;
               INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
-                { proc_to_id_mapping[procs[r]].insert(i);
+                {
+                  proc_to_id_mapping[procs[r]].insert(i);
                 }
               }
             }
