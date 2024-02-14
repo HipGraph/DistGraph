@@ -23,7 +23,7 @@ namespace distblas::net {
 
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim> class DataComm {
 
-private:
+public:
   SpMat<VALUE_TYPE> *sp_local_receiver;
   SpMat<VALUE_TYPE> *sp_local_sender;
   DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
@@ -41,8 +41,6 @@ private:
   int batch_id;
 
   double alpha;
-
-public:
   DataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
            DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
