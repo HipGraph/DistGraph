@@ -18,6 +18,7 @@
 #include <vector>
 #include "algo/spgemm.hpp"
 #include "net/tile_based_data_comm.hpp"
+#include "algo/spgemm_with_tiling.hpp"
 
 using json = nlohmann::json;
 
@@ -248,12 +249,19 @@ int main(int argc, char **argv) {
     bool has_spgemm =dimension>spa_threshold?true:false;
     auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm);
 
-    unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
-                new distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
-                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                    shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
-                    grid.get(),
-                    alpha, beta,col_major,sync_comm));
+//    unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//                new distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
+//                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+//                    shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+//                    grid.get(),
+//                    alpha, beta,col_major,sync_comm));
+
+    unique_ptr<distblas::algo::SpMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+        new distblas::algo::SpMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
+            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+            grid.get(),
+            alpha, beta,col_major,sync_comm));
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
@@ -261,6 +269,10 @@ int main(int argc, char **argv) {
     cout << " rank " << rank << " spgemm algo completed  " << endl;
     output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
     output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
+
+  }else if () {
+
+
 
   }else {
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(

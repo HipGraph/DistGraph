@@ -89,7 +89,7 @@ public:
 
 
 
-  void onboard_all_data()  {
+  void onboard_data()  {
     if (this->alpha == 0) {
       for(int i = 0; i < total_batches; i++){
         this->sp_local_receiver->find_col_ids_with_tiling(

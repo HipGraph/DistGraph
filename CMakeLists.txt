@@ -52,7 +52,8 @@ add_library(disembed_lib SHARED
         cpp/algo/spmm.hpp
         cpp/algo/spgemm.hpp
         cpp/core/sparse_mat_tile.hpp
-        cpp/net/tile_based_data_comm.hpp)
+        cpp/net/tile_based_data_comm.hpp
+        cpp/algo/spgemm_with_tiling.hpp)
 
 SET(BUILD_TESTS "" ON)
 
