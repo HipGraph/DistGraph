@@ -15,15 +15,17 @@ template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class SpGEMMAlgoWithTiling {
 
 private:
-  DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output;
-
-  DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
+  distblas::core::SpMat<VALUE_TYPE> *sparse_local_output;
+  distblas::core::SpMat<VALUE_TYPE> *sparse_local;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
-  std::unordered_map<int, unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
+  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
+
+  //record temp local output
+  unique_ptr<vector<unordered_map<INDEX_TYPE,VALUE_TYPE>>> output_ptr;
 
   //cache size controlling hyper parameter
   double alpha = 0;
@@ -32,7 +34,7 @@ private:
   double beta = 1.0;
 
   //hyper parameter controls the switching the sync vs async commiunication
-  bool sync = false;
+  bool sync = true;
 
   //hyper parameter controls the col major or row major  data access
   bool col_major = false;
