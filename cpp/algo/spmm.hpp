@@ -225,7 +225,7 @@ public:
                           int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
-    auto source_end_index = std::min((batch_id + 1) * batch_size,
+    auto source_end_index = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                                      this->sp_local_receiver->proc_row_width) -
                             1;
 
@@ -392,7 +392,7 @@ public:
                                         int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-    int end_row = std::min((batch_id + 1) * batch_size,
+    int end_row = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                            ((this->sp_local_receiver)->proc_row_width));
 
 #pragma omp parallel for schedule(static)
