@@ -76,7 +76,7 @@ public:
     auto main_comm = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,0.5));
-    main_comm.get()->onboard_data();
+//    main_comm.get()->onboard_data();
 
 
     stop_clock_and_add(t, "Total Time");
