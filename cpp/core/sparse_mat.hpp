@@ -294,8 +294,8 @@ private:
 public:
   INDEX_TYPE gRows, gCols, gNNz;
   vector<Tuple<VALUE_TYPE>> coords;
-  int batch_size;
-  int proc_col_width, proc_row_width;
+  INDEX_TYPE batch_size;
+  INDEX_TYPE proc_col_width, proc_row_width;
   double tile_width_fraction;
   bool transpose = false;
   bool col_partitioned = false;

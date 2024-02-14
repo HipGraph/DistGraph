@@ -256,7 +256,7 @@ int main(int argc, char **argv) {
 //                    grid.get(),
 //                    alpha, beta,col_major,sync_comm));
 
-    unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+    unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>>(
         new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
             shared_sparseMat.get(), shared_sparseMat_receiver.get(),
             shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
@@ -269,10 +269,6 @@ int main(int argc, char **argv) {
     cout << " rank " << rank << " spgemm algo completed  " << endl;
     output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
     output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
-
-  }else if () {
-
-
 
   }else {
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
