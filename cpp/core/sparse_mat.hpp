@@ -84,8 +84,61 @@ private:
    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
-  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc, int tile_width,
-                                            unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>>& tile_map) {
+  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,
+                                            vector<unordered_map<int, SparseTile<INDEX_TYPE,VALUE_TYPE>*>>* tile_map) {
+    int rank= grid->rank_in_col;
+    int world_size = grid->col_world_size;
+
+    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+
+    vector<int> procs;
+    for (int i = starting_proc; i < end_proc; i++) {
+      int  target   = (col_partitioned)? (rank + i) % world_size: (rank >= i) ? (rank - i) % world_size : (world_size - i + rank) % world_size;
+      procs.push_back(target);
+    }
+    if (col_partitioned) {
+      for (int r = 0 ; r < procs.size(); r++) {
+        INDEX_TYPE starting_index = batch_id * batch_size + proc_row_width * procs[r];
+        auto end_index =
+            std::min(std::min((starting_index+batch_size),static_cast<INDEX_TYPE>((procs[r] + 1) * proc_row_width)), gRows);
+
+        for (int i = starting_index; i < end_index; i++) {
+          if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
+              auto col_val = handle->col_idx[j];
+              { proc_to_id_mapping[procs[r]].insert(col_val);
+                id_to_proc_mapping[col_val][procs[r]] = true;
+              }
+            }
+          }
+        }
+      }
+    } else if (transpose) {
+      for (int r = 0 ; r < procs.size(); r++) {
+        INDEX_TYPE starting_index = proc_col_width * procs[r];
+        auto end_index =
+            std::min(static_cast<INDEX_TYPE>((procs[r] + 1) * proc_col_width), gCols);
+        for (auto i = starting_index; i < end_index; i++) {
+          if (rank != procs[r] and
+              (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
+
+            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,i, proc_col_width, procs[r],  tile_width_fraction);
+            SparseTile<INDEX_TYPE,VALUE_TYPE>* tile = (*tile_map)[procs[r]][tile_id];
+            for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+              auto col_val = handle->col_idx[j];
+              INDEX_TYPE dst_start = batch_id * batch_size;
+              INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
+              if (col_val >= dst_start and col_val < dst_end_index) {
+                {
+                  tile->insert(procs[r],i);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
 
 
   }
@@ -124,7 +177,8 @@ private:
           if (rank != procs[r] and (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
-              { proc_to_id_mapping[procs[r]].insert(col_val);
+              {
+                proc_to_id_mapping[procs[r]].insert(col_val);
                 id_to_proc_mapping[col_val][procs[r]] = true;
               }
             }
@@ -239,6 +293,7 @@ public:
   vector<Tuple<VALUE_TYPE>> coords;
   int batch_size;
   int proc_col_width, proc_row_width;
+  double tile_width_fraction;
   bool transpose = false;
   bool col_partitioned = false;
   unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;

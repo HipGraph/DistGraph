@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <memory>
 #include "../net/process_3D_grid.hpp"
+#include <set>
 
 using namespace distblas::net;
 
@@ -29,6 +30,18 @@ public:
         row_end_index(row_end_index), col_start_index(col_start_index),
         col_end_index(col_end_index) {
     proc_to_id_mapping =  vector<unordered_set<INDEX_TYPE>>(grid->world_size);
+  }
+
+  void insert(int rank, INDEX_TYPE col_index){
+    proc_to_id_mapping[rank].insert(col_index);
+  }
+
+  static int get_tile_id(int batch_id, INDEX_TYPE col_index, INDEX_TYPE proc_col_width, int rank, double tile_width_fraction){
+    int tiles_per_process_row = static_cast<int>(1/(tile_width_fraction));
+    int tile_width = (proc_col_width%tiles_per_process_row)==0?static_cast<int>(proc_col_width*tile_width_fraction):(static_cast<int>(proc_col_width*tile_width_fraction)+1);
+    auto local_i = col_index- (proc_col_width * rank);
+    int  tile_col_id = static_cast<int>(local_i/tile_width);
+    return batch_id * tiles_per_process_row + tile_col_id;
   }
 };
 
