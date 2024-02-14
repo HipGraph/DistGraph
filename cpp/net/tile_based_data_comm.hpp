@@ -1,6 +1,7 @@
 #pragma once
 #include "../core/sparse_mat_tile.hpp"
 #include "data_comm.hpp"
+#include <math.h>
 
 namespace distblas::net {
 
