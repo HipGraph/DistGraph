@@ -14,9 +14,6 @@ public:
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, batch_id,alpha) {
 
-
-
-
   }
 
   ~TileDataComm() {}
