@@ -3,6 +3,9 @@
 #include "data_comm.hpp"
 #include <math.h>
 
+using namespace distblas::core;
+using namespace std:
+
 namespace distblas::net {
 
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
