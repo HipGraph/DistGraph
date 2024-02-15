@@ -22,17 +22,20 @@ private:
 
    double tile_width_fraction;
    int tiles_per_process_row;
+
+   bool spgemm=true;
 public:
   TileDataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
                distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                distblas::core::SpMat<VALUE_TYPE> *sparse_local,
                Process3DGrid *grid, double alpha, int total_batches,
-               double tile_width_fraction)
+               double tile_width_fraction, bool spgemm=true)
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
      tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
      this->total_batches = total_batches;
      this->tile_width_fraction = tile_width_fraction;
+     this->spgemm=spgemm;
      SparseTile<INDEX_TYPE,VALUE_TYPE>::tile_width_fraction=tile_width_fraction;
     receiver_proc_tile_map =
         make_shared<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>(
@@ -108,8 +111,8 @@ public:
             sender_proc_tile_map.get(), this->send_indices_to_proc_map, 0);
       }
       // This represents the case for pulling
-      this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true);
-      this->sparse_local->get_transferrable_datacount(receiver_proc_tile_map.get(),total_batches,false);
+      this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true, false);
+      this->sp_local_sender->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true,spgemm,"+",this->sparse_local);
 
       int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
       auto itr = total_batches * this->grid->col_world_size * tiles_per_process;
@@ -131,6 +134,7 @@ public:
         t.batch_id = i;
         t.tile_id = k;
         t.count = (*sender_proc_tile_map)[i][j][k].total_transferrable_datacount;
+        t.send_merge_count = (*sender_proc_tile_map)[i][j][k].total_receivable_datacount;
         (*send_tile_meta)[index]=t;
       }
 
@@ -147,6 +151,7 @@ public:
         TileTuple<INDEX_TYPE> t = (*receive_tile_meta)[index];
         if (t.batch_id==i and t.tile_id==k){
           (*receiver_proc_tile_map)[i][j][k].total_receivable_datacount=t.count;
+          (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount=t.send_merge_count;
         }
       }
 
@@ -156,9 +161,7 @@ public:
         auto k = in % tiles_per_process;
         auto offset = j*per_process_messages;
         cout<<" rank "<<this->grid->rank_in_col<<" batch_id "<<i<<" process "<<j<<" tile id  "
-             <<k<<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_receivable_datacount<<" "<<" transferrable "
-             <<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<" col "
-             <<(*receiver_proc_tile_map)[i][j][k].col_id_set.size()<<" row "<<(*receiver_proc_tile_map)[i][j][k].row_id_set.size()<<endl;
+             <<k<<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_receivable_datacount<<" "<<" transferrable "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<endl;
       }
     }
   }

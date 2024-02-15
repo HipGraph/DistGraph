@@ -424,7 +424,9 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
      return new_handler;
   }
 
-  void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,int total_batches, bool col_id_set){
+  void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,
+                                   int total_batches, bool col_id_set, bool indices_only,
+                                   string semring="+", SpMat<INDEX_TYPE> *input_data=nullptr){
 
     CSRHandle *handle = (csr_local_data.get())->handler.get();
     int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
@@ -437,7 +439,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
       auto k = in % tiles_per_process;
       INDEX_TYPE total_count = 0;
       SparseTile<INDEX_TYPE, VALUE_TYPE> tile = (*tile_map)[i][j][k];
-      if (col_id_set) {
+      if (col_id_set and !indices_only) {
         for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();
              ++it) {
           total_count +=
@@ -445,11 +447,32 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
         }
         (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
 
-      }else {
+      }else if (col_id_set and indices_only){
+        if (semring=="+" and input_data != nullptr){
+          CSRHandle *input_handle = input_data->handler.get();
+           auto row_index_start = (*tile_map)[i][j][k].row_starting_index;
+           auto row_end_index = (*tile_map)[i][j][k].row_end_index;
+           for(auto l=row_index_start;l<row_end_index;l++){
+             unordered_set<INDEX_TYPE> unique_per_row;
+             for(auto m=handle->rowStart[l];m<handle->rowStart[l+1];m++){
+               auto col_val = handle->col_idx[m];
+               if (input_handle->rowStart[col_val+1]-input_handle->rowStart[col_val]>0){
+                 for(auto h = input_handle->rowStart[col_val];h<input_handle->rowStart[col_val+1];h++){
+                   unique_per_row.insert(input_handle->col_idx(h));
+                 }
+               }
+             }
+             total_count += unique_per_row.size();
+           }
+           (*tile_map)[i][j][k].total_receivable_datacount = total_count;
+        }
+      }else if (!indices_only) {
         for (auto it = tile.row_id_set.begin(); it != tile.row_id_set.end();++it) {
           total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
         }
         (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
+      }else {
+        (*tile_map)[i][j][k].total_transferrable_datacount = (*tile_map)[i][j][k].row_id_set.size();
       }
     }
   }

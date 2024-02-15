@@ -82,6 +82,7 @@ template <typename INDEX_TYPE> struct TileTuple {
   int batch_id;
   int tile_id;
   INDEX_TYPE count;
+  INDEX_TYPE send_merge_count;
 };
 
 template <typename VALUE_TYPE> struct CSR {
@@ -200,7 +201,7 @@ void initialize_mpi_datatype_SPARSETUPLE() {
 template <typename INDEX_TYPE>
 void initialize_mpi_datatype_TILETUPLE() {
    TileTuple<INDEX_TYPE> p;
-   TILETUPLE = CreateCustomMpiType(p,p.batch_id, p.tile_id, p.count);
+   TILETUPLE = CreateCustomMpiType(p,p.batch_id, p.tile_id, p.count,p.send_merge_count);
 }
 
 template <typename VALUE_TYPE, size_t embedding_dim>
