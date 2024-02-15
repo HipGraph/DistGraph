@@ -456,7 +456,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
              unordered_set<INDEX_TYPE> unique_per_row;
              for(auto m=handle->rowStart[l];m<handle->rowStart[l+1];m++){
                auto col_val = handle->col_idx[m];
-               if (col_val>= (*tile_map)[i][j][k].col_starting_index and col_val<(*tile_map)[i][j][k].col_end_index) {
+               if (col_val>= (*tile_map)[i][j][k].col_start_index and col_val<(*tile_map)[i][j][k].col_end_index) {
                  if (input_handle->rowStart[col_val + 1] -
                          input_handle->rowStart[col_val] >
                      0) {
