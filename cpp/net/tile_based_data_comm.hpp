@@ -32,6 +32,7 @@ public:
      tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
      this->total_batches = total_batches;
      this->tile_width_fraction = tile_width_fraction;
+
     receiver_proc_tile_map =
         make_shared<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>(
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
@@ -83,6 +84,7 @@ public:
             (*sender_proc_tile_map)[i][j][k].row_end_index = row_end_index_sender;
             (*sender_proc_tile_map)[i][j][k].col_start_index =col_starting_index_sender;
             (*sender_proc_tile_map)[i][j][k].col_end_index = col_end_index_sender;
+
           }
         }
       }

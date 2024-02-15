@@ -73,6 +73,9 @@ public:
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
+    sp_local_receiver->tile_width_fraction=0.5;
+    sp_local_sender->tile_width_fraction=0.5;
+    sparse_local->tile_width_fraction=0.5;
     auto main_comm = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,0.5));
