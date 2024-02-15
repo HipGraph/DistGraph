@@ -78,6 +78,12 @@ template <typename VALUE_TYPE> struct Tuple {
   VALUE_TYPE value;
 };
 
+template <typename INDEX_TYPE> struct TileTuple {
+  int batch_id;
+  int tile_id;
+  INDEX_TYPE count;
+};
+
 template <typename VALUE_TYPE> struct CSR {
   int64_t row;
   int64_t col;
@@ -147,6 +153,8 @@ extern MPI_Datatype DENSETUPLE;
 
 extern MPI_Datatype SPARSETUPLE;
 
+extern MPI_Datatype TILETUPLE;
+
 extern vector<string> perf_counter_keys;
 
 extern map<string, int> call_count;
@@ -189,11 +197,18 @@ void initialize_mpi_datatype_SPARSETUPLE() {
   SPARSETUPLE = CreateCustomMpiType(p,p.rows, p.cols, p.values);
 }
 
+template <typename INDEX_TYPE>
+void initialize_mpi_datatype_TILETUPLE() {
+   TileTuple<INDEX_TYPE> p;
+   TILETUPLE = CreateCustomMpiType(p,p.batch_id, p.tile_id, p.count);
+}
+
 template <typename VALUE_TYPE, size_t embedding_dim>
 void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<VALUE_TYPE>();
   initialize_mpi_datatype_DENSETUPLE<VALUE_TYPE,embedding_dim>();
   initialize_mpi_datatype_SPARSETUPLE<VALUE_TYPE,embedding_dim>();
+  initialize_mpi_datatype_TILETUPLE<INDEX_TYPE>();
 }
 
 template <typename VALUE_TYPE, size_t MAXBOUND>

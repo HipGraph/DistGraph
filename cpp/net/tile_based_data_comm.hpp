@@ -110,14 +110,8 @@ public:
       this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true);
       this->sparse_local->get_transferrable_datacount(receiver_proc_tile_map.get(),total_batches,false);
 
-      for(auto i=0;i<(*receiver_proc_tile_map).size();i++){
-        for(auto j=0;j<(*receiver_proc_tile_map)[i].size();j++){
-          auto tile_size = (*receiver_proc_tile_map)[i][j].size();
-          for(auto k=0;k<tile_size;k++) {
-            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<"dataset size "<<(*receiver_proc_tile_map)[i][j][k].row_id_set.size()<<" total transferable "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<endl;
-          }
-        }
-      }
+
+
 
 
     }

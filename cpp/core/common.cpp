@@ -9,6 +9,8 @@ MPI_Datatype distblas::core::SPTUPLE;
 MPI_Datatype distblas::core::DENSETUPLE;
 MPI_Datatype distblas::core::SPARSETUPLE;
 
+MPI_Datatype distblas::core::TILETUPLE;
+
 vector<string> distblas::core::perf_counter_keys = {
     "Computation Time", "Communication Time", "Memory usage", "Data transfers","Total Time","Transfer Data","Compute  Local","Compute  Remote"};
 
