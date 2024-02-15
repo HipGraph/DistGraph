@@ -458,7 +458,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
                auto col_val = handle->col_idx[m];
                if (input_handle->rowStart[col_val+1]-input_handle->rowStart[col_val]>0){
                  for(auto h = input_handle->rowStart[col_val];h<input_handle->rowStart[col_val+1];h++){
-                   unique_per_row.insert(input_handle->col_idx(h));
+                   unique_per_row.insert(input_handle->col_idx[h]);
                  }
                }
              }
