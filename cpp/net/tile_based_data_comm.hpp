@@ -88,6 +88,9 @@ public:
           }
         }
       }
+
+      sparse_local->get_transferrable_datacount(sender_proc_tile_map.get());
+
     }
   }
 

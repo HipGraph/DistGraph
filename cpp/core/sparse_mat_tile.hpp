@@ -24,6 +24,9 @@ public:
   unordered_set<INDEX_TYPE> col_id_set;
   int mode = 0; // mode=0 local and mode=1 remote
 
+  int64_t total_transferrable_datacount=-1;
+  int64_t total_receivable_datacount=-1;
+
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
              INDEX_TYPE col_end_index)
