@@ -449,7 +449,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
 
       }else if (col_id_set and indices_only){
         if (semring=="+" and input_data != nullptr){
-          CSRHandle *input_handle = input_data->handler.get();
+          CSRHandle *input_handle = input_data->csr_local_data->handler.get();
            auto row_index_start = (*tile_map)[i][j][k].row_starting_index;
            auto row_end_index = (*tile_map)[i][j][k].row_end_index;
            for(auto l=row_index_start;l<row_end_index;l++){
