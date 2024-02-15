@@ -447,7 +447,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
     CSRHandle *handle = (csr_local_data.get())->handler.get();
 
     #pragma omp parallel for collapse(3)
-    for(auto i=0;i<tile_map.size();i++){
+    for(auto i=0;i<(*tile_map).size();i++){
       for(auto j=0;j<(*tile_map)[i].size();j++){
         for(auto k=0;k<((*tile_map)[i][j].size();k++)){
           INDEX_TYPE total_count=0;
