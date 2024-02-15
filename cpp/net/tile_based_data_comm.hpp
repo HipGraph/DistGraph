@@ -114,7 +114,7 @@ public:
         for(auto j=0;j<(*receiver_proc_tile_map)[i].size();j++){
           auto tile_size = (*receiver_proc_tile_map)[i][j].size();
           for(auto k=0;k<tile_size;k++) {
-            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<" total transferable "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<endl;
+            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<"dataset size "<<(*receiver_proc_tile_map)[i][j][k].row_id_set.size()<<" total transferable "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<endl;
           }
         }
       }
