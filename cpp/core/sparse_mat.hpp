@@ -107,7 +107,7 @@ private:
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               {
-                int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r],  tile_width_fraction);
+                int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r]);
                 (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
                 id_to_proc_mapping[col_val][procs[r]] = true;
               }
@@ -124,7 +124,7 @@ private:
           if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
 
-            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,(i-starting_index), proc_col_width, procs[r],  tile_width_fraction);
+            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,(i-starting_index), proc_col_width, procs[r]);
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
               auto col_val = handle->col_idx[j];
               INDEX_TYPE dst_start = batch_id * batch_size;
@@ -295,7 +295,6 @@ public:
   vector<Tuple<VALUE_TYPE>> coords;
   INDEX_TYPE batch_size;
   INDEX_TYPE proc_col_width, proc_row_width;
-  double tile_width_fraction;
   bool transpose = false;
   bool col_partitioned = false;
   unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
@@ -347,25 +346,6 @@ public:
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
-    if (hash_spgemm) {
-      sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
-          proc_row_width, vector<Tuple<VALUE_TYPE>>());
-
-      sparse_data_counter = make_unique<vector<INDEX_TYPE>>(proc_row_width, 0);
-      this->hash_spgemm = true;
-    }else{
-      dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(proc_row_width,vector<VALUE_TYPE>(proc_col_width,0));
-    }
-  }
-
-  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm,double tile_with_fraction) {
-    this->grid = grid;
-    this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
-    this->proc_col_width = proc_col_width;
-    this->proc_row_width = proc_row_width;
-    this->batch_size = proc_row_width;
-    this->tile_width_fraction=tile_with_fraction;
-    //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     if (hash_spgemm) {
       sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
           proc_row_width, vector<Tuple<VALUE_TYPE>>());
@@ -444,35 +424,59 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
      return new_handler;
   }
 
-  void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map, bool col_id_set){
+  void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,int total_batches, bool col_id_set){
 
     CSRHandle *handle = (csr_local_data.get())->handler.get();
+    int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>>::get_tiles_per_process_row();
 
-//    #pragma omp parallel for collapse(3)
-    for(auto i=0;i<(*tile_map).size();i++){
-      for(auto j=0;j<(*tile_map)[i].size();j++){
-        auto tile_size = (*tile_map)[i][j].size();
-        for(auto k=0;k<tile_size;k++) {
-          INDEX_TYPE total_count = 0;
-          SparseTile<INDEX_TYPE, VALUE_TYPE> tile = (*tile_map)[i][j][k];
-          if (col_id_set) {
-            for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();
-                 ++it) {
-              total_count +=
-                  handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
-            }
-            (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
-            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<"sender dataset size "<<total_count<<endl;
-          }else {
-            for (auto it = tile.row_id_set.begin(); it != tile.row_id_set.end();++it) {
-              total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
-            }
-            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<"receiver dataset size "<<total_count<<endl;
-            (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
-          }
+    auto itr = total_batches * grid->col_world_size * tiles_per_process;
+    #pragma omp parallel for
+    for(auto in=0;in<itr;in++){
+      auto i = in / (grid->col_world_size * tiles_per_process);
+      auto j = (in / tiles_per_process) % grid->col_world_size;
+      auto k = in % tiles_per_process;
+      INDEX_TYPE total_count = 0;
+      SparseTile<INDEX_TYPE, VALUE_TYPE> tile = (*tile_map)[i][j][k];
+      if (col_id_set) {
+        for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();
+             ++it) {
+          total_count +=
+              handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
         }
+        (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
+
+      }else {
+        for (auto it = tile.row_id_set.begin(); it != tile.row_id_set.end();++it) {
+          total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
+        }
+        (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
       }
     }
+
+
+//    for(auto i=0;i<(*tile_map).size();i++){
+//      for(auto j=0;j<(*tile_map)[i].size();j++){
+//        auto tile_size = (*tile_map)[i][j].size();
+//        for(auto k=0;k<tile_size;k++) {
+//          INDEX_TYPE total_count = 0;
+//          SparseTile<INDEX_TYPE, VALUE_TYPE> tile = (*tile_map)[i][j][k];
+//          if (col_id_set) {
+//            for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();
+//                 ++it) {
+//              total_count +=
+//                  handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
+//            }
+//            (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
+//
+//          }else {
+//            for (auto it = tile.row_id_set.begin(); it != tile.row_id_set.end();++it) {
+//              total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
+//            }
+//            (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
+//          }
+//        }
+//      }
+//    }
   }
 
 
