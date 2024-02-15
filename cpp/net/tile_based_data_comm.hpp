@@ -112,7 +112,7 @@ public:
       }
       // This represents the case for pulling
       this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true, false);
-      this->sp_local_sender->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true,spgemm,"+",this->sparse_local);
+      this->sp_local_sender->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true,spgemm,"+",this->sparse_local.get());
 
       int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
       auto itr = total_batches * this->grid->col_world_size * tiles_per_process;
