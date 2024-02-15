@@ -448,7 +448,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
 
     CSRHandle *handle = (csr_local_data.get())->handler.get();
 
-    #pragma omp parallel for collapse(3)
+//    #pragma omp parallel for collapse(3)
     for(auto i=0;i<(*tile_map).size();i++){
       for(auto j=0;j<(*tile_map)[i].size();j++){
         auto tile_size = (*tile_map)[i][j].size();
@@ -462,10 +462,12 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
                   handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
             }
             (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
+            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<"sender dataset size "<<total_count<<endl;
           }else {
             for (auto it = tile.row_id_set.begin(); it != tile.row_id_set.end();++it) {
               total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
             }
+            cout<<" batch  id "<<i<<" process "<<j<<" tile id "<<k<<"receiver dataset size "<<total_count<<endl;
             (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
           }
         }
