@@ -2,6 +2,7 @@
 #include "../core/sparse_mat_tile.hpp"
 #include "data_comm.hpp"
 #include <math.h>
+#include <memory>
 
 using namespace distblas::core;
 using namespace std;
@@ -110,9 +111,31 @@ public:
       this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true);
       this->sparse_local->get_transferrable_datacount(receiver_proc_tile_map.get(),total_batches,false);
 
+      int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+      auto itr = total_batches * grid->col_world_size * tiles_per_process;
 
+      auto per_process_messages = total_batches*tiles_per_process;
 
+      unique_ptr<vector<TileTuple<INDEX_TYPE>>> send_tile_meta = make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
+      unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta = make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
 
+      #pragma omp parallel for
+      for(auto in=0;in<itr;in++){
+        auto i = in / (grid->col_world_size * tiles_per_process);
+        auto j = (in / tiles_per_process) % grid->col_world_size;
+        auto k = in % tiles_per_process;
+
+        auto offset = j*per_process_messages;
+        auto index = offset+ i*tiles_per_process +k;
+        TileTuple<INDEX_TYPE> t;
+        t.batch_id = i;
+        t.tile_id = k;
+        t.count = (*sender_proc_tile_map)[i][j][k].total_transferrable_datacount;
+        (*send_tile_meta)[index]=t;
+      }
+
+      MPI_Alltoall((*send_tile_meta).data(),per_process_messages , TILETUPLE,
+                   (*receive_tile_meta).data(), per_process_messages, TILETUPLE, grid->col_world);
 
     }
   }
