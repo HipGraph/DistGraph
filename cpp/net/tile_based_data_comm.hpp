@@ -32,7 +32,7 @@ public:
      tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
      this->total_batches = total_batches;
      this->tile_width_fraction = tile_width_fraction;
-
+     SparseTile<INDEX_TYPE,VALUE_TYPE>::tile_width_fraction=tile_width_fraction;
     receiver_proc_tile_map =
         make_shared<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>(
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
