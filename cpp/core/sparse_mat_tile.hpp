@@ -39,18 +39,18 @@ public:
                          INDEX_TYPE proc_col_width, int rank,
                          double tile_width_fraction) {
     int tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
-    int tile_width =
+     auto tile_width =
         (proc_col_width % tiles_per_process_row) == 0
-            ? static_cast<int>(proc_col_width * tile_width_fraction)
-            : (static_cast<int>(proc_col_width * tile_width_fraction) + 1);
+            ? (proc_col_width/tiles_per_process_row)
+            : ((proc_col_width/tiles_per_process_row) + 1);
     return static_cast<int>(col_index / tile_width);
   }
 
-  static int get_tile_width(INDEX_TYPE proc_col_width, double tile_width_fraction) {
+  static INDEX_TYPE get_tile_width(INDEX_TYPE proc_col_width, double tile_width_fraction) {
     int tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
     return (proc_col_width % tiles_per_process_row) == 0
-               ? static_cast<int>(proc_col_width * tile_width_fraction)
-               : (static_cast<int>(proc_col_width * tile_width_fraction) + 1);
+               ? (proc_col_width/tiles_per_process_row)
+               : ((proc_col_width/tile_width_fraction) + 1);
   }
 };
 
