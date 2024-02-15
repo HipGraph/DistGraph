@@ -452,7 +452,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
         for(auto k=0;k<(*tile_map)[i][j].size();k++){
           INDEX_TYPE total_count=0;
           SparseTile<INDEX_TYPE,VALUE_TYPE> tile = (*tile_map)[i][j][k];
-          for(auto it=tile.col_id_set.begin();it!=tile.col_id_set.end()) {
+          for(auto it=tile.col_id_set.begin();it!=tile.col_id_set.end(); ++it) {
             total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
           }
           (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
