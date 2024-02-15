@@ -427,7 +427,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
   void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,int total_batches, bool col_id_set){
 
     CSRHandle *handle = (csr_local_data.get())->handler.get();
-    int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>>::get_tiles_per_process_row();
+    int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
 
     auto itr = total_batches * grid->col_world_size * tiles_per_process;
     #pragma omp parallel for
