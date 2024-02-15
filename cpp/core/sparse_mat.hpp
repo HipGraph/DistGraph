@@ -452,31 +452,6 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
         (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
       }
     }
-
-
-//    for(auto i=0;i<(*tile_map).size();i++){
-//      for(auto j=0;j<(*tile_map)[i].size();j++){
-//        auto tile_size = (*tile_map)[i][j].size();
-//        for(auto k=0;k<tile_size;k++) {
-//          INDEX_TYPE total_count = 0;
-//          SparseTile<INDEX_TYPE, VALUE_TYPE> tile = (*tile_map)[i][j][k];
-//          if (col_id_set) {
-//            for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();
-//                 ++it) {
-//              total_count +=
-//                  handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
-//            }
-//            (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
-//
-//          }else {
-//            for (auto it = tile.row_id_set.begin(); it != tile.row_id_set.end();++it) {
-//              total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
-//            }
-//            (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
-//          }
-//        }
-//      }
-//    }
   }
 
 

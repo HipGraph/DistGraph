@@ -155,10 +155,10 @@ public:
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
         auto k = in % tiles_per_process;
         auto offset = j*per_process_messages;
-        auto index = offset+ i*tiles_per_process +k;
         cout<<" rank "<<this->grid->rank_in_col<<" batch_id "<<i<<" process "<<j<<" tile id  "
-             <<k<<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_receivable_datacount<<" transferrable "
-             <<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<endl;
+             <<k<<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_receivable_datacount<<" "<<" transferrable "
+             <<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<" col "
+             <<(*receiver_proc_tile_map)[i][j][k].col_id_set.size()<<" row "<<(*receiver_proc_tile_map)[i][j][k].row_id_set.size()<<endl;
       }
     }
   }
