@@ -31,6 +31,7 @@ public:
 
   static double tile_width_fraction;
 
+
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
              INDEX_TYPE col_end_index)
