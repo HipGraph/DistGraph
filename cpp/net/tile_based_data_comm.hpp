@@ -112,7 +112,7 @@ public:
       this->sparse_local->get_transferrable_datacount(receiver_proc_tile_map.get(),total_batches,false);
 
       int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
-      auto itr = total_batches * grid->col_world_size * tiles_per_process;
+      auto itr = total_batches * this->grid->col_world_size * tiles_per_process;
 
       auto per_process_messages = total_batches*tiles_per_process;
 
