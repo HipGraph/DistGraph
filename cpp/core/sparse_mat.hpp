@@ -132,6 +132,8 @@ private:
               if (col_val >= dst_start and col_val < dst_end_index) {
                 {
                   (*tile_map)[batch_id][procs[r]][tile_id].insert(i);
+                  (*tile_map)[batch_id][procs[r]][tile_id].insert_row_index(col_val);
+
                 }
               }
             }

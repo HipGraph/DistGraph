@@ -22,6 +22,7 @@ public:
 
   unordered_map<INDEX_TYPE, unordered_map<int, bool>> id_to_proc_mapping;
   unordered_set<INDEX_TYPE> col_id_set;
+  unordered_set<INDEX_TYPE> row_id_set;
   int mode = 0; // mode=0 local and mode=1 remote
 
   int64_t total_transferrable_datacount=-1;
@@ -37,6 +38,7 @@ public:
   SparseTile(Process3DGrid *grid) : grid(grid) {}
 
   void insert(INDEX_TYPE col_index) { col_id_set.insert(col_index); }
+  void insert_row_index(INDEX_TYPE row_index) { row_id_set.insert(row_index); }
 
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,
                          INDEX_TYPE proc_col_width, int rank,
