@@ -108,9 +108,9 @@ private:
               auto col_val = handle->col_idx[j];
               {
                 int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r],  tile_width_fraction);
-                cout<<" rank "<<grid->rank_in_col<< "accessing tile id "<<tile_id<<endl;
+//                cout<<" rank "<<grid->rank_in_col<< "accessing tile id "<<tile_id<<endl;
                 (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
-                cout<<" rank "<<grid->rank_in_col<< "accessing tile id "<<tile_id<<" success "<<endl;
+//                cout<<" rank "<<grid->rank_in_col<< "accessing tile id "<<tile_id<<" success "<<endl;
                 id_to_proc_mapping[col_val][procs[r]] = true;
               }
             }
@@ -141,9 +141,6 @@ private:
         }
       }
     }
-
-
-
   }
 
 //  void find_col_ids_for_pushing_with_tiling(int batch_id, int starting_proc, int end_proc,

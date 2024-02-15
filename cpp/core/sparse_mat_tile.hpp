@@ -43,7 +43,10 @@ public:
         (proc_col_width % tiles_per_process_row) == 0
             ? (proc_col_width/tiles_per_process_row)
             : ((proc_col_width/tiles_per_process_row) + 1);
-    return static_cast<int>(col_index / tile_width);
+
+     cout<<" proc_col_width "<<proc_col_width<<" tile_width "<<tile_width<<" tiles_per_process_row "<<tiles_per_process_row<<endl;
+
+    return static_cast<int>(col_index/tile_width);
   }
 
   static INDEX_TYPE get_tile_width(INDEX_TYPE proc_col_width, double tile_width_fraction) {
