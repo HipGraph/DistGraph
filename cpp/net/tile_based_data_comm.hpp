@@ -107,8 +107,8 @@ public:
             sender_proc_tile_map.get(), this->send_indices_to_proc_map, 0);
       }
       // This represents the case for pulling
-      this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),true);
-      this->sparse_local->get_transferrable_datacount(receiver_proc_tile_map.get(),false);
+      this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true);
+      this->sparse_local->get_transferrable_datacount(receiver_proc_tile_map.get(),total_batches,false);
 
       for(auto i=0;i<(*receiver_proc_tile_map).size();i++){
         for(auto j=0;j<(*receiver_proc_tile_map)[i].size();j++){
