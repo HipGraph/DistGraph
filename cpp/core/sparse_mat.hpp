@@ -107,8 +107,8 @@ private:
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               {
-                int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r],  tile_width_fraction);
-                (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
+//                int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r],  tile_width_fraction);
+//                (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
                 id_to_proc_mapping[col_val][procs[r]] = true;
               }
             }
@@ -124,14 +124,14 @@ private:
           if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
 
-            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,(i-starting_index), proc_col_width, procs[r],  tile_width_fraction);
+//            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,(i-starting_index), proc_col_width, procs[r],  tile_width_fraction);
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
               auto col_val = handle->col_idx[j];
               INDEX_TYPE dst_start = batch_id * batch_size;
               INDEX_TYPE dst_end_index = std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
                 {
-                  (*tile_map)[batch_id][procs[r]][tile_id].insert(i);
+//                  (*tile_map)[batch_id][procs[r]][tile_id].insert(i);
                 }
               }
             }
