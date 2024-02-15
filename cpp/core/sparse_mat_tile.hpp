@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 
+
 using namespace distblas::net;
 
 namespace distblas::core {
@@ -65,4 +66,6 @@ public:
 
 };
 
+template <typename INDEX_TYPE, typename VALUE_TYPE>
+double SparseTile<INDEX_TYPE, VALUE_TYPE>::tile_width_fraction = 0.5;
 } // namespace distblas::core
