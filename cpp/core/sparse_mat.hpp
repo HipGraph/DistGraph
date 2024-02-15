@@ -110,7 +110,7 @@ private:
               {
                 int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,col_val, proc_col_width, procs[r]);
                 (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
-                if (semring="+" and input_data != nullptr){
+                if (semring=="+" and input_data != nullptr){
                   CSRHandle *input_handle = input_data->csr_local_data->handler.get();
                   if (input_handle->rowStart[col_val + 1] - input_handle->rowStart[col_val] >0) {
                     for (auto h = input_handle->rowStart[col_val];h < input_handle->rowStart[col_val + 1]; h++) {
