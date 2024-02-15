@@ -34,6 +34,9 @@ using INDEX_TYPE = uint64_t;
 
 using VALUE_TYPE = double;
 
+template <typename INDEX_TYPE, typename VALUE_TYPE>
+double SparseTile<INDEX_TYPE, VALUE_TYPE>::tile_width_fraction = 0.5;
+
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
