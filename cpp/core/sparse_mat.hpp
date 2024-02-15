@@ -124,7 +124,7 @@ private:
           if (rank != procs[r] and
               (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
 
-            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,i, proc_col_width, procs[r],  tile_width_fraction);
+            int tile_id = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tile_id(batch_id,(i-starting_index), proc_col_width, procs[r],  tile_width_fraction);
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
               auto col_val = handle->col_idx[j];
               INDEX_TYPE dst_start = batch_id * batch_size;

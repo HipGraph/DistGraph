@@ -43,8 +43,7 @@ public:
         (proc_col_width % tiles_per_process_row) == 0
             ? static_cast<int>(proc_col_width * tile_width_fraction)
             : (static_cast<int>(proc_col_width * tile_width_fraction) + 1);
-    auto local_i = col_index - (proc_col_width * rank);
-    return static_cast<int>(local_i / tile_width);
+    return static_cast<int>(col_index / tile_width);
   }
 
   static int get_tile_width(INDEX_TYPE proc_col_width, double tile_width_fraction) {
