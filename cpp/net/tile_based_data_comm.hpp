@@ -62,7 +62,7 @@ public:
           for (int k = 0; k < tiles_per_process_row; k++) {
             auto tile_width =
                 SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tile_width(
-                    sp_local_receiver->proc_col_width, tile_width_fraction);
+                    sp_local_receiver->proc_col_width);
             INDEX_TYPE col_starting_index_receiver = k * tile_width + sp_local_receiver->proc_col_width * j;
 
             INDEX_TYPE col_end_index_receiver = std::min(std::min((col_starting_index_receiver + tile_width),
