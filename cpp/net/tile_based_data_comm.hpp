@@ -121,8 +121,8 @@ public:
 
       #pragma omp parallel for
       for(auto in=0;in<itr;in++){
-        auto i = in / (grid->col_world_size * tiles_per_process);
-        auto j = (in / tiles_per_process) % grid->col_world_size;
+        auto i = in / (this->grid->col_world_size * tiles_per_process);
+        auto j = (in / tiles_per_process) % this->grid->col_world_size;
         auto k = in % tiles_per_process;
 
         auto offset = j*per_process_messages;
@@ -135,7 +135,7 @@ public:
       }
 
       MPI_Alltoall((*send_tile_meta).data(),per_process_messages , TILETUPLE,
-                   (*receive_tile_meta).data(), per_process_messages, TILETUPLE, grid->col_world);
+                   (*receive_tile_meta).data(), per_process_messages, TILETUPLE, this->grid->col_world);
 
     }
   }
