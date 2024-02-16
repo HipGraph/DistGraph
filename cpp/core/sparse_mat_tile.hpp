@@ -31,6 +31,13 @@ public:
 
   static double tile_width_fraction;
 
+  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
+
+  unique_ptr<vector<INDEX_TYPE>> sparse_data_counter;
+
+  unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
+
+
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
@@ -43,6 +50,16 @@ public:
 
   void insert(INDEX_TYPE col_index) { col_id_set.insert(col_index); }
   void insert_row_index(INDEX_TYPE row_index) { row_id_set.insert(row_index); }
+
+
+
+  void initialize_output_DS_if(int comparing_mode){
+    if (mode==comparing_mode){
+      auto len = row_end_index- row_starting_index;
+      sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len);
+      sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
+    }
+  }
 
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,
                          INDEX_TYPE proc_col_width, int rank) {
