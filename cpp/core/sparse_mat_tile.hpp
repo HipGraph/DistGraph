@@ -57,7 +57,7 @@ public:
     if (mode==comparing_mode){
       auto len = row_end_index- row_starting_index;
       sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len);
-      sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
+      sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
     }
   }
 
