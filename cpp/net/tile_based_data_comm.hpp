@@ -212,8 +212,7 @@ public:
              cout<<" processing tile "<<tile<< " for process "<<sending_procs[i]<<endl;
             if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-              current.rows[0] =
-                  2; // rows first two indices are already taken for metadata
+              current.rows[0] = 2; // rows first two indices are already taken for metadata
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
