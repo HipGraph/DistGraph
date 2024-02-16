@@ -181,10 +181,10 @@ public:
     data_buffer_ptr->resize(this->grid->col_world_size);
 
     int total_send_count = 0;
-    send_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
-    receive_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
-    sdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
-    rdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->send_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->receive_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->sdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->rdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
 
     vector<int> sending_procs;
     vector<int> receiving_procs;
@@ -210,19 +210,19 @@ public:
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0 and sender_proc_tile_map[batch_id][sending_procs[i]][i].mode==1) {
 
-            if (send_counts_cyclic[sending_procs[i]] == 0) {
+            if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
               current.rows[0] =
                   2; // rows first two indices are already taken for metadata
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
-              send_counts_cyclic[sending_procs[i]]++;
+              this->send_counts_cyclic[sending_procs[i]]++;
             }
 
             SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest =
                 (*data_buffer_ptr)[sending_procs[i]]
-                                  [send_counts_cyclic[sending_procs[i]] - 1];
+                                  [this->send_counts_cyclic[sending_procs[i]] - 1];
             auto row_index_offset = latest.rows[0];
             auto col_index_offset = latest.rows[1];
             if (row_index_offset >= row_max or
@@ -233,10 +233,10 @@ public:
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
-              send_counts_cyclic[sending_procs[i]]++;
+              this->send_counts_cyclic[sending_procs[i]]++;
               latest =
                   (*data_buffer_ptr)[sending_procs[i]]
-                                    [send_counts_cyclic[sending_procs[i]] - 1];
+                                    [this->send_counts_cyclic[sending_procs[i]] - 1];
               row_index_offset = latest.rows[0];
               col_index_offset = latest.rows[1];
             }
@@ -261,7 +261,7 @@ public:
                    latest.values.begin() + col_index_offset);
             }
             (*data_buffer_ptr)[sending_procs[i]]
-                              [send_counts_cyclic[sending_procs[i]] - 1] =
+                              [this->send_counts_cyclic[sending_procs[i]] - 1] =
                                   latest;
             if (remaining_data_items > 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
@@ -270,10 +270,10 @@ public:
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
-              send_counts_cyclic[sending_procs[i]]++;
+              this->send_counts_cyclic[sending_procs[i]]++;
               latest =
                   (*data_buffer_ptr)[sending_procs[i]]
-                                    [send_counts_cyclic[sending_procs[i]] - 1];
+                                    [this->send_counts_cyclic[sending_procs[i]] - 1];
               row_index_offset = latest.rows[0];
               col_index_offset = latest.rows[1];
               latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
@@ -290,7 +290,7 @@ public:
                        remaining_data_items,
                    latest.values.begin());
               (*data_buffer_ptr)[sending_procs[i]]
-                                [send_counts_cyclic[sending_procs[i]] - 1] =
+                                [this->send_counts_cyclic[sending_procs[i]] - 1] =
                                     latest;
             }
           }
@@ -299,22 +299,22 @@ public:
     }
     (*sendbuf_cyclic).resize(total_send_count);
     for (int i = 0; i < this->grid->col_world_size; i++) {
-      sdispls_cyclic[i] =
-          (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
-                  : sdispls_cyclic[i];
+      this->sdispls_cyclic[i] =
+          (i > 0) ? this->sdispls_cyclic[i - 1] + this->send_counts_cyclic[i - 1]
+                  : this->sdispls_cyclic[i];
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
-           (*sendbuf_cyclic).begin() + sdispls_cyclic[i]);
+           (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
     auto t = start_clock();
-    MPI_Alltoall(send_counts_cyclic.data(), 1, MPI_INT,
-                 receive_counts_cyclic.data(), 1, MPI_INT, this->grid->col_world);
+    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
+                 this->receive_counts_cyclic.data(), 1, MPI_INT, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
-      rdispls_cyclic[i] =
-          (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
-                  : rdispls_cyclic[i];
-      total_receive_count += receive_counts_cyclic[i];
+      this->rdispls_cyclic[i] =
+          (i > 0) ? this->rdispls_cyclic[i - 1] + this->receive_counts_cyclic[i - 1]
+                  : this->rdispls_cyclic[i];
+      total_receive_count += this->receive_counts_cyclic[i];
     }
 
     if (total_receive_count > 0) {
@@ -324,9 +324,9 @@ public:
     add_datatransfers(total_receive_count, "Data transfers");
 
     t = start_clock();
-    MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
-                  sdispls_cyclic.data(), SPARSETUPLE, (*receivebuf).data(),
-                  receive_counts_cyclic.data(), rdispls_cyclic.data(),
+    MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
+                  this->sdispls_cyclic.data(), SPARSETUPLE, (*receivebuf).data(),
+                  this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
                   SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,
