@@ -437,8 +437,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
   }
 
   void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,
-                                   int total_batches, bool col_id_set, bool indices_only,
-                                   string semring="+", SpMat<VALUE_TYPE> *input_data=nullptr){
+                                   int total_batches, bool col_id_set, bool indices_only){
 
     CSRHandle *handle = (csr_local_data.get())->handler.get();
     int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
