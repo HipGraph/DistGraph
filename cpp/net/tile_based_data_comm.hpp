@@ -178,24 +178,24 @@ public:
     int total_receive_count = 0;
     shared_ptr<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>
         data_buffer_ptr = make_shared<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>();
-    data_buffer_ptr->resize(grid->col_world_size);
+    data_buffer_ptr->resize(this->grid->col_world_size);
 
     int total_send_count = 0;
-    send_counts_cyclic = vector<int>(grid->col_world_size, 0);
-    receive_counts_cyclic = vector<int>(grid->col_world_size, 0);
-    sdispls_cyclic = vector<int>(grid->col_world_size, 0);
-    rdispls_cyclic = vector<int>(grid->col_world_size, 0);
+    send_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    receive_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    sdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+    rdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
 
     vector<int> sending_procs;
     vector<int> receiving_procs;
 
     for (int i = starting_proc; i < end_proc; i++) {
-      int sending_rank = (grid->rank_in_col + i) % grid->col_world_size;
+      int sending_rank = (this->grid->rank_in_col + i) % this->grid->col_world_size;
       int receiving_rank =
-          (grid->rank_in_col >= i)
-              ? (grid->rank_in_col - i) % grid->col_world_size
-              : (grid->col_world_size - i + grid->rank_in_col) %
-                    grid->col_world_size;
+          (this->grid->rank_in_col >= i)
+              ? (this->grid->rank_in_col - i) % this->grid->col_world_size
+              : (this->grid->col_world_size - i + this->grid->rank_in_col) %
+                    this->grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
       (*data_buffer_ptr)[sending_rank] =
@@ -298,7 +298,7 @@ public:
       }
     }
     (*sendbuf_cyclic).resize(total_send_count);
-    for (int i = 0; i < grid->col_world_size; i++) {
+    for (int i = 0; i < this->grid->col_world_size; i++) {
       sdispls_cyclic[i] =
           (i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]
                   : sdispls_cyclic[i];
@@ -307,10 +307,10 @@ public:
     }
     auto t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1, MPI_INT,
-                 receive_counts_cyclic.data(), 1, MPI_INT, grid->col_world);
+                 receive_counts_cyclic.data(), 1, MPI_INT, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 
-    for (int i = 0; i < grid->col_world_size; i++) {
+    for (int i = 0; i < this->grid->col_world_size; i++) {
       rdispls_cyclic[i] =
           (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
                   : rdispls_cyclic[i];
@@ -327,7 +327,7 @@ public:
     MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                   sdispls_cyclic.data(), SPARSETUPLE, (*receivebuf).data(),
                   receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                  SPARSETUPLE, grid->col_world);
+                  SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,
                                 batch_id);
