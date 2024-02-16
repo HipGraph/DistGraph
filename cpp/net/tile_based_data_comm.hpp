@@ -107,16 +107,16 @@ public:
 
 
 
-  void onboard_data() override {
+  void onboard_data()  {
     if (this->alpha == 0) {
       for(int i = 0; i < total_batches; i++){
         this->sp_local_receiver->find_col_ids_with_tiling(
             i, 0, this->grid->col_world_size,
-            receiver_proc_tile_map.get(), receive_indices_proc_map, 0);
+            receiver_proc_tile_map.get(), receive_indices_proc_map.get(), 0);
         // calculating sending data cols
         this->sp_local_sender->find_col_ids_with_tiling(
             i, 0, this->grid->col_world_size,
-            sender_proc_tile_map.get(), send_indices_proc_map, 0,"+",this->sparse_local);
+            sender_proc_tile_map.get(), send_indices_proc_map.get(), 0,"+",this->sparse_local);
       }
       // This represents the case for pulling
       this->sparse_local->get_transferrable_datacount(sender_proc_tile_map.get(),total_batches,true, false);
