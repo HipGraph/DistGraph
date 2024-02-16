@@ -77,7 +77,22 @@ public:
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,1));
 
+    // Buffer used for receive MPI operations data
+    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> update_ptr =
+        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
+
+    //Buffer used for send MPI operations data
+    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> sendbuf_ptr =
+        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
+
     main_comm.get()->onboard_data();
+
+    int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+    main_comm.get()-> transfer_sparse_data (sendbuf_ptr.get(),
+        update_ptr.get(), 0,0, 0, grid->col_world_size, 0,  total_tiles);
+
 
     stop_clock_and_add(t, "Total Time");
   }
