@@ -33,7 +33,7 @@ public:
 
   shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 
-  unique_ptr<vector<INDEX_TYPE>> sparse_data_counter;
+  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
 
   unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
@@ -56,7 +56,7 @@ public:
   void initialize_output_DS_if(int comparing_mode){
     if (mode==comparing_mode){
       auto len = row_end_index- row_starting_index;
-      sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len);
+      sparse_data_counter = make_shared<vector<INDEX_TYPE>>(len);
       sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
     }
   }
