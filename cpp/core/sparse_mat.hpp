@@ -122,7 +122,7 @@ private:
               }
             }
             for(int tile=0;tile<SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();tile++){
-              (*tile_map)[batch_id][procs[r]][tile].total_receivable_datacount = unique_per_row[tile].size();
+              (*tile_map)[batch_id][procs[r]][tile].total_receivable_datacount += unique_per_row[tile].size();
             }
           }
         }

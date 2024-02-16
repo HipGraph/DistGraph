@@ -26,8 +26,8 @@ public:
   unordered_set<INDEX_TYPE> row_id_set;
   int mode = 0; // mode=0 local and mode=1 remote
 
-  int64_t total_transferrable_datacount=-1;
-  int64_t total_receivable_datacount=-1;
+  uint64_t total_transferrable_datacount=0;
+  uint64_t total_receivable_datacount=0;
 
   static double tile_width_fraction;
 
