@@ -24,7 +24,7 @@ public:
   unordered_map<INDEX_TYPE, unordered_map<int, bool>> id_to_proc_mapping;
   unordered_set<INDEX_TYPE> col_id_set;
   unordered_set<INDEX_TYPE> row_id_set;
-  int mode = 0; // mode=0 local and mode=1 remote
+  int mode = 1; // mode=0 local and mode=1 remote
 
   uint64_t total_transferrable_datacount=0;
   uint64_t total_receivable_datacount=0;

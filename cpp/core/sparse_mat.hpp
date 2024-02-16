@@ -84,7 +84,7 @@ private:
    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
-  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping,
+  void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,vector<vector<unordered_map<INDEX_TYPE, unordered_map<int,bool>>>> *id_to_proc_mapping,
                                             vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map, string semring="+", SpMat<VALUE_TYPE> *input_data=nullptr) {
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
@@ -118,7 +118,7 @@ private:
                     }
                   }
                 }
-                id_to_proc_mapping[col_val][procs[r]] = true;
+                (*id_to_proc_mapping)[batch_id][tile_id][col_val][procs[r]] = true;
               }
             }
             for(int tile=0;tile<SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();tile++){
@@ -412,7 +412,7 @@ public:
 
 
   void find_col_ids_with_tiling(int batch_id, int starting_proc, int end_proc, vector<vector<vector<distblas::core::SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* proc_to_id_mapping,
-                    unordered_map<INDEX_TYPE, unordered_map<int,bool>> &id_to_proc_mapping, bool mode,string semring="+", SpMat<VALUE_TYPE> *input_data=nullptr) {
+                    vector<vector<unordered_map<INDEX_TYPE, unordered_map<int,bool>>>> *id_to_proc_mapping, bool mode,string semring="+", SpMat<VALUE_TYPE> *input_data=nullptr) {
 
     if (mode == 0) {
       find_col_ids_for_pulling_with_tiling(batch_id,starting_proc,end_proc, id_to_proc_mapping,proc_to_id_mapping,semring,input_data);
