@@ -152,16 +152,10 @@ public:
         if (t.batch_id==i and t.tile_id==k){
           (*receiver_proc_tile_map)[i][j][k].total_receivable_datacount=t.count;
           (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount=t.send_merge_count;
+          if (t.count>t.send_merge_count){
+            (*receiver_proc_tile_map)[i][j][k].mode=1;
+          }
         }
-      }
-
-      for(auto in=0;in<itr;in++){
-        auto i = in / (this->grid->col_world_size * tiles_per_process);
-        auto j = (in / tiles_per_process) % this->grid->col_world_size;
-        auto k = in % tiles_per_process;
-        auto offset = j*per_process_messages;
-        cout<<" rank "<<this->grid->rank_in_col<<" batch_id "<<i<<" process "<<j<<" tile id  "
-             <<k<<" receivables "<<(*receiver_proc_tile_map)[i][j][k].total_receivable_datacount<<" "<<" transferrable "<<(*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount<<endl;
       }
     }
   }
