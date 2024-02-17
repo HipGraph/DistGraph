@@ -70,13 +70,12 @@ public:
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
-  CSRHandle  fetch_remote_data(INDEX_TYPE local_key) {
+  CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
     CSRHandle *handle = (csr_local_data.get())->handler.get();
     CSRHandle new_handler;
-    INDEX_TYPE global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
-    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
+    int count = handle->rowStart[global_key + 1]-handle->rowStart[global_key];
     new_handler.row_idx.resize(1,global_key);
-    if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
+    if(handle->rowStart[global_key + 1]-handle->rowStart[global_key]>0){
       new_handler.col_idx.resize(count);
       new_handler.values.resize(count);
       copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
