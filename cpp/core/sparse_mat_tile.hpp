@@ -39,7 +39,7 @@ public:
 
   shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
-  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
+  shared_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
 
 
@@ -67,7 +67,7 @@ public:
 
 
   void initialize_CSR_from_sparse_collector() {
-    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+    csr_local_data = make_shared<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
