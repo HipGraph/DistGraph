@@ -540,7 +540,7 @@ public:
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
-    this->store_remotely_computed_data(sendbuf_cyclic.get(),receivebuf.get(),iteration,batch_id);
+    this->store_remotely_computed_data(sendbuf_cyclic,receivebuf,iteration,batch_id);
     stop_clock_and_add(t, "Communication Time");
   }
 
