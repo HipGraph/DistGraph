@@ -109,8 +109,8 @@ template <typename VALUE_TYPE, size_t size> struct CacheEntry {
 };
 
 template <typename VALUE_TYPE> struct SparseCacheEntry {
-  vector<VALUE_TYPE> values;
-  vector<INDEX_TYPE> cols;
+  vector<VALUE_TYPE> values = vector<VALUE_TYPE>();
+  vector<INDEX_TYPE> cols = vector<INDEX_TYPE>();
   int inserted_batch_id;
   int inserted_itr;
 };

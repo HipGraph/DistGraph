@@ -41,6 +41,7 @@ public:
 
   shared_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
+  shared_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
@@ -62,6 +63,7 @@ public:
       auto len = row_end_index- row_starting_index;
       sparse_data_counter = make_shared<vector<INDEX_TYPE>>(len);
       sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
+      dataCachePtr = make_shared<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
     }
   }
 
@@ -84,6 +86,11 @@ public:
     return new_handler;
   }
 
+
+
+
+
+
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,
                          INDEX_TYPE proc_col_width, int rank) {
     int tiles_per_process_row = static_cast<int>(1/(tile_width_fraction));
@@ -104,6 +111,10 @@ public:
   static int get_tiles_per_process_row() {
     return static_cast<int>(1/(tile_width_fraction));
   }
+
+
+
+
 
 };
 

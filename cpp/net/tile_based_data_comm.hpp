@@ -420,17 +420,11 @@ public:
 
     for (int i = 0; i < sending_procs.size(); i++) {
       for (int tile = start_tile; tile < end_tile; tile++) {
-        if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
-            0) {
-          for (INDEX_TYPE index =
-                   (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-                       .row_starting_index;
-               index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-                           .row_end_index;
-               ++index) {
-            CSRHandle sparse_tuple =
-                (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-                    .fetch_remote_data(index);
+        if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==0) {
+          for (INDEX_TYPE index =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_starting_index;
+               index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_end_index;++index) {
+            CSRHandle sparse_tuple =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].fetch_remote_data(index);
+
             if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
               current.rows[0] =
@@ -440,24 +434,17 @@ public:
               total_send_count++;
               this->send_counts_cyclic[sending_procs[i]]++;
             }
-            SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest =
-                (*data_buffer_ptr)[sending_procs[i]]
-                                  [this->send_counts_cyclic[sending_procs[i]] -
-                                   1];
+            SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest = (*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] -1];
             auto row_index_offset = latest.rows[0];
             auto col_index_offset = latest.rows[1];
-            if (row_index_offset >= row_max or
-                col_index_offset >= sp_tuple_max_dim) {
+            if (row_index_offset >= row_max or col_index_offset >= sp_tuple_max_dim) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-              current.rows[0] =
-                  2; // rows first two indices are already taken for metadata
+              current.rows[0] = 2; // rows first two indices are already taken for metadata
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
               this->send_counts_cyclic[sending_procs[i]]++;
-              latest = (*data_buffer_ptr)
-                  [sending_procs[i]]
-                  [this->send_counts_cyclic[sending_procs[i]] - 1];
+              latest = (*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] - 1];
               row_index_offset = latest.rows[0];
               col_index_offset = latest.rows[1];
             }
@@ -470,7 +457,8 @@ public:
 
             latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
             latest.rows[row_index_offset + 1] = num_of_copying_data;
-            latest.rows[0] = row_index_offset + 2;
+            latest.rows[row_index_offset + 2] = tile;
+            latest.rows[0] = row_index_offset + 3;
             latest.rows[1] = latest.rows[1] + num_of_copying_data;
 
             if (num_of_copying_data > 0) {
@@ -499,7 +487,8 @@ public:
               col_index_offset = latest.rows[1];
               latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
               latest.rows[row_index_offset + 1] = remaining_data_items;
-              latest.rows[0] = row_index_offset + 2;
+              latest.rows[row_index_offset + 2] = tile;
+              latest.rows[0] = row_index_offset + 3;
               latest.rows[1] = latest.rows[1] + remaining_data_items;
 
               copy(sparse_tuple.col_idx.begin() + num_of_copying_data - 1,
@@ -551,8 +540,50 @@ public:
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
+    this->store_remotely_computed_data(sendbuf_cyclic.get(),receivebuf.get(),iteration,batch_id);
     stop_clock_and_add(t, "Communication Time");
   }
+
+  inline void store_remotely_computed_data(vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf,
+      vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
+      int batch_id) {
+
+    #pragma omp parallel for
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      INDEX_TYPE base_index = this->rdispls_cyclic[i];
+      INDEX_TYPE count = this->receive_counts_cyclic[i];
+
+      for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
+        SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*receivebuf)[j];
+        auto row_offset = sp_tuple.rows[0];
+        auto offset_so_far = 0;
+        for (auto k = 2; k < row_offset; k = k + 3) {
+          auto key = sp_tuple.rows[k];
+          auto count = sp_tuple.rows[k + 1];
+          auto tile = sp_tuple.rows[k + 2];
+          if (count > 0) {
+            SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
+            auto entry_offset = cache_entry.cols.size();
+            cache_entry.cols.resize(entry_offset + count);
+            cache_entry.values.resize(entry_offset + count);
+            copy(sp_tuple.cols.begin() + offset_so_far,
+                 sp_tuple.cols.begin() + offset_so_far + count,
+                 cache_entry.cols.begin() + entry_offset);
+            copy(sp_tuple.values.begin() + offset_so_far,
+                 sp_tuple.values.begin() + offset_so_far + count,
+                 cache_entry.values.begin() + entry_offset);
+            offset_so_far += count;
+            (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] = cache_entry;
+          }
+        }
+      }
+    }
+    receivebuf->clear();
+    receivebuf->shrink_to_fit();
+    sendbuf->clear();
+    sendbuf->shrink_to_fit();
+  }
+
 };
 
 } // namespace distblas::net
