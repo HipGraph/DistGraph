@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 #include <set>
+#include "common.h"
+#include "csr_local.hpp"
 
 
 using namespace distblas::net;
@@ -37,6 +39,8 @@ public:
 
   shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
+  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
+
 
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
@@ -59,6 +63,26 @@ public:
       sparse_data_counter = make_shared<vector<INDEX_TYPE>>(len);
       sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
     }
+  }
+
+
+  void initialize_CSR_from_sparse_collector() {
+    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+  }
+
+  CSRHandle  fetch_remote_data(INDEX_TYPE local_key) {
+    CSRHandle *handle = (csr_local_data.get())->handler.get();
+    CSRHandle new_handler;
+    INDEX_TYPE global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
+    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
+    new_handler.row_idx.resize(1,global_key);
+    if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
+      new_handler.col_idx.resize(count);
+      new_handler.values.resize(count);
+      copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
+      copy(handle->values.begin(),handle->values.begin()+ count,new_handler.values.begin());
+    }
+    return new_handler;
   }
 
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,
