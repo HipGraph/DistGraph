@@ -110,7 +110,7 @@ public:
         // One process computations without MPI operations
         if (this->grid->col_world_size == 1) {
           // local computations for 1 process
-          this->calc_t_dist_grad_rowptr(csr_block,  lr, j,
+          this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,j,
                                         batch_size, considering_batch_size,
                                         true,  0, 0,false,main_comm.get());
 
