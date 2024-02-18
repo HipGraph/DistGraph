@@ -90,10 +90,8 @@ public:
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,
                          INDEX_TYPE proc_col_width, int rank) {
     int tiles_per_process_row = static_cast<int>(1/(tile_width_fraction));
-     auto tile_width =
-        (proc_col_width % tiles_per_process_row) == 0
-            ? (proc_col_width/tiles_per_process_row)
-            : ((proc_col_width/tiles_per_process_row) + 1);
+    auto tile_width =
+        (proc_col_width % tiles_per_process_row) == 0 ? (proc_col_width/tiles_per_process_row): ((proc_col_width/tiles_per_process_row) + 1);
     return static_cast<int>(col_index/tile_width);
   }
 

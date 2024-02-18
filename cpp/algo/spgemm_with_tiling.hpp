@@ -103,7 +103,7 @@ public:
     for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
-
+        cout<<" rank  "<<grid->rank_in_col<<" processing batch id "<<j<<" "<<endl;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
@@ -196,7 +196,8 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
                                       VALUE_TYPE lr, int itr, int batch_id, int batch_size, int block_size,
-                                      bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
+                                      bool local, int start_process,int end_process,
+                                      bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
@@ -252,8 +253,7 @@ public:
         INDEX_TYPE index = i - batch_id * batch_size;
         int max_reach=0;
 
-        for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
-             j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
+        for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
             INDEX_TYPE local_dst =
