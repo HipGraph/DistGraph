@@ -224,10 +224,10 @@ public:
                 auto dst_start_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
                 auto dst_end_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
 
-//                calc_embedding_row_major(source_start_index, source_end_index,
-//                                         dst_start_index, dst_end_index,
-//                                         csr_block, lr, batch_id, batch_size,
-//                                         block_size, symbolic);
+                calc_embedding_row_major(source_start_index, source_end_index,
+                                         dst_start_index, dst_end_index,
+                                         csr_block, lr, batch_id, batch_size,
+                                         block_size, symbolic);
                 if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }
@@ -247,7 +247,7 @@ public:
 
 
       #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
-      for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
+      for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = i - batch_id * batch_size;
         int max_reach=0;
