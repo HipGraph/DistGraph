@@ -75,7 +75,7 @@ public:
     // fetch initial embeddings
     auto main_comm = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,0.25));
+            sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,1));
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
@@ -215,8 +215,8 @@ public:
               if ((*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].mode ==0) {
                 auto source_start_index =  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_starting_index;
                 auto source_end_index =  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_end_index;
-               auto dst_start_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
-               auto dst_end_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
+                auto dst_start_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
+                auto dst_end_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
 
                 calc_embedding_row_major(source_start_index, source_end_index,
                                          dst_start_index, dst_end_index,
@@ -237,7 +237,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
         INDEX_TYPE index = i - batch_id * batch_size;
