@@ -180,6 +180,9 @@ public:
         t.send_merge_count =
             (*sender_proc_tile_map)[i][j][k].total_receivable_datacount;
         (*send_tile_meta)[index] = t;
+        if (t.count > t.send_merge_count){
+          (*sender_proc_tile_map)[i][j][k].mode=0;
+        }
       }
 
       MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
@@ -201,8 +204,6 @@ public:
               t.send_merge_count;
           if (t.count <= t.send_merge_count) {
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
-          } else {
-//            (*sender_proc_tile_map)[i][j][k].mode = 0;
           }
         }
       }
