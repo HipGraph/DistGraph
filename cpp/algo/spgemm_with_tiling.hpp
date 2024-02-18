@@ -124,7 +124,7 @@ public:
 
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j,
-              this->data_comm_cache[j].get(), csr_block, batch_size,
+              main_comm, csr_block, batch_size,
               considering_batch_size, lr,  1,
               true, 0, true,false);
 
