@@ -224,10 +224,9 @@ public:
                                          dst_start_index, dst_end_index,
                                          csr_block, lr, batch_id, batch_size,
                                          block_size, symbolic);
-                if (itr==0){
+                if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }
-
               }
             }
         }
