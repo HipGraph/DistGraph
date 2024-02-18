@@ -167,13 +167,13 @@ public:
       if (k == comm_initial_start) {
         // local computation
         this->calc_t_dist_grad_rowptr(
-            csr_block,  lr, batch, batch_size,
+            csr_block,  lr, iteration,batch, batch_size,
             considering_batch_size, local_execution,
             first_execution_proc, prev_start,symbolic, main_comm);
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
-        this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
+        this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
                                       batch_size, considering_batch_size, false,
                                       prev_start, prev_end_process,symbolic, main_comm);
       }
@@ -182,7 +182,7 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
                                   batch_size, considering_batch_size,
                                   false,prev_start, prev_end_process,symbolic, main_comm);
     // dense_local->invalidate_cache(i, j, true);
@@ -191,7 +191,7 @@ public:
 
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
-                                      VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
+                                      VALUE_TYPE lr, int itr, int batch_id, int batch_size, int block_size,
                                       bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
@@ -224,7 +224,7 @@ public:
                                          dst_start_index, dst_end_index,
                                          csr_block, lr, batch_id, batch_size,
                                          block_size, symbolic);
-                if (iteration==0){
+                if (itr==0){
                   add_tile(1,"Locally Computed Tiles");
                 }
 
