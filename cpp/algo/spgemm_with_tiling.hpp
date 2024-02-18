@@ -243,10 +243,10 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+//      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
-        INDEX_TYPE index = i - batch_id * batch_size;
+        INDEX_TYPE index = i - source_start_index;
         int max_reach=0;
 
         for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
@@ -256,7 +256,7 @@ public:
                 dst_id - (this->grid)->rank_in_col *
                              (this->sp_local_receiver)->proc_col_width;
             int target_rank =
-                (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
+                (int)(dst_id/(this->sp_local_receiver)->proc_col_width);
             bool fetch_from_cache =
                 target_rank == (this->grid)->rank_in_col ? false : true;
 
@@ -265,9 +265,11 @@ public:
 
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
-                  &arrayMap = (* this->sparse_local->tempCachePtr)[target_rank];
+                  &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
+              cout<<" trying to fetch dst "<<dst_id<<endl;
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
+              cout<<" trying to fetch dst "<<dst_id<<" success "<<endl;
             }
 
             CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
