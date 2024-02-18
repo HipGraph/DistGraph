@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
   j_obj["data_set"] = data_set_name;
   j_obj["d"] = dimension;
   j_obj["batch_size"] = batch_size;
-  j_obj["tile_width_fraction"] = batch_size;
+  j_obj["tile_width_fraction"] = tile_width_fraction;
   if (spgemm){
     j_obj["output_nnz"] = output_sparsity;
   }
