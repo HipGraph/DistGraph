@@ -87,15 +87,14 @@ public:
         INDEX_TYPE row_starting_index_receiver =
             i * sp_local_receiver->batch_size;
         auto row_end_index_receiver =
-            std::min(std::min((row_starting_index_receiver +
+            std::min(std::min((i+1) +
                                sp_local_receiver->batch_size),
                               sp_local_receiver->proc_row_width),
                      sp_local_receiver->gRows);
 
         for (int j = 0; j < grid->col_world_size; j++) {
           INDEX_TYPE row_starting_index_sender =
-              i * sp_local_receiver->batch_size +
-              sp_local_receiver->proc_row_width * j;
+              i * sp_local_receiver->batch_size +sp_local_receiver->proc_row_width * j;
           INDEX_TYPE row_end_index_sender = std::min(
               std::min(
                   (row_starting_index_sender + sp_local_receiver->batch_size),
@@ -116,10 +115,8 @@ public:
                 sp_local_receiver->gCols);
 
             INDEX_TYPE col_starting_index_sender = k * tile_width;
-            auto col_end_index_sender =
-                std::min(std::min((col_starting_index_sender + tile_width),
-                                  sp_local_receiver->proc_col_width),
-                         sp_local_receiver->gCols);
+            auto col_end_index_sender =std::min((col_starting_index_sender + tile_width),
+                                  sp_local_receiver->proc_col_width);
 
             (*receiver_proc_tile_map)[i][j][k].id = k;
             (*receiver_proc_tile_map)[i][j][k].row_starting_index = row_starting_index_receiver;

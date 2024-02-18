@@ -161,7 +161,7 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !this->sparse_local_output->hash_spgemm)) {
-        cout << " rank " << grid->rank_in_col << " initialize transfer_sparse_data " << endl;
+        cout << " rank " << grid->rank_in_col << " initialize transfer_sparse_data " <<" tiles_per_process "<<tiles_per_process<< endl;
         main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process,0,tiles_per_process);
         cout << " rank " << grid->rank_in_col << " completed transfer_sparse_data " << endl;
@@ -198,23 +198,21 @@ public:
                                       bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
-      auto source_end_index = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
-                                       this->sp_local_receiver->proc_row_width) -1;
+      auto source_end_index = std::min(std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
+                                       this->sp_local_receiver->proc_row_width),this->sp_local_receiver->gRows);
       auto dst_start_index =
           this->sp_local_receiver->proc_col_width * this->grid->rank_in_col;
       auto dst_end_index =
           std::min(static_cast<INDEX_TYPE>(this->sp_local_receiver->proc_col_width *
                                            (this->grid->rank_in_col + 1)),
-                   this->sp_local_receiver->gCols) -1;
+                   this->sp_local_receiver->gCols);
       calc_embedding_row_major(source_start_index, source_end_index,
                                dst_start_index, dst_end_index, csr_block,
                                lr, batch_id, batch_size,
                                block_size,symbolic);
     } else {
       for (int r = start_process; r < end_process; r++) {
-
         if (r != grid->rank_in_col) {
-
             int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
             for (int tile = 0;tile <(*main_com->receiver_proc_tile_map)[batch_id][computing_rank].size();tile++) {
               if ((*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].mode ==0) {
