@@ -110,7 +110,7 @@ public:
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block,  lr, j,
                                         batch_size, considering_batch_size,
-                                        true,  0, 0,false);
+                                        true,  0, 0,false,main_comm.get());
 
         } else {
 
@@ -118,9 +118,9 @@ public:
         }
         total_memory += get_memory_usage();
       }
-      (sparse_local)->purge_cache();
+      (this->sparse_local)->purge_cache();
     }
-    (sparse_local_output)->initialize_CSR_blocks();
+    (this->sparse_local_output)->initialize_CSR_blocks();
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
@@ -130,14 +130,11 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
                                       VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
-                                      bool local, int start_process,int end_process, bool symbolic) {
+                                      bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE> *main_comm) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min((batch_id + 1) * batch_size,
                                        this->sp_local_receiver->proc_row_width) -1;
-
-
-
       auto dst_start_index =
           this->sp_local_receiver->proc_col_width * this->grid->rank_in_col;
       auto dst_end_index =
@@ -156,8 +153,10 @@ public:
             int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
             for (int tile = 0;tile <main_com->receiver_proc_tile_map[batch_id][r].size();tile++) {
               if (main_com->receiver_proc_tile_map[batch_id][r][tile].mode ==0) {
-                dst_start_index = main_com->receiver_proc_tile_map[batch_id][r][tile].col_start_index;
-                dst_end_index = main_com->receiver_proc_tile_map[batch_id][r][tile].end_index;
+                auto source_start_index =  main_com->receiver_proc_tile_map[batch_id][r][tile].row_starting_index;
+                auto source_end_index =  main_com->receiver_proc_tile_map[batch_id][r][tile].row_end_index;
+               auto dst_start_index = main_com->receiver_proc_tile_map[batch_id][r][tile].col_start_index;
+               auto dst_end_index = main_com->receiver_proc_tile_map[batch_id][r][tile].end_index;
 
                 calc_embedding_row_major(source_start_index, source_end_index,
                                          dst_start_index, dst_end_index,
