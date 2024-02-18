@@ -87,8 +87,7 @@ public:
         INDEX_TYPE row_starting_index_receiver =
             i * sp_local_receiver->batch_size;
         auto row_end_index_receiver =
-            std::min(std::min((i+1) +
-                               sp_local_receiver->batch_size),
+            std::min(std::min(((i+1) *sp_local_receiver->batch_size),
                               sp_local_receiver->proc_row_width),
                      sp_local_receiver->gRows);
 
