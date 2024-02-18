@@ -202,7 +202,7 @@ public:
           if (t.count <= t.send_merge_count) {
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
           } else {
-            (*sender_proc_tile_map)[i][j][k].mode = 0;
+//            (*sender_proc_tile_map)[i][j][k].mode = 0;
           }
         }
       }
