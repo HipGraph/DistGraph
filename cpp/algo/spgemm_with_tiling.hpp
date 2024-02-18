@@ -88,6 +88,8 @@ public:
 
     main_comm.get()->onboard_data();
 
+    cout << " rank " << grid->rank_in_col << " on board data completed " << batches<< endl;
+
     int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
     main_comm.get()-> transfer_sparse_data (sendbuf_ptr.get(),
         update_ptr.get(), 0,0, 0, grid->col_world_size, 0,  total_tiles);
