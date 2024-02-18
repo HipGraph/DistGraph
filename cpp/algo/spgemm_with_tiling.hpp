@@ -130,7 +130,7 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
                                       VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
-                                      bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE> *main_comm) {
+                                      bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_size> *main_comm) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min((batch_id + 1) * batch_size,
