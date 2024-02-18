@@ -130,7 +130,7 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
                                       VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
-                                      bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_size> *main_comm) {
+                                      bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min((batch_id + 1) * batch_size,
@@ -152,11 +152,11 @@ public:
 
             int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
             for (int tile = 0;tile <main_com->receiver_proc_tile_map[batch_id][r].size();tile++) {
-              if (main_com->receiver_proc_tile_map[batch_id][r][tile].mode ==0) {
-                auto source_start_index =  main_com->receiver_proc_tile_map[batch_id][r][tile].row_starting_index;
-                auto source_end_index =  main_com->receiver_proc_tile_map[batch_id][r][tile].row_end_index;
-               auto dst_start_index = main_com->receiver_proc_tile_map[batch_id][r][tile].col_start_index;
-               auto dst_end_index = main_com->receiver_proc_tile_map[batch_id][r][tile].end_index;
+              if (main_com->receiver_proc_tile_map[batch_id][computing_rank][tile].mode ==0) {
+                auto source_start_index =  main_com->receiver_proc_tile_map[batch_id][computing_rank][tile].row_starting_index;
+                auto source_end_index =  main_com->receiver_proc_tile_map[batch_id][computing_rank][tile].row_end_index;
+               auto dst_start_index = main_com->receiver_proc_tile_map[batch_id][computing_rank][tile].col_start_index;
+               auto dst_end_index = main_com->receiver_proc_tile_map[batch_id][computing_rank][tile].end_index;
 
                 calc_embedding_row_major(source_start_index, source_end_index,
                                          dst_start_index, dst_end_index,
