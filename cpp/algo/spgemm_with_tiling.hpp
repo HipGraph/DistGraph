@@ -116,7 +116,7 @@ public:
           if( (this->sparse_local_output)->hash_spgemm) {
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
-                main_comm, csr_block, batch_size,
+                main_comm.get(), csr_block, batch_size,
                 considering_batch_size, lr, 1, true, 0, true, true);
 
             (this->sparse_local_output)->initialize_hashtables();
@@ -124,7 +124,7 @@ public:
 
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j,
-              main_comm, csr_block, batch_size,
+              main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
               true, 0, true,false);
 
