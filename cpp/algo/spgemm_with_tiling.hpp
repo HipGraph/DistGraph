@@ -266,10 +266,12 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
-              cout<<"rank "<<(this->grid)->rank_in_col<<" trying to fetch dst "<<dst_id<<endl;
+              if (arrayMap.find(dst_id) == arrayMap.end()){
+                  cout<<" rank "<<grid->rank_in_col<< " cannot find data id "<<dst_id<<endl;
+              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
-              cout<<"rank "<<(this->grid)->rank_in_col<<" trying to fetch dst "<<dst_id<<" success "<<endl;
+
             }
 
             CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
