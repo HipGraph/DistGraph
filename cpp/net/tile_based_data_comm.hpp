@@ -13,10 +13,7 @@ template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class TileDataComm : public DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> {
 
 private:
-  shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
-      receiver_proc_tile_map;
-  shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
-      sender_proc_tile_map;
+
 
   shared_ptr<
       vector<vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>>>
@@ -33,6 +30,11 @@ private:
   bool spgemm = true;
 
 public:
+  shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
+      receiver_proc_tile_map;
+  shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
+      sender_proc_tile_map;
+
   TileDataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
                distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                distblas::core::SpMat<VALUE_TYPE> *sparse_local,

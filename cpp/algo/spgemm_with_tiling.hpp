@@ -55,7 +55,7 @@ public:
 
   void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr) {
     auto t = start_clock();
-
+    size_t total_memory = 0;
     int batches = 0;
     int last_batch_size = batch_size;
 
@@ -133,7 +133,7 @@ public:
                                       bool local, int start_process,int end_process, bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
-      auto source_end_index = std::min((batch_id + 1) * batch_size,
+      auto source_end_index = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                                        this->sp_local_receiver->proc_row_width) -1;
       auto dst_start_index =
           this->sp_local_receiver->proc_col_width * this->grid->rank_in_col;
