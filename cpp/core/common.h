@@ -55,6 +55,8 @@ void add_memory(size_t mem, string counter_name);
 
 void add_datatransfers(INDEX_TYPE count, string counter_name);
 
+void add_tiles(INDEX_TYPE count, string counter_name);
+
 void print_performance_statistics();
 
 my_timer_t start_clock();

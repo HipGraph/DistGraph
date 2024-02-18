@@ -87,10 +87,6 @@ public:
   }
 
 
-
-
-
-
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,
                          INDEX_TYPE proc_col_width, int rank) {
     int tiles_per_process_row = static_cast<int>(1/(tile_width_fraction));
@@ -111,10 +107,6 @@ public:
   static int get_tiles_per_process_row() {
     return static_cast<int>(1/(tile_width_fraction));
   }
-
-
-
-
 
 };
 

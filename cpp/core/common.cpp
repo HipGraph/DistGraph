@@ -12,7 +12,7 @@ MPI_Datatype distblas::core::SPARSETUPLE;
 MPI_Datatype distblas::core::TILETUPLE;
 
 vector<string> distblas::core::perf_counter_keys = {
-    "Computation Time", "Communication Time", "Memory usage", "Data transfers","Total Time","Transfer Data","Compute  Local","Compute  Remote"};
+    "Computation Time", "Communication Time", "Memory usage", "Data transfers","Total Time","Transfer Data","Compute  Local","Compute  Remote","Total Tiles", "Locally Computed Tiles","Remote Computed Tiles"};
 
 map<string, int> distblas::core::call_count;
 map<string, double> distblas::core::total_time;
@@ -104,6 +104,22 @@ void distblas::core::add_memory(size_t mem, string counter_name) {
 }
 
 void distblas::core::add_datatransfers(INDEX_TYPE count, string counter_name) {
+  int rank;
+  int world_size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  if (find(perf_counter_keys.begin(), perf_counter_keys.end(), counter_name) !=
+      perf_counter_keys.end()) {
+    call_count[counter_name]++;
+    total_time[counter_name] += count;
+  } else {
+    cout << "Error, performance counter " << counter_name << " not registered."
+         << endl;
+    exit(1);
+  }
+}
+
+void distblas::core::add_tiles(INDEX_TYPE count, string counter_name) {
   int rank;
   int world_size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);

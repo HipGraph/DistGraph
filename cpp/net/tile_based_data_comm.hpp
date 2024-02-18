@@ -3,6 +3,7 @@
 #include "data_comm.hpp"
 #include <math.h>
 #include <memory>
+#include "../core/common.h"
 
 using namespace distblas::core;
 using namespace std;
@@ -75,6 +76,10 @@ public:
         total_batches,
         vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>(
             tiles_per_process));
+
+    auto total_tiles = total_batches* this->grid->col_world_size*tiles_per_process;
+
+    add_tiles(total_tiles,"Total Tiles");
 
     if (alpha == 0) {
 #pragma omp parallel for
