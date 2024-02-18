@@ -225,7 +225,7 @@ public:
                                          csr_block, lr, batch_id, batch_size,
                                          block_size, symbolic);
                 if (itr==0){
-                  add_tile(1,"Locally Computed Tiles");
+                  add_tiles(1,"Locally Computed Tiles");
                 }
 
               }
