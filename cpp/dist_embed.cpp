@@ -63,6 +63,8 @@ int main(int argc, char **argv) {
 
   double output_sparsity=0;
 
+   double tile_width_fraction=0.5;
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -104,6 +106,8 @@ int main(int argc, char **argv) {
       save_results = save_res == 1 ? true : false;
     }else if (strcmp(argv[p], "-input_sparse_file") == 0) {
       sparse_data_file = argv[p + 1];
+    } else if (strcmp(argv[p], "-tile_width_fraction") == 0) {
+      tile_width_fraction = atof(argv[p + 1]);
     }
   }
 
@@ -261,7 +265,7 @@ int main(int argc, char **argv) {
             shared_sparseMat.get(), shared_sparseMat_receiver.get(),
             shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
             grid.get(),
-            alpha, beta,col_major,sync_comm));
+            alpha, beta,col_major,sync_comm, tile_width_fraction));
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
@@ -300,6 +304,8 @@ int main(int argc, char **argv) {
   j_obj["sparsity"] = density;
   j_obj["data_set"] = data_set_name;
   j_obj["d"] = dimension;
+  j_obj["batch_size"] = batch_size;
+  j_obj["tile_width_fraction"] = batch_size;
   if (spgemm){
     j_obj["output_nnz"] = output_sparsity;
   }

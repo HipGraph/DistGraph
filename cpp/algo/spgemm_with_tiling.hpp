@@ -39,7 +39,7 @@ private:
   //hyper parameter controls the col major or row major  data access
   bool col_major = false;
 
-
+  double tile_width_fraction;
 
 public:
   SpGEMMAlgoWithTiling(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
@@ -47,11 +47,11 @@ public:
              distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
              distblas::core::SpMat<VALUE_TYPE> *sparse_local,
              distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
-             Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
+             Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm, double tile_width_fraction)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local), grid(grid),
         alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),
-        sparse_local_output(sparse_local_output) {}
+        sparse_local_output(sparse_local_output), tile_width_fraction(tile_width_fraction) {}
 
 
 
@@ -77,7 +77,7 @@ public:
     // fetch initial embeddings
     auto main_comm = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,1));
+            sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,tile_width_fraction));
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
