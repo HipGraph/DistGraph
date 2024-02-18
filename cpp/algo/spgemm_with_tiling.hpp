@@ -122,14 +122,13 @@ public:
                 considering_batch_size, lr, 1, true, 0, true, true);
 
             (this->sparse_local_output)->initialize_hashtables();
-            cout << " rank " << grid->rank_in_col << " initialize_hashtables completed " << endl;
           }
 
-//          this->execute_pull_model_computations(
-//              sendbuf_ptr.get(), update_ptr.get(), i, j,
-//              main_comm.get(), csr_block, batch_size,
-//              considering_batch_size, lr,  1,
-//              true, 0, true,false);
+          this->execute_pull_model_computations(
+              sendbuf_ptr.get(), update_ptr.get(), i, j,
+              main_comm.get(), csr_block, batch_size,
+              considering_batch_size, lr,  1,
+              true, 0, true,false);
 
         }
         total_memory += get_memory_usage();
@@ -161,10 +160,10 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !this->sparse_local_output->hash_spgemm)) {
-        cout << " rank " << grid->rank_in_col << " initialize transfer_sparse_data " <<" tiles_per_process "<<tiles_per_process<< endl;
+
         main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process,0,tiles_per_process);
-        cout << " rank " << grid->rank_in_col << " completed transfer_sparse_data " << endl;
+
       }
       if (k == comm_initial_start) {
         // local computation
@@ -266,9 +265,6 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
-              if (arrayMap.find(dst_id) == arrayMap.end()){
-                  cout<<" rank "<<grid->rank_in_col<< " cannot find data id "<<dst_id<<endl;
-              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
 
