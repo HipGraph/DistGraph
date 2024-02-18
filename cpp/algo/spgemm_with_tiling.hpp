@@ -127,11 +127,11 @@ public:
             cout << " rank " << grid->rank_in_col << " initialize_hashtables completed " << endl;
           }
 
-          this->execute_pull_model_computations(
-              sendbuf_ptr.get(), update_ptr.get(), i, j,
-              main_comm.get(), csr_block, batch_size,
-              considering_batch_size, lr,  1,
-              true, 0, true,false);
+//          this->execute_pull_model_computations(
+//              sendbuf_ptr.get(), update_ptr.get(), i, j,
+//              main_comm.get(), csr_block, batch_size,
+//              considering_batch_size, lr,  1,
+//              true, 0, true,false);
 
         }
         total_memory += get_memory_usage();

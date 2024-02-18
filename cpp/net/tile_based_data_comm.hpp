@@ -262,8 +262,7 @@ public:
         CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id);
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0 and
-              (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
-                  1) {
+              (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==1) {
             if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
               current.rows[0] =
@@ -276,8 +275,7 @@ public:
 
             SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest =
                 (*data_buffer_ptr)[sending_procs[i]]
-                                  [this->send_counts_cyclic[sending_procs[i]] -
-                                   1];
+                                  [this->send_counts_cyclic[sending_procs[i]] -1];
             auto row_index_offset = latest.rows[0];
             auto col_index_offset = latest.rows[1];
             if (row_index_offset >= row_max or
