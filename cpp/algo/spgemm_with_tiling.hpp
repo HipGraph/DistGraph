@@ -186,9 +186,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-//    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
-//                                  batch_size, considering_batch_size,
-//                                  false,prev_start, prev_end_process,symbolic, main_comm);
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
+                                  batch_size, considering_batch_size,
+                                  false,prev_start, prev_end_process,symbolic, main_comm);
     // dense_local->invalidate_cache(i, j, true);
   }
 
