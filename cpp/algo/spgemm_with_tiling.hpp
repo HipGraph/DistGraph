@@ -113,7 +113,20 @@ public:
                                         true,  0, 0,false,main_comm.get());
 
         } else {
+          if( (this->sparse_local_output)->hash_spgemm) {
+            this->execute_pull_model_computations(
+                sendbuf_ptr.get(), update_ptr.get(), i, j,
+                main_comm, csr_block, batch_size,
+                considering_batch_size, lr, 1, true, 0, true, true);
 
+            (this->sparse_local_output)->initialize_hashtables();
+          }
+
+          this->execute_pull_model_computations(
+              sendbuf_ptr.get(), update_ptr.get(), i, j,
+              this->data_comm_cache[j].get(), csr_block, batch_size,
+              considering_batch_size, lr,  1,
+              true, 0, true,false);
 
         }
         total_memory += get_memory_usage();
@@ -124,6 +137,53 @@ public:
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
+  }
+
+
+  inline void execute_pull_model_computations(
+      std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *sendbuf,
+      std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *receivebuf, int iteration,
+      int batch, TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_comm,
+      CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
+      double lr,  int comm_initial_start, bool local_execution,
+      int first_execution_proc, bool communication, bool symbolic) {
+
+    int proc_length = get_proc_length(beta, this->grid->col_world_size);
+    int prev_start = comm_initial_start;
+
+     auto tiles_per_process= SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+    for (int k = prev_start; k < this->grid->col_world_size; k += proc_length) {
+      int end_process = get_end_proc(k, beta, this->grid->col_world_size);
+
+      MPI_Request req;
+
+      if (communication and (symbolic or !this->sparse_local_output->hash_spgemm)) {
+
+        main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
+                                        batch, k, end_process,0,tiles_per_process);
+      }
+      if (k == comm_initial_start) {
+        // local computation
+        this->calc_t_dist_grad_rowptr(
+            csr_block,  lr, batch, batch_size,
+            considering_batch_size, local_execution,
+            first_execution_proc, prev_start,symbolic, main_comm);
+      } else if (k > comm_initial_start) {
+        int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
+
+        this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
+                                      batch_size, considering_batch_size, false,
+                                      prev_start, prev_end_process,symbolic, main_comm);
+      }
+      prev_start = k;
+    }
+    int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
+
+    // updating last remote fetched data vectors
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, batch,
+                                  batch_size, considering_batch_size,
+                                  false,prev_start, prev_end_process,symbolic, main_comm);
+    // dense_local->invalidate_cache(i, j, true);
   }
 
 
