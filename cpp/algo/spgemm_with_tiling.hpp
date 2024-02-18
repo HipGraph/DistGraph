@@ -88,7 +88,7 @@ public:
 
     main_comm.get()->onboard_data();
 
-    cout << " rank " << grid->rank_in_col << " on board data completed " << batches<< endl;
+    cout << " rank " << grid->rank_in_col << " on board data completed " << endl;
 
     int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
     main_comm.get()-> transfer_sparse_data (sendbuf_ptr.get(),
@@ -124,6 +124,7 @@ public:
                 considering_batch_size, lr, 1, true, 0, true, true);
 
             (this->sparse_local_output)->initialize_hashtables();
+            cout << " rank " << grid->rank_in_col << " initialize_hashtables completed " << endl;
           }
 
           this->execute_pull_model_computations(
@@ -162,9 +163,10 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !this->sparse_local_output->hash_spgemm)) {
-
+        cout << " rank " << grid->rank_in_col << " initialize transfer_sparse_data " << endl;
         main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process,0,tiles_per_process);
+        cout << " rank " << grid->rank_in_col << " completed transfer_sparse_data " << endl;
       }
       if (k == comm_initial_start) {
         // local computation
