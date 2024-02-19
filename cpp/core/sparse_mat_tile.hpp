@@ -46,15 +46,15 @@ public:
 //
 //  bool  hash_spgemm=false;
 
-
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
              INDEX_TYPE col_end_index)
-      : grid(grid), id(id), row_starting_index(row_starting_index),
-        row_end_index(row_end_index), col_start_index(col_start_index),
-        col_end_index(col_end_index):public DistrbiutedMat(){}
+      : DistrbiutedMat(), grid(grid), id(id),
+        row_starting_index(row_starting_index), row_end_index(row_end_index),
+        col_start_index(col_start_index), col_end_index(col_end_index) {}
 
-  SparseTile(Process3DGrid *grid, bool hash_spgemm) : grid(grid), hash_spgemm(hash_spgemm):public DistrbiutedMat() {}
+  SparseTile(Process3DGrid *grid, bool hash_spgemm)
+      : DistrbiutedMat(), grid(grid), hash_spgemm(hash_spgemm) {}
 
   void insert(INDEX_TYPE col_index) { col_id_set.insert(col_index); }
   void insert_row_index(INDEX_TYPE row_index) { row_id_set.insert(row_index); }
