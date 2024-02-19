@@ -55,14 +55,14 @@ public:
                                grid->col_world_size,
                                vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
                                    tiles_per_process_row,
-                                   SparseTile<INDEX_TYPE, VALUE_TYPE>(grid))));
+                                   SparseTile<INDEX_TYPE, VALUE_TYPE>(grid,spgemm))));
     sender_proc_tile_map =
         make_shared<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>(
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
                                grid->col_world_size,
                                vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
                                    tiles_per_process_row,
-                                   SparseTile<INDEX_TYPE, VALUE_TYPE>(grid))));
+                                   SparseTile<INDEX_TYPE, VALUE_TYPE>(grid,spgemm))));
 
     auto tiles_per_process =
         SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
