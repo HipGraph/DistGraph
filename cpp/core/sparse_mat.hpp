@@ -314,7 +314,13 @@ public:
 
   unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
+  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 
+  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
+
+  shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
+
+  bool  hash_spgemm=false;
 
 
 

@@ -101,6 +101,7 @@ public:
     for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
+        cout<<" rank "<<grid->rank_in_col<<" batch "<<j<<endl;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
@@ -125,7 +126,7 @@ public:
             //compute remote computations
             this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                           batch_size, considering_batch_size,
-                                          2,  0, this->grid->col_world_size,true,main_comm.get(),this->sparse_local_output);
+                                          2,  0, this->grid->col_world_size,true,main_comm.get(),nullptr);
           }
 
           this->execute_pull_model_computations(
@@ -261,8 +262,6 @@ public:
           }
         }
       }
-
-
 
     }
   }
