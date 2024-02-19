@@ -162,7 +162,7 @@ public:
     int prev_start = comm_initial_start;
 
      auto tiles_per_process= SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
-
+      cout<<" rank "<<grid->rank_in_col<<" tiles_per_process "<<tiles_per_process<<endl;
     for (int k = prev_start; k < this->grid->col_world_size; k += proc_length) {
       int end_process = get_end_proc(k, beta, this->grid->col_world_size);
 
@@ -192,9 +192,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
-                                  batch_size, considering_batch_size,
-                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
+//    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
+//                                  batch_size, considering_batch_size,
+//                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
