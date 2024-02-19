@@ -276,10 +276,10 @@ public:
             if (!fetch_from_cache) {
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
               if (symbolic) {
-                INDEX_TYPE val =(*(this->sparse_local_output->sparse_data_counter))[index] +count;
-                (*(this->sparse_local_output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
-              }else if (this->sparse_local_output->hash_spgemm) {
-                INDEX_TYPE ht_size = (*(this->sparse_local_output->sparse_data_collector))[index].size();
+                INDEX_TYPE val =(*(output->sparse_data_counter))[index] +count;
+                (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
+              }else if (output->hash_spgemm) {
+                INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto  d = (handle->col_idx[k]);
                   INDEX_TYPE hash = (d*hash_scale) & (ht_size-1);
@@ -287,12 +287,12 @@ public:
                   int max_count=10;
                   int count=0;
                   while(count<max_count){
-                    if ((*(this->sparse_local_output->sparse_data_collector))[index][hash].col==d){
-                      (*(this->sparse_local_output->sparse_data_collector))[index][hash].value = (*(this->sparse_local_output->sparse_data_collector))[index][hash].value + value;
+                    if ((*(output->sparse_data_collector))[index][hash].col==d){
+                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
                       break;
-                    }else if ((*(this->sparse_local_output->sparse_data_collector))[index][hash].col==-1){
-                      (*(this->sparse_local_output->sparse_data_collector))[index][hash].col = d;
-                      (*(this->sparse_local_output->sparse_data_collector))[index][hash].value =   value;
+                    }else if ((*(output->sparse_data_collector))[index][hash].col==-1){
+                      (*(output->sparse_data_collector))[index][hash].col = d;
+                      (*(output->sparse_data_collector))[index][hash].value =   value;
                       break;
                     }else {
                       hash = (hash+100) & (ht_size-1);
@@ -303,16 +303,16 @@ public:
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
-                  (*(this->sparse_local_output->dense_collector))[index][d] += lr*(handle->values[k]);
+                  (*(output->dense_collector))[index][d] += lr*(handle->values[k]);
                 }
               }
             }else{
               int count = remote_cols.size();
               if (symbolic){
-                INDEX_TYPE val  = (*(this->sparse_local_output->sparse_data_counter))[index]+ count;
-                (*(this->sparse_local_output->sparse_data_counter))[index] = std::min(val,static_cast<INDEX_TYPE>(embedding_dim));
-              }else if (this->sparse_local_output->hash_spgemm) {
-                INDEX_TYPE ht_size = (*(this->sparse_local_output->sparse_data_collector))[index].size();
+                INDEX_TYPE val  = (*(output->sparse_data_counter))[index]+ count;
+                (*(output->sparse_data_counter))[index] = std::min(val,static_cast<INDEX_TYPE>(embedding_dim));
+              }else if (output->hash_spgemm) {
+                INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value =  lr *remote_values[m];
@@ -320,12 +320,12 @@ public:
                   int max_count=10;
                   int count=0;
                   while (count<max_count) {
-                    if ((*(this->sparse_local_output->sparse_data_collector))[index][hash].col == d) {
-                      (*(this->sparse_local_output->sparse_data_collector))[index][hash].value = (*(this->sparse_local_output->sparse_data_collector))[index][hash].value + value;
+                    if ((*(output->sparse_data_collector))[index][hash].col == d) {
+                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
                       break;
-                    } else if ((*(this->sparse_local_output->sparse_data_collector))[index][hash].col ==-1) {
-                      (*(this->sparse_local_output->sparse_data_collector))[index][hash].col = d;
-                      (*(this->sparse_local_output->sparse_data_collector))[index][hash].value = value;
+                    } else if ((*(output->sparse_data_collector))[index][hash].col ==-1) {
+                      (*(output->sparse_data_collector))[index][hash].col = d;
+                      (*(output->sparse_data_collector))[index][hash].value = value;
                       break;
                     } else {
                       hash =(hash + 100) &(ht_size -1);
@@ -336,7 +336,7 @@ public:
               }else{
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
-                  (*(this->sparse_local_output->dense_collector))[index][d] += lr*remote_values[m];
+                  (*(output->dense_collector))[index][d] += lr*remote_values[m];
                 }
 
               }
