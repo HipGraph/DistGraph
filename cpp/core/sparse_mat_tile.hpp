@@ -34,9 +34,9 @@ public:
 
   static double tile_width_fraction;
 
-  shared_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
+  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
-  shared_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
+  unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
 //  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 //
@@ -66,10 +66,10 @@ public:
   void initialize_output_DS_if(int comparing_mode){
     if (mode==comparing_mode){
       auto len = row_end_index- row_starting_index;
-      dataCachePtr = make_shared<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
+      dataCachePtr = make_unique<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
       if (this->hash_spgemm) {
-        this->sparse_data_counter = make_shared<vector<INDEX_TYPE>>(len);
-        this->sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
+        this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len);
+        this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
       }else {
 //        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(proc_col_width,0));
       }
@@ -79,7 +79,7 @@ public:
 
 
   void initialize_CSR_from_sparse_collector() {
-    csr_local_data = make_shared<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
