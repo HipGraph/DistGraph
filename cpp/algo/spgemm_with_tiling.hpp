@@ -100,7 +100,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
 
-      for (int j = 0; j < 1; j++) {
+      for (int j = 0; j < batches; j++) {
         cout<<" rank "<<grid->rank_in_col<<" batch "<<j<<endl;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
