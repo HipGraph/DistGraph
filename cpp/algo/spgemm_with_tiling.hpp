@@ -111,7 +111,7 @@ public:
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block,  lr, i,j,
                                         batch_size, considering_batch_size,
-                                        true,  0, 0,false,main_comm.get(),this->sparse_local_output);
+                                        0,  0, 0,false,main_comm.get(),this->sparse_local_output);
 
         } else {
           if( (this->sparse_local_output)->hash_spgemm) {
@@ -121,6 +121,11 @@ public:
                 considering_batch_size, lr, 1, true, 0, true, true, this->sparse_local_output);
 
             (this->sparse_local_output)->initialize_hashtables();
+
+            //compute remote computations
+            this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
+                                          batch_size, considering_batch_size,
+                                          0,  0, 0,false,main_comm.get(),this->sparse_local_output);
           }
 
           this->execute_pull_model_computations(
@@ -169,13 +174,13 @@ public:
         // local computation
         this->calc_t_dist_grad_rowptr(
             csr_block,  lr, iteration,batch, batch_size,
-            considering_batch_size, local_execution,
+            considering_batch_size, 0,
             first_execution_proc, prev_start,symbolic, main_comm,output);
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
         this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
-                                      batch_size, considering_batch_size, false,
+                                      batch_size, considering_batch_size, 1,
                                       prev_start, prev_end_process,symbolic, main_comm, output);
       }
       prev_start = k;
@@ -185,7 +190,7 @@ public:
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
                                   batch_size, considering_batch_size,
-                                  false,prev_start, prev_end_process,symbolic, main_comm, output);
+                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -193,9 +198,9 @@ public:
 
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
                                       VALUE_TYPE lr, int itr, int batch_id, int batch_size, int block_size,
-                                      bool local, int start_process,int end_process,
+                                      int mode, int start_process,int end_process,
                                       bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com, DistributedMat* output) {
-    if (local) {
+    if (mode==0) {//local computation
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min(std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                                        this->sp_local_receiver->proc_row_width),this->sp_local_receiver->gRows);
@@ -209,7 +214,7 @@ public:
                                dst_start_index, dst_end_index, csr_block,
                                lr, batch_id, batch_size,
                                block_size,symbolic,output);
-    } else {
+    } else if (mode==1) {//remote pull
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
             int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
@@ -231,6 +236,31 @@ public:
             }
         }
       }
+    }else { //execute remote computations
+      for (int r = start_process; r < end_process; r++) {
+        if (r != grid->rank_in_col) {
+          int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
+          for (int tile = 0;tile <(*main_com->sender_proc_tile_map)[batch_id][computing_rank].size();tile++) {
+            if ((*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile].mode ==0) {
+              auto source_start_index =  (*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile].row_starting_index;
+              auto source_end_index =  (*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile].row_end_index;
+              auto dst_start_index = (*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
+              auto dst_end_index = (*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
+
+              calc_embedding_row_major(source_start_index, source_end_index,
+                                       dst_start_index, dst_end_index,
+                                       csr_block, lr, batch_id, batch_size,
+                                       block_size, symbolic,&(*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile]);
+              if (itr==0 and !symbolic){
+                add_tiles(1,"Remote Computed Tiles");
+              }
+            }
+          }
+        }
+      }
+
+
+
     }
   }
 
