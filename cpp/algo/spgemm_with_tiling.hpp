@@ -154,6 +154,7 @@ public:
     int prev_start = comm_initial_start;
 
      auto tiles_per_process= SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+
     for (int k = prev_start; k < this->grid->col_world_size; k += proc_length) {
       int end_process = get_end_proc(k, beta, this->grid->col_world_size);
 
@@ -242,7 +243,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = i - source_start_index;
