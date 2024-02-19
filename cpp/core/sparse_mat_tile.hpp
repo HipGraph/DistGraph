@@ -56,9 +56,14 @@ public:
   void initialize_output_DS_if(int comparing_mode){
     if (mode==comparing_mode){
       auto len = row_end_index- row_starting_index;
-      sparse_data_counter = make_shared<vector<INDEX_TYPE>>(len);
-      sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len,vector<Tuple<VALUE_TYPE>>());
       dataCachePtr = make_shared<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
+      if (this->hash_spgemm) {
+        sparse_data_counter = make_shared<vector<INDEX_TYPE>>(len);
+        sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
+      }else {
+//        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(proc_col_width,0));
+      }
+
     }
   }
 
