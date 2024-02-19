@@ -255,9 +255,9 @@ public:
 //                                       dst_start_index, dst_end_index,
 //                                       csr_block, lr, batch_id, batch_size,
 //                                       block_size, symbolic,&(*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile]);
-              if (itr==0 and !symbolic){
+//              if (itr==0 and !symbolic){
                 add_tiles(1,"Remote Computed Tiles");
-              }
+//              }
             }
           }
         }
