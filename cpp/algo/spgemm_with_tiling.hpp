@@ -111,7 +111,7 @@ public:
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block,  lr, i,j,
                                         batch_size, considering_batch_size,
-                                        true,  0, 0,false,main_comm.get());
+                                        true,  0, 0,false,main_comm.get(),this->sparse_local_output);
 
         } else {
           if( (this->sparse_local_output)->hash_spgemm) {
@@ -170,7 +170,7 @@ public:
         this->calc_t_dist_grad_rowptr(
             csr_block,  lr, iteration,batch, batch_size,
             considering_batch_size, local_execution,
-            first_execution_proc, prev_start,symbolic, main_comm);
+            first_execution_proc, prev_start,symbolic, main_comm,output);
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
