@@ -314,11 +314,7 @@ public:
 
   unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
-  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 
-  unique_ptr<vector<INDEX_TYPE>> sparse_data_counter;
-
-  unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
   bool  hash_spgemm=false;
 
@@ -359,13 +355,13 @@ public:
     this->batch_size = proc_row_width;
 //    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     if (hash_spgemm) {
-      sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
+      this->sparse_data_collector = make_shared<vector<vector<Tuple<VALUE_TYPE>>>>(
           proc_row_width, vector<Tuple<VALUE_TYPE>>());
 
-      sparse_data_counter = make_unique<vector<INDEX_TYPE>>(proc_row_width, 0);
+      this->sparse_data_counter = make_shared<vector<INDEX_TYPE>>(proc_row_width, 0);
       this->hash_spgemm = true;
     }else{
-      dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(proc_row_width,vector<VALUE_TYPE>(proc_col_width,0));
+      this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(proc_row_width,vector<VALUE_TYPE>(proc_col_width,0));
     }
   }
 
