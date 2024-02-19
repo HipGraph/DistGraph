@@ -309,7 +309,7 @@ public:
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
               if (symbolic) {
                 INDEX_TYPE val =(*(output->sparse_data_counter))[index] +count;
-                (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
+//                (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
               }else if (output->hash_spgemm) {
                 INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
