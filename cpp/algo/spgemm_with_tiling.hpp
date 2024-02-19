@@ -311,7 +311,7 @@ public:
                 INDEX_TYPE val =(*(output->sparse_data_counter))[index] +count;
                 (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
               }else if (output->hash_spgemm) {
-                cout<<" executing hash spgemm"<<grid->rank_in_col<< "tile  "<<tile<<endl;
+                cout<<" executing hash spgemm"<<grid->rank_in_col<< "batch_id  "<<batch_id<<endl;
                 INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto  d = (handle->col_idx[k]);
