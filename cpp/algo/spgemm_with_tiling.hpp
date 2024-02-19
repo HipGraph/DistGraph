@@ -281,7 +281,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = i - source_start_index;
@@ -317,7 +317,7 @@ public:
                 INDEX_TYPE val =(*(output->sparse_data_counter))[index] +count;
                 (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
               }else if (output->hash_spgemm) {
-                cout<<" executing hash spgemm"<<grid->rank_in_col<< "batch_id  "<<batch_id<<endl;
+//                cout<<" executing hash spgemm"<<grid->rank_in_col<< "batch_id  "<<batch_id<<endl;
                 INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto  d = (handle->col_idx[k]);
