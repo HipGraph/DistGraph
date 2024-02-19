@@ -71,7 +71,6 @@ public:
         mode(other.mode),
         total_transferrable_datacount(other.total_transferrable_datacount),
         total_receivable_datacount(other.total_receivable_datacount),
-        tile_width_fraction(other.tile_width_fraction),
         csr_local_data(nullptr),  // Create a new object
         dataCachePtr(nullptr)    // Create a new object
   {
