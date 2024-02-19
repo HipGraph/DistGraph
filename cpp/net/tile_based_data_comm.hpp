@@ -122,8 +122,9 @@ public:
             (*receiver_proc_tile_map)[i][j][k].col_start_index = col_starting_index_receiver;
             (*receiver_proc_tile_map)[i][j][k].col_end_index = col_end_index_receiver;
 
-            SparseTile<INDEX_TYPE,VALUE_TYPE> t  =  SparseTile<INDEX_TYPE,VALUE_TYPE>(this->grid,false);
-            (*sender_proc_tile_map)[i][j][k].id = t;
+            SparseTile<INDEX_TYPE,VALUE_TYPE> t  =  SparseTile<INDEX_TYPE,VALUE_TYPE>(this->grid,spgemm);
+            (*sender_proc_tile_map)[i][j][k] = t;
+            (*sender_proc_tile_map)[i][j][k].id = k;
             (*sender_proc_tile_map)[i][j][k].row_starting_index = row_starting_index_sender;
             (*sender_proc_tile_map)[i][j][k].row_end_index = row_end_index_sender;
             (*sender_proc_tile_map)[i][j][k].col_start_index = col_starting_index_sender;
