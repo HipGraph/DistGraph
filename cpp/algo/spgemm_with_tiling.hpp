@@ -127,7 +127,7 @@ public:
               sendbuf_ptr.get(), update_ptr.get(), i, j,
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
-              true, 0, true,false);
+              true, 0, true,false, this->sparse_local_output);
 
         }
         total_memory += get_memory_usage();
