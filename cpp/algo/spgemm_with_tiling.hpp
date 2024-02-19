@@ -101,7 +101,6 @@ public:
     for (int i = 0; i < iterations; i++) {
 
       for (int j = 0; j < batches; j++) {
-        cout<<" rank  "<<grid->rank_in_col<<" processing batch id "<<j<<" "<<endl;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
@@ -148,7 +147,7 @@ public:
       int batch, TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_comm,
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
       double lr,  int comm_initial_start, bool local_execution,
-      int first_execution_proc, bool communication, bool symbolic) {
+      int first_execution_proc, bool communication, bool symbolic, DistributedMat* output) {
 
     int proc_length = get_proc_length(beta, this->grid->col_world_size);
     int prev_start = comm_initial_start;
@@ -160,7 +159,7 @@ public:
 
       MPI_Request req;
 
-      if (communication and (symbolic or !this->sparse_local_output->hash_spgemm)) {
+      if (communication and (symbolic or !output->hash_spgemm)) {
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process,0,tiles_per_process);
@@ -177,7 +176,7 @@ public:
 
         this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
                                       batch_size, considering_batch_size, false,
-                                      prev_start, prev_end_process,symbolic, main_comm);
+                                      prev_start, prev_end_process,symbolic, main_comm, output);
       }
       prev_start = k;
     }
@@ -186,7 +185,7 @@ public:
     // updating last remote fetched data vectors
     this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
                                   batch_size, considering_batch_size,
-                                  false,prev_start, prev_end_process,symbolic, main_comm);
+                                  false,prev_start, prev_end_process,symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -195,7 +194,7 @@ public:
   inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block,
                                       VALUE_TYPE lr, int itr, int batch_id, int batch_size, int block_size,
                                       bool local, int start_process,int end_process,
-                                      bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com) {
+                                      bool symbolic,TileDataComm<INDEX_TYPE,VALUE_TYPE, embedding_dim> *main_com, DistributedMat* output) {
     if (local) {
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min(std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
@@ -209,7 +208,7 @@ public:
       calc_embedding_row_major(source_start_index, source_end_index,
                                dst_start_index, dst_end_index, csr_block,
                                lr, batch_id, batch_size,
-                               block_size,symbolic,this->sparse_local_output);
+                               block_size,symbolic,output);
     } else {
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
@@ -224,7 +223,7 @@ public:
                 calc_embedding_row_major(source_start_index, source_end_index,
                                          dst_start_index, dst_end_index,
                                          csr_block, lr, batch_id, batch_size,
-                                         block_size, symbolic,this->sparse_local_output);
+                                         block_size, symbolic,output);
                 if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }

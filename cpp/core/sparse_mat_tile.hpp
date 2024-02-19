@@ -5,13 +5,14 @@
 #include <set>
 #include "common.h"
 #include "csr_local.hpp"
+#include "distributed_mat.hpp"
 
 
 using namespace distblas::net;
 
 namespace distblas::core {
 
-template <typename INDEX_TYPE, typename VALUE_TYPE> class SparseTile {
+template <typename INDEX_TYPE, typename VALUE_TYPE> class SparseTile:public DistributedMat {
 
 private:
 public:
@@ -32,12 +33,6 @@ public:
   uint64_t total_receivable_datacount=0;
 
   static double tile_width_fraction;
-
-  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
-
-  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
-
-  shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
   shared_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
