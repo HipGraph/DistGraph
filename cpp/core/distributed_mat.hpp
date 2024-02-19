@@ -13,6 +13,10 @@ public:
 
   bool  hash_spgemm=false;
 
+  DistributedMat() {
+
+  }
+
 };
 
 }

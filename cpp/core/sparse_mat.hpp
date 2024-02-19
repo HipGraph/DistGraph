@@ -314,13 +314,7 @@ public:
 
   unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
-  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
 
-  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
-
-  shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
-
-  bool  hash_spgemm=false;
 
 
 
@@ -334,7 +328,7 @@ public:
    */
   SpMat(Process3DGrid *grid, vector<Tuple<VALUE_TYPE>> &coords, INDEX_TYPE &gRows, INDEX_TYPE &gCols,
         INDEX_TYPE &gNNz, int &batch_size, int &proc_row_width,
-        int &proc_col_width, bool transpose, bool col_partitioned) {
+        int &proc_col_width, bool transpose, bool col_partitioned): public DistributedMat() {
     this->gRows = gRows;
     this->gCols = gCols;
     this->gNNz = gNNz;
@@ -348,12 +342,12 @@ public:
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
-  SpMat(Process3DGrid *grid) {
+  SpMat(Process3DGrid *grid): public DistributedMat() {
     this->grid = grid;
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
   }
 
-  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm) {
+  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width, bool hash_spgemm): public DistributedMat() {
     this->grid = grid;
     this->tempCachePtr = std::make_unique<std::vector<std::unordered_map<INDEX_TYPE,SparseCacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
     this->proc_col_width = proc_col_width;
