@@ -124,9 +124,9 @@ public:
             (this->sparse_local_output)->initialize_hashtables();
 
             //compute remote computations
-            this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
-                                          batch_size, considering_batch_size,
-                                          2,  0, this->grid->col_world_size,true,main_comm.get(),nullptr);
+//            this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
+//                                          batch_size, considering_batch_size,
+//                                          2,  0, this->grid->col_world_size,true,main_comm.get(),nullptr);
           }
 
           this->execute_pull_model_computations(
