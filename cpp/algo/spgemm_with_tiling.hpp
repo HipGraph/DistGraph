@@ -251,11 +251,17 @@ public:
               auto source_end_index =  sp_tile.row_end_index;
               auto dst_start_index = sp_tile.col_start_index;
               auto dst_end_index = sp_tile.col_end_index;
-              sp_tile.initialize_output_DS_if(0);
+              if (symbolic){
+                sp_tile.initialize_output_DS_if(0);
+              }
+
               calc_embedding_row_major(source_start_index, source_end_index,
                                        dst_start_index, dst_end_index,
                                        csr_block, lr, batch_id, batch_size,
                                        block_size, symbolic,mode,&sp_tile);
+              if (symbolic){
+                sp_tile.initialize_hashtables();
+              }
               if (itr==0 and !symbolic){
                 add_tiles(1,"Remote Computed Tiles");
               }
@@ -319,19 +325,19 @@ public:
                   auto value =  lr *handle->values[k];
                   int max_count=10;
                   int count=0;
-//                  while(count<max_count){
-//                    if ((*(output->sparse_data_collector))[index][hash].col==d){
-//                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
-//                      break;
-//                    }else if ((*(output->sparse_data_collector))[index][hash].col==-1){
-//                      (*(output->sparse_data_collector))[index][hash].col = d;
-//                      (*(output->sparse_data_collector))[index][hash].value =   value;
-//                      break;
-//                    }else {
-//                      hash = (hash+100) & (ht_size-1);
-//                      count++;
-//                    }
-//                  }
+                  while(count<max_count){
+                    if ((*(output->sparse_data_collector))[index][hash].col==d){
+                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
+                      break;
+                    }else if ((*(output->sparse_data_collector))[index][hash].col==-1){
+                      (*(output->sparse_data_collector))[index][hash].col = d;
+                      (*(output->sparse_data_collector))[index][hash].value =   value;
+                      break;
+                    }else {
+                      hash = (hash+100) & (ht_size-1);
+                      count++;
+                    }
+                  }
                 }
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {

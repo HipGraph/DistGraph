@@ -93,6 +93,21 @@ public:
 
     }
   }
+  void initialize_hashtables(){
+    auto len = row_end_index- row_starting_index;
+#pragma  omp parallel for
+    for(auto i=0;i<len;i++){
+      auto count = (*this->sparse_data_counter)[i];
+      auto resize_count = pow(2,log2(count)+1);
+      (*this->sparse_data_collector)[i].clear();
+      Tuple<VALUE_TYPE> t;
+      t.row=i;
+      t.col=-1;
+      t.value=0;
+      (*this->sparse_data_collector)[i].resize(resize_count,t);
+      (*this->sparse_data_counter)[i]=0;
+    }
+  }
 
 
   void initialize_CSR_from_sparse_collector() {
