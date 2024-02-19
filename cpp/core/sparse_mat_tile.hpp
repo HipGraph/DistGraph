@@ -38,6 +38,7 @@ public:
 
   shared_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
+  bool hash_spgemm;
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
@@ -46,7 +47,7 @@ public:
         row_end_index(row_end_index), col_start_index(col_start_index),
         col_end_index(col_end_index){}
 
-  SparseTile(Process3DGrid *grid) : grid(grid) {}
+  SparseTile(Process3DGrid *grid, bool hash_spgemm) : grid(grid), hash_spgemm(hash_spgemm) {}
 
   void insert(INDEX_TYPE col_index) { col_id_set.insert(col_index); }
   void insert_row_index(INDEX_TYPE row_index) { row_id_set.insert(row_index); }
