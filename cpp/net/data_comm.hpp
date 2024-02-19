@@ -519,7 +519,7 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id) {
 
-#pragma omp parallel for
+//#pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
@@ -538,6 +538,7 @@ public:
             sp_entry.inserted_batch_id = batch_id;
             sp_entry.cols = vector<INDEX_TYPE>();
             sp_entry.values = vector<VALUE_TYPE>();
+            cout<<" rank "<<this->grid->rank_in_col<<" receiving "<<key<<" from  rank "<<i<< " batch_id "<<batch_id<<endl;
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
           if (count > 0) {
