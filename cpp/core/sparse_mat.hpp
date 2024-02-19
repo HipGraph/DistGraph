@@ -445,7 +445,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
       auto j = (in / tiles_per_process) % grid->col_world_size;
       auto k = in % tiles_per_process;
       INDEX_TYPE total_count = 0;
-      SparseTile<INDEX_TYPE, VALUE_TYPE> tile = (*tile_map)[i][j][k];
+      SparseTile<INDEX_TYPE, VALUE_TYPE>& tile = (*tile_map)[i][j][k];
       if (col_id_set and !indices_only) {
         for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();
              ++it) {
