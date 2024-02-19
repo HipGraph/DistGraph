@@ -319,19 +319,19 @@ public:
                   auto value =  lr *handle->values[k];
                   int max_count=10;
                   int count=0;
-                  while(count<max_count){
-                    if ((*(output->sparse_data_collector))[index][hash].col==d){
-                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
-                      break;
-                    }else if ((*(output->sparse_data_collector))[index][hash].col==-1){
-                      (*(output->sparse_data_collector))[index][hash].col = d;
-                      (*(output->sparse_data_collector))[index][hash].value =   value;
-                      break;
-                    }else {
-                      hash = (hash+100) & (ht_size-1);
-                      count++;
-                    }
-                  }
+//                  while(count<max_count){
+//                    if ((*(output->sparse_data_collector))[index][hash].col==d){
+//                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
+//                      break;
+//                    }else if ((*(output->sparse_data_collector))[index][hash].col==-1){
+//                      (*(output->sparse_data_collector))[index][hash].col = d;
+//                      (*(output->sparse_data_collector))[index][hash].value =   value;
+//                      break;
+//                    }else {
+//                      hash = (hash+100) & (ht_size-1);
+//                      count++;
+//                    }
+//                  }
                 }
               }else {
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
