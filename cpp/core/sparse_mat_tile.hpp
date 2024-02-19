@@ -141,7 +141,7 @@ public:
     int tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
     return (proc_col_width % tiles_per_process_row) == 0
                ? (proc_col_width/tiles_per_process_row)
-               : ((proc_col_width/tile_width_fraction) + 1);
+               : ((proc_col_width/tiles_per_process_row) + 1);
   }
 
   static int get_tiles_per_process_row() {
