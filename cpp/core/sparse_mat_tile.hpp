@@ -77,13 +77,12 @@ public:
     // Perform deep copy or other necessary operations
     if (other.csr_local_data) {
       // If csr_local_data is present in other, create a new object
-      csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*(other.csr_local_data));
+      csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>();
     }
 
     if (other.dataCachePtr) {
       // If dataCachePtr is present in other, create a new object
-      dataCachePtr = make_unique<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>>(
-          *(other.dataCachePtr));
+      dataCachePtr = make_unique<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>>();
     }
 
     // Update for other members if necessary
