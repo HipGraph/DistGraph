@@ -217,7 +217,7 @@ public:
       calc_embedding_row_major(source_start_index, source_end_index,
                                dst_start_index, dst_end_index, csr_block,
                                lr, batch_id, batch_size,
-                               block_size,symbolic,output,mode);
+                               block_size,symbolic,output);
     } else if (mode==1) {//remote pull
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
@@ -232,7 +232,7 @@ public:
                 calc_embedding_row_major(source_start_index, source_end_index,
                                          dst_start_index, dst_end_index,
                                          csr_block, lr, batch_id, batch_size,
-                                         block_size, symbolic,output,mode);
+                                         block_size, symbolic,output);
                 if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }
@@ -255,7 +255,7 @@ public:
 //              calc_embedding_row_major(source_start_index, source_end_index,
 //                                       dst_start_index, dst_end_index,
 //                                       csr_block, lr, batch_id, batch_size,
-//                                       block_size, symbolic,&sp_tile,mode);
+//                                       block_size, symbolic,sp_tile);
 //              if (itr==0 and !symbolic){
                 add_tiles(1,"Remote Computed Tiles");
 //              }
@@ -270,7 +270,7 @@ public:
   inline void calc_embedding_row_major(INDEX_TYPE source_start_index,
                                        INDEX_TYPE source_end_index, INDEX_TYPE dst_start_index,
                                        INDEX_TYPE dst_end_index, CSRLocal<VALUE_TYPE> *csr_block,VALUE_TYPE lr, int batch_id,
-                                       int batch_size, int block_size, bool symbolic, DistributedMat *output, int mode=0) {
+                                       int batch_size, int block_size, bool symbolic, DistributedMat *output) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -284,13 +284,13 @@ public:
         for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
-            INDEX_TYPE local_dst = (mode!=2)?
+            INDEX_TYPE local_dst =
                 dst_id - (this->grid)->rank_in_col *
-                             (this->sp_local_receiver)->proc_col_width:dst_id;
+                             (this->sp_local_receiver)->proc_col_width;
             int target_rank =
                 (int)(dst_id/(this->sp_local_receiver)->proc_col_width);
             bool fetch_from_cache =
-                (target_rank == (this->grid)->rank_in_col or mode==2) ? false : true;
+                target_rank == (this->grid)->rank_in_col ? false : true;
 
             vector<INDEX_TYPE> remote_cols;
             vector<VALUE_TYPE> remote_values;
@@ -309,7 +309,7 @@ public:
               int count = handle->rowStart[local_dst+1]- handle->rowStart[local_dst];
               if (symbolic) {
                 INDEX_TYPE val =(*(output->sparse_data_counter))[index] +count;
-//                (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
+                (*(output->sparse_data_counter))[index] =std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
               }else if (output->hash_spgemm) {
                 INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
