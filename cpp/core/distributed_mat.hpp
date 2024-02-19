@@ -13,9 +13,9 @@ public:
 
   bool  hash_spgemm;
 
-  DistributedMat() {
-
-  }
+  DistributedMat() = default;
+  DistributedMat(const DistributedMat&) = delete;
+  DistributedMat& operator=(const DistributedMat&) = delete;
 
 };
 
