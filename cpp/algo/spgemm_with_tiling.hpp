@@ -125,7 +125,7 @@ public:
             //compute remote computations
             this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                           batch_size, considering_batch_size,
-                                          2,  0, 0,true,main_comm.get(),this->sparse_local_output);
+                                          2,  0, this->grid->col_world_size,true,main_comm.get(),this->sparse_local_output);
           }
 
           this->execute_pull_model_computations(
@@ -135,7 +135,7 @@ public:
               true, 0, true,false, this->sparse_local_output);
           this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                         batch_size, considering_batch_size,
-                                        2,  0, 0,false,main_comm.get(),this->sparse_local_output);
+                                        2,  0, this->grid->col_world_size,false,main_comm.get(),this->sparse_local_output);
 
         }
         total_memory += get_memory_usage();
