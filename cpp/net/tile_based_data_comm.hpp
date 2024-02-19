@@ -252,6 +252,7 @@ public:
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0 and
               (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==1) {
+            cout<<" rank "<<this->rank_in_col<<" sending "<<sparse_tuple.row_idx[0]<<" to  rank "<<sending_procs[i]<< " tile "<<tile<<endl;
             if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
               current.rows[0] =
