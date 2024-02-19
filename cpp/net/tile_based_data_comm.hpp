@@ -54,13 +54,15 @@ public:
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
                                grid->col_world_size,
                                vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
-                                   tiles_per_process_row)));
+                                   tiles_per_process_row,
+                                   SparseTile<INDEX_TYPE, VALUE_TYPE>(grid,false))));
     sender_proc_tile_map =
         make_shared<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>(
             total_batches, vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>(
                                grid->col_world_size,
                                vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
-                                   tiles_per_process_row)));
+                                   tiles_per_process_row,
+                                   SparseTile<INDEX_TYPE, VALUE_TYPE>(grid,spgemm))));
 
     auto tiles_per_process =
         SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
@@ -114,16 +116,13 @@ public:
             INDEX_TYPE col_starting_index_sender = k * tile_width;
             auto col_end_index_sender =std::min((col_starting_index_sender + tile_width),
                                   sp_local_receiver->proc_col_width);
-            SparseTile<INDEX_TYPE,VALUE_TYPE> r  =  SparseTile<INDEX_TYPE,VALUE_TYPE>(this->grid,false);
-            (*receiver_proc_tile_map)[i][j][k] =r;
+
             (*receiver_proc_tile_map)[i][j][k].id = k;
             (*receiver_proc_tile_map)[i][j][k].row_starting_index = row_starting_index_receiver;
             (*receiver_proc_tile_map)[i][j][k].row_end_index = row_end_index_receiver;
             (*receiver_proc_tile_map)[i][j][k].col_start_index = col_starting_index_receiver;
             (*receiver_proc_tile_map)[i][j][k].col_end_index = col_end_index_receiver;
 
-            SparseTile<INDEX_TYPE,VALUE_TYPE> t  =  SparseTile<INDEX_TYPE,VALUE_TYPE>(this->grid,spgemm);
-            (*sender_proc_tile_map)[i][j][k] = t;
             (*sender_proc_tile_map)[i][j][k].id = k;
             (*sender_proc_tile_map)[i][j][k].row_starting_index = row_starting_index_sender;
             (*sender_proc_tile_map)[i][j][k].row_end_index = row_end_index_sender;

@@ -58,6 +58,38 @@ public:
     this->hash_spgemm =hash_spgemm;
   }
 
+  SparseTile<INDEX_TYPE, VALUE_TYPE>::SparseTile(const SparseTile& other)
+      : DistributedMat(other), id(other.id),
+        row_starting_index(other.row_starting_index),
+        row_end_index(other.row_end_index),
+        col_start_index(other.col_start_index),
+        col_end_index(other.col_end_index),
+        grid(other.grid),
+        id_to_proc_mapping(other.id_to_proc_mapping),
+        col_id_set(other.col_id_set),
+        row_id_set(other.row_id_set),
+        mode(other.mode),
+        total_transferrable_datacount(other.total_transferrable_datacount),
+        total_receivable_datacount(other.total_receivable_datacount),
+        tile_width_fraction(other.tile_width_fraction),
+        csr_local_data(nullptr),  // Create a new object
+        dataCachePtr(nullptr)    // Create a new object
+  {
+    // Perform deep copy or other necessary operations
+    if (other.csr_local_data) {
+      // If csr_local_data is present in other, create a new object
+      csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*(other.csr_local_data));
+    }
+
+    if (other.dataCachePtr) {
+      // If dataCachePtr is present in other, create a new object
+      dataCachePtr = make_unique<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>>(
+          *(other.dataCachePtr));
+    }
+
+    // Update for other members if necessary
+  }
+
   void insert(INDEX_TYPE col_index) { col_id_set.insert(col_index); }
   void insert_row_index(INDEX_TYPE row_index) { row_id_set.insert(row_index); }
 
