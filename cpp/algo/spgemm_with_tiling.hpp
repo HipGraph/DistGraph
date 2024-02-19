@@ -252,10 +252,10 @@ public:
               auto dst_start_index = sp_tile.col_start_index;
               auto dst_end_index = sp_tile.col_end_index;
               sp_tile.initialize_output_DS_if(0);
-              calc_embedding_row_major(source_start_index, source_end_index,
-                                       dst_start_index, dst_end_index,
-                                       csr_block, lr, batch_id, batch_size,
-                                       block_size, symbolic,&sp_tile,mode);
+//              calc_embedding_row_major(source_start_index, source_end_index,
+//                                       dst_start_index, dst_end_index,
+//                                       csr_block, lr, batch_id, batch_size,
+//                                       block_size, symbolic,&sp_tile,mode);
 //              if (itr==0 and !symbolic){
                 add_tiles(1,"Remote Computed Tiles");
 //              }
