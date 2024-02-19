@@ -209,7 +209,7 @@ public:
       calc_embedding_row_major(source_start_index, source_end_index,
                                dst_start_index, dst_end_index, csr_block,
                                lr, batch_id, batch_size,
-                               block_size,symbolic);
+                               block_size,symbolic,this->sparse_local_output);
     } else {
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
@@ -224,7 +224,7 @@ public:
                 calc_embedding_row_major(source_start_index, source_end_index,
                                          dst_start_index, dst_end_index,
                                          csr_block, lr, batch_id, batch_size,
-                                         block_size, symbolic);
+                                         block_size, symbolic,this->sparse_local_output);
                 if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }
@@ -238,7 +238,7 @@ public:
   inline void calc_embedding_row_major(INDEX_TYPE source_start_index,
                                        INDEX_TYPE source_end_index, INDEX_TYPE dst_start_index,
                                        INDEX_TYPE dst_end_index, CSRLocal<VALUE_TYPE> *csr_block,VALUE_TYPE lr, int batch_id,
-                                       int batch_size, int block_size, bool symbolic) {
+                                       int batch_size, int block_size, bool symbolic, DistributedMat *output) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
