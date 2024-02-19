@@ -11,7 +11,7 @@ public:
 
   shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
-  bool  hash_spgemm=false;
+  bool  hash_spgemm;
 
   DistributedMat() {
 
