@@ -255,7 +255,7 @@ public:
               calc_embedding_row_major(source_start_index, source_end_index,
                                        dst_start_index, dst_end_index,
                                        csr_block, lr, batch_id, batch_size,
-                                       block_size, symbolic,sp_tile);
+                                       block_size, symbolic,&sp_tile);
 //              if (itr==0 and !symbolic){
                 add_tiles(1,"Remote Computed Tiles");
 //              }
