@@ -38,13 +38,13 @@ public:
 
   shared_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
-  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
-
-  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
-
-  shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
-
-  bool  hash_spgemm=false;
+//  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
+//
+//  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
+//
+//  shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
+//
+//  bool  hash_spgemm=false;
 
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
