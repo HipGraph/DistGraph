@@ -192,9 +192,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-//    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
-//                                  batch_size, considering_batch_size,
-//                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
+                                  batch_size, considering_batch_size,
+                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -304,6 +304,9 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
+              if (arrayMap.find(dst_id) == arrayMap.end()){
+                cout<<"grid"<<grid->rank_in_col<<" cannot find "<<dst_id<<endl;
+              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
 
