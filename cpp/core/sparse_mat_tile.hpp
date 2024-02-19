@@ -73,20 +73,7 @@ public:
         total_receivable_datacount(other.total_receivable_datacount),
         csr_local_data(nullptr),  // Create a new object
         dataCachePtr(nullptr)    // Create a new object
-  {
-    // Perform deep copy or other necessary operations
-    if (other.csr_local_data) {
-      // If csr_local_data is present in other, create a new object
-      csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>();
-    }
-
-    if (other.dataCachePtr) {
-      // If dataCachePtr is present in other, create a new object
-      dataCachePtr = make_unique<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>>();
-    }
-
-    // Update for other members if necessary
-  }
+  {}
 
   void insert(INDEX_TYPE col_index) { col_id_set.insert(col_index); }
   void insert_row_index(INDEX_TYPE row_index) { row_id_set.insert(row_index); }
