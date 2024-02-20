@@ -121,8 +121,8 @@ public:
     if (global_key>=row_end_index or global_key<row_starting_index){
       cout<<" rank "<<grid->rank_in_col<<"access index "<<local_key<<" global key "<<" wrong limits" <<endl;
     }
-
-    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
+     int count =1;
+//    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
     new_handler.row_idx.resize(1,global_key);
     if(count>0){
       new_handler.col_idx.resize(count);
