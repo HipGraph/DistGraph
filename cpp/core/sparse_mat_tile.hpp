@@ -127,8 +127,8 @@ public:
     if(count>0){
       new_handler.col_idx.resize(count);
       new_handler.values.resize(count);
-      copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
-      copy(handle->values.begin(),handle->values.begin()+ count,new_handler.values.begin());
+//      copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
+//      copy(handle->values.begin(),handle->values.begin()+ count,new_handler.values.begin());
     }
     return new_handler;
   }
