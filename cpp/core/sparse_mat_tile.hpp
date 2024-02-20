@@ -118,9 +118,11 @@ public:
     CSRHandle *handle = (csr_local_data.get())->handler.get();
     CSRHandle new_handler;
     INDEX_TYPE  local_key = global_key-row_starting_index;
+    cout<<" rank "<<grid->rank_in_col<<"access index "<<local_key<<endl;
     int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
+    cout<<" rank "<<grid->rank_in_col<<" access index sucess "<<local_key<<endl;
     new_handler.row_idx.resize(1,global_key);
-    if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
+    if(count>0){
       new_handler.col_idx.resize(count);
       new_handler.values.resize(count);
       copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
