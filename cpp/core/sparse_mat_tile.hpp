@@ -115,11 +115,11 @@ public:
   }
 
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
-    CSRHandle *handle = (csr_local_data.get())->handler.get();
+    CSRHandle *handle = (csr_local_data)->handler.get();
     CSRHandle new_handler;
     INDEX_TYPE  local_key = global_key-row_starting_index;
-    if (handle->rowStart.size() <=local_key){
-      cout<<" oh my god "<<handle->rowStart.size()<<" "<<local_key<<endl;
+    if (handle == nullptr or  handle->rowStart.size() <=local_key){
+      cout<<" oh my god "<<endl;
     }
     int count=1;
 //    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
