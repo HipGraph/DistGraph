@@ -118,9 +118,11 @@ public:
     CSRHandle *handle = (csr_local_data)->handler.get();
     CSRHandle new_handler;
     INDEX_TYPE  local_key = global_key-row_starting_index;
-    if (handle == nullptr or  handle->rowStart.size() <=local_key){
+
+    if (handle == nullptr ){
       cout<<" oh my god "<<endl;
     }
+
     int count=1;
 //    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
     new_handler.row_idx.resize(1,global_key);
