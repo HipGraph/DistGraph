@@ -534,7 +534,7 @@ public:
 //                  this->rdispls_cyclic.data(), SPARSETUPLE,
 //                  this->grid->col_world);
 //    this->store_remotely_computed_data(sendbuf_cyclic,receivebuf,iteration,batch_id);
-    stop_clock_and_add(t, "Communication Time");
+//    stop_clock_and_add(t, "Communication Time");
   }
 
   inline void store_remotely_computed_data(vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf,
