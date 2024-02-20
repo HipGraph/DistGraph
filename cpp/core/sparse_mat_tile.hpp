@@ -117,9 +117,10 @@ public:
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
     CSRHandle *handle = (csr_local_data.get())->handler.get();
     CSRHandle new_handler;
-    int count = handle->rowStart[global_key + 1]-handle->rowStart[global_key];
+    INDEX_TYPE  local_key = global_key-row_starting_index;
+    int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
     new_handler.row_idx.resize(1,global_key);
-    if(handle->rowStart[global_key + 1]-handle->rowStart[global_key]>0){
+    if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
       new_handler.col_idx.resize(count);
       new_handler.values.resize(count);
       copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
