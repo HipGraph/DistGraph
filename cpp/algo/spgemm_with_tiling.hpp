@@ -264,9 +264,6 @@ public:
                                        block_size, symbolic,mode,&sp_tile);
               if (symbolic){
                 sp_tile.initialize_hashtables();
-              } else {
-                //we need to change this to convert to dense collector
-                sp_tile.initialize_CSR_from_sparse_collector();
               }
               if (itr==0 and !symbolic){
                 add_tiles(1,"Remote Computed Tiles");
