@@ -416,7 +416,7 @@ public:
         if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==0) {
           for (INDEX_TYPE index =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_starting_index;
                index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_end_index;++index) {
-//            CSRHandle sparse_tuple =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].fetch_remote_data(index);
+            CSRHandle sparse_tuple =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].fetch_remote_data(index);
 
 //            if (this->send_counts_cyclic[sending_procs[i]] == 0) {
 //              SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
