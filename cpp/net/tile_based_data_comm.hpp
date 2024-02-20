@@ -385,8 +385,7 @@ public:
 
     int total_receive_count = 0;
     shared_ptr<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>
-        data_buffer_ptr = make_shared<
-            vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>();
+        data_buffer_ptr = make_shared<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>();
     data_buffer_ptr->resize(this->grid->col_world_size);
 
     int total_send_count = 0;
@@ -534,7 +533,7 @@ public:
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
-    this->store_remotely_computed_data(sendbuf_cyclic,receivebuf,iteration,batch_id);
+//    this->store_remotely_computed_data(sendbuf_cyclic,receivebuf,iteration,batch_id);
     stop_clock_and_add(t, "Communication Time");
   }
 
