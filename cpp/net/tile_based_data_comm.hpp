@@ -181,7 +181,7 @@ public:
             (*sender_proc_tile_map)[i][j][k].total_receivable_datacount;
         (*send_tile_meta)[index] = t;
         if (t.count > t.send_merge_count){
-          cout<<"rank "<<grid->rank_in_col<<" batch "<<i<<" tile "<<k<<"zero setted"<<
+          cout<<"rank "<<this->grid->rank_in_col<<" batch "<<i<<" tile "<<k<<"zero setted"<<
              "row started index"<< (*sender_proc_tile_map)[i][j][k].row_starting_index<<"row_starting_index" <<(*sender_proc_tile_map)[i][j][k].row_starting_index<<"row_end_index"<<(*sender_proc_tile_map)[i][j][k].row_end_index<<"col_start_index"<<(*sender_proc_tile_map)[i][j][k].col_start_index<<"col_end_index"<<(*sender_proc_tile_map)[i][j][k].col_end_index<<endl;
           (*sender_proc_tile_map)[i][j][k].mode=0;
         }
