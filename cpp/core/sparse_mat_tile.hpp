@@ -82,8 +82,6 @@ public:
 
   void initialize_output_DS_if(int comparing_mode){
     if (mode==comparing_mode){
-      auto len = row_end_index- row_starting_index;
-      dataCachePtr = make_unique<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
       if (this->hash_spgemm) {
 
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
@@ -117,6 +115,11 @@ public:
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(this->sparse_data_collector.get());
 
   }
+  void initialize_dataCache(){
+    auto len = row_end_index- row_starting_index;
+    dataCachePtr = make_unique<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
+  }
+
 
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
     CSRHandle *handle = (csr_local_data)->handler.get();
