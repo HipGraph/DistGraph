@@ -224,7 +224,8 @@ public:
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
             int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
-            for (int tile = 0;tile <(*main_com->receiver_proc_tile_map)[batch_id][computing_rank].size();tile++) {
+            int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+            for (int tile = 0;tile <total_tiles;tile++) {
               if ((*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].mode ==0) {
                 auto source_start_index =  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_starting_index;
                 auto source_end_index =  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_end_index;
@@ -245,7 +246,8 @@ public:
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
           int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
-          for (int tile = 0;tile <(*main_com->sender_proc_tile_map)[batch_id][computing_rank].size();tile++) {
+          int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+          for (int tile = 0;tile <total_tiles;tile++) {
             SparseTile<INDEX_TYPE,VALUE_TYPE>& sp_tile = (*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile];
             if (sp_tile.mode ==0) {
               auto source_start_index =  sp_tile.row_starting_index;
