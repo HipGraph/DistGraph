@@ -249,12 +249,12 @@ public:
           int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
           for (int tile = 0;tile <total_tiles;tile++) {
             SparseTile<INDEX_TYPE,VALUE_TYPE>& sp_tile = (*main_com->sender_proc_tile_map)[batch_id][computing_rank][tile];
+            cout<<"rank "<<this->grid->rank_in_col<<"calc_t_dist_grad_rowptr  "<<" row_starting_index " <<sp_tile.row_starting_index<<"row_end_index"<<sp_tile.row_end_index<<"col_start_index"<<sp_tile.col_start_index<<"col_end_index"<<sp_tile.col_end_index<<" mode "<<sp_tile.mode<<endl;
             if (sp_tile.mode ==0) {
               auto source_start_index =  sp_tile.row_starting_index;
               auto source_end_index =  sp_tile.row_end_index;
               auto dst_start_index = sp_tile.col_start_index;
               auto dst_end_index = sp_tile.col_end_index;
-              cout<<"rank "<<this->grid->rank_in_col<<"calc_t_dist_grad_rowptr  "<<" row_starting_index " <<sp_tile.row_starting_index<<"row_end_index"<<sp_tile.row_end_index<<"col_start_index"<<sp_tile.col_start_index<<"col_end_index"<<sp_tile.col_end_index<<endl;
               if (symbolic){
 
                 sp_tile.initialize_output_DS_if(0);
