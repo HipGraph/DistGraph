@@ -111,6 +111,9 @@ public:
 
 
   void initialize_CSR_from_sparse_collector() {
+    if (sparse_data_collector == nullptr or sparse_data_collector.get()==nullptr){
+      cout<<" rank "<<grid->rank_in_col<<" passing nullptr"<<endl;
+    }
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
