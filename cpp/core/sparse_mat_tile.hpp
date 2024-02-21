@@ -111,10 +111,17 @@ public:
 
 
   void initialize_CSR_from_sparse_collector() {
-    if (sparse_data_collector == nullptr or sparse_data_collector.get()==nullptr){
-      cout<<" rank "<<grid->rank_in_col<<" passing nullptr"<<endl;
+    if (sparse_data_collector == nullptr){
+      cout<<" rank "<<grid->rank_in_col<<" sparse_data_collector passing nullptr "<<"mode"<<mode<<"spgemm"<<this->hash_spgemm<<endl;
+    }
+
+    if (sparse_data_collector->handler.get() == nullptr) {
+      cout << " rank " << grid->rank_in_col
+           << " sparse_data_collector->handler nullptr "
+           << "mode" << mode << "spgemm" << this->hash_spgemm << endl;
     }
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+
   }
 
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
