@@ -559,7 +559,7 @@ public:
           auto tile = sp_tuple.rows[k + 2];
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
           if (data_count > 0) {
-            if ((*receiver_proc_tile_map)[batch_id][i][tile].mode==1){
+            if ((*receiver_proc_tile_map)[batch_id][i][tile].mode==0){
               cout<<" rank "<<this->grid->rank_in_col<<" wrong mode "<<endl;
             }
 //            cout<<" rank "<<this->grid->rank_in_col<<" size "<<(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr).size();
