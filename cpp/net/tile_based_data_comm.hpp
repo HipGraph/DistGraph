@@ -534,7 +534,7 @@ public:
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
-//    this->store_remotely_computed_data(sendbuf_cyclic,receivebuf,iteration,batch_id);
+    this->store_remotely_computed_data(sendbuf_cyclic,receivebuf,iteration,batch_id);
 //    stop_clock_and_add(t, "Communication Time");
   }
 
@@ -555,6 +555,15 @@ public:
           auto key = sp_tuple.rows[k];
           auto count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
+          if ((*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[i].find(key) ==
+              (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr).end()) {
+            SparseCacheEntry<VALUE_TYPE> sp_entry;
+            sp_entry.inserted_itr = iteration;
+            sp_entry.inserted_batch_id = batch_id;
+            sp_entry.cols = vector<INDEX_TYPE>();
+            sp_entry.values = vector<VALUE_TYPE>();
+            (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[i][key] = sp_entry;
+          }
           if (count > 0) {
             SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
             auto entry_offset = cache_entry.cols.size();
