@@ -87,6 +87,7 @@ public:
       if (this->hash_spgemm) {
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
         this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
+
       }else {
 //        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(proc_col_width,0));
       }
@@ -111,16 +112,16 @@ public:
 
 
   void initialize_CSR_from_sparse_collector() {
-    if (sparse_data_collector == nullptr){
-      cout<<" rank "<<grid->rank_in_col<<" sparse_data_collector passing nullptr "<<"mode"<<mode<<"spgemm"<<this->hash_spgemm<<endl;
+    if (this->sparse_data_collector == nullptr){
+      cout<<" rank "<<grid->rank_in_col<<" sparse_data_collector passing nullptr "<<"mode"<<this->mode<<"spgemm"<<this->hash_spgemm<<endl;
     }
 
-    if (sparse_data_collector.get() == nullptr) {
+    if (this->sparse_data_collector.get() == nullptr) {
       cout << " rank " << grid->rank_in_col
            << "sparse_data_collector->get() nullptr "
            << "mode" << mode << "spgemm" << this->hash_spgemm << endl;
     }
-    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(this->sparse_data_collector.get());
 
   }
 
