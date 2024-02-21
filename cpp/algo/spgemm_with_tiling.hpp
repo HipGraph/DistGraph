@@ -165,7 +165,6 @@ public:
     int prev_start = comm_initial_start;
 
      auto tiles_per_process= SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
-      cout<<" rank "<<grid->rank_in_col<<" tiles_per_process "<<tiles_per_process<<endl;
     for (int k = prev_start; k < this->grid->col_world_size; k += proc_length) {
       int end_process = get_end_proc(k, beta, this->grid->col_world_size);
 
