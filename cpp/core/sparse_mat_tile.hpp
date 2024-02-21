@@ -115,7 +115,7 @@ public:
       cout<<" rank "<<grid->rank_in_col<<" sparse_data_collector passing nullptr "<<"mode"<<mode<<"spgemm"<<this->hash_spgemm<<endl;
     }
 
-    if (sparse_data_collector->get() == nullptr) {
+    if (sparse_data_collector.get() == nullptr) {
       cout << " rank " << grid->rank_in_col
            << "sparse_data_collector->get() nullptr "
            << "mode" << mode << "spgemm" << this->hash_spgemm << endl;
