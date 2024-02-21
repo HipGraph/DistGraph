@@ -244,7 +244,6 @@ public:
       }
     }else { //execute remote computations
       for (int r = start_process; r < end_process; r++) {
-        if (r != grid->rank_in_col) {
           int computing_rank =(grid->rank_in_col >= r)? (grid->rank_in_col - r) % grid->col_world_size: (grid->col_world_size - r + grid->rank_in_col) %grid->col_world_size;
           int total_tiles = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
           for (int tile = 0;tile <total_tiles;tile++) {
@@ -272,7 +271,6 @@ public:
               }
             }
           }
-        }
       }
 
     }
