@@ -85,8 +85,10 @@ public:
       auto len = row_end_index- row_starting_index;
       dataCachePtr = make_unique<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
       if (this->hash_spgemm) {
+
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
         this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
+        cout<<" rank "<<grid->rank_in_col<<" sparse_data_collector initiated "<<"mode"<<this->mode<<"spgemm"<<this->hash_spgemm<<endl;
 
       }else {
 //        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(proc_col_width,0));
