@@ -164,7 +164,7 @@ public:
       unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta =
           make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
 
-//#pragma omp parallel for
+#pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -181,8 +181,6 @@ public:
             (*sender_proc_tile_map)[i][j][k].total_receivable_datacount;
         (*send_tile_meta)[index] = t;
         if (t.count > t.send_merge_count){
-          cout<<"rank "<<this->grid->rank_in_col<<" batch "<<i<<" tile "<<k<<"zero setted"<<
-             "row started index"<< (*sender_proc_tile_map)[i][j][k].row_starting_index<<"row_starting_index" <<(*sender_proc_tile_map)[i][j][k].row_starting_index<<"row_end_index"<<(*sender_proc_tile_map)[i][j][k].row_end_index<<"col_start_index"<<(*sender_proc_tile_map)[i][j][k].col_start_index<<"col_end_index"<<(*sender_proc_tile_map)[i][j][k].col_end_index<<endl;
           (*sender_proc_tile_map)[i][j][k].mode=0;
         }
       }
@@ -191,7 +189,7 @@ public:
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
 
-//#pragma omp parallel for
+#pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -419,7 +417,7 @@ public:
           (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].initialize_CSR_from_sparse_collector();
           for (INDEX_TYPE index =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_starting_index;
                index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_end_index;++index) {
-//            CSRHandle sparse_tuple =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].fetch_remote_data(index);
+            CSRHandle sparse_tuple =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].fetch_remote_data(index);
 
 //            if (this->send_counts_cyclic[sending_procs[i]] == 0) {
 //              SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
