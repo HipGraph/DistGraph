@@ -509,18 +509,18 @@ public:
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
-//    auto t = start_clock();
-//    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
-//                 this->receive_counts_cyclic.data(), 1, MPI_INT,
-//                 this->grid->col_world);
-//    stop_clock_and_add(t, "Communication Time");
-//
-//    for (int i = 0; i < this->grid->col_world_size; i++) {
-//      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
-//                                              this->receive_counts_cyclic[i - 1]
-//                                        : this->rdispls_cyclic[i];
-//      total_receive_count += this->receive_counts_cyclic[i];
-//    }
+    auto t = start_clock();
+    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
+                 this->receive_counts_cyclic.data(), 1, MPI_INT,
+                 this->grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
+
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
+                                              this->receive_counts_cyclic[i - 1]
+                                        : this->rdispls_cyclic[i];
+      total_receive_count += this->receive_counts_cyclic[i];
+    }
 //
 //    if (total_receive_count > 0) {
 //      receivebuf->resize(total_receive_count);
