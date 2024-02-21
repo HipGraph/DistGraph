@@ -164,7 +164,7 @@ public:
       unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta =
           make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
 
-#pragma omp parallel for
+//#pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -182,6 +182,7 @@ public:
         (*send_tile_meta)[index] = t;
         if (t.count > t.send_merge_count){
           (*sender_proc_tile_map)[i][j][k].mode=0;
+          cout<<" rank "<<this->grid->rank_in_col<<" target "<<j<<" tile "<<k<<endl;
         }
       }
 
@@ -189,7 +190,7 @@ public:
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
 
-#pragma omp parallel for
+//#pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
