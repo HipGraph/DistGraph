@@ -555,28 +555,20 @@ public:
           auto key = sp_tuple.rows[k];
           auto count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
-          if ((*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[i].find(key) ==
-              (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr).end()) {
-            SparseCacheEntry<VALUE_TYPE> sp_entry;
-            sp_entry.inserted_itr = iteration;
-            sp_entry.inserted_batch_id = batch_id;
-            sp_entry.cols = vector<INDEX_TYPE>();
-            sp_entry.values = vector<VALUE_TYPE>();
-            (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[i][key] = sp_entry;
-          }
+          key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
           if (count > 0) {
             SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
-            auto entry_offset = cache_entry.cols.size();
-            cache_entry.cols.resize(entry_offset + count);
-            cache_entry.values.resize(entry_offset + count);
-            copy(sp_tuple.cols.begin() + offset_so_far,
-                 sp_tuple.cols.begin() + offset_so_far + count,
-                 cache_entry.cols.begin() + entry_offset);
-            copy(sp_tuple.values.begin() + offset_so_far,
-                 sp_tuple.values.begin() + offset_so_far + count,
-                 cache_entry.values.begin() + entry_offset);
-            offset_so_far += count;
-            (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] = cache_entry;
+//            auto entry_offset = cache_entry.cols.size();
+//            cache_entry.cols.resize(entry_offset + count);
+//            cache_entry.values.resize(entry_offset + count);
+//            copy(sp_tuple.cols.begin() + offset_so_far,
+//                 sp_tuple.cols.begin() + offset_so_far + count,
+//                 cache_entry.cols.begin() + entry_offset);
+//            copy(sp_tuple.values.begin() + offset_so_far,
+//                 sp_tuple.values.begin() + offset_so_far + count,
+//                 cache_entry.values.begin() + entry_offset);
+//            offset_so_far += count;
+//            (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] = cache_entry;
           }
         }
       }
