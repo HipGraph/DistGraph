@@ -559,8 +559,8 @@ public:
           auto tile = sp_tuple.rows[k + 2];
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
           if (data_count > 0) {
-            cout<<" rank "<<this->grid->rank_in_col<<" size "<<(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr.size();
-            SparseCacheEntry<VALUE_TYPE> cache_entry =(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr[key];
+            cout<<" rank "<<this->grid->rank_in_col<<" size "<<(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr).size();
+            SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
 //            auto entry_offset = cache_entry.cols.size();
 //            cache_entry.cols.resize(entry_offset + count);
 //            cache_entry.values.resize(entry_offset + count);
