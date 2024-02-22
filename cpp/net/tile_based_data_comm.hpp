@@ -567,12 +567,12 @@ public:
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->sdispls_cyclic[i];
       INDEX_TYPE count = this->send_counts_cyclic[i];
-      cout<<" rank "<<this->grid->rank_in_col<<" base_index "<<base_index<<"sending rank "<<i<<" count "<<count<<endl;
+//      cout<<" rank "<<this->grid->rank_in_col<<" base_index "<<base_index<<"sending rank "<<i<<" count "<<count<<endl;
 
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*sendbuf_cyclic)[j];
         auto row_offset = sp_tuple.rows[0];
-        cout<<" rank "<<this->grid->rank_in_col<<" row_offset "<<row_offset<<"sending rank "<<i<<" "<<endl;
+//        cout<<" rank "<<this->grid->rank_in_col<<" row_offset "<<row_offset<<"sending rank "<<i<<" "<<endl;
         auto offset_so_far = 0;
         for (auto k = 2; k < row_offset; k = k + 3) {
           if (sp_tuple.rows[k]>=16834){
@@ -601,13 +601,14 @@ public:
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
-      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<base_index<<"receiving rank "<<i<<" count "<<count<<endl;
+//      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<base_index<<"receiving rank "<<i<<" count "<<count<<endl;
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
-        SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*receivebuf)[j];
+        SpTuple<VALUE_TYPE, sp_tuple_max_dim>& sp_tuple = (*receivebuf)[j];
         auto row_offset = sp_tuple.rows[0];
         auto offset_so_far = 0;
         for (auto k = 2; k < row_offset; k = k + 3) {
           auto key = sp_tuple.rows[k];
+          cout<<" rank "<<this->grid->rank_in_col<<"batch id "<<batch_id<<" k "<<k<<" key "<<(*receivebuf)[j].rows[k]<<endl;
           auto data_count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
