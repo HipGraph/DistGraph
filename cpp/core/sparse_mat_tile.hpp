@@ -114,8 +114,8 @@ public:
   void initialize_CSR_from_sparse_collector() {
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(this->sparse_data_collector.get());
     cout<<"row_starting_index "<<row_starting_index<< " row end index "<<row_end_index
-         <<"  size "<<csr_local_data->handler->size()<<"total count "
-         <<(*(csr_local_data->handler))[csr_local_data->handler->size()-1]<<endl;
+         <<"  size "<<(*(csr_local_data->handler)).rowStart.size()<<"total count "
+         <<((*(csr_local_data->handler)).rowStart)[(*(csr_local_data->handler)).rowStart.size()-1]<<endl;
 
   }
   void initialize_dataCache(){
