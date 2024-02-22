@@ -470,7 +470,13 @@ public:
             latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
             latest.rows[row_index_offset + 1] = num_of_copying_data;
             latest.rows[row_index_offset + 2] = static_cast<INDEX_TYPE>(tile);
-            cout << " rank " << this->grid->rank_in_col << " batch id " << batch_id << " sending rank " << sending_procs[i] << " key " << latest.rows[row_index_offset] << " data_count " << latest.rows[row_index_offset + 1] << " tile " << latest.rows[row_index_offset + 2] << endl;
+            if (latest.rows[row_index_offset + 2]>0) {
+              cout << " rank " << this->grid->rank_in_col << " batch id "
+                   << batch_id << " sending rank " << sending_procs[i]
+                   << " key " << latest.rows[row_index_offset] << " data_count "
+                   << latest.rows[row_index_offset + 1] << " tile "
+                   << latest.rows[row_index_offset + 2] << endl;
+            }
             latest.rows[0] = row_index_offset + 3;
             latest.rows[1] = latest.rows[1] + num_of_copying_data;
 
@@ -561,9 +567,11 @@ public:
           auto key = sp_tuple.rows[k];
           auto data_count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
-
-          cout << " rank checking " << this->grid->rank_in_col << " batch id " << batch_id << " sending rank " << i << " key " << key << " data_count " << data_count << " tile " << tile << endl;
-
+           if (tile>0) {
+             cout << " rank checking " << this->grid->rank_in_col << " batch id "
+                  << batch_id << " sending rank " << i << " key " << key
+                  << " data_count " << data_count << " tile " << tile << endl;
+           }
         }
       }
     }
