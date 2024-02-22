@@ -398,54 +398,64 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
       auto source_start_index = batch_id * batch_size;
-      auto source_end_index = std::min(std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
-                                                this->sp_local_receiver->proc_row_width),this->sp_local_receiver->gRows);
+      auto source_end_index = std::min(
+          std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
+                   this->sp_local_receiver->proc_row_width),
+          this->sp_local_receiver->gRows);
 
-      vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>* tile_map = main_comm->receiver_proc_tile_map.get();
-      int tiles_per_process_row = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
-      for(auto i=source_start_index;i<source_end_index;i++){
-        INDEX_TYPE index = i-source_start_index;
-        unordered_map<INDEX_TYPE,VALUE_TYPE> value_map;
-        for(int ra=0;ra<this->grid->col_world_size;ra++){
-          for(int j=0;j<tiles_per_process_row;j++){
-            if (tile_map[batch_id][ra][j].mode==1){
-                SparseCacheEntry<VALUE_TYPE>& cache_entry = (*(tile_map[batch_id][ra][j].dataCachePtr))[index];
-                if (cache_entry.cols.size()>0){
-                  for(int k=0;k<cache_entry.cols.size();k++){
-                    value_map[k] += cache_entry.values[k];
-                  }
+      vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map =
+          main_comm->receiver_proc_tile_map.get();
+      int tiles_per_process_row =
+          SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+      for (auto i = source_start_index; i < source_end_index; i++) {
+        INDEX_TYPE index = i - source_start_index;
+        unordered_map<INDEX_TYPE, VALUE_TYPE> value_map;
+        for (int ra = 0; ra < this->grid->col_world_size; ra++) {
+          for (int j = 0; j < tiles_per_process_row; j++) {
+            if (tile_map[batch_id][ra][j].mode == 1) {
+              SparseCacheEntry<VALUE_TYPE> &cache_entry =
+                  (*(tile_map[batch_id][ra][j].dataCachePtr))[index];
+              if (cache_entry.cols.size() > 0) {
+                for (int k = 0; k < cache_entry.cols.size(); k++) {
+                  value_map[k] += cache_entry.values[k];
                 }
+              }
             }
           }
         }
         vector<INDEX_TYPE> available_spots;
-        for(auto k=0;k<(*(output->sparse_data_collector))[index].size();k++){
+        for (auto k = 0; k < (*(output->sparse_data_collector))[index].size();
+             k++) {
           auto d = (*(output->sparse_data_collector))[index][k].col;
-          if (d>0 and value_map.find(d)!= value_map.end()){
-            (*(output->sparse_data_collector))[index][k].value += (*(output->sparse_data_collector))[index][k].value + value_map[d];
+          if (d > 0 and value_map.find(d) != value_map.end()) {
+            (*(output->sparse_data_collector))[index][k].value +=
+                (*(output->sparse_data_collector))[index][k].value +
+                value_map[d];
             value_map.erase(d);
-          }else{
+          } else {
             available_spots.push_back(k);
           }
         }
-        if (value_map.size()>0){
-          for(int k=0;k<available_spots.size();k++){
-            for(auto it=value_map.begin();it!= value_map.end();++it){
-              (*(output->sparse_data_collector))[index][available_spots[k]].col=(*it).first;
-              (*(output->sparse_data_collector))[index][available_spots[k]].value= (*it).second;
+        if (value_map.size() > 0) {
+          for (int k = 0; k < available_spots.size(); k++) {
+            for (auto it = value_map.begin(); it != value_map.end(); ++it) {
+              (*(output->sparse_data_collector))[index][available_spots[k]]
+                  .col = (*it).first;
+              (*(output->sparse_data_collector))[index][available_spots[k]]
+                  .value = (*it).second;
               value_map.erase((*it).first);
               break;
             }
           }
-          for(auto it=value_map.begin();it!= value_map.end();++it){
-            Tuple tuple;
+          for (auto it = value_map.begin(); it != value_map.end(); ++it) {
+            Tuple<VALUE_TYPE> tuple;
             tuple.col = (*it).first;
             tuple.value = (*it).second;
             (*(output->sparse_data_collector))[index].push_back(tuple);
           }
         }
       }
+    }
   }
-
 };
 } // namespace distblas::algo
