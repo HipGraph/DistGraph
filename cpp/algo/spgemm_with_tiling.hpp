@@ -139,7 +139,7 @@ public:
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
           //receive remote computations
           main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
-          this->merge_remote_computations(csr_block,j,batch_size,this->sparse_local_output,main_comm);
+          this->merge_remote_computations(csr_block,j,batch_size,this->sparse_local_output,main_comm.get());
 
 
 
