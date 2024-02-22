@@ -562,7 +562,7 @@ public:
           auto data_count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
 
-          cout << " rank " << this->grid->rank_in_col << " batch id " << batch_id << " sending rank " << i << " key " << key << " data_count " << data_count << " tile " << tile << endl;
+          cout << " rank checking " << this->grid->rank_in_col << " batch id " << batch_id << " sending rank " << i << " key " << key << " data_count " << data_count << " tile " << tile << endl;
 
         }
       }
