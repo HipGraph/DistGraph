@@ -568,7 +568,7 @@ public:
       INDEX_TYPE base_index = this->sdispls_cyclic[i];
       INDEX_TYPE count = this->send_counts_cyclic[i];
       cout<<" rank "<<this->grid->rank_in_col<<" base_index "<<base_index<<"sending rank "<<i<<" count "<<count<<endl;
-      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<this->rdispls_cyclic[i]<<"receiving rank "<<i<<" count "<<this->receive_counts_cyclic[i]<<endl;
+
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*sendbuf_cyclic)[j];
         auto row_offset = sp_tuple.rows[0];
@@ -601,7 +601,7 @@ public:
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
-
+      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<base_index<<"receiving rank "<<i<<" count "<<count<<endl;
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*receivebuf)[j];
         auto row_offset = sp_tuple.rows[0];
@@ -612,15 +612,15 @@ public:
           auto tile = sp_tuple.rows[k + 2];
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
 
-          auto len = (*receiver_proc_tile_map)[batch_id][i][tile].row_end_index - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
-          if (((*receiver_proc_tile_map)[batch_id][i][tile].mode==0)){
-                cout<<" rank "<<this->grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<<endl;
-           }
-
-           if (key>= len){
-             cout<<" rank "<<this->grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<<" offset "<<row_offset<<" k "<<k<<" key"<<key<<"len "<<len<<endl;
-           }
-          SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
+//          auto len = (*receiver_proc_tile_map)[batch_id][i][tile].row_end_index - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
+//          if (((*receiver_proc_tile_map)[batch_id][i][tile].mode==0)){
+//                cout<<" rank "<<this->grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<<endl;
+//           }
+//
+//           if (key>= len){
+//             cout<<" rank "<<this->grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<<" offset "<<row_offset<<" k "<<k<<" key"<<key<<"len "<<len<<endl;
+//           }
+//          SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
 //          auto entry_offset = cache_entry.cols.size();
 //          cache_entry.cols.resize(entry_offset + data_count);
 //          cache_entry.values.resize(entry_offset + data_count);
