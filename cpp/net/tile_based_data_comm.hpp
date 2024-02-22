@@ -594,7 +594,7 @@ public:
           auto data_count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
-          if ((*(*receiver_proc_tile_map)[batch_id][i][tile].mode==0)){
+          if (((*receiver_proc_tile_map)[batch_id][i][tile].mode==0)){
                 cout<<" rank "<<grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<<endl;
            }
           SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
