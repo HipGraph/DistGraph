@@ -412,7 +412,7 @@ public:
         unordered_map<INDEX_TYPE, VALUE_TYPE> value_map;
         for (int ra = 0; ra < this->grid->col_world_size; ra++) {
           for (int j = 0; j < tiles_per_process_row; j++) {
-            SparseTile<INDEX_TYPE,VALUE_TYPE>& sp_tile = tile_map[batch_id][ra][j];
+            SparseTile<INDEX_TYPE,VALUE_TYPE>& sp_tile = (*tile_map)[batch_id][ra][j];
             if (sp_tile.mode == 1) {
               SparseCacheEntry<VALUE_TYPE> &cache_entry =
                   (*(sp_tile.dataCachePtr))[index];
