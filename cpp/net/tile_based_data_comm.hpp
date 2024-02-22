@@ -573,7 +573,7 @@ public:
         auto row_offset = sp_tuple.rows[0];
         auto offset_so_far = 0;
         for (auto k = 2; k < row_offset; k = k + 3) {
-          if (key>=16834){
+          if (sp_tuple.rows[k]>=16834){
             cout<<" rank "<<this->grid->rank_in_col<<" key "<<sp_tuple.rows[k]<<"sending rank "<<i<<" wrong "<<endl;
           }
         }
