@@ -83,7 +83,7 @@ public:
     add_tiles(total_tiles, "Total Tiles");
 
     if (alpha == 0) {
-#pragma omp parallel for
+      #pragma omp parallel for
       for (int i = 0; i < total_batches; i++) {
         INDEX_TYPE row_starting_index_receiver =
             i * sp_local_receiver->batch_size;
@@ -563,33 +563,15 @@ public:
     add_datatransfers(total_receive_count, "Data transfers");
     //
     t = start_clock();
-
-    for (int i = 0; i < this->grid->col_world_size; i++) {
-      INDEX_TYPE base_index = this->sdispls_cyclic[i];
-      INDEX_TYPE count = this->send_counts_cyclic[i];
-//      cout<<" rank "<<this->grid->rank_in_col<<" base_index "<<base_index<<"sending rank "<<i<<" count "<<count<<endl;
-
-      for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
-        SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*sendbuf_cyclic)[j];
-        auto row_offset = sp_tuple.rows[0];
-//        cout<<" rank "<<this->grid->rank_in_col<<" row_offset "<<row_offset<<"sending rank "<<i<<" "<<endl;
-        auto offset_so_far = 0;
-        for (auto k = 2; k < row_offset; k = k + 3) {
-          if (sp_tuple.rows[k]>=16834){
-            cout<<" rank "<<this->grid->rank_in_col<<" key "<<sp_tuple.rows[k]<<"sending rank "<<i<<" wrong "<<endl;
-          }
-        }
-      }
-    }
-
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
                                        batch_id);
-    //    stop_clock_and_add(t, "Communication Time");
+
   }
 
   inline void store_remotely_computed_data(
@@ -597,11 +579,10 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id) {
 
-    //    #pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
-//      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<base_index<<"receiving rank "<<i<<" count "<<count<<endl;
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         auto row_offset = (*receivebuf)[j].rows[0];
         auto offset_so_far = 0;
