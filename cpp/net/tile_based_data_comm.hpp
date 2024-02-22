@@ -444,6 +444,9 @@ public:
             CSRHandle sparse_tuple =
                 (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
                     .fetch_remote_data(index);
+            if (sparse_tuple.row_idx[0]>=16384){
+              cout<<"rank "<<grid->rank_in_col<<" wrong key"<<sparse_tuple.row_idx[0]<<"batch id"<<batch_id<<" seidng rank "<<sending_procs[i]<<endl;
+            }
             if (sparse_tuple.col_idx.size() > 0) {
               if (this->send_counts_cyclic[sending_procs[i]] == 0) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
@@ -501,8 +504,7 @@ public:
                                  1] = latest;
               if (remaining_data_items > 0) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-                current.rows[0] =
-                    2; // rows first two indices are already taken for metadata
+                current.rows[0] =2; // rows first two indices are already taken for metadata
                 current.rows[1] = 0;
                 (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                 total_send_count++;
@@ -514,8 +516,7 @@ public:
                 col_index_offset = latest.rows[1];
                 latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
                 latest.rows[row_index_offset + 1] = remaining_data_items;
-                latest.rows[row_index_offset + 2] =
-                    static_cast<INDEX_TYPE>(tile);
+                latest.rows[row_index_offset + 2] =static_cast<INDEX_TYPE>(tile);
                 latest.rows[0] = row_index_offset + 3;
                 latest.rows[1] = latest.rows[1] + remaining_data_items;
 
