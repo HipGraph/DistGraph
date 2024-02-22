@@ -126,7 +126,7 @@ public:
     INDEX_TYPE  local_key = global_key-row_starting_index;
 
     int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
-    new_handler.row_idx.resize(1,global_key);
+    new_handler.row_idx.resize(1,local_key);
     if(count>0){
       new_handler.col_idx.resize(count);
       new_handler.values.resize(count);
