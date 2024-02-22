@@ -571,6 +571,7 @@ public:
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*sendbuf_cyclic)[j];
         auto row_offset = sp_tuple.rows[0];
+        cout<<" rank "<<this->grid->rank_in_col<<" row_offset "<<row_offset<<"sending rank "<<i<<" "<<endl;
         auto offset_so_far = 0;
         for (auto k = 2; k < row_offset; k = k + 3) {
           if (sp_tuple.rows[k]>=16834){
