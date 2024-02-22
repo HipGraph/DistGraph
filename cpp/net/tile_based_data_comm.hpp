@@ -568,7 +568,7 @@ public:
       INDEX_TYPE base_index = this->sdispls_cyclic[i];
       INDEX_TYPE count = this->send_counts_cyclic[i];
       cout<<" rank "<<this->grid->rank_in_col<<" base_index "<<base_index<<"sending rank "<<i<<" count "<<count<<endl;
-      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<rdispls_cyclic[i]<<"receiving rank "<<i<<" count "<<receive_counts_cyclic[i]<<endl;
+      cout<<" rank "<<this->grid->rank_in_col<<" base_index_receive "<<this->rdispls_cyclic[i]<<"receiving rank "<<i<<" count "<<this->receive_counts_cyclic[i]<<endl;
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         SpTuple<VALUE_TYPE, sp_tuple_max_dim> sp_tuple = (*sendbuf_cyclic)[j];
         auto row_offset = sp_tuple.rows[0];
