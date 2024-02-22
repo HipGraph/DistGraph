@@ -139,7 +139,7 @@ public:
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
           //receive remote computations
           main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
-          this->merge_remote_computations(csr_block,j,batch_size,this->sparse_local_output,main_comm.get());
+          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
 
 
 
@@ -285,7 +285,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = i - source_start_index;
@@ -393,10 +393,8 @@ public:
     }
   }
 
-  inline void merge_remote_computations(CSRLocal<VALUE_TYPE> *csr_block,int batch_id,INDEX_TYPE batch_size,DistributedMat *output,
+  inline void merge_remote_computations(int batch_id,INDEX_TYPE batch_size,DistributedMat *output,
                                         TileDataComm<INDEX_TYPE,VALUE_TYPE,embedding_dim>* main_comm) {
-    if (csr_block->handler != nullptr) {
-      CSRHandle *csr_handle = csr_block->handler.get();
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min(
           std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
@@ -407,6 +405,7 @@ public:
           main_comm->receiver_proc_tile_map.get();
       int tiles_per_process_row =
           SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+      #pragma omp parallel for schedule(static)
       for (auto i = source_start_index; i < source_end_index; i++) {
         INDEX_TYPE index = i - source_start_index;
         unordered_map<INDEX_TYPE, VALUE_TYPE> value_map;
@@ -456,7 +455,6 @@ public:
           }
         }
       }
-    }
   }
 };
 } // namespace distblas::algo
