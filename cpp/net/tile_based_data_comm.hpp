@@ -561,7 +561,7 @@ public:
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
           if (data_count > 0) {
             if ((*receiver_proc_tile_map)[batch_id][i][tile].mode==0){
-              cout<<" rank "<<this->grid->rank_in_col<<" wrong mode "<<"batch id"<<batch_id<<"incoming rank"<<i<<" tile "<<tile<<endl;
+              cout<<" rank "<<this->grid->rank_in_col<<" wrong mode "<<"batch id"<<batch_id<<"incoming rank"<<i<<"key "<<key<<"data_count "<<data_count<<" tile "<<tile<<endl;
             }
 //            cout<<" rank "<<this->grid->rank_in_col<<" size "<<(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr).size();
 //            SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
