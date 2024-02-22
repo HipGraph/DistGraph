@@ -445,7 +445,7 @@ public:
                 (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
                     .fetch_remote_data(index);
             if (sparse_tuple.row_idx[0]>=16384){
-              cout<<"rank "<<grid->rank_in_col<<" wrong key"<<sparse_tuple.row_idx[0]<<"batch id"<<batch_id<<" seidng rank "<<sending_procs[i]<<endl;
+              cout<<"rank "<<this->grid->rank_in_col<<" wrong key"<<sparse_tuple.row_idx[0]<<"batch id"<<batch_id<<" seidng rank "<<sending_procs[i]<<endl;
             }
             if (sparse_tuple.col_idx.size() > 0) {
               if (this->send_counts_cyclic[sending_procs[i]] == 0) {
