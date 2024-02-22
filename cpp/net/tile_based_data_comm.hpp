@@ -601,7 +601,7 @@ public:
            }
 
            if (key>= len){
-             cout<<" rank "<<this->grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<"wrong len"<<" key"<<key<<"len "<<len<<endl;
+             cout<<" rank "<<this->grid->rank_in_col<<" batch_id  "<<batch_id<<" i "<<i<<" tile "<<tile<<"wrong len"<<" key"<<key<<"len "<<len<<endl;
            }
           SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
 //          auto entry_offset = cache_entry.cols.size();
