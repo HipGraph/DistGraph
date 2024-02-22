@@ -22,8 +22,6 @@ private:
   distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
-  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
-
   //record temp local output
   unique_ptr<vector<unordered_map<INDEX_TYPE,VALUE_TYPE>>> output_ptr;
 
@@ -134,12 +132,16 @@ public:
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
               true, 0, true,false, this->sparse_local_output);
+
+          //execute remote computations
           this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                         batch_size, considering_batch_size,
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
-
-
+          //receive remote computations
           main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
+          this->merge_remote_computations(csr_block,j,batch_size,this->sparse_local_output,main_comm);
+
+
 
         }
         total_memory += get_memory_usage();
@@ -389,6 +391,62 @@ public:
         }
       }
     }
+  }
+
+  inline void merge_remote_computations(CSRLocal<VALUE_TYPE> *csr_block,int batch_id,INDEX_TYPE batch_size,DistributedMat *output,
+                                        TileDataComm<INDEX_TYPE,VALUE_TYPE>* main_comm) {
+    if (csr_block->handler != nullptr) {
+      CSRHandle *csr_handle = csr_block->handler.get();
+      auto source_start_index = batch_id * batch_size;
+      auto source_end_index = std::min(std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
+                                                this->sp_local_receiver->proc_row_width),this->sp_local_receiver->gRows);
+
+      vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>* tile_map = main_comm->receiver_proc_tile_map;
+      int tiles_per_process_row = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
+      for(auto i=source_start_index;i<source_end_index;i++){
+        unordered_map<INDEX_TYPE,VALUE_TYPE> value_map;
+        for(int ra=0;ra<this->grid->col_world_size;ra++){
+          for(int j=0;j<tiles_per_process_row;j++){
+            if (tile_map[batch_id][ra][j].mode==1){
+              if (symbolic){
+                INDEX_TYPE local_key = i-source_start_index;
+                SparseCacheEntry<VALUE_TYPE>& cache_entry = (*(tile_map[batch_id][ra][j].dataCachePtr))[local_key];
+                if (cache_entry.cols.size()>0){
+                  for(int k=0;k<cache_entry.cols.size();k++){
+                    value_map[k] += cache_entry.values[k];
+                  }
+                }
+              }
+            }
+          }
+        }
+        vector<INDEX_TYPE> available_spots;
+        for(auto k=0;(*(output->sparse_data_collector))[index].size();k++){
+          auto d = (*(output->sparse_data_collector))[index][k].col;
+          if (d>0 and value_map.find(d)!= value_map.end()){
+            (*(output->sparse_data_collector))[index][k].value += value_map[d];
+            value_map.erase(d);
+          }else{
+            available_spots.push_back(k);
+          }
+        }
+        if (value_map.size()>0){
+          for(int k=0;k<available_spots.size();k++){
+            for(auto it=value_map.begin();it!= value_map.end();++it){
+              (*(output->sparse_data_collector))[index][available_spots[k]].col=(*it).first;
+              (*(output->sparse_data_collector))[index][available_spots[k]].value=(*it).second;
+              value_map.erase((*it).first);
+              break;
+            }
+          }
+          for(auto it=value_map.begin();it!= value_map.end();++it){
+            Tuple tuple;
+            tuple.col = (*it).first;
+            tuple.value = (*it).second;
+            (*(output->sparse_data_collector))[index].push_back(tuple);
+          }
+        }
+      }
   }
 
 

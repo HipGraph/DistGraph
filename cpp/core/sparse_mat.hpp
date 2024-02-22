@@ -353,7 +353,6 @@ public:
     this->proc_col_width = proc_col_width;
     this->proc_row_width = proc_row_width;
     this->batch_size = proc_row_width;
-//    sparse_input_as_dense = static_cast<T *>(::operator new(sizeof(T[proc_row_width * proc_col_width])));
     if (hash_spgemm) {
       this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(
           proc_row_width, vector<Tuple<VALUE_TYPE>>());
