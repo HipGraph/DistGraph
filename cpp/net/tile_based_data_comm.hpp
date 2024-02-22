@@ -453,7 +453,7 @@ public:
 
             latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
             latest.rows[row_index_offset + 1] = num_of_copying_data;
-            latest.rows[row_index_offset + 2] = tile;
+            latest.rows[row_index_offset + 2] = static_cast<INDEX_TYPE>(tile);
 
             cout<<" rank "<<this->grid->rank_in_col<<"  "<<"batch id"<<batch_id<<" sending rank"<<sending_procs[i]<<" tile "<<tile<<endl;
 
@@ -486,7 +486,7 @@ public:
               col_index_offset = latest.rows[1];
               latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
               latest.rows[row_index_offset + 1] = remaining_data_items;
-              latest.rows[row_index_offset + 2] = tile;
+              latest.rows[row_index_offset + 2] = static_cast<INDEX_TYPE>(tile);
               cout<<" rank "<<this->grid->rank_in_col<<"  "<<"batch id"<<batch_id<<" sending rank"<<sending_procs[i]<<" tile "<<tile<<endl;
               latest.rows[0] = row_index_offset + 3;
               latest.rows[1] = latest.rows[1] + remaining_data_items;
