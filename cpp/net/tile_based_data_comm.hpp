@@ -596,15 +596,15 @@ public:
           key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
           SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
           auto entry_offset = cache_entry.cols.size();
-          cache_entry.cols.resize(entry_offset + count);
-          cache_entry.values.resize(entry_offset + count);
+          cache_entry.cols.resize(entry_offset + data_count);
+          cache_entry.values.resize(entry_offset + data_count);
           copy(sp_tuple.cols.begin() + offset_so_far,
-               sp_tuple.cols.begin() + offset_so_far + count,
+               sp_tuple.cols.begin() + offset_so_far + data_count,
                cache_entry.cols.begin() + entry_offset);
           copy(sp_tuple.values.begin() + offset_so_far,
-               sp_tuple.values.begin() + offset_so_far + count,
+               sp_tuple.values.begin() + offset_so_far + data_count,
                cache_entry.values.begin() + entry_offset);
-          offset_so_far += count;
+          offset_so_far += data_count;
           (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =cache_entry;
         }
       }
