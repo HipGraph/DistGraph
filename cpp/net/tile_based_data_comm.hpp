@@ -82,7 +82,7 @@ public:
     add_tiles(total_tiles,"Total Tiles");
 
     if (alpha == 0) {
-#pragma omp parallel for
+      #pragma omp parallel for
       for (int i = 0; i < total_batches; i++) {
         INDEX_TYPE row_starting_index_receiver =
             i * sp_local_receiver->batch_size;
@@ -164,7 +164,7 @@ public:
       unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta =
           make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
 
-//#pragma omp parallel for
+     #pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -182,7 +182,6 @@ public:
         (*send_tile_meta)[index] = t;
         if (t.count > t.send_merge_count){
           (*sender_proc_tile_map)[i][j][k].mode=0;
-          cout<<" rank "<<this->grid->rank_in_col<<" target "<<j<<" tile "<<k<<endl;
         }
       }
 
@@ -190,7 +189,7 @@ public:
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
 
-//#pragma omp parallel for
+#pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -455,6 +454,9 @@ public:
             latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
             latest.rows[row_index_offset + 1] = num_of_copying_data;
             latest.rows[row_index_offset + 2] = tile;
+
+            cout<<" rank "<<this->grid->rank_in_col<<"  "<<"batch id"<<batch_id<<" sending rank"<<sending_procs[i]<<" tile "<<tile<<endl;
+
             latest.rows[0] = row_index_offset + 3;
             latest.rows[1] = latest.rows[1] + num_of_copying_data;
 
@@ -485,6 +487,7 @@ public:
               latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
               latest.rows[row_index_offset + 1] = remaining_data_items;
               latest.rows[row_index_offset + 2] = tile;
+              cout<<" rank "<<this->grid->rank_in_col<<"  "<<"batch id"<<batch_id<<" sending rank"<<sending_procs[i]<<" tile "<<tile<<endl;
               latest.rows[0] = row_index_offset + 3;
               latest.rows[1] = latest.rows[1] + remaining_data_items;
 
