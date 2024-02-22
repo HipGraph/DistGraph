@@ -401,7 +401,7 @@ public:
       auto source_end_index = std::min(std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                                                 this->sp_local_receiver->proc_row_width),this->sp_local_receiver->gRows);
 
-      vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>* tile_map = main_comm->receiver_proc_tile_map;
+      vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>* tile_map = main_comm->receiver_proc_tile_map.get();
       int tiles_per_process_row = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
       for(auto i=source_start_index;i<source_end_index;i++){
         INDEX_TYPE index = i-source_start_index;
