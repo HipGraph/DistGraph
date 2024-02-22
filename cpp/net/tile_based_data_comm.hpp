@@ -461,8 +461,8 @@ public:
 
               auto row_index_offset = latest.rows[0];
               auto col_index_offset = latest.rows[1];
-              if (row_index_offset >= row_max-1 or
-                  col_index_offset >= sp_tuple_max_dim-1) {
+              if (row_index_offset >= row_max-3 or
+                  col_index_offset >= sp_tuple_max_dim) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
                 current.rows[0] =
                     2; // rows first two indices are already taken for metadata
