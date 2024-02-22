@@ -610,17 +610,17 @@ public:
           auto data_count = (*receivebuf)[j].rows[k + 1];
           auto tile = (*receivebuf)[j].rows[k + 2];
           SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
-//          auto entry_offset = cache_entry.cols.size();
-//          cache_entry.cols.resize(entry_offset + data_count);
-//          cache_entry.values.resize(entry_offset + data_count);
-//          copy(sp_tuple.cols.begin() + offset_so_far,
-//               sp_tuple.cols.begin() + offset_so_far + data_count,
-//               cache_entry.cols.begin() + entry_offset);
-//          copy(sp_tuple.values.begin() + offset_so_far,
-//               sp_tuple.values.begin() + offset_so_far + data_count,
-//               cache_entry.values.begin() + entry_offset);
-//          offset_so_far += data_count;
-//          (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =cache_entry;
+          auto entry_offset = cache_entry.cols.size();
+          cache_entry.cols.resize(entry_offset + data_count);
+          cache_entry.values.resize(entry_offset + data_count);
+          copy((*receivebuf)[j].cols.begin() + offset_so_far,
+               (*receivebuf)[j].cols.begin() + offset_so_far + data_count,
+               cache_entry.cols.begin() + entry_offset);
+          copy((*receivebuf)[j].values.begin() + offset_so_far,
+               (*receivebuf)[j].values.begin() + offset_so_far + data_count,
+               cache_entry.values.begin() + entry_offset);
+          offset_so_far += data_count;
+          (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =cache_entry;
         }
       }
     }
