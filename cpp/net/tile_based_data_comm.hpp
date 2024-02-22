@@ -216,7 +216,8 @@ public:
           if (t.count <= t.send_merge_count) {
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
           } else {
-            (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive
+            (*receiver_proc_tile_map)[i][j][k]
+                .initialize_dataCache(); // initialize data cache to receive
                                          // remote computed data
           }
         }
@@ -269,7 +270,8 @@ public:
                   1) {
             if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-              current.rows[0] =2; // rows first two indices are already taken for metadata
+              current.rows[0] =
+                  2; // rows first two indices are already taken for metadata
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
@@ -423,15 +425,22 @@ public:
                     this->grid->col_world_size;
       sending_procs.push_back(sending_rank);
       receiving_procs.push_back(receiving_rank);
-      (*data_buffer_ptr)[sending_rank] = vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>();
+      (*data_buffer_ptr)[sending_rank] =
+          vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>();
     }
 
     for (int i = 0; i < sending_procs.size(); i++) {
       for (int tile = start_tile; tile < end_tile; tile++) {
-        if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==0) {
-          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].initialize_CSR_from_sparse_collector();
-          for (INDEX_TYPE index =(*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_starting_index;
-               index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].row_end_index;++index) {
+        if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
+            0) {
+          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
+              .initialize_CSR_from_sparse_collector();
+          for (INDEX_TYPE index =
+                   (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
+                       .row_starting_index;
+               index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
+                           .row_end_index;
+               ++index) {
             CSRHandle sparse_tuple =
                 (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
                     .fetch_remote_data(index);
@@ -556,7 +565,6 @@ public:
     //
     t = start_clock();
 
-
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
@@ -585,30 +593,19 @@ public:
           auto key = sp_tuple.rows[k];
           auto data_count = sp_tuple.rows[k + 1];
           auto tile = sp_tuple.rows[k + 2];
-          key = key -
-                (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
-              cout << " rank " << this->grid->rank_in_col << " wrong mode "
-                   << "batch id" << batch_id << "incoming rank" << i << "key "
-                   << key << "data_count " << data_count << " tile " << tile
-                   << endl;
-
-            //            cout<<" rank "<<this->grid->rank_in_col<<" size
-            //            "<<(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr).size();
-            //            SparseCacheEntry<VALUE_TYPE> cache_entry
-            //            =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
-            //            auto entry_offset = cache_entry.cols.size();
-            //            cache_entry.cols.resize(entry_offset + count);
-            //            cache_entry.values.resize(entry_offset + count);
-            //            copy(sp_tuple.cols.begin() + offset_so_far,
-            //                 sp_tuple.cols.begin() + offset_so_far + count,
-            //                 cache_entry.cols.begin() + entry_offset);
-            //            copy(sp_tuple.values.begin() + offset_so_far,
-            //                 sp_tuple.values.begin() + offset_so_far + count,
-            //                 cache_entry.values.begin() + entry_offset);
-            //            offset_so_far += count;
-            //            (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key]
-            //            = cache_entry;
-
+          key = key - (*receiver_proc_tile_map)[batch_id][i][tile].row_starting_index;
+          SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
+          auto entry_offset = cache_entry.cols.size();
+          cache_entry.cols.resize(entry_offset + count);
+          cache_entry.values.resize(entry_offset + count);
+          copy(sp_tuple.cols.begin() + offset_so_far,
+               sp_tuple.cols.begin() + offset_so_far + count,
+               cache_entry.cols.begin() + entry_offset);
+          copy(sp_tuple.values.begin() + offset_so_far,
+               sp_tuple.values.begin() + offset_so_far + count,
+               cache_entry.values.begin() + entry_offset);
+          offset_so_far += count;
+          (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =cache_entry;
         }
       }
     }
