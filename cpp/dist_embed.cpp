@@ -160,9 +160,9 @@ int main(int argc, char **argv) {
                                         grid.get()->col_world_size);
 
   // To enable full batch size
-//  if (spmm or spgemm) {
-//    batch_size = localARows;
-//  }
+  if (spmm or spgemm) {
+    batch_size = localARows;
+  }
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
 
