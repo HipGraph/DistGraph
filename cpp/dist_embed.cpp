@@ -320,6 +320,7 @@ int main(int argc, char **argv) {
  if(spgemm & save_results){
    reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
  }
+ reader->parallel_write_Csr(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
 
   MPI_Finalize();
   return 0;

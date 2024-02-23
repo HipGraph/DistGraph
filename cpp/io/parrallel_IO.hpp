@@ -237,8 +237,7 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void parallel_write_csr(string file_path, CSRHandle *handle, INDEX_TYPE proc_row_width,
-                          Process3DGrid *grid, INDEX_TYPE local_rows, INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
+  void parallel_write_csr(string file_path, CSRHandle *handle,Process3DGrid *grid, INDEX_TYPE local_rows, INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
