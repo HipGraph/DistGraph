@@ -48,7 +48,7 @@ public:
 
     G.ParallelReadMM(file_path, true, maximum<VALUE_TYPE>());
 
-    nnz = G.get()->getnnz();
+    nnz = G.getnnz();
     if (proc_rank == 0) {
       cout << "File reader read " << nnz << " nonzeros." << endl;
     }
