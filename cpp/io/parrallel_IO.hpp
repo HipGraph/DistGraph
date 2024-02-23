@@ -57,7 +57,7 @@ public:
     vector<Tuple<VALUE_TYPE>> coords;
     coords.resize(tups.getnnz());
 
-//#pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < tups.getnnz(); i++) {
       coords[i].row = get<0>(values[i]);
       coords[i].col = get<1>(values[i]);
@@ -65,7 +65,6 @@ public:
         coords[i].value = get<1>(values[i]);
       } else {
         coords[i].value = get<2>(values[i]);
-        cout<<"value "<<coords[i].value<<" ";
       }
     }
 
