@@ -12,7 +12,7 @@ using namespace distblas::core;
 using namespace combblas;
 namespace distblas::io {
 
-typedef SpParMat<int64_t, int, SpDCCols<int32_t, int>> PSpMat_s32p64_Int;
+typedef SpParMat<int64_t, VALUE_TYPE , SpDCCols<int32_t, VALUE_TYPE>> PSpMat_s32p64_Int;
 
 /**
  * This class implements IO operations of DistBlas library.
