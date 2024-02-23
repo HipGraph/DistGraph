@@ -352,7 +352,7 @@ public:
       this->initialize_CSR_from_sparse_collector();
     }else if (dense_collector->size()>0){
       cout<<grid->rank_in_col<<" initialize_CSR_from_dense_collector "<<endl;
-      this->initialize_CSR_from_dense_collector(this->proc_row_width,this->gCols);
+      this->initialize_CSR_from_dense_collector(this->proc_row_width,this->proc_col_width);
     }
   }
 
