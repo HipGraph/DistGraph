@@ -136,20 +136,13 @@ public:
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
               true, 0, true,false, this->sparse_local_output);
-          cout<<this->grid->rank_in_col<<" starting remote computation "<<endl;
           //execute remote computations
           this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                         batch_size, considering_batch_size,
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
-          cout<<this->grid->rank_in_col<<" end remote computation "<<endl;
           //receive remote computations
           main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
-          cout<<this->grid->rank_in_col<<" receive receive_remotely_computed_data computed data completed "<<endl;
           this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
-          cout<<this->grid->rank_in_col<<" merging remotely computed data completed "<<endl;
-
-
-
         }
         total_memory += get_memory_usage();
       }
@@ -265,7 +258,6 @@ public:
               auto dst_start_index = sp_tile.col_start_index;
               auto dst_end_index = sp_tile.col_end_index;
               sp_tile.initialize_output_DS_if(0,symbolic);
-              cout<<"rank "<<grid->rank_in_col<<" reaching calc_embedding_row_major "<<endl;
               calc_embedding_row_major(source_start_index, source_end_index,
                                        dst_start_index, dst_end_index,
                                        csr_block, lr, batch_id, batch_size,
