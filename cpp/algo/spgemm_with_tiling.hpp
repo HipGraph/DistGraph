@@ -51,7 +51,7 @@ public:
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local), grid(grid),
         alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),
-        sparse_local_output(sparse_local_output), tile_width_fraction(tile_width_fraction),{
+        sparse_local_output(sparse_local_output), tile_width_fraction(tile_width_fraction){
     this->hash_spgemm=hash_spgemm;
   }
 
