@@ -256,8 +256,8 @@ public:
     for(auto i=0;i<(*handle).rowStart.size();i++){
       for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
         INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
-        INDEX_TYPE col_index = (*handle).col_idx[i];
-        INDEX_TYPE value = (*handle).values[i];
+        INDEX_TYPE col_index = (*handle).col_idx[j];
+        INDEX_TYPE value = (*handle).values[j];
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", index, col_index,value);
       }
       char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
@@ -273,8 +273,8 @@ public:
       }
       for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
         INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
-        INDEX_TYPE col_index = (*handle).col_idx[i];
-        INDEX_TYPE value = (*handle).values[i];
+        INDEX_TYPE col_index = (*handle).col_idx[j];
+        INDEX_TYPE value = (*handle).values[j];
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", index, col_index, value);
       }
       MPI_Status status;
