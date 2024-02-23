@@ -78,7 +78,7 @@ public:
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
         this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
       }else {
-        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(dimension,0));
+        this->dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(dimension,0));
       }
     }
   }
