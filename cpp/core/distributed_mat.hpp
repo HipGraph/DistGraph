@@ -59,9 +59,9 @@ public:
       coords.insert(coords.end(), coords_local.begin(), coords_local.end());
     }
     Tuple<VALUE_TYPE> *coords_ptr = coords.data();
-    csr_local_data =
-        make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
-                                          coords_ptr, coords.size(), false);
+//    csr_local_data =
+//        make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
+//                                          coords_ptr, coords.size(), false);
   }
 
   void initialize_CSR_from_sparse_collector() {
