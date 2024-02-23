@@ -62,8 +62,7 @@ public:
         mode(other.mode),
         total_transferrable_datacount(other.total_transferrable_datacount),
         total_receivable_datacount(other.total_receivable_datacount),
-        dimension(other.dimension),
-        csr_local_data(nullptr),  // Create a new object
+        dimension(other.dimension),// Create a new object
         dataCachePtr(nullptr)    // Create a new object
   {}
 
