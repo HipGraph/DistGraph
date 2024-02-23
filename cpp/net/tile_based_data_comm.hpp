@@ -129,6 +129,7 @@ public:
                 col_starting_index_receiver;
             (*receiver_proc_tile_map)[i][j][k].col_end_index =
                 col_end_index_receiver;
+            (*receiver_proc_tile_map)[i][j][k].dimension=embedding_dim;
 
             (*sender_proc_tile_map)[i][j][k].id = k;
             (*sender_proc_tile_map)[i][j][k].row_starting_index =
@@ -139,6 +140,7 @@ public:
                 col_starting_index_sender;
             (*sender_proc_tile_map)[i][j][k].col_end_index =
                 col_end_index_sender;
+            (*sender_proc_tile_map)[i][j][k].dimension=embedding_dim;
           }
         }
       }

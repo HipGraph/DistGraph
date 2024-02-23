@@ -74,8 +74,8 @@ public:
 
   void initialize_output_DS_if(int comparing_mode){
     if (mode==comparing_mode){
+      auto len = row_end_index- row_starting_index;
       if (this->hash_spgemm) {
-        auto len = row_end_index- row_starting_index;
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
         this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
       }else {
@@ -107,7 +107,7 @@ public:
       this->initialize_CSR_from_sparse_collector();
     }else {
       auto len = row_end_index - row_starting_index;
-      this->initialize_CSR_from_dense_collector(len,dimension)
+      this->initialize_CSR_from_dense_collector(len,dimension);
     }
   }
   void initialize_dataCache(){
