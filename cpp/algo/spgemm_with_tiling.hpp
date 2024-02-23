@@ -136,14 +136,17 @@ public:
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
               true, 0, true,false, this->sparse_local_output);
-
+          cout<<this->grid->rank_in_col<<" starting remote computation "<<endl;
           //execute remote computations
           this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                         batch_size, considering_batch_size,
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
+          cout<<this->grid->rank_in_col<<" end remote computation "<<endl;
           //receive remote computations
           main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
+          cout<<this->grid->rank_in_col<<" receive receive_remotely_computed_data computed data completed "<<endl;
           this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
+          cout<<this->grid->rank_in_col<<" merging remotely computed data completed "<<endl;
 
 
 
@@ -180,7 +183,7 @@ public:
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process,0,tiles_per_process);
-
+          cout<<this->grid->rank_in_col<<" transfer data completed "<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -188,6 +191,7 @@ public:
             csr_block,  lr, iteration,batch, batch_size,
             considering_batch_size, 0,
             first_execution_proc, prev_start,symbolic, main_comm,output);
+        cout<<this->grid->rank_in_col<<" local completed "<<endl;
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
@@ -203,6 +207,7 @@ public:
     this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
                                   batch_size, considering_batch_size,
                                   1,prev_start, prev_end_process,symbolic, main_comm, output);
+    cout<<this->grid->rank_in_col<<" remote completed "<<endl;
     // dense_local->invalidate_cache(i, j, true);
   }
 
