@@ -447,6 +447,183 @@ public:
                                 batch_id);
   }
 
+  inline void transfer_remotely_computable_data(
+      vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf_cyclic,
+      vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
+      int batch_id, int starting_proc, int end_proc, int start_tile,
+      int end_tile) {
+
+    int total_receive_count = 0;
+    unique_ptr<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>
+        data_buffer_ptr = make_unique<
+            vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>();
+    data_buffer_ptr->resize(this->grid->col_world_size);
+
+    int total_send_count = 0;
+    this->send_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->receive_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->sdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->rdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+
+    vector<int> sending_procs;
+    vector<int> receiving_procs;
+
+    for (int i = starting_proc; i < end_proc; i++) {
+      int sending_rank =
+          (this->grid->rank_in_col + i) % this->grid->col_world_size;
+      int receiving_rank =
+          (this->grid->rank_in_col >= i)
+              ? (this->grid->rank_in_col - i) % this->grid->col_world_size
+              : (this->grid->col_world_size - i + this->grid->rank_in_col) %
+                    this->grid->col_world_size;
+      sending_procs.push_back(sending_rank);
+      receiving_procs.push_back(receiving_rank);
+      (*data_buffer_ptr)[sending_rank] =
+          vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>();
+    }
+
+    for (int i = 0; i < sending_procs.size(); i++) {
+      for (int tile = start_tile; tile < end_tile; tile++) {
+        SparseTile<INDEX_TYPE,VALUE_TYPE>& spTile =  (*receiver_proc_tile_map)[batch_id][sending_procs[i]][tile];
+        if (spTile.mode ==1) {
+          for (auto it=spTile.row_id_set.begin(); it!= spTile.row_id_set.end();++it) {
+            auto index = *it;
+            CSRHandle sparse_tuple =(this->sparse_local)->fetch_local_data(index);
+
+            if (sparse_tuple.col_idx.size() > 0) {
+              if (this->send_counts_cyclic[sending_procs[i]] == 0) {
+                SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
+                current.rows[0] =
+                    2; // rows first two indices are already taken for metadata
+                current.rows[1] = 0;
+                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                total_send_count++;
+                this->send_counts_cyclic[sending_procs[i]]++;
+              }
+              SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest = (*data_buffer_ptr)
+                  [sending_procs[i]]
+                  [this->send_counts_cyclic[sending_procs[i]] - 1];
+
+              auto row_index_offset = latest.rows[0];
+              auto col_index_offset = latest.rows[1];
+              if (row_index_offset >= row_max - 3 or
+                  col_index_offset >= sp_tuple_max_dim) {
+                SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
+                current.rows[0] =
+                    2; // rows first two indices are already taken for metadata
+                current.rows[1] = 0;
+                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                total_send_count++;
+                this->send_counts_cyclic[sending_procs[i]]++;
+                latest = (*data_buffer_ptr)
+                    [sending_procs[i]]
+                    [this->send_counts_cyclic[sending_procs[i]] - 1];
+                row_index_offset = latest.rows[0];
+                col_index_offset = latest.rows[1];
+              }
+
+              INDEX_TYPE offset = sparse_tuple.col_idx.size();
+              // start filling from offset position
+              INDEX_TYPE pending_col_pos = sp_tuple_max_dim - col_index_offset;
+              INDEX_TYPE num_of_copying_data = min(offset, pending_col_pos);
+              INDEX_TYPE remaining_data_items = offset - num_of_copying_data;
+
+              latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
+              latest.rows[row_index_offset + 1] = num_of_copying_data;
+              latest.rows[row_index_offset + 2] = static_cast<INDEX_TYPE>(tile);
+              latest.rows[0] = row_index_offset + 3;
+              latest.rows[1] = latest.rows[1] + num_of_copying_data;
+
+              if (num_of_copying_data > 0) {
+                copy(sparse_tuple.col_idx.begin(),
+                     sparse_tuple.col_idx.begin() + num_of_copying_data,
+                     latest.cols.begin() + col_index_offset);
+                copy(sparse_tuple.values.begin(),
+                     sparse_tuple.values.begin() + num_of_copying_data,
+                     latest.values.begin() + col_index_offset);
+              }
+              (*data_buffer_ptr)[sending_procs[i]]
+                                [this->send_counts_cyclic[sending_procs[i]] -
+                                 1] = latest;
+              if (remaining_data_items > 0) {
+                SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
+                current.rows[0] =
+                    2; // rows first two indices are already taken for metadata
+                current.rows[1] = 0;
+                (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                total_send_count++;
+                this->send_counts_cyclic[sending_procs[i]]++;
+                latest = (*data_buffer_ptr)
+                    [sending_procs[i]]
+                    [(*data_buffer_ptr)[sending_procs[i]].size() - 1];
+                row_index_offset = latest.rows[0];
+                col_index_offset = latest.rows[1];
+                latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
+                latest.rows[row_index_offset + 1] = remaining_data_items;
+                latest.rows[row_index_offset + 2] =
+                    static_cast<INDEX_TYPE>(tile);
+                latest.rows[0] = row_index_offset + 3;
+                latest.rows[1] = latest.rows[1] + remaining_data_items;
+
+                copy(sparse_tuple.col_idx.begin() + num_of_copying_data - 1,
+                     sparse_tuple.col_idx.begin() + num_of_copying_data - 1 +
+                         remaining_data_items,
+                     latest.cols.begin());
+                copy(sparse_tuple.values.begin() + num_of_copying_data - 1,
+                     sparse_tuple.values.begin() + num_of_copying_data - 1 +
+                         remaining_data_items,
+                     latest.values.begin());
+                (*data_buffer_ptr)[sending_procs[i]]
+                                  [this->send_counts_cyclic[sending_procs[i]] -
+                                   1] = latest;
+              }
+            }
+          }
+        }
+      }
+    }
+    (*sendbuf_cyclic).resize(total_send_count);
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      this->sdispls_cyclic[i] = (i > 0) ? this->sdispls_cyclic[i - 1] +
+                                              this->send_counts_cyclic[i - 1]
+                                        : this->sdispls_cyclic[i];
+      copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
+           (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
+    }
+    auto t = start_clock();
+    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
+                 this->receive_counts_cyclic.data(), 1, MPI_INT,
+                 this->grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
+
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
+                                              this->receive_counts_cyclic[i - 1]
+                                        : this->rdispls_cyclic[i];
+      total_receive_count += this->receive_counts_cyclic[i];
+    }
+
+    if (total_receive_count > 0) {
+      receivebuf->resize(total_receive_count);
+    }
+
+    add_datatransfers(total_receive_count, "Data transfers");
+    //
+    t = start_clock();
+    MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
+                  this->sdispls_cyclic.data(), SPARSETUPLE,
+                  (*receivebuf).data(), this->receive_counts_cyclic.data(),
+                  this->rdispls_cyclic.data(), SPARSETUPLE,
+                  this->grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
+    this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
+                                       batch_id,false);
+  }
+
+
+
+
+
   inline void receive_remotely_computed_data(
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf_cyclic,
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
@@ -617,13 +794,13 @@ public:
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
-                                       batch_id);
+                                       batch_id,true);
   }
 
   inline void store_remotely_computed_data(
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf,
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
-      int batch_id) {
+      int batch_id, bool receive_computed_data) {
 
 #pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
@@ -636,8 +813,8 @@ public:
           auto key = (*receivebuf)[j].rows[k];
           auto data_count = (*receivebuf)[j].rows[k + 1];
           auto tile = (*receivebuf)[j].rows[k + 2];
-          SparseCacheEntry<VALUE_TYPE> cache_entry =
-              (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
+          SparseTile<INDEX_TYPE,VALUE_TYPE>&spTile = receive_computed_data?(*(*receiver_proc_tile_map)[batch_id][i][tile]:(*(*sender_proc_tile_map)[batch_id][i][tile];
+          SparseCacheEntry<VALUE_TYPE> cache_entry = (*spTile.dataCachePtr)[key];
           auto entry_offset = cache_entry.cols.size();
           cache_entry.cols.resize(entry_offset + data_count);
           cache_entry.values.resize(entry_offset + data_count);
@@ -648,8 +825,7 @@ public:
                (*receivebuf)[j].values.begin() + offset_so_far + data_count,
                cache_entry.values.begin() + entry_offset);
           offset_so_far += data_count;
-          (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =
-              cache_entry;
+          (*spTile.dataCachePtr)[key] =cache_entry;
         }
       }
     }
