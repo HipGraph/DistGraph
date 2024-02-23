@@ -71,10 +71,10 @@ public:
 
 
 
-  void initialize_output_DS_if(int comparing_mode){
+  void initialize_output_DS_if(int comparing_mode, bool symbolic){
     if (mode==comparing_mode){
       auto len = row_end_index- row_starting_index;
-      if (this->hash_spgemm) {
+      if (this->hash_spgemm and symbolic) {
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
         this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
       }else {

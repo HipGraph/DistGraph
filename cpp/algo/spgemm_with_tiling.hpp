@@ -264,10 +264,8 @@ public:
               auto source_end_index =  sp_tile.row_end_index;
               auto dst_start_index = sp_tile.col_start_index;
               auto dst_end_index = sp_tile.col_end_index;
-              if (symbolic){
-                sp_tile.initialize_output_DS_if(0);
-              }
-
+              sp_tile.initialize_output_DS_if(0,symbolic);
+              cout<<"rank "<<grid->rank_in_col<<" reaching calc_embedding_row_major "<<endl;
               calc_embedding_row_major(source_start_index, source_end_index,
                                        dst_start_index, dst_end_index,
                                        csr_block, lr, batch_id, batch_size,
