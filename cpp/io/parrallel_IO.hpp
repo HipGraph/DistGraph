@@ -259,7 +259,7 @@ public:
         INDEX_TYPE  index = i+ grid->rank_in_col*proc_row_width;
         INDEX_TYPE col_index = (*handle).col_idx[i];
         INDEX_TYPE value = (*handle).values[i];
-        total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
+        total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", index, col_index,value);
       }
       char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
       if (buffer == nullptr) {
@@ -276,7 +276,7 @@ public:
         INDEX_TYPE  index = i+ grid->rank_in_col*proc_row_width;
         INDEX_TYPE col_index = (*handle).col_idx[i];
         INDEX_TYPE value = (*handle).values[i];
-        current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
+        current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", index, col_index, value);
       }
       MPI_Status status;
       MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
