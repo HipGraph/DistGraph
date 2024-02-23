@@ -250,7 +250,7 @@ public:
 
     MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM, grid->col_world);
 
-    if (grid->rank_in_col==0 and i==0){
+    if (grid->rank_in_col==0){
       total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
     }
 
