@@ -65,7 +65,7 @@ public:
         coords[i].value = get<1>(values[i]);
       } else {
         coords[i].value = get<2>(values[i]);
-        cout<<"value "<<coords[i].value<<" "
+        cout<<"value "<<coords[i].value<<" ";
       }
     }
 
