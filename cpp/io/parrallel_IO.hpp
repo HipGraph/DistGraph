@@ -236,5 +236,58 @@ public:
     MPI_File_close(&fh);
   }
 
+  template <typename VALUE_TYPE>
+  void parallel_write_csr(string file_path, CSRHandle *handle, INDEX_TYPE proc_row_width,
+                          Process3DGrid *grid, INDEX_TYPE local_rows, INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
+    MPI_File fh;
+    MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+
+    int chunk_size = 100000; // Number of elements to write at a time
+    size_t total_size = 0;
+
+    INDEX_TYPE  global_sum = 0;
+    INDEX_TYPE local_sum = (*handle).rowStart[(*handle).rowStart.size()-1];
+
+    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM, grid->col_world);
+
+    if (grid->rank_in_col==0 and i==0){
+      total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
+    }
+
+    for(auto i=0;i<(*handle).rowStart.size();i++){
+      for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
+        INDEX_TYPE  index = i+ grid->rank_in_col*proc_row_width;
+        INDEX_TYPE col_index = (*handle).col_idx[i];
+        INDEX_TYPE value = (*handle).values[i];
+        total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
+      }
+      char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
+      if (buffer == nullptr) {
+        // Handle allocation failure
+        cout << "Memory allocation failed." << endl;
+        return;
+      }
+
+      char *current_position = buffer;
+      if (i==0 and grid->rank_in_col==0){
+        current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
+      }
+      for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
+        INDEX_TYPE  index = i+ grid->rank_in_col*proc_row_width;
+        INDEX_TYPE col_index = (*handle).col_idx[i];
+        INDEX_TYPE value = (*handle).values[i];
+        current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
+      }
+      MPI_Status status;
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
+
+      // Free the dynamically allocated memory for each chunk
+      free(buffer);
+      total_size = 0; // Reset total_size for the next chunk
+    }
+
+    MPI_File_close(&fh);
+  }
+
 };
 } // namespace distblas::io
