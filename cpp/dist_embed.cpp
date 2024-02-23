@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 
   auto start_io = std::chrono::high_resolution_clock::now();
 
-  reader.get()->parallel_read_MM<VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
+  reader.get()->parallel_read_MM<int64_t,int>(input_file, shared_sparseMat.get(),true);
 
 
   cout << " rank " << rank << " reading data from file path:  " << input_file
@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
                                                                    gCols, gNNZ, batch_size,
                                                                    localARows, localBRows, false, false);
   }else if (spgemm){
-    reader.get()->parallel_read_MM<VALUE_TYPE>(sparse_data_file, sparse_input.get(),false);
+    reader.get()->parallel_read_MM<int64_t,VALUE_TYPE>(sparse_data_file, sparse_input.get(),false);
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);

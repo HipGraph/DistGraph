@@ -12,7 +12,7 @@ using namespace distblas::core;
 using namespace combblas;
 namespace distblas::io {
 
-typedef SpParMat<int64_t , double , SpDCCols<int64_t, double>> PSpMat_s32p64_Int;
+//typedef SpParMat<int64_t , double , SpDCCols<int64_t, double>> PSpMat_s32p64_Int;
 
 /**
  * This class implements IO operations of DistBlas library.
@@ -27,7 +27,7 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  template <typename VALUE_TYPE>
+  template <typename INDEX_TYPE ,VALUE_TYPE>
   void parallel_read_MM(string file_path, distblas::core::SpMat<VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value) {
     MPI_Comm WORLD;
@@ -40,18 +40,19 @@ public:
     shared_ptr<CommGrid> simpleGrid;
     simpleGrid.reset(new CommGrid(WORLD, num_procs, 1));
 
-    unique_ptr<PSpMat_s32p64_Int> G =
-        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
+    SpParMat<INDEX_TYPE , VALUE_TYPE , SpDCCols<INDEX_TYPE, VALUE_TYPE>> G
+//    unique_ptr<PSpMat_s32p64_Int> G =
+//        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
 
     INDEX_TYPE nnz;
 
-    G.get()->ParallelReadMM(file_path, true, maximum<double>());
+    G.ParallelReadMM(file_path, true, maximum<VALUE_TYPE>());
 
     nnz = G.get()->getnnz();
     if (proc_rank == 0) {
       cout << "File reader read " << nnz << " nonzeros." << endl;
     }
-    SpTuples<int64_t, VALUE_TYPE> tups(G.get()->seq());
+    SpTuples<int64_t, VALUE_TYPE> tups(G.seq());
     tuple<int64_t, int64_t, VALUE_TYPE> *values = tups.tuples;
 
     vector<Tuple<VALUE_TYPE>> coords;
@@ -68,7 +69,7 @@ public:
       }
     }
 
-    int rowIncrement = G->getnrow() / num_procs;
+    int rowIncrement = G.getnrow() / num_procs;
 
 #pragma omp parallel for
     for (int i = 0; i < coords.size(); i++) {
@@ -76,9 +77,9 @@ public:
     }
 
     sp_mat->coords = coords;
-    sp_mat->gRows = G.get()->getnrow();
-    sp_mat->gCols = G.get()->getncol();
-    sp_mat->gNNz = G.get()->getnnz();
+    sp_mat->gRows = G.getnrow();
+    sp_mat->gCols = G.getncol();
+    sp_mat->gNNz = G.getnnz();
   }
 
   template <typename VALUE_TYPE>
