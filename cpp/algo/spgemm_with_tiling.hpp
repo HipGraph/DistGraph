@@ -140,7 +140,7 @@ public:
                                         batch_size, considering_batch_size,
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
           main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
-//          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
+          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
         }
         total_memory += get_memory_usage();
       }
@@ -406,6 +406,7 @@ public:
             SparseTile<INDEX_TYPE, VALUE_TYPE> &sp_tile =
                 (*tile_map)[batch_id][ra][j];
             if (sp_tile.mode == 1) {
+              SparseCacheEntry<VALUE_TYPE> newEntry;
               SparseCacheEntry<VALUE_TYPE> &cache_entry =
                   (*(sp_tile.dataCachePtr))[index];
               if (cache_entry.cols.size() > 0) {
@@ -416,6 +417,7 @@ public:
                   }
                 }
               }
+              (*(sp_tile.dataCachePtr))[index]=newEntry;
             }
           }
         }
