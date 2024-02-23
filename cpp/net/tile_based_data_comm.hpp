@@ -232,9 +232,7 @@ public:
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
             st.mode = 1;
           } else {
-            (*receiver_proc_tile_map)[i][j][k]
-                .initialize_dataCache(); // initialize data cache to receive//
-                                         // remote computed data
+            (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive//// remote computed data
             st.mode = 0;
           }
           (*send_tile_meta)[index] = st;
@@ -247,9 +245,7 @@ public:
             if (t.count <= t.send_merge_count) {
               (*receiver_proc_tile_map)[i][j][k].mode = 0;
             } else {
-              (*receiver_proc_tile_map)[i][j][k]
-                  .initialize_dataCache(); // initialize data cache to receive
-                                           // remote computed data
+              (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive remote computed data
             }
           }
         }
@@ -274,6 +270,7 @@ public:
           if (st.batch_id == i and st.tile_id == k){
               if (st.mode == 0) {
                 (*sender_proc_tile_map)[i][j][k].mode = 0;
+                (*sender_proc_tile_map)[i][j][k].initialize_dataCache();
               }
             }
         }
@@ -487,19 +484,11 @@ public:
 
     for (int i = 0; i < sending_procs.size(); i++) {
       for (int tile = start_tile; tile < end_tile; tile++) {
-        if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
-            0) {
-          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-              .initialize_CSR_blocks();
-          for (INDEX_TYPE index =
-                   (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-                       .row_starting_index;
-               index < (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-                           .row_end_index;
-               ++index) {
-            CSRHandle sparse_tuple =
-                (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-                    .fetch_remote_data(index);
+       SparseTile<INDEX_TYPE,VALUE_TYPE>& spTile =  (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile];
+        if (spTile.mode ==0) {
+          spTile.initialize_CSR_blocks();
+          for (INDEX_TYPE index =spTile.row_starting_index;index < spTile.row_end_index;++index) {
+            CSRHandle sparse_tuple =spTile.fetch_remote_data(index);
 
             if (sparse_tuple.col_idx.size() > 0) {
               if (this->send_counts_cyclic[sending_procs[i]] == 0) {
