@@ -27,7 +27,7 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  template <typename INDEX_TYPE ,typename VALUE_TYPE>
+  template <typename INDEX_TYPE, typename VALUE_TYPE>
   void parallel_read_MM(string file_path, distblas::core::SpMat<VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value) {
     MPI_Comm WORLD;
