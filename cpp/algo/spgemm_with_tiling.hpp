@@ -148,7 +148,9 @@ public:
       }
       (this->sparse_local)->purge_cache();
     }
+    cout<<" rank "<<this->grid->rank_in_col<<" initialize_CSR_blocks  "<<endl;
     (this->sparse_local_output)->initialize_CSR_blocks();
+    cout<<" rank "<<this->grid->rank_in_col<<" initializeing CSR_blocks completed "<<endl;
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
