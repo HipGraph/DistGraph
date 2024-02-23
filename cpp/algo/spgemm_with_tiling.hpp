@@ -332,12 +332,12 @@ public:
                   while(count<max_count){
                     if ((*(output->sparse_data_collector))[index][hash].col==d){
                       (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value + value;
-                      cout<<(*(output->sparse_data_collector))[index][hash].value<<" "
+                      cout<<(*(output->sparse_data_collector))[index][hash].value<<" ";
                       break;
                     }else if ((*(output->sparse_data_collector))[index][hash].col==-1){
                       (*(output->sparse_data_collector))[index][hash].col = d;
                       (*(output->sparse_data_collector))[index][hash].value =   value;
-                      cout<<(*(output->sparse_data_collector))[index][hash].value<<" "
+                      cout<<(*(output->sparse_data_collector))[index][hash].value<<" ";
                       break;
                     }else {
                       hash = (hash+100) & (ht_size-1);
