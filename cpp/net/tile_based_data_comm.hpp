@@ -433,8 +433,7 @@ public:
       for (int tile = start_tile; tile < end_tile; tile++) {
         if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
             0) {
-          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
-              .initialize_CSR_from_sparse_collector();
+          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].initialize_CSR_blocks();
           for (INDEX_TYPE index =
                    (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
                        .row_starting_index;

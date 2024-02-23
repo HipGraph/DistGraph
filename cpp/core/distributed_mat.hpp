@@ -1,5 +1,6 @@
 #pragma once
-
+#include "common.h"
+#include "csr_local.hpp"
 namespace distblas::core {
 
 class DistributedMat {
@@ -10,6 +11,8 @@ public:
   unique_ptr<vector<INDEX_TYPE>> sparse_data_counter;
 
   unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
+
+  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
   bool  hash_spgemm;
 
@@ -35,6 +38,34 @@ public:
       dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(
           *(other.dense_collector));
     }
+  }
+
+  void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols){
+    vector<Tuple<VALUE_TYPE>> coords;
+#pragma omp parallel for
+    for(auto i=0;i<dense_collector->size();i++) {
+      vector<Tuple<VALUE_TYPE>> coords_local;
+      for (auto j = 0; j < (*dense_collector)[i].size(); j++) {
+        if ((*dense_collector)[i][j] != 0) {
+          Tuple<VALUE_TYPE> t;
+          t.col = j;
+          t.row = i;
+          t.value = (*dense_collector)[i][j];
+          coords_local.push_back(t);
+          (*dense_collector)[i][j]=0;
+        }
+      }
+#pragma omp critical
+      coords.insert(coords.end(), coords_local.begin(), coords_local.end());
+    }
+    Tuple<VALUE_TYPE> *coords_ptr = coords.data();
+    csr_local_data =
+        make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
+                                          coords_ptr, coords.size(), false);
+  }
+
+  void initialize_CSR_from_sparse_collector() {
+    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
 };

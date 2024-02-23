@@ -45,51 +45,29 @@ private:
 
     if (col_partitioned) {
       // This is used to find sending indices
-      csr_local_data =
+      this->csr_local_data =
           make_unique<CSRLocal<VALUE_TYPE>>(gRows, proc_col_width, coords.size(),
                                    coords_ptr, coords.size(), transpose);
     } else {
       // This is used to find receiving indices and computations
-      csr_local_data =
+      this->csr_local_data =
           make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
                                    coords_ptr, coords.size(), transpose);
     }
   }
 
-  void initialize_CSR_from_dense_collector(){
-    vector<Tuple<VALUE_TYPE>> coords;
-    #pragma omp parallel for
-    for(auto i=0;i<dense_collector->size();i++) {
-      vector<Tuple<VALUE_TYPE>> coords_local;
-      for (auto j = 0; j < (*dense_collector)[i].size(); j++) {
-        if ((*dense_collector)[i][j] != 0) {
-          Tuple<VALUE_TYPE> t;
-          t.col = j;
-          t.row = i;
-          t.value = (*dense_collector)[i][j];
-          coords_local.push_back(t);
-          (*dense_collector)[i][j]=0;
-        }
-      }
-      #pragma omp critical
-      coords.insert(coords.end(), coords_local.begin(), coords_local.end());
-    }
-    Tuple<VALUE_TYPE> *coords_ptr = coords.data();
-    csr_local_data =
-        make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, coords.size(),
-                                 coords_ptr, coords.size(), false);
-  }
 
-  void initialize_CSR_from_sparse_collector() {
-   csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
-  }
+
+//  void initialize_CSR_from_sparse_collector() {
+//   this->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+//  }
 
   void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,vector<vector<unordered_map<INDEX_TYPE, unordered_map<int,bool>>>> *id_to_proc_mapping,
                                             vector<vector<vector<SparseTile<INDEX_TYPE,VALUE_TYPE>>>>* tile_map, string semring="+", SpMat<VALUE_TYPE> *input_data=nullptr) {
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
 
-    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+    distblas::core::CSRHandle *handle = (this->csr_local_data.get())->handler.get();
 
     vector<int> procs;
     for (int i = starting_proc; i < end_proc; i++) {
@@ -171,7 +149,7 @@ private:
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
 
-    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+    distblas::core::CSRHandle *handle = (this->csr_local_data.get())->handler.get();
 
     vector<int> procs;
     for (int i = starting_proc; i < end_proc; i++) {
@@ -230,7 +208,7 @@ private:
     int rank= grid->rank_in_col;
     int world_size = grid->col_world_size;
 
-    distblas::core::CSRHandle *handle = (csr_local_data.get())->handler.get();
+    distblas::core::CSRHandle *handle = (this->csr_local_data.get())->handler.get();
 
     auto batches = (proc_row_width / batch_size);
 
@@ -309,7 +287,6 @@ public:
   INDEX_TYPE proc_col_width, proc_row_width;
   bool transpose = false;
   bool col_partitioned = false;
-  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
   Process3DGrid *grid;
 
   unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
@@ -372,9 +349,9 @@ public:
     if (coords.size()>0) {
       initialize_CSR_from_tuples();
     }else if (hash_spgemm and sparse_data_collector->size()>0){
-      initialize_CSR_from_sparse_collector();
+      this->initialize_CSR_from_sparse_collector();
     }else if (dense_collector->size()>0){
-      initialize_CSR_from_dense_collector();
+      this->initialize_CSR_from_dense_collector(this->proc_row_width,this->gCols);
     }
   }
 
@@ -417,7 +394,7 @@ public:
   }
 
 CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
-     CSRHandle *handle = (csr_local_data.get())->handler.get();
+     CSRHandle *handle = (this->csr_local_data.get())->handler.get();
      CSRHandle new_handler;
      INDEX_TYPE global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
      int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
@@ -434,7 +411,7 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
   void get_transferrable_datacount(vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,
                                    int total_batches, bool col_id_set, bool indices_only){
 
-    CSRHandle *handle = (csr_local_data.get())->handler.get();
+    CSRHandle *handle = (this->csr_local_data.get())->handler.get();
     int tiles_per_process = SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();
 
     auto itr = total_batches * grid->col_world_size * tiles_per_process;

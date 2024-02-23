@@ -22,6 +22,7 @@ public:
   INDEX_TYPE col_start_index;
   INDEX_TYPE col_end_index;
 
+  INDEX_TYPE dimension;
   Process3DGrid *grid;
 
   unordered_map<INDEX_TYPE, unordered_map<int, bool>> id_to_proc_mapping;
@@ -34,24 +35,14 @@ public:
 
   static double tile_width_fraction;
 
-  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
-
   unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
-
-//  shared_ptr<vector<vector<Tuple<VALUE_TYPE>>>> sparse_data_collector;
-//
-//  shared_ptr<vector<INDEX_TYPE>> sparse_data_counter;
-//
-//  shared_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
-//
-//  bool  hash_spgemm=false;
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
              INDEX_TYPE col_end_index)
       : DistributedMat(), grid(grid), id(id),
         row_starting_index(row_starting_index), row_end_index(row_end_index),
-        col_start_index(col_start_index), col_end_index(col_end_index) {}
+        col_start_index(col_start_index), col_end_index(col_end_index),dimension(dimension) {}
 
   SparseTile(Process3DGrid *grid, bool hash_spgemm)
       : DistributedMat(), grid(grid) {
@@ -71,6 +62,7 @@ public:
         mode(other.mode),
         total_transferrable_datacount(other.total_transferrable_datacount),
         total_receivable_datacount(other.total_receivable_datacount),
+        dimension(other.dimension),
         csr_local_data(nullptr),  // Create a new object
         dataCachePtr(nullptr)    // Create a new object
   {}
@@ -86,33 +78,37 @@ public:
         auto len = row_end_index- row_starting_index;
         this->sparse_data_counter = make_unique<vector<INDEX_TYPE>>(len,0);
         this->sparse_data_collector = make_unique<vector<vector<Tuple<VALUE_TYPE>>>>(len, vector<Tuple<VALUE_TYPE>>());
-
-
       }else {
-//        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(proc_col_width,0));
+        this->dense_collector = make_shared<vector<vector<VALUE_TYPE>>>(len,vector<VALUE_TYPE>(dimension,0));
       }
-
     }
   }
-  void initialize_hashtables(){
-    auto len = row_end_index- row_starting_index;
-#pragma  omp parallel for
-    for(auto i=0;i<len;i++){
-      auto count = (*this->sparse_data_counter)[i];
-      auto resize_count = pow(2,log2(count)+1);
-      (*this->sparse_data_collector)[i].clear();
-      Tuple<VALUE_TYPE> t;
-      t.row=i;
-      t.col=-1;
-      t.value=0;
-      (*this->sparse_data_collector)[i].resize(resize_count,t);
-      (*this->sparse_data_counter)[i]=0;
+  void initialize_hashtables() {
+    auto len = row_end_index - row_starting_index;
+    if (this->hash_spgemm) {
+#pragma omp parallel for
+      for (auto i = 0; i < len; i++) {
+        auto count = (*this->sparse_data_counter)[i];
+        auto resize_count = pow(2, log2(count) + 1);
+        (*this->sparse_data_collector)[i].clear();
+        Tuple<VALUE_TYPE> t;
+        t.row = i;
+        t.col = -1;
+        t.value = 0;
+        (*this->sparse_data_collector)[i].resize(resize_count, t);
+        (*this->sparse_data_counter)[i] = 0;
+      }
     }
   }
 
 
-  void initialize_CSR_from_sparse_collector() {
-    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(this->sparse_data_collector.get());
+  void initialize_CSR_blocks() {
+    if (this->hash_spgemm) {
+      this->initialize_CSR_from_sparse_collector();
+    }else {
+      auto len = row_end_index - row_starting_index;
+      this->initialize_CSR_from_dense_collector(len,dimension)
+    }
   }
   void initialize_dataCache(){
     auto len = row_end_index- row_starting_index;
@@ -121,7 +117,7 @@ public:
 
 
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
-    CSRHandle *handle = (csr_local_data)->handler.get();
+    CSRHandle *handle = (this->csr_local_data)->handler.get();
     CSRHandle new_handler;
     INDEX_TYPE  local_key = global_key-row_starting_index;
 
