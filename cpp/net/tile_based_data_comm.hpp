@@ -227,7 +227,7 @@ public:
           TileTuple<INDEX_TYPE> st;
           st.batch_id = i;
           st.tile_id = k;
-          auto remote_cost = (merge_cost_factor*t.send_merge_count) +  (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount);
+          auto remote_cost = (merge_cost_factor*t.send_merge_count) +  (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount;
           if (t.count <= remote_cost) {
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
             st.mode = 1;
