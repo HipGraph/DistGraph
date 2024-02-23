@@ -255,7 +255,7 @@ public:
 
     for(auto i=0;i<(*handle).rowStart.size();i++){
       for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
-        INDEX_TYPE  index = i+ grid->rank_in_col*proc_row_width;
+        INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
         INDEX_TYPE col_index = (*handle).col_idx[i];
         INDEX_TYPE value = (*handle).values[i];
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", index, col_index,value);
@@ -272,7 +272,7 @@ public:
         current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
       }
       for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
-        INDEX_TYPE  index = i+ grid->rank_in_col*proc_row_width;
+        INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
         INDEX_TYPE col_index = (*handle).col_idx[i];
         INDEX_TYPE value = (*handle).values[i];
         current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", index, col_index, value);
