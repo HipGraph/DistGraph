@@ -136,9 +136,9 @@ public:
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
                0, true,false, this->sparse_local_output);
-//          this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
-//                                        batch_size, considering_batch_size,
-//                                        2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
+          this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
+                                        batch_size, considering_batch_size,
+                                        2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
 //          main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
 //          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
         }
