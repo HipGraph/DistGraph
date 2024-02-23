@@ -223,6 +223,7 @@ int main(int argc, char **argv) {
 
   if (spgemm){
     sparse_input->initialize_CSR_blocks();
+    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_input->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
   }
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;

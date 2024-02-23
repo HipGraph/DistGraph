@@ -325,7 +325,7 @@ public:
                 INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst]; k < handle->rowStart[local_dst + 1]; k++) {
                   auto  d = (handle->col_idx[k]);
-                  cout<<handle->values[k]<<" ";
+//                  cout<<handle->values[k]<<" ";
                   INDEX_TYPE hash = (d*hash_scale) & (ht_size-1);
                   auto value =  lr *handle->values[k];
                   int max_count=10;
@@ -359,7 +359,7 @@ public:
                 INDEX_TYPE ht_size = (*(output->sparse_data_collector))[index].size();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
-                  cout<<remote_values[m] <<" ";
+//                  cout<<remote_values[m] <<" ";
                   auto value =  lr *remote_values[m];
                   INDEX_TYPE hash = (d*hash_scale) & (ht_size-1);
                   int max_count=10;
