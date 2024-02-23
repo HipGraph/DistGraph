@@ -136,7 +136,6 @@ public:
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
                0, true,false, this->sparse_local_output);
-          execute remote computations
           this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
                                         batch_size, considering_batch_size,
                                         2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
