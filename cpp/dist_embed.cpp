@@ -184,6 +184,7 @@ int main(int argc, char **argv) {
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
+    reader->parallel_write(output_file+"/sparse_embedding.txt",sparse_input.get()->coords,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
   }
 
   auto end_io = std::chrono::high_resolution_clock::now();
@@ -223,7 +224,6 @@ int main(int argc, char **argv) {
 
   if (spgemm){
     sparse_input->initialize_CSR_blocks();
-    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_input->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
   }
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
