@@ -27,7 +27,7 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  template <typename INDEX_TYPE, typename VALUE_TYPE>
+  template <typename INDEX_TYPE, typename WEIGHT_VALUE, typename VALUE_TYPE>
   void parallel_read_MM(string file_path, distblas::core::SpMat<VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value) {
     MPI_Comm WORLD;
@@ -40,20 +40,20 @@ public:
     shared_ptr<CommGrid> simpleGrid;
     simpleGrid.reset(new CommGrid(WORLD, num_procs, 1));
 
-    SpParMat<INDEX_TYPE , VALUE_TYPE , SpDCCols<INDEX_TYPE, VALUE_TYPE>> G;
+    SpParMat<INDEX_TYPE , WEIGHT_VALUE , SpDCCols<INDEX_TYPE, WEIGHT_VALUE>> G;
 //    unique_ptr<PSpMat_s32p64_Int> G =
 //        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
 
     INDEX_TYPE nnz;
 
-    G.ParallelReadMM(file_path, true, maximum<VALUE_TYPE>());
+    G.ParallelReadMM(file_path, true, maximum<WEIGHT_VALUE>());
 
     nnz = G.getnnz();
     if (proc_rank == 0) {
       cout << "File reader read " << nnz << " nonzeros." << endl;
     }
-    SpTuples<int64_t, VALUE_TYPE> tups(G.seq());
-    tuple<int64_t, int64_t, VALUE_TYPE> *values = tups.tuples;
+    SpTuples<int64_t, WEIGHT_VALUE> tups(G.seq());
+    tuple<int64_t, int64_t, WEIGHT_VALUE> *values = tups.tuples;
 
     vector<Tuple<VALUE_TYPE>> coords;
     coords.resize(tups.getnnz());
