@@ -121,7 +121,7 @@ public:
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                 main_comm.get(), csr_block, batch_size,
-                considering_batch_size, lr, 1, true, 0, true, true, this->sparse_local_output);
+                considering_batch_size, lr, 1,  0, true, true, this->sparse_local_output);
 
             (this->sparse_local_output)->initialize_hashtables();
 
@@ -131,11 +131,11 @@ public:
                                           2,  0, this->grid->col_world_size,true,main_comm.get(),nullptr);
           }
 
-          this->execute_pull_model_computations(
-              sendbuf_ptr.get(), update_ptr.get(), i, j,
-              main_comm.get(), csr_block, batch_size,
-              considering_batch_size, lr,  1,
-              true, 0, true,false, this->sparse_local_output);
+//          this->execute_pull_model_computations(
+//              sendbuf_ptr.get(), update_ptr.get(), i, j,
+//              main_comm.get(), csr_block, batch_size,
+//              considering_batch_size, lr,  1,
+//               0, true,false, this->sparse_local_output);
           //execute remote computations
 //          this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
 //                                        batch_size, considering_batch_size,
@@ -162,8 +162,8 @@ public:
       std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch, TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_comm,
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
-      double lr,  int comm_initial_start, bool local_execution,
-      int first_execution_proc, bool communication, bool symbolic, DistributedMat* output) {
+      double lr,  int comm_initial_start,int first_execution_proc,
+      bool communication, bool symbolic, DistributedMat* output) {
 
     int proc_length = get_proc_length(beta, this->grid->col_world_size);
     int prev_start = comm_initial_start;
