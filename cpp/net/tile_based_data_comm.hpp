@@ -28,6 +28,10 @@ private:
 
   bool hash_spgemm = true;
 
+  bool embedding = false;
+
+  double merge_cost_factor = 1.0;
+
 public:
   shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
       receiver_proc_tile_map;
@@ -38,13 +42,16 @@ public:
                distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                distblas::core::SpMat<VALUE_TYPE> *sparse_local,
                Process3DGrid *grid, double alpha, int total_batches,
-               double tile_width_fraction, bool hash_spgemm = true)
+               double tile_width_fraction, bool hash_spgemm = true,
+               bool embedding = false, double merge_cost_factor = 1.0)
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
     tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
     this->total_batches = total_batches;
     this->tile_width_fraction = tile_width_fraction;
     this->hash_spgemm = hash_spgemm;
+    this->embedding = embedding;
+    this->merge_cost_factor = merge_cost_factor;
     SparseTile<INDEX_TYPE, VALUE_TYPE>::tile_width_fraction =
         tile_width_fraction;
     receiver_proc_tile_map =
@@ -83,7 +90,7 @@ public:
     add_tiles(total_tiles, "Total Tiles");
 
     if (alpha == 0) {
-      #pragma omp parallel for
+#pragma omp parallel for
       for (int i = 0; i < total_batches; i++) {
         INDEX_TYPE row_starting_index_receiver =
             i * sp_local_receiver->batch_size;
@@ -129,7 +136,7 @@ public:
                 col_starting_index_receiver;
             (*receiver_proc_tile_map)[i][j][k].col_end_index =
                 col_end_index_receiver;
-            (*receiver_proc_tile_map)[i][j][k].dimension=embedding_dim;
+            (*receiver_proc_tile_map)[i][j][k].dimension = embedding_dim;
 
             (*sender_proc_tile_map)[i][j][k].id = k;
             (*sender_proc_tile_map)[i][j][k].row_starting_index =
@@ -140,7 +147,7 @@ public:
                 col_starting_index_sender;
             (*sender_proc_tile_map)[i][j][k].col_end_index =
                 col_end_index_sender;
-            (*sender_proc_tile_map)[i][j][k].dimension=embedding_dim;
+            (*sender_proc_tile_map)[i][j][k].dimension = embedding_dim;
           }
         }
       }
@@ -163,8 +170,11 @@ public:
       // This represents the case for pulling
       this->sparse_local->get_transferrable_datacount(
           sender_proc_tile_map.get(), total_batches, true, false);
-      this->sp_local_sender->get_transferrable_datacount(
-          sender_proc_tile_map.get(), total_batches, true, hash_spgemm);
+
+      if (embedding) {
+        this->sparse_local->get_transferrable_datacount(
+            receiver_proc_tile_map.get(), total_batches, false, false);
+      }
 
       int tiles_per_process =
           SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
@@ -202,6 +212,9 @@ public:
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
 
+      send_tile_meta->clear();
+      send_tile_meta->resize(itr);
+
 #pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
@@ -210,18 +223,59 @@ public:
         auto offset = j * per_process_messages;
         auto index = offset + i * tiles_per_process + k;
         TileTuple<INDEX_TYPE> t = (*receive_tile_meta)[index];
-        if (t.batch_id == i and t.tile_id == k) {
-          (*receiver_proc_tile_map)[i][j][k].total_receivable_datacount =
-              t.count;
-          (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount =
-              t.send_merge_count;
-          if (t.count <= t.send_merge_count) {
+        if (embedding and (t.batch_id == i and t.tile_id == k)) {
+          TileTuple<INDEX_TYPE> st;
+          st.batch_id = i;
+          st.tile_id = k;
+          auto remote_cost = (merge_cost_factor*t.send_merge_count) +  (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount);
+          if (t.count <= remote_cost) {
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
+            st.mode = 1;
           } else {
             (*receiver_proc_tile_map)[i][j][k]
-                .initialize_dataCache(); // initialize data cache to receive
+                .initialize_dataCache(); // initialize data cache to receive//
                                          // remote computed data
+            st.mode = 0;
           }
+          (*send_tile_meta)[index] = st;
+        } else {
+          if (t.batch_id == i and t.tile_id == k) {
+            (*receiver_proc_tile_map)[i][j][k].total_receivable_datacount =
+                t.count;
+            (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount =
+                t.send_merge_count;
+            if (t.count <= t.send_merge_count) {
+              (*receiver_proc_tile_map)[i][j][k].mode = 0;
+            } else {
+              (*receiver_proc_tile_map)[i][j][k]
+                  .initialize_dataCache(); // initialize data cache to receive
+                                           // remote computed data
+            }
+          }
+        }
+      }
+
+      (receive_tile_meta)->clear();
+      (receive_tile_meta)->resize(itr);
+
+      if (embedding) {
+        MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
+                     (*receive_tile_meta).data(), per_process_messages,
+                     TILETUPLE, this->grid->col_world);
+
+#pragma omp parallel for
+        for (auto in = 0; in < itr; in++) {
+          auto i = in / (this->grid->col_world_size * tiles_per_process);
+          auto j = (in / tiles_per_process) % this->grid->col_world_size;
+          auto k = in % tiles_per_process;
+          auto offset = j * per_process_messages;
+          auto index = offset + i * tiles_per_process + k;
+          TileTuple<INDEX_TYPE> st = (*receive_tile_meta)[index];
+          if (st.batch_id == i and st.tile_id == k)){
+              if (st.mode == 0) {
+                (*sender_proc_tile_map)[i][j][k].mode = 0;
+              }
+            }
         }
       }
     }
@@ -435,7 +489,8 @@ public:
       for (int tile = start_tile; tile < end_tile; tile++) {
         if ((*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
             0) {
-          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].initialize_CSR_blocks();
+          (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
+              .initialize_CSR_blocks();
           for (INDEX_TYPE index =
                    (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile]
                        .row_starting_index;
@@ -462,7 +517,7 @@ public:
 
               auto row_index_offset = latest.rows[0];
               auto col_index_offset = latest.rows[1];
-              if (row_index_offset >= row_max-3 or
+              if (row_index_offset >= row_max - 3 or
                   col_index_offset >= sp_tuple_max_dim) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
                 current.rows[0] =
@@ -503,7 +558,8 @@ public:
                                  1] = latest;
               if (remaining_data_items > 0) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-                current.rows[0] =2; // rows first two indices are already taken for metadata
+                current.rows[0] =
+                    2; // rows first two indices are already taken for metadata
                 current.rows[1] = 0;
                 (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                 total_send_count++;
@@ -515,7 +571,8 @@ public:
                 col_index_offset = latest.rows[1];
                 latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
                 latest.rows[row_index_offset + 1] = remaining_data_items;
-                latest.rows[row_index_offset + 2] =static_cast<INDEX_TYPE>(tile);
+                latest.rows[row_index_offset + 2] =
+                    static_cast<INDEX_TYPE>(tile);
                 latest.rows[0] = row_index_offset + 3;
                 latest.rows[1] = latest.rows[1] + remaining_data_items;
 
@@ -572,7 +629,6 @@ public:
     stop_clock_and_add(t, "Communication Time");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
                                        batch_id);
-
   }
 
   inline void store_remotely_computed_data(
@@ -580,7 +636,7 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id) {
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
@@ -591,7 +647,8 @@ public:
           auto key = (*receivebuf)[j].rows[k];
           auto data_count = (*receivebuf)[j].rows[k + 1];
           auto tile = (*receivebuf)[j].rows[k + 2];
-          SparseCacheEntry<VALUE_TYPE> cache_entry =(*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
+          SparseCacheEntry<VALUE_TYPE> cache_entry =
+              (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key];
           auto entry_offset = cache_entry.cols.size();
           cache_entry.cols.resize(entry_offset + data_count);
           cache_entry.values.resize(entry_offset + data_count);
@@ -602,7 +659,8 @@ public:
                (*receivebuf)[j].values.begin() + offset_so_far + data_count,
                cache_entry.values.begin() + entry_offset);
           offset_so_far += data_count;
-          (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =cache_entry;
+          (*(*receiver_proc_tile_map)[batch_id][i][tile].dataCachePtr)[key] =
+              cache_entry;
         }
       }
     }
