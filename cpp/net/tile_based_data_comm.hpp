@@ -271,7 +271,7 @@ public:
           auto offset = j * per_process_messages;
           auto index = offset + i * tiles_per_process + k;
           TileTuple<INDEX_TYPE> st = (*receive_tile_meta)[index];
-          if (st.batch_id == i and st.tile_id == k)){
+          if (st.batch_id == i and st.tile_id == k){
               if (st.mode == 0) {
                 (*sender_proc_tile_map)[i][j][k].mode = 0;
               }
