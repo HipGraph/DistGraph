@@ -27,7 +27,7 @@ public:
    * Interface for parallel reading of Matrix Market formatted files
    * @param file_path
    */
-  template <typename INDEX_TYPE ,VALUE_TYPE>
+  template <typename INDEX_TYPE ,typename VALUE_TYPE>
   void parallel_read_MM(string file_path, distblas::core::SpMat<VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value) {
     MPI_Comm WORLD;
@@ -40,7 +40,7 @@ public:
     shared_ptr<CommGrid> simpleGrid;
     simpleGrid.reset(new CommGrid(WORLD, num_procs, 1));
 
-    SpParMat<INDEX_TYPE , VALUE_TYPE , SpDCCols<INDEX_TYPE, VALUE_TYPE>> G
+    SpParMat<INDEX_TYPE , VALUE_TYPE , SpDCCols<INDEX_TYPE, VALUE_TYPE>> G;
 //    unique_ptr<PSpMat_s32p64_Int> G =
 //        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
 
