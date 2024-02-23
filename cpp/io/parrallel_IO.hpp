@@ -41,8 +41,8 @@ public:
     simpleGrid.reset(new CommGrid(WORLD, num_procs, 1));
 
     SpParMat<INDEX_TYPE , WEIGHT_VALUE , SpDCCols<INDEX_TYPE, WEIGHT_VALUE>> G(simpleGrid);
-    unique_ptr<PSpMat_s32p64_Int> G =
-        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
+//    unique_ptr<PSpMat_s32p64_Int> G =
+//        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
 
     INDEX_TYPE nnz;
 
