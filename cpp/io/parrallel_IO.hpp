@@ -258,8 +258,10 @@ public:
         INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
         INDEX_TYPE col_index = (*handle).col_idx[j];
         VALUE_TYPE value = (*handle).values[j];
+        cout<<value<<" "
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", index, col_index,value);
       }
+      cout<<endl;
       char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
       if (buffer == nullptr) {
         // Handle allocation failure
