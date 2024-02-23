@@ -184,7 +184,6 @@ int main(int argc, char **argv) {
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
-    reader->parallel_write(output_file+"/sparse_embedding.txt",sparse_input.get()->coords,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
   }
 
   auto end_io = std::chrono::high_resolution_clock::now();
