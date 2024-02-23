@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
             shared_sparseMat.get(), shared_sparseMat_receiver.get(),
             shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
             grid.get(),
-            alpha, beta,col_major,sync_comm, tile_width_fraction));
+            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;

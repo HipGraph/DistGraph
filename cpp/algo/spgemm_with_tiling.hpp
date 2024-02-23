@@ -39,17 +39,21 @@ private:
 
   double tile_width_fraction;
 
+  bool hash_spgemm=false;
+
 public:
   SpGEMMAlgoWithTiling(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
              distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
              distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
              distblas::core::SpMat<VALUE_TYPE> *sparse_local,
              distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
-             Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm, double tile_width_fraction)
+             Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm, double tile_width_fraction, bool hash_spgemm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local), grid(grid),
         alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),
-        sparse_local_output(sparse_local_output), tile_width_fraction(tile_width_fraction) {}
+        sparse_local_output(sparse_local_output), tile_width_fraction(tile_width_fraction),{
+    this->hash_spgemm=hash_spgemm;
+  }
 
 
 
@@ -75,7 +79,7 @@ public:
     // fetch initial embeddings
     auto main_comm = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
         new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,tile_width_fraction));
+            sp_local_receiver, sp_local_sender, sparse_local, grid,  alpha,batches,tile_width_fraction,hash_spgemm));
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> update_ptr = unique_ptr<std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
@@ -256,7 +260,6 @@ public:
               auto dst_start_index = sp_tile.col_start_index;
               auto dst_end_index = sp_tile.col_end_index;
               if (symbolic){
-
                 sp_tile.initialize_output_DS_if(0);
               }
 

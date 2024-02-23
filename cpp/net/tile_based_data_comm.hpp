@@ -26,7 +26,7 @@ private:
   double tile_width_fraction;
   int tiles_per_process_row;
 
-  bool spgemm = true;
+  bool hash_spgemm = true;
 
 public:
   shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
@@ -38,13 +38,13 @@ public:
                distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                distblas::core::SpMat<VALUE_TYPE> *sparse_local,
                Process3DGrid *grid, double alpha, int total_batches,
-               double tile_width_fraction, bool spgemm = true)
+               double tile_width_fraction, bool hash_spgemm = true)
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
     tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
     this->total_batches = total_batches;
     this->tile_width_fraction = tile_width_fraction;
-    this->spgemm = spgemm;
+    this->hash_spgemm = hash_spgemm;
     SparseTile<INDEX_TYPE, VALUE_TYPE>::tile_width_fraction =
         tile_width_fraction;
     receiver_proc_tile_map =
@@ -62,7 +62,7 @@ public:
                 grid->col_world_size,
                 vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>(
                     tiles_per_process_row,
-                    SparseTile<INDEX_TYPE, VALUE_TYPE>(grid, spgemm))));
+                    SparseTile<INDEX_TYPE, VALUE_TYPE>(grid, hash_spgemm))));
 
     auto tiles_per_process =
         SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
@@ -164,7 +164,7 @@ public:
       this->sparse_local->get_transferrable_datacount(
           sender_proc_tile_map.get(), total_batches, true, false);
       this->sp_local_sender->get_transferrable_datacount(
-          sender_proc_tile_map.get(), total_batches, true, spgemm);
+          sender_proc_tile_map.get(), total_batches, true, hash_spgemm);
 
       int tiles_per_process =
           SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
