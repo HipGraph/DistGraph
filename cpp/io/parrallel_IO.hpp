@@ -12,7 +12,7 @@ using namespace distblas::core;
 using namespace combblas;
 namespace distblas::io {
 
-typedef SpParMat<int64_t, VALUE_TYPE , SpDCCols<int32_t, VALUE_TYPE>> PSpMat_s32p64_Int;
+typedef SpParMat<int64_t , double , SpDCCols<int64_t, double>> PSpMat_s32p64_Int;
 
 /**
  * This class implements IO operations of DistBlas library.
@@ -45,7 +45,7 @@ public:
 
     INDEX_TYPE nnz;
 
-    G.get()->ParallelReadMM(file_path, true, maximum<VALUE_TYPE>());
+    G.get()->ParallelReadMM(file_path, true, maximum<double>());
 
     nnz = G.get()->getnnz();
     if (proc_rank == 0) {
@@ -65,7 +65,7 @@ public:
         coords[i].value = get<1>(values[i]);
       } else {
         coords[i].value = get<2>(values[i]);
-        cout<<coords[i].value<<" "<<get<2>(values[i])<<" ";
+        cout<<"value "<<coords[i].value<<" "
       }
     }
 
