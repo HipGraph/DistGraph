@@ -816,6 +816,9 @@ public:
           auto data_count = (*receivebuf)[j].rows[k + 1];
           auto tile = (*receivebuf)[j].rows[k + 2];
           SparseTile<INDEX_TYPE,VALUE_TYPE>&spTile = receive_computed_data?(*receiver_proc_tile_map)[batch_id][i][tile]:(*sender_proc_tile_map)[batch_id][i][tile];
+          if (spTile.mode==0){
+            cout<<" rank "<<this->grid->rank_in_col<<" wrong tile received  rank "<<i<<" batch "<<batch_id<<"tile"<<tile<<endl;
+          }
 
 //          SparseCacheEntry<VALUE_TYPE> cache_entry = (*spTile.dataCachePtr)[key];
 //          auto entry_offset = cache_entry.cols.size();
