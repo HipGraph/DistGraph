@@ -100,52 +100,52 @@ public:
 
     int considering_batch_size = batch_size;
 
-//    for (int i = 0; i < iterations; i++) {
-//
-//      for (int j = 0; j < batches; j++) {
-//        cout<<" rank "<<grid->rank_in_col<<" batch "<<j<<endl;
-//        if (j == batches - 1) {
-//          considering_batch_size = last_batch_size;
-//        }
-//
-//
-//        // One process computations without MPI operations
-//        if (this->grid->col_world_size == 1) {
-//          // local computations for 1 process
-//          this->calc_t_dist_grad_rowptr(csr_block,  lr, i,j,
-//                                        batch_size, considering_batch_size,
-//                                        0,  0, 0,false,main_comm.get(),this->sparse_local_output);
-//
-//        } else {
-//          if( (this->sparse_local_output)->hash_spgemm) {
-//            this->execute_pull_model_computations(
-//                sendbuf_ptr.get(), update_ptr.get(), i, j,
-//                main_comm.get(), csr_block, batch_size,
-//                considering_batch_size, lr, 1,  0, true, true, this->sparse_local_output);
-//
-//            (this->sparse_local_output)->initialize_hashtables();
-//
-//            //compute remote computations
-//            this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
-//                                          batch_size, considering_batch_size,
-//                                          2,  0, this->grid->col_world_size,true,main_comm.get(),nullptr);
-//          }
-//
-//          this->execute_pull_model_computations(
-//              sendbuf_ptr.get(), update_ptr.get(), i, j,
-//              main_comm.get(), csr_block, batch_size,
-//              considering_batch_size, lr,  1,
-//               0, true,false, this->sparse_local_output);
+    for (int i = 0; i < iterations; i++) {
+
+      for (int j = 0; j < batches; j++) {
+        cout<<" rank "<<grid->rank_in_col<<" batch "<<j<<endl;
+        if (j == batches - 1) {
+          considering_batch_size = last_batch_size;
+        }
+
+
+        // One process computations without MPI operations
+        if (this->grid->col_world_size == 1) {
+          // local computations for 1 process
+          this->calc_t_dist_grad_rowptr(csr_block,  lr, i,j,
+                                        batch_size, considering_batch_size,
+                                        0,  0, 0,false,main_comm.get(),this->sparse_local_output);
+
+        } else {
+          if( (this->sparse_local_output)->hash_spgemm) {
+            this->execute_pull_model_computations(
+                sendbuf_ptr.get(), update_ptr.get(), i, j,
+                main_comm.get(), csr_block, batch_size,
+                considering_batch_size, lr, 1,  0, true, true, this->sparse_local_output);
+
+            (this->sparse_local_output)->initialize_hashtables();
+
+            //compute remote computations
+            this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
+                                          batch_size, considering_batch_size,
+                                          2,  0, this->grid->col_world_size,true,main_comm.get(),nullptr);
+          }
+
+          this->execute_pull_model_computations(
+              sendbuf_ptr.get(), update_ptr.get(), i, j,
+              main_comm.get(), csr_block, batch_size,
+              considering_batch_size, lr,  1,
+               0, true,false, this->sparse_local_output);
 //          this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
 //                                        batch_size, considering_batch_size,
 //                                        2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
 //          main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
 //          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
-//        }
-//        total_memory += get_memory_usage();
-//      }
-//      (this->sparse_local)->purge_cache();
-//    }
+        }
+        total_memory += get_memory_usage();
+      }
+      (this->sparse_local)->purge_cache();
+    }
     (this->sparse_local_output)->initialize_CSR_blocks();
     total_memory = total_memory / (iterations * batches);
     add_memory(total_memory, "Memory usage");
