@@ -597,28 +597,28 @@ public:
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
-//    stop_clock_and_add(t, "Communication Time");
-//
-//    for (int i = 0; i < this->grid->col_world_size; i++) {
-//      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
-//                                              this->receive_counts_cyclic[i - 1]
-//                                        : this->rdispls_cyclic[i];
-//      total_receive_count += this->receive_counts_cyclic[i];
-//    }
-//
-//    if (total_receive_count > 0) {
-//      receivebuf->resize(total_receive_count);
-//    }
-//
-//    add_datatransfers(total_receive_count, "Data transfers");
-//    //
-//    t = start_clock();
-//    MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
-//                  this->sdispls_cyclic.data(), SPARSETUPLE,
-//                  (*receivebuf).data(), this->receive_counts_cyclic.data(),
-//                  this->rdispls_cyclic.data(), SPARSETUPLE,
-//                  this->grid->col_world);
-//    stop_clock_and_add(t, "Communication Time");
+    stop_clock_and_add(t, "Communication Time");
+
+    for (int i = 0; i < this->grid->col_world_size; i++) {
+      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
+                                              this->receive_counts_cyclic[i - 1]
+                                        : this->rdispls_cyclic[i];
+      total_receive_count += this->receive_counts_cyclic[i];
+    }
+
+    if (total_receive_count > 0) {
+      receivebuf->resize(total_receive_count);
+    }
+
+    add_datatransfers(total_receive_count, "Data transfers");
+    //
+    t = start_clock();
+    MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
+                  this->sdispls_cyclic.data(), SPARSETUPLE,
+                  (*receivebuf).data(), this->receive_counts_cyclic.data(),
+                  this->rdispls_cyclic.data(), SPARSETUPLE,
+                  this->grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
 //    this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
 //                                       batch_id,false);
   }
