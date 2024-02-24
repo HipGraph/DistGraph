@@ -19,6 +19,7 @@
 #include "algo/spgemm.hpp"
 #include "net/tile_based_data_comm.hpp"
 #include "algo/spgemm_with_tiling.hpp"
+#include "algo/sparse_embedding.hpp"
 
 using json = nlohmann::json;
 
@@ -260,8 +261,15 @@ int main(int argc, char **argv) {
 //                    grid.get(),
 //                    alpha, beta,col_major,sync_comm));
 
-    unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
+//    unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//        new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
+//            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+//            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+//            grid.get(),
+//            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+
+    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
+        new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
             shared_sparseMat.get(), shared_sparseMat_receiver.get(),
             shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
             grid.get(),
@@ -269,7 +277,7 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
-    spgemm_algo.get()->algo_spgemm(iterations, batch_size,lr);
+    spgemm_algo.get()->algo_sparse_embedding(iterations, batch_size,lr);
     cout << " rank " << rank << " spgemm algo completed  " << endl;
     output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
     output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
