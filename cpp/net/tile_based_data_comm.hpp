@@ -582,13 +582,16 @@ public:
         }
       }
     }
-    (*sendbuf_cyclic).resize(total_send_count);
-    for (int i = 0; i < this->grid->col_world_size; i++) {
-      this->sdispls_cyclic[i] = (i > 0) ? this->sdispls_cyclic[i - 1] +
-                                              this->send_counts_cyclic[i - 1]
-                                        : this->sdispls_cyclic[i];
-      copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
-           (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
+    if (total_send_count>0) {
+      (*sendbuf_cyclic).resize(total_send_count);
+
+      for (int i = 0; i < this->grid->col_world_size; i++) {
+        this->sdispls_cyclic[i] = (i > 0) ? this->sdispls_cyclic[i - 1] +
+                                                this->send_counts_cyclic[i - 1]
+                                          : this->sdispls_cyclic[i];
+        copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
+             (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
+      }
     }
     auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
