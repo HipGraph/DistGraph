@@ -593,10 +593,10 @@ public:
              (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
       }
     }
-//    auto t = start_clock();
-//    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
-//                 this->receive_counts_cyclic.data(), 1, MPI_INT,
-//                 this->grid->col_world);
+    auto t = start_clock();
+    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
+                 this->receive_counts_cyclic.data(), 1, MPI_INT,
+                 this->grid->col_world);
 //    stop_clock_and_add(t, "Communication Time");
 //
 //    for (int i = 0; i < this->grid->col_world_size; i++) {
