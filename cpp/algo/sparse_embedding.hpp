@@ -136,11 +136,11 @@ public:
               main_comm.get(), csr_block, batch_size,
               considering_batch_size, lr,  1,
                0, true,false, this->sparse_local_output);
-//          this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
-//                                        batch_size, considering_batch_size,
-//                                        2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
-//          main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
-//          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
+          this->calc_t_dist_grad_rowptr((this->sp_local_sender)->csr_local_data.get(),  lr, i,j,
+                                        batch_size, considering_batch_size,
+                                        2,  0, this->grid->col_world_size,false,main_comm.get(),nullptr);
+          main_comm->receive_remotely_computed_data(sendbuf_ptr.get(),update_ptr.get(),i,j,0,this->grid->col_world_size,0,total_tiles);
+          this->merge_remote_computations(j,batch_size,this->sparse_local_output,main_comm.get());
         }
         total_memory += get_memory_usage();
       }
@@ -196,9 +196,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-//    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
-//                                  batch_size, considering_batch_size,
-//                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
+                                  batch_size, considering_batch_size,
+                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
