@@ -174,7 +174,8 @@ public:
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf,  iteration,
                                         batch, k, end_process,0,tiles_per_process);
-
+        main_comm->transfer_remotely_computable_data(sendbuf, receivebuf,  iteration,
+                                        batch, k, end_process,0,tiles_per_process);
       }
       if (k == comm_initial_start) {
         // local computation
