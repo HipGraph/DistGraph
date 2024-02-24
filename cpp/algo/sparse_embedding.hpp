@@ -233,10 +233,10 @@ public:
                 auto source_end_index =  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_end_index;
                 auto dst_start_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
                 auto dst_end_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
-//                calc_embedding_row_major(source_start_index, source_end_index,
-//                                         dst_start_index, dst_end_index,
-//                                         csr_block, lr, batch_id, batch_size,
-//                                         block_size, symbolic,mode,output);
+                calc_embedding_row_major(source_start_index, source_end_index,
+                                         dst_start_index, dst_end_index,
+                                         csr_block, lr, batch_id, batch_size,
+                                         block_size, symbolic,mode,output);
                 if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }
@@ -304,6 +304,9 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
+              if (arrayMap.find(dst_id) == arrayMap.end()){
+                cout<<" rank "<<grid->rank_in_col<<" dst_id  "<<dst_id<<" not found "<<endl;
+              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values =arrayMap[dst_id].values;
 
