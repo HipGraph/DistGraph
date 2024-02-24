@@ -619,8 +619,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-//    this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
-//                                       batch_id,false);
+    this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,batch_id,false);
   }
 
 
@@ -805,7 +804,7 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id, bool receive_computed_data) {
 
-#pragma omp parallel for
+//#pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
@@ -816,19 +815,19 @@ public:
           auto key = (*receivebuf)[j].rows[k];
           auto data_count = (*receivebuf)[j].rows[k + 1];
           auto tile = (*receivebuf)[j].rows[k + 2];
-          SparseTile<INDEX_TYPE,VALUE_TYPE>&spTile = receive_computed_data?(*receiver_proc_tile_map)[batch_id][i][tile]:(*sender_proc_tile_map)[batch_id][i][tile];
-          SparseCacheEntry<VALUE_TYPE> cache_entry = (*spTile.dataCachePtr)[key];
-          auto entry_offset = cache_entry.cols.size();
-          cache_entry.cols.resize(entry_offset + data_count);
-          cache_entry.values.resize(entry_offset + data_count);
-          copy((*receivebuf)[j].cols.begin() + offset_so_far,
-               (*receivebuf)[j].cols.begin() + offset_so_far + data_count,
-               cache_entry.cols.begin() + entry_offset);
-          copy((*receivebuf)[j].values.begin() + offset_so_far,
-               (*receivebuf)[j].values.begin() + offset_so_far + data_count,
-               cache_entry.values.begin() + entry_offset);
-          offset_so_far += data_count;
-          (*spTile.dataCachePtr)[key] =cache_entry;
+//          SparseTile<INDEX_TYPE,VALUE_TYPE>&spTile = receive_computed_data?(*receiver_proc_tile_map)[batch_id][i][tile]:(*sender_proc_tile_map)[batch_id][i][tile];
+//          SparseCacheEntry<VALUE_TYPE> cache_entry = (*spTile.dataCachePtr)[key];
+//          auto entry_offset = cache_entry.cols.size();
+//          cache_entry.cols.resize(entry_offset + data_count);
+//          cache_entry.values.resize(entry_offset + data_count);
+//          copy((*receivebuf)[j].cols.begin() + offset_so_far,
+//               (*receivebuf)[j].cols.begin() + offset_so_far + data_count,
+//               cache_entry.cols.begin() + entry_offset);
+//          copy((*receivebuf)[j].values.begin() + offset_so_far,
+//               (*receivebuf)[j].values.begin() + offset_so_far + data_count,
+//               cache_entry.values.begin() + entry_offset);
+//          offset_so_far += data_count;
+//          (*spTile.dataCachePtr)[key] =cache_entry;
         }
       }
     }
