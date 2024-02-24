@@ -196,9 +196,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-//    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
-//                                  batch_size, considering_batch_size,
-//                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
+    this->calc_t_dist_grad_rowptr(csr_block,  lr, iteration,batch,
+                                  batch_size, considering_batch_size,
+                                  1,prev_start, prev_end_process,symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -233,10 +233,10 @@ public:
                 auto source_end_index =  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_end_index;
                 auto dst_start_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
                 auto dst_end_index = (*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
-                calc_embedding_row_major(source_start_index, source_end_index,
-                                         dst_start_index, dst_end_index,
-                                         csr_block, lr, batch_id, batch_size,
-                                         block_size, symbolic,mode,output);
+//                calc_embedding_row_major(source_start_index, source_end_index,
+//                                         dst_start_index, dst_end_index,
+//                                         csr_block, lr, batch_id, batch_size,
+//                                         block_size, symbolic,mode,output);
                 if (itr==0 and !symbolic){
                   add_tiles(1,"Locally Computed Tiles");
                 }
