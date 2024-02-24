@@ -808,7 +808,6 @@ public:
     for (int i = 0; i < this->grid->col_world_size; i++) {
       INDEX_TYPE base_index = this->rdispls_cyclic[i];
       INDEX_TYPE count = this->receive_counts_cyclic[i];
-      cout<<" rank "<<this->grid->rank_in_col<<" base_index "<<base_index<<" count "<<count<<endl;
       for (INDEX_TYPE j = base_index; j < base_index + count; j++) {
         auto row_offset = (*receivebuf)[j].rows[0];
         auto offset_so_far = 0;
