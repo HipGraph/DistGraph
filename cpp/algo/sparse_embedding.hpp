@@ -154,7 +154,7 @@ public:
               j, batch_size, this->sparse_local_output, main_comm.get());
         }
         total_memory += get_memory_usage();
-//        this->merge_output_to_input();
+        this->merge_output_to_input();
       }
       (this->sparse_local)->purge_cache();
     }
