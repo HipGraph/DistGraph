@@ -361,14 +361,16 @@ public:
       auto rows = handle->rowStart.size()-1;
       auto cols = this->proc_col_width;
       dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
+      #pragma omp parallel for
       for(auto i=0;i<handle->rowStart.size()-1;i++){
         for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
          auto d = handle->col_idx[j];
          auto value = handle->values[j];
-         (*dense_representation)[i][d]=value;
+         if (d<cols) {
+           (*dense_representation)[i][d] = value;
+         }
         }
       }
-      cout<<" rank "<<grid->rank_in_col<<" dense representaion completed "<<rows<<" cols "<<cols<<endl;
     }
   }
 
