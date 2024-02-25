@@ -185,15 +185,15 @@ public:
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process);
-//        main_comm->transfer_remotely_computable_data(
-//            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
-//            tiles_per_process);
+        main_comm->transfer_remotely_computable_data(
+            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
+            tiles_per_process);
       }
       if (k == comm_initial_start) {
         // local computation
-//        this->calc_t_dist_grad_rowptr(
-//            csr_block, lr, iteration, batch, batch_size, considering_batch_size,
-//            0, first_execution_proc, prev_start, symbolic, main_comm, output);
+        this->calc_t_dist_grad_rowptr(
+            csr_block, lr, iteration, batch, batch_size, considering_batch_size,
+            0, first_execution_proc, prev_start, symbolic, main_comm, output);
 
       } else if (k > comm_initial_start) {
         int prev_end_process =
@@ -208,9 +208,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-//    this->calc_t_dist_grad_rowptr(
-//        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
-//        prev_start, prev_end_process, symbolic, main_comm, output);
+    this->calc_t_dist_grad_rowptr(
+        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
+        prev_start, prev_end_process, symbolic, main_comm, output);
     // dense_local->invalidate_cache(i, j, true);
   }
 
