@@ -361,7 +361,7 @@ public:
       auto cols = this->proc_col_width;
       dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
       distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
-      for(auto i=0;i<handle->rowStart.size();i++){
+      for(auto i=0;i<rows;i++){
         for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
          auto d = handle->col_idx[j];
          auto value = handle->values[j];
