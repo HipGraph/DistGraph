@@ -64,8 +64,11 @@ public:
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
   }
 
-  void initialize_CSR_from_dense(INDEX_TYPE proc_row_width,INDEX_TYPE gCols, vector<vector<VALUE_TYPE>> *dense_collector){
+  void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols, vector<vector<VALUE_TYPE>> *dense_collector=nullptr){
     unique_ptr<vector<Tuple<VALUE_TYPE>>> coords_ptr= make_unique<vector<Tuple<VALUE_TYPE>>>(vector<Tuple<VALUE_TYPE>>());
+    if (dense_collector==nullptr) {
+      dense_collector = this->dense_collector.get();
+    }
 #pragma omp parallel for
     for(auto i=0;i<dense_collector->size();i++) {
       vector<Tuple<VALUE_TYPE>> coords_local;
@@ -82,7 +85,7 @@ public:
 #pragma omp critical
       (*coords_ptr).insert((*coords_ptr).end(), coords_local.begin(), coords_local.end());
     }
-    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
+//    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
   }
 
   void initialize_CSR_from_sparse_collector() {

@@ -532,7 +532,7 @@ public:
 
   void merge_output_to_input(int batch_id) {
     cout<<" rank  "<<grid->rank_in_col<<" start building  "<<batch_id<<endl;
-    this->sparse_local->initialize_CSR_from_dense( this->sparse_local->proc_row_width,embedding_dim,
+    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,
                                                             this->sparse_local->dense_representation.get());
     cout<<" rank  "<<grid->rank_in_col<<" start building  completed"<<batch_id<<endl;
   }
