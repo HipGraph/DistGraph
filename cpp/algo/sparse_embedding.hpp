@@ -93,7 +93,7 @@ public:
         unique_ptr<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>(
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
-    this->sparse_local->build_dense_represention();
+    this->sparse_local->build_computable_represention();
     main_comm.get()->onboard_data();
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
