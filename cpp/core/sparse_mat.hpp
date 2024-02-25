@@ -355,9 +355,10 @@ public:
     }
   }
 
-  void build_dense_represention(){
+  void build_computable_represention(){
     if (this->csr_local_data != nullptr and this->csr_local_data->handler != nullptr){
       distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
+      if (!this->hash_spgemm){
       auto rows = handle->rowStart.size()-1;
       auto cols = this->proc_col_width;
       dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
@@ -371,6 +372,8 @@ public:
          }
         }
       }
+    }}else {
+      //TODO: implement for hash_spgemm
     }
   }
 

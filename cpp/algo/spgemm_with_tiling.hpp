@@ -283,7 +283,7 @@ public:
       #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
-        INDEX_TYPE index = i - source_start_index;
+        INDEX_TYPE index = (mode==0 or mode==1)?i:i-source_start_index;
         int max_reach=0;
 
         for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
