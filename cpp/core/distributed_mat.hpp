@@ -40,12 +40,9 @@ public:
     }
   }
 
-  void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols, vector<vector<VALUE_TYPE>> *dense_collector=nullptr, bool reset_dense=true){
+  void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols, bool reset_dense=true){
     unique_ptr<vector<Tuple<VALUE_TYPE>>> coords_ptr= make_unique<vector<Tuple<VALUE_TYPE>>>(vector<Tuple<VALUE_TYPE>>());
 
-    if (dense_collector==nullptr) {
-      dense_collector = this->dense_collector.get();
-    }
 #pragma omp parallel for
     for(auto i=0;i<dense_collector->size();i++) {
       vector<Tuple<VALUE_TYPE>> coords_local;

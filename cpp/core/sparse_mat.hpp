@@ -291,8 +291,6 @@ public:
 
   unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
-  unique_ptr<vector<vector<VALUE_TYPE>>> dense_representation;
-
 
 
 
@@ -355,28 +353,30 @@ public:
     }
   }
 
-  void build_computable_represention(){
-    if (this->csr_local_data != nullptr and this->csr_local_data->handler != nullptr){
-      distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
-      if (!this->hash_spgemm){
-      auto rows = handle->rowStart.size()-1;
-      auto cols = this->proc_col_width;
-      dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
-      #pragma omp parallel for
-      for(auto i=0;i<handle->rowStart.size()-1;i++){
-        for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
-         auto d = handle->col_idx[j];
-         auto value = handle->values[j];
-         if (d<cols) {
-           (*dense_representation)[i][d] = value;
-         }
+  void build_computable_represention() {
+    if (this->csr_local_data != nullptr and
+        this->csr_local_data->handler != nullptr) {
+      distblas::core::CSRHandle *handle = this->csr_local_data->handler.get();
+      if (this->hash_spgemm) {
+        //TODO: implement hash spgemm
+      } else {
+        auto rows = handle->rowStart.size() - 1;
+        auto cols = this->proc_col_width;
+        this->dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(
+            rows, vector<VALUE_TYPE>(cols, 0));
+#pragma omp parallel for
+        for (auto i = 0; i < handle->rowStart.size() - 1; i++) {
+          for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
+            auto d = handle->col_idx[j];
+            auto value = handle->values[j];
+            if (d < cols) {
+              (*dense_collector)[i][d] = value;
+            }
+          }
         }
       }
-    }}else {
-      //TODO: implement for hash_spgemm
     }
   }
-
 
 
 
