@@ -402,7 +402,7 @@ public:
                     auto local_value = local_handle->values[local_tracker];
                     VALUE_TYPE attrc = local_value * local_value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale( * d1);
+                    VALUE_TYPE l = scale( attrc* d1);
                     (*(output->dense_collector))[index][local_d] +=  (lr)*l;
                     local_tracker++;
                     count++;
@@ -410,7 +410,7 @@ public:
                     auto remote_value = local_handle->values[remote_tracker];
                     VALUE_TYPE attrc = remote_value * remote_value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale( * d1);
+                    VALUE_TYPE l = scale( attrc* d1);
                     (*(output->dense_collector))[index][remote_d] +=  (lr)*l;
                     remote_tracker++;
                     count++;
@@ -420,7 +420,7 @@ public:
                     VALUE_TYPE value = local_value - remote_value;
                     VALUE_TYPE attrc = value * value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale( * d1);
+                    VALUE_TYPE l = scale( attrc* d1);
                     (*(output->dense_collector))[index][remote_d] +=  (lr)*l;
                     local_tracker++;
                     remote_tracker++;
