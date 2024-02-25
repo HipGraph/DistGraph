@@ -316,7 +316,7 @@ public:
     for (int tile = start_tile; tile < end_tile; tile++) {
       for (const auto &pair : (*send_indices_proc_map)[batch_id][tile]) {
         auto col_id = pair.first;
-//        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id);
+        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id);
 //        for (int i = 0; i < sending_procs.size(); i++) {
 //          if (pair.second.count(sending_procs[i]) > 0 and
 //              (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
