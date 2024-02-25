@@ -96,7 +96,6 @@ public:
 
     this->sparse_local->build_dense_represention();
     main_comm.get()->onboard_data();
-    this->merge_output_to_input();
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
     int total_tiles = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
@@ -153,7 +152,7 @@ public:
               j, batch_size, this->sparse_local_output, main_comm.get());
         }
         total_memory += get_memory_usage();
-        this->merge_output_to_input();
+        this->merge_output_to_input(j);
       }
       (this->sparse_local)->purge_cache();
     }
@@ -531,9 +530,11 @@ public:
     }
   }
 
-  void merge_output_to_input() {
+  void merge_output_to_input(int batch_id) {
+    cout<<" rank  "<<grid->rank_in_col<<" start building  "<<batch_id<<endl;
     this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,
                                                             this->sparse_local->dense_representation.get());
+    cout<<" rank  "<<grid->rank_in_col<<" start building  "<<completed<<endl;
   }
 
 
