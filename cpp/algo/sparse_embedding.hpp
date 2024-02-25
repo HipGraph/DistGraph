@@ -395,7 +395,7 @@ public:
                 int count=0;
                 while(count<total_count){
                   auto  local_d =  (local_tracker<local_tracker_end)?local_handle->col_idx[local_tracker]:INT_MAX;
-                  audo remote_d =  (remote_tracker<remote_tracker_end)?handle->col_idx[remote_tracker]:INT_MAX;
+                  auto remote_d =  (remote_tracker<remote_tracker_end)?handle->col_idx[remote_tracker]:INT_MAX;
                   if (local_d==INT_MAX and remote_d==INT_MAX){
                     break;
                   }else if (remote_d==INT_MAX or local_d<remote_d){
