@@ -357,11 +357,11 @@ public:
 
   void build_dense_represention(){
     if (this->csr_local_data != nullptr and this->csr_local_data->handler != nullptr){
-      auto rows = this->proc_row_width;
+      distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
+      auto rows = handle->rowStart.size()-1;
       auto cols = this->proc_col_width;
       dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
-      distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
-      for(auto i=0;i<rows;i++){
+      for(auto i=0;i<handle->rowStart.size()-1;i++){
         for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
          auto d = handle->col_idx[j];
          auto value = handle->values[j];
