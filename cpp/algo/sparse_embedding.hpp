@@ -384,7 +384,7 @@ public:
                   }
                 }
               } else {
-                CSRHandle* local_handle = this->sparse_local->handler.get();
+                CSRHandle* local_handle = this->sparse_local->csr_local_data->handler.get();
                 int local_count = local_handle->rowStart[index+1]-local_handle->rowStart[index];
                 int remote_count = handle->rowStart[local_dst+1] - handle->rowStart[local_dst];
                 int total_count = local_count + remote_count;
