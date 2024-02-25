@@ -95,9 +95,8 @@ public:
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
     this->sparse_local->build_dense_represention();
-    this->merge_output_to_input();
     main_comm.get()->onboard_data();
-
+    this->merge_output_to_input();
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
     int total_tiles = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
