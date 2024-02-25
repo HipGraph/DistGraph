@@ -121,34 +121,34 @@ public:
               false, main_comm.get(), this->sparse_local_output);
 
         } else {
-//          if ((this->sparse_local_output)->hash_spgemm) {
-//            this->execute_pull_model_computations(
-//                sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
-//                csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
-//                true, this->sparse_local_output);
-//
-//            (this->sparse_local_output)->initialize_hashtables();
-//
-//            // compute remote computations
-//            this->calc_t_dist_grad_rowptr(
-//                (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
-//                batch_size, considering_batch_size, 2, 0,
-//                this->grid->col_world_size, true, main_comm.get(), nullptr);
-//          }
+          if ((this->sparse_local_output)->hash_spgemm) {
+            this->execute_pull_model_computations(
+                sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
+                csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
+                true, this->sparse_local_output);
+
+            (this->sparse_local_output)->initialize_hashtables();
+
+            // compute remote computations
+            this->calc_t_dist_grad_rowptr(
+                (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
+                batch_size, considering_batch_size, 2, 0,
+                this->grid->col_world_size, true, main_comm.get(), nullptr);
+          }
 
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
-//          this->calc_t_dist_grad_rowptr(
-//              (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
-//              batch_size, considering_batch_size, 2, 0,
-//              this->grid->col_world_size, false, main_comm.get(), nullptr);
-//          main_comm->receive_remotely_computed_data(
-//              sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
-//              this->grid->col_world_size, 0, total_tiles);
-//          this->merge_remote_computations(
-//              j, batch_size, this->sparse_local_output, main_comm.get());
+          this->calc_t_dist_grad_rowptr(
+              (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
+              batch_size, considering_batch_size, 2, 0,
+              this->grid->col_world_size, false, main_comm.get(), nullptr);
+          main_comm->receive_remotely_computed_data(
+              sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
+              this->grid->col_world_size, 0, total_tiles);
+          this->merge_remote_computations(
+              j, batch_size, this->sparse_local_output, main_comm.get());
         }
         total_memory += get_memory_usage();
         this->merge_output_to_input(j);
@@ -365,9 +365,6 @@ public:
                 (*(output->sparse_data_counter))[index] =
                     std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
               } else if (output->hash_spgemm) {
-                //                cout<<" executing hash
-                //                spgemm"<<grid->rank_in_col<< "batch_id
-                //                "<<batch_id<<endl;
                 INDEX_TYPE ht_size =
                     (*(output->sparse_data_collector))[index].size();
                 for (auto k = handle->rowStart[local_dst];
@@ -530,10 +527,8 @@ public:
   }
 
   void merge_output_to_input(int batch_id) {
-    cout<<" rank  "<<grid->rank_in_col<<" start building  "<<batch_id<<endl;
     this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,
                                                             this->sparse_local->dense_representation.get(),false);
-    cout<<" rank  "<<grid->rank_in_col<<" start building  completed"<<batch_id<<endl;
   }
 
 
