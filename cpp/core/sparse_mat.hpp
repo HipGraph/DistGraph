@@ -420,12 +420,12 @@ CSRHandle  fetch_local_data(INDEX_TYPE local_key) {
      INDEX_TYPE global_key = (col_partitioned)?local_key:local_key+proc_row_width * grid->rank_in_col;
      int count = handle->rowStart[local_key + 1]-handle->rowStart[local_key];
      new_handler.row_idx.resize(1,global_key);
-//     if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
-//       new_handler.col_idx.resize(count);
-//       new_handler.values.resize(count);
-//       copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
-//       copy(handle->values.begin(),handle->values.begin()+ count,new_handler.values.begin());
-//     }
+     if(handle->rowStart[local_key + 1]-handle->rowStart[local_key]>0){
+       new_handler.col_idx.resize(count);
+       new_handler.values.resize(count);
+       copy(handle->col_idx.begin(),handle->col_idx.begin()+ count, new_handler.col_idx.begin());
+       copy(handle->values.begin(),handle->values.begin()+ count,new_handler.values.begin());
+     }
      return new_handler;
   }
 
