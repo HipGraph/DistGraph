@@ -357,7 +357,7 @@ public:
 
   void build_dense_represention(){
     if (this->csr_local_data != nullptr and this->csr_local_data->handler != nullptr){
-      auto rows = (*(this->csr_local_data->handler)).rowStart.size()-1;
+      auto rows = this->proc_row_width;
       auto cols = this->proc_col_width;
       dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
       distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
@@ -368,6 +368,7 @@ public:
          (*dense_representation)[i][d]=value;
         }
       }
+      cout<<" rank "<<grid->rank_in_col<<" dense representaion completed "<<rows<<" cols "<<cols<<endl;
     }
   }
 
