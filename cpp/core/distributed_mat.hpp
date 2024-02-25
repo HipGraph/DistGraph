@@ -85,7 +85,7 @@ public:
 #pragma omp critical
       (*coords_ptr).insert((*coords_ptr).end(), coords_local.begin(), coords_local.end());
     }
-//    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
+    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
   }
 
   void initialize_CSR_from_sparse_collector() {
