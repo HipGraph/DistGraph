@@ -164,7 +164,7 @@ public:
 //        sparse_coo.push_back(t);
 //      }
 //    }
-    std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols);
+    std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols-1);
         for (INDEX_TYPE i = 0; i < rows; ++i) {
           for(INDEX_TYPE j=0;j<expected_non_zeros;j++){
             VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));

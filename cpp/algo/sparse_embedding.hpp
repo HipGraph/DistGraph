@@ -98,11 +98,9 @@ public:
     this->merge_output_to_input();
     main_comm.get()->onboard_data();
 
-    cout << " rank " << grid->rank_in_col << " on board data completed "
-         << endl;
+    cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
-    int total_tiles =
-        SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+    int total_tiles = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
 
     CSRLocal<VALUE_TYPE> *csr_block =
         (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
@@ -156,7 +154,7 @@ public:
               j, batch_size, this->sparse_local_output, main_comm.get());
         }
         total_memory += get_memory_usage();
-        this->merge_output_to_input();
+//        this->merge_output_to_input();
       }
       (this->sparse_local)->purge_cache();
     }
