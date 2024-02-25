@@ -95,7 +95,7 @@ public:
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
     main_comm.get()->onboard_data();
-
+    this->sparse_local->build_dense_represention();
     cout << " rank " << grid->rank_in_col << " on board data completed "
          << endl;
 
@@ -154,6 +154,7 @@ public:
               j, batch_size, this->sparse_local_output, main_comm.get());
         }
         total_memory += get_memory_usage();
+        this->merge_output_to_input();
       }
       (this->sparse_local)->purge_cache();
     }
@@ -530,5 +531,13 @@ public:
       }
     }
   }
+
+  void merge_output_to_input() {
+    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,
+                                                            this->sparse_local->dense_representation.get());
+  }
+
+
+
 };
 } // namespace distblas::algo
