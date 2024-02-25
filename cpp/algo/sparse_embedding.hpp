@@ -556,7 +556,14 @@ public:
     this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
   }
 
-
+  VALUE_TYPE scale(VALUE_TYPE v) {
+    if (v > MAX_BOUND)
+      return MAX_BOUND;
+    else if (v < -MAX_BOUND)
+      return -MAX_BOUND;
+    else
+      return v;
+  }
 
 };
 } // namespace distblas::algo

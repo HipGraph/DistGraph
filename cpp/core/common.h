@@ -34,6 +34,9 @@ using INDEX_TYPE = uint64_t;
 
 using VALUE_TYPE = double;
 
+using VALUE_TYPE MAX_BOUND = 5;
+using VALUE_TYPE MIN_BOUND = -5;
+
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
