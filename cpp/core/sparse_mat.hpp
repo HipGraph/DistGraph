@@ -291,7 +291,7 @@ public:
 
   unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
-
+  unique_ptr<vector<vector<VALUE_TYPE>>> dense_representation;
 
 
 
@@ -354,6 +354,24 @@ public:
       this->initialize_CSR_from_dense_collector(this->proc_row_width,this->proc_col_width);
     }
   }
+
+  void build_dense_represention(){
+    if (this->csr_local_data != nullptr and this->csr_local_data->handler != nullptr){
+      auto rows = (*(this->csr_local_data->handler)).rowStart.size()-1;
+      auto cols = this->proc_col_width;
+      dense_representation = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(cols,0));
+      distblas::core::CSRHandle* handle = this->csr_local_data->handler.get();
+      for(auto i=0;i<handle->rowStart.size();i++){
+        for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
+         auto d = handle->col_idx[j];
+         auto value = handle->values[j];
+         (*dense_representation)[i][d]=value;
+        }
+      }
+    }
+  }
+
+
 
 
   void initialize_hashtables(){
