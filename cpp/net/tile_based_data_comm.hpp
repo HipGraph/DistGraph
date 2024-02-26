@@ -457,7 +457,7 @@ public:
 
     for (int i = 0; i < col_ids.size(); i++) {
       int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
-      if (owner_rank == grid->rank_in_col) {
+      if (owner_rank == this->grid->rank_in_col) {
         send_col_ids_list.push_back(col_ids[i]);
       } else {
         receive_col_ids_list[owner_rank].push_back(col_ids[i]);
@@ -480,9 +480,9 @@ public:
 
       this->sdispls[i] = 0;
       this->rdispls_cyclic[i] =
-          (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
-                  : rdispls_cyclic[i];
-      total_receive_count = total_receive_count + receive_counts_cyclic[i];
+          (i > 0) ? this->rdispls_cyclic[i - 1] + this->receive_counts_cyclic[i - 1]
+                  : this->rdispls_cyclic[i];
+      total_receive_count = total_receive_count + this->receive_counts_cyclic[i];
     }
 
     unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>> sendbuf =
