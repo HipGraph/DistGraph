@@ -93,7 +93,7 @@ public:
         unique_ptr<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>(
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
-    this->sparse_local->build_computable_represention();
+//    this->sparse_local->build_computable_represention();
     main_comm.get()->onboard_data();
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
@@ -186,9 +186,9 @@ public:
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process);
-        main_comm->transfer_remotely_computable_data(
-            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
-            tiles_per_process);
+//        main_comm->transfer_remotely_computable_data(
+//            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
+//            tiles_per_process);
       }
       if (k == comm_initial_start) {
         // local computation
