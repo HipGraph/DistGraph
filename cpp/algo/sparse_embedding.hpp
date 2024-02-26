@@ -403,21 +403,18 @@ public:
                   }
                 }
               } else {
-                CSRHandle *local_handle =
-                    this->sparse_local->csr_local_data->handler.get();
-                int local_count = local_handle->rowStart[index + 1] -
-                                  local_handle->rowStart[index];
-                int remote_count = handle->rowStart[local_dst + 1] -
-                                   handle->rowStart[local_dst];
+                CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
+                int local_count = (mode==2)?(*(output->dataCachePtr))[index].cols.size() :local_handle->rowStart[index + 1] - local_handle->rowStart[index];
+                int remote_count = handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
                 int total_count = local_count + remote_count;
                 int remote_tracker = handle->rowStart[local_dst];
                 int remote_tracker_end = handle->rowStart[local_dst + 1];
-                int local_tracker = local_handle->rowStart[index];
-                int local_tracker_end = local_handle->rowStart[index + 1];
+                int local_tracker = (mode==2)?0:local_handle->rowStart[index];
+                int local_tracker_end = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle->rowStart[index + 1];
                 int count = 0;
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
-                                     ? local_handle->col_idx[local_tracker]
+                                     ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle->col_idx[local_tracker]
                                      : INT_MAX;
                   auto remote_d = (remote_tracker < remote_tracker_end)
                                       ? handle->col_idx[remote_tracker]
@@ -425,7 +422,7 @@ public:
                   if (local_d == INT_MAX and remote_d == INT_MAX) {
                     break;
                   } else if (remote_d == INT_MAX or local_d < remote_d) {
-                    auto local_value = local_handle->values[local_tracker];
+                    auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
                     VALUE_TYPE attrc = local_value * local_value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                     VALUE_TYPE l = scale(attrc * d1);
@@ -441,7 +438,7 @@ public:
                     remote_tracker++;
                     count++;
                   } else {
-                    auto local_value = local_handle->values[local_tracker];
+                    auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
                     auto remote_value = handle->values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
                     VALUE_TYPE attrc = value * value;

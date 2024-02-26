@@ -35,7 +35,6 @@ public:
 
   static double tile_width_fraction;
 
-  unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,

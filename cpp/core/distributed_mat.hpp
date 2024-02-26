@@ -14,6 +14,8 @@ public:
 
   unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
+  unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
+
   bool  hash_spgemm;
 
   DistributedMat() = default;
@@ -37,6 +39,10 @@ public:
     if (other.dense_collector) {
       dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(
           *(other.dense_collector));
+    }
+
+    if (other.dataCachePtr) {
+      dataCachePtr = make_unique<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>>(*(other.dataCachePtr));
     }
   }
 
