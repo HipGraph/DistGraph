@@ -73,15 +73,12 @@ public:
           sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
-    cout << " rank " << grid->rank_in_col << " total batches " << batches
-         << endl;
+    cout << " rank " << grid->rank_in_col << " total batches " << batches<< endl;
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto main_comm =
-        unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-            new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-                sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
+    auto main_comm =unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>
+        (new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
                 batches, tile_width_fraction, hash_spgemm, true));
 
     // Buffer used for receive MPI operations data
@@ -96,11 +93,9 @@ public:
 
     this->sparse_local->build_computable_represention();
     main_comm.get()->onboard_data();
-    cout << " rank " << grid->rank_in_col << " on board data completed "
-         << endl;
+    cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
-    int total_tiles =
-        SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+    int total_tiles = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
 
     CSRLocal<VALUE_TYPE> *csr_block =
         (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
@@ -112,10 +107,12 @@ public:
 
       for (int j = 0; j < batches; j++) {
         cout << " rank " << grid->rank_in_col << " batch " << j << endl;
+        int seed = j + i;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-
+        vector<INDEX_TYPE> random_number_vec = generate_random_numbers(
+            0, (this->sp_local_receiver)->gRows, seed, ns);
         // One process computations without MPI operations
         if (this->grid->col_world_size == 1) {
           // local computations for 1 process
@@ -140,7 +137,7 @@ public:
           //                this->grid->col_world_size, true, main_comm.get(),
           //                nullptr);
           //          }
-
+          main_comm->transfer_sparse_data(random_number_vec,i,j);
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,

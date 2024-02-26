@@ -447,6 +447,89 @@ public:
                                 batch_id);
   }
 
+  void transfer_sparse_data(vector<INDEX_TYPE> &col_ids, int iteration, int batch_id) {
+
+    vector<vector<INDEX_TYPE>> receive_col_ids_list(grid->col_world_size);
+    vector<INDEX_TYPE> send_col_ids_list;
+
+    int total_send_count = 0;
+    int total_receive_count = 0;
+
+    for (int i = 0; i < col_ids.size(); i++) {
+      int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
+      if (owner_rank == grid->rank_in_col) {
+        send_col_ids_list.push_back(col_ids[i]);
+      } else {
+        receive_col_ids_list[owner_rank].push_back(col_ids[i]);
+      }
+    }
+
+    for (int i = 0; i < grid->col_world_size; i++) {
+      total_send_count = send_col_ids_list.size();
+      if (i != grid->rank_in_col) {
+        this->sendcounts[i] = total_send_count;
+      } else {
+        this->sendcounts[i] = 0;
+      }
+      this->receive_counts_cyclic[i] = receive_col_ids_list[i].size();
+    }
+
+    this->sdispls[0] = 0;
+    this->rdispls_cyclic[0] = 0;
+    for (int i = 0; i < grid->col_world_size; i++) {
+
+      this->sdispls[i] = 0;
+      this->rdispls_cyclic[i] =
+          (i > 0) ? rdispls_cyclic[i - 1] + receive_counts_cyclic[i - 1]
+                  : rdispls_cyclic[i];
+      total_receive_count = total_receive_count + receive_counts_cyclic[i];
+    }
+
+    unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>> sendbuf =
+        unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>>(
+            new vector<SpTuple<VALUE_TYPE, embedding_dim>>());
+
+    sendbuf->resize(total_send_count);
+
+    unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>>
+        receivebuf_ptr =
+            unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>>(
+                new vector<SpTuple<VALUE_TYPE, embedding_dim>>());
+
+    receivebuf_ptr.get()->resize(total_receive_count);
+
+    for (int j = 0; j < send_col_ids_list.size(); j++) {
+      int local_key = send_col_ids_list[j] - (grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
+      CSRhandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true);
+
+      SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
+      current.rows[0] =2; // rows first two indices are already taken for metadata
+      current.rows[1] = 0;
+      current.rows[current.rows[0]] = sparse_tuple.row_idx[0];
+      INDEX_TYPE num_of_copying_data = sparse_tuple.col_idx.size();
+
+      copy(sparse_tuple.col_idx.begin() ,
+           sparse_tuple.col_idx.begin() + num_of_copying_data ,
+           current.cols.begin());
+      copy(sparse_tuple.values.begin(),
+           sparse_tuple.values.begin() + num_of_copying_data,
+           current.values.begin());
+      (*sendbuf).push_back(current);
+    }
+
+    auto t = start_clock();
+    MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
+                  SPARSETUPLE, (*receivebuf_ptr.get()).data(),
+                  receive_counts_cyclic.data(), rdispls_cyclic.data(),
+                  SPARSETUPLE, grid->col_world);
+    stop_clock_and_add(t, "Communication Time");
+    MPI_Request dumy;
+    this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(), &dumy, true,
+                         iteration, batch_id, true); // we should not do this
+
+    //    delete[] sendbuf;
+  }
+
   inline void transfer_remotely_computable_data(
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf_cyclic,
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
