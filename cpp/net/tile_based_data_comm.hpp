@@ -510,13 +510,14 @@ public:
       current.rows[1] = 0;
       current.rows[current.rows[0]] = sparse_tuple.row_idx[0];
       INDEX_TYPE num_of_copying_data = sparse_tuple.col_idx.size();
-      cout<<" rank "<<this->grid->rank_in_col<<" sending  "<<current.rows[current.rows[0]]<<" to all  num_of_copying_data "<<num_of_copying_data<<endl;
       copy(sparse_tuple.col_idx.begin() ,
            sparse_tuple.col_idx.begin() + num_of_copying_data ,
            current.cols.begin());
       copy(sparse_tuple.values.begin(),
            sparse_tuple.values.begin() + num_of_copying_data,
            current.values.begin());
+      current.rows[0] =  current.rows[0]+1;
+      current.rows[1] =current.rows[1]+num_of_copying_data;
       (*sendbuf).push_back(current);
     }
 
