@@ -602,7 +602,7 @@ public:
             } else if (local_d == INT_MAX or remote_d < local_d) {
               auto remote_value = remote_values[remote_tracker];
               VALUE_TYPE repuls = remote_value * remote_value;
-              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
               VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
               remote_tracker++;
@@ -612,7 +612,7 @@ public:
               auto remote_value = remote_values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
               VALUE_TYPE repuls = value * value;
-              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
               VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
               local_tracker++;
@@ -621,6 +621,7 @@ public:
             }
           }
         } else {
+          CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
           CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
           int local_count = local_handle->rowStart[row_id + 1] - local_handle->rowStart[row_id];
           int remote_count = handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
