@@ -57,7 +57,7 @@ public:
     this->hash_spgemm = hash_spgemm;
   }
 
-  void algo_sparse_embedding(int iterations, int batch_size, VALUE_TYPE lr) {
+  void algo_sparse_embedding(int iterations, int batch_size,int ns, VALUE_TYPE lr) {
     auto t = start_clock();
     size_t total_memory = 0;
     int batches = 0;
