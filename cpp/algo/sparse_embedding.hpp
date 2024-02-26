@@ -93,7 +93,7 @@ public:
         unique_ptr<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>(
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
-    this->sparse_local->build_computable_represention();
+//    this->sparse_local->build_computable_represention();
     main_comm.get()->onboard_data();
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
@@ -393,9 +393,9 @@ public:
                 int local_tracker=local_handle->rowStart[index];
                 int local_tracker_end=local_handle->rowStart[index+1];
                 int count=0;
-                while(count<total_count){
-                  auto  local_d =  (local_tracker<local_tracker_end)?local_handle->col_idx[local_tracker]:INT_MAX;
-                  auto remote_d =  (remote_tracker<remote_tracker_end)?handle->col_idx[remote_tracker]:INT_MAX;
+//                while(count<total_count){
+//                  auto  local_d =  (local_tracker<local_tracker_end)?local_handle->col_idx[local_tracker]:INT_MAX;
+//                  auto remote_d =  (remote_tracker<remote_tracker_end)?handle->col_idx[remote_tracker]:INT_MAX;
 //                  if (local_d==INT_MAX and remote_d==INT_MAX){
 //                    break;
 //                  }else if (remote_d==INT_MAX or local_d<remote_d){
@@ -426,7 +426,7 @@ public:
 //                    remote_tracker++;
 //                    count = count+2;
 //                  }
-                }
+//                }
               }
             } else {
               int count = remote_cols.size();
