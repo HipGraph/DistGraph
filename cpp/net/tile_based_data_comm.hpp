@@ -485,14 +485,14 @@ public:
       total_receive_count = total_receive_count + receive_counts_cyclic[i];
     }
 
-    unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>> sendbuf =
-        unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>>(
-            new vector<SpTuple<VALUE_TYPE, embedding_dim>>());
+    unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>> sendbuf =
+        unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>(
+            new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
-    unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>>
+    unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>
         receivebuf_ptr =
-            unique_ptr<std::vector<SpTuple<VALUE_TYPE, embedding_dim>>>(
-                new vector<SpTuple<VALUE_TYPE, embedding_dim>>());
+            unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>(
+                new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
     receivebuf_ptr.get()->resize(total_receive_count);
 
