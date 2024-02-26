@@ -506,17 +506,18 @@ public:
       CSRHandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true);
 
       SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
+      INDEX_TYPE num_of_copying_data = sparse_tuple.col_idx.size();
       current.rows[0] =2; // rows first two indices are already taken for metadata
       current.rows[1] = 0;
       current.rows[current.rows[0]] = sparse_tuple.row_idx[0];
-      INDEX_TYPE num_of_copying_data = sparse_tuple.col_idx.size();
+      current.rows[current.rows[0]+1] = num_of_copying_data;
       copy(sparse_tuple.col_idx.begin() ,
            sparse_tuple.col_idx.begin() + num_of_copying_data ,
            current.cols.begin());
       copy(sparse_tuple.values.begin(),
            sparse_tuple.values.begin() + num_of_copying_data,
            current.values.begin());
-      current.rows[0] =  current.rows[0]+1;
+      current.rows[0] =  current.rows[0]+2;
       current.rows[1] =current.rows[1]+num_of_copying_data;
       (*sendbuf).push_back(current);
     }
