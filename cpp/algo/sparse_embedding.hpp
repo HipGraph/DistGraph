@@ -542,6 +542,142 @@ public:
     }
   }
 
+  inline void calc_t_dist_replus_rowptr(vector<INDEX_TYPE> &col_ids, VALUE_TYPE lr,
+                                        int batch_id, int batch_size,
+                                        int block_size) {
+
+    int row_base_index = batch_id * batch_size;
+
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < block_size; i++) {
+      INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
+      for (int j = 0; j < col_ids.size(); j++) {
+        INDEX_TYPE global_col_id = col_ids[j];
+        INDEX_TYPE local_col_id =
+            global_col_id -
+            static_cast<INDEX_TYPE>(((grid)->rank_in_col *
+                                     (this->sp_local_receiver)->proc_row_width));
+        bool fetch_from_cache = false;
+
+        int owner_rank = static_cast<int>(
+            global_col_id / (this->sp_local_receiver)->proc_row_width);
+
+        if (owner_rank != (grid)->rank_in_col) {
+          fetch_from_cache = true;
+        }
+        vector<INDEX_TYPE> remote_cols;
+        vector<VALUE_TYPE> remote_values;
+
+        if (fetch_from_cache) {
+          unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
+              &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
+          remote_cols = arrayMap[dst_id].cols;
+          remote_values = arrayMap[dst_id].values;
+        }
+
+        if (fetch_from_cache) {
+          CSRHandle *local_handle =
+              this->sparse_local->csr_local_data->handler.get();
+          int local_count = local_handle->rowStart[index + 1] -
+                            local_handle->rowStart[index];
+          int remote_count = remote_cols.size();
+          int total_count = local_count + remote_count;
+          int remote_tracker = 0;
+          int remote_tracker_end = remote_cols.size();
+          int local_tracker = local_handle->rowStart[index];
+          int local_tracker_end = local_handle->rowStart[index + 1];
+          int count = 0;
+          while (count < total_count) {
+            auto local_d = (local_tracker < local_tracker_end)
+                               ? local_handle->col_idx[local_tracker]
+                               : INT_MAX;
+            auto remote_d = (remote_tracker < remote_tracker_end)
+                                ? remote_cols[remote_tracker]
+                                : INT_MAX;
+            if (local_d == INT_MAX and remote_d == INT_MAX) {
+              break;
+            } else if (remote_d == INT_MAX or local_d < remote_d) {
+              auto local_value = local_handle->values[local_tracker];
+              VALUE_TYPE repuls = local_value * local_value;
+              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE l = scale(attrc * d1);
+              (*(output->dense_collector))[index][local_d] += (lr)*l;
+              local_tracker++;
+              count++;
+            } else if (local_d == INT_MAX or remote_d < local_d) {
+              auto remote_value = remote_values[remote_tracker];
+              VALUE_TYPE repuls = remote_value * remote_value;
+              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE l = scale(attrc * d1);
+              (*(output->dense_collector))[index][remote_d] += (lr)*l;
+              remote_tracker++;
+              count++;
+            } else {
+              auto local_value = local_handle->values[local_tracker];
+              auto remote_value = remote_values[remote_tracker];
+              VALUE_TYPE value = local_value - remote_value;
+              VALUE_TYPE repuls = value * value;
+              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE l = scale(attrc * d1);
+              (*(output->dense_collector))[index][remote_d] += (lr)*l;
+              local_tracker++;
+              remote_tracker++;
+              count = count + 2;
+            }
+          }
+        } else {
+          CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
+          int local_count = local_handle->rowStart[index + 1] - local_handle->rowStart[index];
+          int remote_count = handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
+          int total_count = local_count + remote_count;
+          int remote_tracker = handle->rowStart[local_dst];
+          int remote_tracker_end = handle->rowStart[local_dst + 1];
+          int local_tracker = local_handle->rowStart[index];
+          int local_tracker_end = local_handle->rowStart[index + 1];
+          int count = 0;
+          while (count < total_count) {
+            auto local_d = (local_tracker < local_tracker_end)
+                               ? local_handle->col_idx[local_tracker]
+                               : INT_MAX;
+            auto remote_d = (remote_tracker < remote_tracker_end)
+                                ? handle->col_idx[remote_tracker]
+                                : INT_MAX;
+            if (local_d == INT_MAX and remote_d == INT_MAX) {
+              break;
+            } else if (remote_d == INT_MAX or local_d < remote_d) {
+              auto local_value =local_handle->values[local_tracker];
+              VALUE_TYPE attrc = local_value * local_value;
+              VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
+              VALUE_TYPE l = scale(attrc * d1);
+              (*(output->dense_collector))[index][local_d] += (lr)*l;
+              local_tracker++;
+              count++;
+            } else if (local_d == INT_MAX or remote_d < local_d) {
+              auto remote_value = handle->values[remote_tracker];
+              VALUE_TYPE attrc = remote_value * remote_value;
+              VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
+              VALUE_TYPE l = scale(attrc * d1);
+              (*(output->dense_collector))[index][remote_d] += (lr)*l;
+              remote_tracker++;
+              count++;
+            } else {
+              auto local_value =local_handle->values[local_tracker];
+              auto remote_value = handle->values[remote_tracker];
+              VALUE_TYPE value = local_value - remote_value;
+              VALUE_TYPE attrc = value * value;
+              VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
+              VALUE_TYPE l = scale(attrc * d1);
+              (*(output->dense_collector))[index][remote_d] += (lr)*l;
+              local_tracker++;
+              remote_tracker++;
+              count = count + 2;
+            }
+          }
+        }
+      }
+    }
+  }
+
   inline void merge_remote_computations(
       int batch_id, INDEX_TYPE batch_size, DistributedMat *output,
       TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_comm) {
