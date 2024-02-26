@@ -369,9 +369,7 @@ public:
           for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1]; j++) {
             auto d = handle->col_idx[j];
             auto value = handle->values[j];
-            if (d < cols) {
-              (*dense_collector)[i][d] = value;
-            }
+            (*dense_collector)[i][d] = value;
           }
         }
       }
