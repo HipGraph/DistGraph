@@ -138,9 +138,9 @@ public:
           //                nullptr);
           //          }
           main_comm->transfer_sparse_data(random_number_vec,i,j);
-//          this->calc_t_dist_replus_rowptr( random_number_vec,
-//                                          lr, j, batch_size,
-//                                          considering_batch_size,this->sparse_local_output);
+          this->calc_t_dist_replus_rowptr( random_number_vec,
+                                          lr, j, batch_size,
+                                          considering_batch_size,this->sparse_local_output);
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
@@ -573,6 +573,9 @@ public:
         if (fetch_from_cache) {
           unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
               &arrayMap = (*this->sparse_local->tempCachePtr)[owner_rank];
+          if (arrayMap.find(global_col_id)== arrayMap.end()){
+            cout<<" rank "<this->grid->rank_in_col<<" trying to access "<<global_col_id<<" failed "<<endl;
+          }
           remote_cols = arrayMap[global_col_id].cols;
           remote_values = arrayMap[global_col_id].values;
         }
