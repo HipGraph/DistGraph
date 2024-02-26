@@ -498,7 +498,7 @@ public:
 
     for (int j = 0; j < send_col_ids_list.size(); j++) {
       int local_key = send_col_ids_list[j] - (this->grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
-      CSRhandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true);
+      CSRHandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true);
 
       SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
       current.rows[0] =2; // rows first two indices are already taken for metadata
@@ -516,10 +516,10 @@ public:
     }
 
     auto t = start_clock();
-    MPI_Alltoallv((*sendbuf).data(), sendcounts.data(), sdispls.data(),
+    MPI_Alltoallv((*sendbuf).data(), this->sendcounts.data(), this->sdispls.data(),
                   SPARSETUPLE, (*receivebuf_ptr.get()).data(),
-                  receive_counts_cyclic.data(), rdispls_cyclic.data(),
-                  SPARSETUPLE, grid->col_world);
+                  this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
+                  SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     MPI_Request dumy;
     this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id); // we should not do this
