@@ -141,15 +141,15 @@ public:
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
 
-//          this->calc_t_dist_grad_rowptr(
-//              (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
-//              batch_size, considering_batch_size, 2, 0,
-//              this->grid->col_world_size, false, main_comm.get(), nullptr);
-//
-//          main_comm->receive_remotely_computed_data(sendbuf_ptr.get(), update_ptr.get(), i, j, 0,this->grid->col_world_size, 0, total_tiles);
-//
-//          this->merge_remote_computations(j, batch_size, this->sparse_local_output,
-//                                          main_comm.get());
+          this->calc_t_dist_grad_rowptr(
+              (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
+              batch_size, considering_batch_size, 2, 0,
+              this->grid->col_world_size, false, main_comm.get(), nullptr);
+
+          main_comm->receive_remotely_computed_data(sendbuf_ptr.get(), update_ptr.get(), i, j, 0,this->grid->col_world_size, 0, total_tiles);
+
+          this->merge_remote_computations(j, batch_size, this->sparse_local_output,
+                                          main_comm.get());
         }
         total_memory += get_memory_usage();
         this->merge_output_to_input(j);
@@ -186,9 +186,9 @@ public:
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process,true);
-//        main_comm->transfer_remotely_computable_data(
-//            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
-//            tiles_per_process,true);
+        main_comm->transfer_remotely_computable_data(
+            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
+            tiles_per_process,true);
       }
       if (k == comm_initial_start) {
         // local computation
@@ -347,8 +347,7 @@ public:
             CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
 
             if (!fetch_from_cache) {
-              int count =
-                  handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
+              int count = handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
               if (symbolic) {
                 INDEX_TYPE val =
                     (*(output->sparse_data_counter))[index] + count;
@@ -550,10 +549,6 @@ public:
         }
       }
     }
-  }
-
-  void merge_output_to_input(int batch_id) {
-//    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
   }
 
   VALUE_TYPE scale(VALUE_TYPE v) {
