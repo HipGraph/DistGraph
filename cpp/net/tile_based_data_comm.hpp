@@ -455,6 +455,11 @@ public:
     int total_send_count = 0;
     int total_receive_count = 0;
 
+    this->send_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->receive_counts_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->sdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+    this->rdispls_cyclic = vector<int>(this->grid->col_world_size, 0);
+
     for (int i = 0; i < col_ids.size(); i++) {
       int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
       if (owner_rank == this->grid->rank_in_col) {
@@ -467,18 +472,18 @@ public:
     for (int i = 0; i < this->grid->col_world_size; i++) {
       total_send_count = send_col_ids_list.size();
       if (i != this->grid->rank_in_col) {
-        this->sendcounts[i] = total_send_count;
+        this->send_counts_cyclic[i] = total_send_count;
       } else {
-        this->sendcounts[i] = 0;
+        this->send_counts_cyclic[i] = 0;
       }
       this->receive_counts_cyclic[i] = receive_col_ids_list[i].size();
     }
 
-    this->sdispls[0] = 0;
+    this->sdispls_cyclic[0] = 0;
     this->rdispls_cyclic[0] = 0;
     for (int i = 0; i < this->grid->col_world_size; i++) {
 
-      this->sdispls[i] = 0;
+      this->sdispls_cyclic[i] = 0;
       this->rdispls_cyclic[i] =
           (i > 0) ? this->rdispls_cyclic[i - 1] + this->receive_counts_cyclic[i - 1]
                   : this->rdispls_cyclic[i];
@@ -516,7 +521,7 @@ public:
     }
 
     auto t = start_clock();
-    MPI_Alltoallv((*sendbuf).data(), this->sendcounts.data(), this->sdispls.data(),
+    MPI_Alltoallv((*sendbuf).data(), this->send_counts_cyclic.data(), this->sdispls_cyclic.data(),
                   SPARSETUPLE, (*receivebuf_ptr.get()).data(),
                   this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
                   SPARSETUPLE, this->grid->col_world);
