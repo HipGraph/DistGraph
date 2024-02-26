@@ -544,7 +544,7 @@ public:
 
   inline void calc_t_dist_replus_rowptr(vector<INDEX_TYPE> &col_ids, VALUE_TYPE lr,
                                         int batch_id, int batch_size,
-                                        int block_size) {
+                                        int block_size, DistributedMat * output) {
 
     int row_base_index = batch_id * batch_size;
 
@@ -595,7 +595,7 @@ public:
               auto local_value = local_handle->values[local_tracker];
               VALUE_TYPE repuls = local_value * local_value;
               VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-              VALUE_TYPE l = scale(attrc * d1);
+              VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][local_d] += (lr)*l;
               local_tracker++;
               count++;
