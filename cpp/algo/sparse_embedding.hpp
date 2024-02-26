@@ -553,7 +553,7 @@ public:
   }
 
   void merge_output_to_input(int batch_id) {
-    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
+//    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
   }
 
   VALUE_TYPE scale(VALUE_TYPE v) {
