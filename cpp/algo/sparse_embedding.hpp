@@ -185,10 +185,10 @@ public:
       if (communication and (symbolic or !output->hash_spgemm)) {
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
-                                        k, end_process, 0, tiles_per_process);
+                                        k, end_process, 0, tiles_per_process,true);
 //        main_comm->transfer_remotely_computable_data(
 //            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
-//            tiles_per_process);
+//            tiles_per_process,true);
       }
       if (k == comm_initial_start) {
         // local computation
@@ -553,7 +553,7 @@ public:
   }
 
   void merge_output_to_input(int batch_id) {
-    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
+//    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
   }
 
   VALUE_TYPE scale(VALUE_TYPE v) {
