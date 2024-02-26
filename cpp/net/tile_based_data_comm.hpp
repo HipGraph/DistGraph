@@ -449,7 +449,7 @@ public:
 
   void transfer_sparse_data(vector<INDEX_TYPE> &col_ids, int iteration, int batch_id) {
 
-    vector<vector<INDEX_TYPE>> receive_col_ids_list(grid->col_world_size);
+    vector<vector<INDEX_TYPE>> receive_col_ids_list(this->grid->col_world_size);
     vector<INDEX_TYPE> send_col_ids_list;
 
     int total_send_count = 0;
@@ -464,9 +464,9 @@ public:
       }
     }
 
-    for (int i = 0; i < grid->col_world_size; i++) {
+    for (int i = 0; i < this->grid->col_world_size; i++) {
       total_send_count = send_col_ids_list.size();
-      if (i != grid->rank_in_col) {
+      if (i != this->grid->rank_in_col) {
         this->sendcounts[i] = total_send_count;
       } else {
         this->sendcounts[i] = 0;
@@ -476,7 +476,7 @@ public:
 
     this->sdispls[0] = 0;
     this->rdispls_cyclic[0] = 0;
-    for (int i = 0; i < grid->col_world_size; i++) {
+    for (int i = 0; i < this->grid->col_world_size; i++) {
 
       this->sdispls[i] = 0;
       this->rdispls_cyclic[i] =
@@ -497,7 +497,7 @@ public:
     receivebuf_ptr.get()->resize(total_receive_count);
 
     for (int j = 0; j < send_col_ids_list.size(); j++) {
-      int local_key = send_col_ids_list[j] - (grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
+      int local_key = send_col_ids_list[j] - (this->grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
       CSRhandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true);
 
       SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
