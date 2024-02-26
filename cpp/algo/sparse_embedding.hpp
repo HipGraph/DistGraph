@@ -152,7 +152,6 @@ public:
                                           main_comm.get());
         }
         total_memory += get_memory_usage();
-        this->merge_output_to_input(j);
       }
       (this->sparse_local)->purge_cache();
     }
