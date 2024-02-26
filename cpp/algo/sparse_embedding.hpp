@@ -403,7 +403,7 @@ public:
                     VALUE_TYPE attrc = local_value * local_value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                     VALUE_TYPE l = scale( attrc* d1);
-                    (*(output->dense_collector))[index][local_d] +=  (lr)*l;
+//                    (*(output->dense_collector))[index][local_d] +=  (lr)*l;
                     local_tracker++;
                     count++;
                   }else if (local_d==INT_MAX or remote_d<local_d){
@@ -411,7 +411,7 @@ public:
                     VALUE_TYPE attrc = remote_value * remote_value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                     VALUE_TYPE l = scale( attrc* d1);
-                    (*(output->dense_collector))[index][remote_d] +=  (lr)*l;
+//                    (*(output->dense_collector))[index][remote_d] +=  (lr)*l;
                     remote_tracker++;
                     count++;
                   }else{
@@ -421,7 +421,7 @@ public:
                     VALUE_TYPE attrc = value * value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                     VALUE_TYPE l = scale( attrc* d1);
-                    (*(output->dense_collector))[index][remote_d] +=  (lr)*l;
+//                    (*(output->dense_collector))[index][remote_d] +=  (lr)*l;
                     local_tracker++;
                     remote_tracker++;
                     count = count+2;
