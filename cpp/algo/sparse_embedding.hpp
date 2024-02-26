@@ -554,7 +554,10 @@ public:
       for (int j = 0; j < col_ids.size(); j++) {
         INDEX_TYPE global_col_id = col_ids[j];
         bool fetch_from_cache = false;
-
+        INDEX_TYPE local_col_id =
+            global_col_id -
+            static_cast<INDEX_TYPE>(((grid)->rank_in_col *
+                                     (this->sp_local_receiver)->proc_row_width));
         int owner_rank = static_cast<int>(
             global_col_id / (this->sp_local_receiver)->proc_row_width);
 
@@ -624,10 +627,10 @@ public:
           CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
           CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
           int local_count = local_handle->rowStart[row_id + 1] - local_handle->rowStart[row_id];
-          int remote_count = handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
+          int remote_count = handle->rowStart[local_col_id + 1] - handle->rowStart[local_col_id];
           int total_count = local_count + remote_count;
-          int remote_tracker = handle->rowStart[local_dst];
-          int remote_tracker_end = handle->rowStart[local_dst + 1];
+          int remote_tracker = handle->rowStart[local_col_id];
+          int remote_tracker_end = handle->rowStart[local_col_id + 1];
           int local_tracker = local_handle->rowStart[row_id];
           int local_tracker_end = local_handle->rowStart[row_id + 1];
           int count = 0;
@@ -643,7 +646,7 @@ public:
             } else if (remote_d == INT_MAX or local_d < remote_d) {
               auto local_value =local_handle->values[local_tracker];
               VALUE_TYPE repuls = local_value * local_value;
-              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls));
               VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][local_d] += (lr)*l;
               local_tracker++;
@@ -651,7 +654,7 @@ public:
             } else if (local_d == INT_MAX or remote_d < local_d) {
               auto remote_value = handle->values[remote_tracker];
               VALUE_TYPE repuls = remote_value * remote_value;
-              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls));
               VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
               remote_tracker++;
@@ -661,7 +664,7 @@ public:
               auto remote_value = handle->values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
               VALUE_TYPE repuls = value * value;
-              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls))
+              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls));
               VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
               local_tracker++;
