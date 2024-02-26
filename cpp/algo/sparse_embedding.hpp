@@ -407,7 +407,7 @@ public:
                     local_tracker++;
                     count++;
                   }else if (local_d==INT_MAX or remote_d<local_d){
-                    auto remote_value = local_handle->values[remote_tracker];
+                    auto remote_value = handle->values[remote_tracker];
                     VALUE_TYPE attrc = remote_value * remote_value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                     VALUE_TYPE l = scale( attrc* d1);
@@ -416,7 +416,7 @@ public:
                     count++;
                   }else{
                     auto local_value = local_handle->values[local_tracker];
-                    auto remote_value = local_handle->values[remote_tracker];
+                    auto remote_value = handle->values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
                     VALUE_TYPE attrc = value * value;
                     VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
@@ -553,7 +553,7 @@ public:
   }
 
   void merge_output_to_input(int batch_id) {
-    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
+//    this->sparse_local->initialize_CSR_from_dense_collector( this->sparse_local->proc_row_width,embedding_dim,false);
   }
 
   VALUE_TYPE scale(VALUE_TYPE v) {
