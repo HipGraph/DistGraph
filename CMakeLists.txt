@@ -54,7 +54,8 @@ add_library(disembed_lib SHARED
         cpp/core/sparse_mat_tile.hpp
         cpp/net/tile_based_data_comm.hpp
         cpp/algo/spgemm_with_tiling.hpp
-        cpp/algo/sparse_embedding.hpp)
+        cpp/algo/sparse_embedding.hpp
+        cpp/algo/spgemm_spmm_iterative.hpp)
 
 SET(BUILD_TESTS "" ON)
 

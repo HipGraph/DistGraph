@@ -20,6 +20,7 @@
 #include "net/tile_based_data_comm.hpp"
 #include "algo/spgemm_with_tiling.hpp"
 #include "algo/sparse_embedding.hpp"
+#include "algo/spgemm_spmm_iterative.hpp"
 
 using json = nlohmann::json;
 
@@ -268,20 +269,28 @@ int main(int argc, char **argv) {
 //            grid.get(),
 //            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
-            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
-            grid.get(),
-            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+//    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//        new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
+//            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+//            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+//            grid.get(),
+//            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+
+        unique_ptr<distblas::algo::SpGEMMSpMMIterative<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMSpMMIterative<INDEX_TYPE, VALUE_TYPE, dimension>>(
+            new distblas::algo::SpGEMMSpMMIterative<INDEX_TYPE, VALUE_TYPE, dimension>(
+                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                shared_sparseMat_sender.get(), sparse_input.get(),
+                grid.get(),
+                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
-    spgemm_algo.get()->algo_sparse_embedding(iterations, batch_size,ns,lr);
+    spgemm_algo.get()->execute(iterations, batch_size,lr);
     cout << " rank " << rank << " spgemm algo completed  " << endl;
-    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
-    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
-    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
+//    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
+//    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
+//    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
 
   }else {
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
