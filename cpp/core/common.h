@@ -132,10 +132,10 @@ struct CSRHandle {
 
   CSRHandle& operator=(const CSRHandle& other) {
     if (this != &other) {
-      this->values = other->values;
-      this->col_idx = other->col_idx;
-      this->rowStart = other->rowStart;
-      this->row_idx = other->row_idx;
+      this->values = other.values;
+      this->col_idx = other.col_idx;
+      this->rowStart = other.rowStart;
+      this->row_idx = other.row_idx;
     }
     return *this;
   }
