@@ -158,6 +158,20 @@ public:
        handler->values.insert((handler->values).end(), Values.begin(), Values.end());
        handler->rowStart[i+1]=filtered.size()+handler->rowStart[i];
     }
+
+    CSRLocal& operator=(const CSRLocal& other) {
+      if (this != &other) {
+        rows = other.rows;
+        cols = other.cols;
+        max_nnz = other.max_nnz;
+        num_coords = other.num_coords;
+        transpose = other.transpose;
+
+        // Copy handler using its copy assignment operator or copy constructor
+        handler = make_unique<CSRHandle>(*other.handler);
+      }
+      return *this;
+    }
   }
 
   ~CSRLocal() {
