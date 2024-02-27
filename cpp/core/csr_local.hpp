@@ -160,6 +160,21 @@ public:
     }
   }
 
+  CSRLocal<VALUE_TYPE>& CSRLocal<VALUE_TYPE>::operator=(const CSRLocal<VALUE_TYPE>& other) {
+    if (this != &other) {
+      // Copy all necessary data members
+      rows = other.rows;
+      cols = other.cols;
+      max_nnz = other.max_nnz;
+      num_coords = other.num_coords;
+      transpose = other.transpose;
+
+      // Copy the CSRHandle using its copy assignment operator or copy constructor
+      handler = make_unique<CSRHandle>(*other.handler);
+    }
+    return *this;
+  }
+
   ~CSRLocal() {
     //    mkl_sparse_destroy((handler.get())->mkl_handle);
   }
