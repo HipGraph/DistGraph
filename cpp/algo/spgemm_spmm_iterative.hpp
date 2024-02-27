@@ -58,7 +58,9 @@ public:
       if (i == 0) {
         sparse_input = sparse_local;
       }
-      auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,static_cast<INDEX_TYPE>(embedding_dim),hash_spgemm);
+      auto rows = sp_local_receiver->proc_row_width;
+      auto cols = static_cast<INDEX_TYPE>(embedding_dim);
+      auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
                                                       embedding_dim>>
           spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
