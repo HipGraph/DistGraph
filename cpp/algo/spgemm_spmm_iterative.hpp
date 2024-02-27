@@ -75,7 +75,7 @@ public:
       output_sparsity =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
       output_sparsity =100 * (output_sparsity /(((sparse_out->csr_local_data)->handler->rowStart.size() - 1) *embedding_dim));
       cout << " rank " << grid->rank_in_col << " output sparsity "<< output_sparsity << endl;
-      sparse_input->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*sparse_out->csr_local_data);
+      sparse_input = sparse_out.get();
     }
   }
 };
