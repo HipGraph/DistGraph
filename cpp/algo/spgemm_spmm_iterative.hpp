@@ -71,15 +71,11 @@ public:
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
                   sync, tile_width_fraction, hash_spgemm));
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr);
-      sparse_out.get()->batch_size = batch_size;
-      sparse_out.get()->proc_row_width = sp_local_receiver->proc_row_width;
-      sparse_out.get()->proc_col_width = static_cast<int>(embedding_dim);
 
       output_sparsity =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
       output_sparsity =100 * (output_sparsity /(((sparse_out->csr_local_data)->handler->rowStart.size() - 1) *embedding_dim));
-
       cout << " rank " << grid->rank_in_col << " output sparsity "<< output_sparsity << endl;
-      sparse_input = sparse_out.get();
+      sparse_input->csr_local_data = sparse_out->csr_local_data;
     }
   }
 };

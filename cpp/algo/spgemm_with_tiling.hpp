@@ -87,7 +87,7 @@ public:
     //Buffer used for send MPI operations data
     unique_ptr<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>> sendbuf_ptr = unique_ptr<vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>>(new vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>>());
 
-
+    cout << " rank " << grid->rank_in_col << " on board data starting " << endl;
     main_comm.get()->onboard_data();
 
     cout << " rank " << grid->rank_in_col << " on board data completed " << endl;
