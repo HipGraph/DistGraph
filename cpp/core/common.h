@@ -129,6 +129,16 @@ struct CSRHandle {
   vector<MKL_INT> rowStart;
   vector<MKL_INT> row_idx;
   sparse_matrix_t mkl_handle;
+
+  CSRHandle& operator=(const CSRHandle& other) {
+    if (this != &other) {
+      this->values = other->values;
+      this->col_idx = other->col_idx;
+      this->rowStart = other->rowStart;
+      this->row_idx = other->row_idx;
+    }
+    return *this;
+  }
 };
 
 template <typename T>
