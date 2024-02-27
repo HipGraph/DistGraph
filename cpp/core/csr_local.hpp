@@ -160,7 +160,7 @@ public:
     }
   }
 
-  CSRLocal& operator=(const CSRLocal& other) {
+  CSRLocal(const CSRLocal& other) {
     if (this != &other) {
       rows = other.rows;
       cols = other.cols;
@@ -171,7 +171,6 @@ public:
       // Copy handler using its copy assignment operator or copy constructor
       handler = make_unique<CSRHandle>(*other.handler);
     }
-    return *this;
   }
 
   ~CSRLocal() {
