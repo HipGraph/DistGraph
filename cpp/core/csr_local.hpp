@@ -172,6 +172,23 @@ public:
       handler = make_unique<CSRHandle>(*other.handler);
     }
   }
+  CSRLocal& operator=(const CSRLocal& other) {
+    if (this != &other) {
+      // Copy other members
+      rows = other.rows;
+      cols = other.cols;
+      max_nnz = other.max_nnz;
+      num_coords = other.num_coords;
+      transpose = other.transpose;
+
+      // Ensure handler is initialized before assignment
+      handler = make_unique<CSRHandle>();
+
+      // Use the copy assignment operator of CSRHandle
+      *handler = *other.handler;
+    }
+    return *this;
+  }
 
   ~CSRLocal() {
     //    mkl_sparse_destroy((handler.get())->mkl_handle);
