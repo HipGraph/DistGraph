@@ -32,7 +32,6 @@ private:
   bool hash_spgemm = false;
 
 public:
-public
   SpGEMMSpMMIterative(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
                       distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
                       distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
@@ -81,4 +80,4 @@ public
 };
 
 } // namespace distblas::algo
-#endif // DISTEMBED_CPP_ALGO_SPGEMM_SPMM_HYBRID_H_
+
