@@ -373,7 +373,7 @@ public:
         grid->col_world_size);
   }
 
-  SpMat(Process3DGrid *grid, int &proc_row_width, const int &proc_col_width,
+  SpMat(Process3DGrid *grid, INDEX_TYPE &proc_row_width,  INDEX_TYPE &proc_col_width,
         bool hash_spgemm)
       : DistributedMat() {
     this->grid = grid;
