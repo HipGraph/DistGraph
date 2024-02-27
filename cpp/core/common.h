@@ -147,6 +147,11 @@ struct CSRHandle {
     }
     return *this;
   }
+  ~CSRHandle() {
+    // Use library-specific function to deallocate the sparse matrix handle
+    // Note: This assumes MKL library; adapt based on your actual library.
+    mkl_sparse_destroy(mkl_handle);
+  }
 };
 
 template <typename T>
