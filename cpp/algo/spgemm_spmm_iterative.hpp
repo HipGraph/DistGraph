@@ -58,8 +58,8 @@ public:
       if (i == 0) {
         sparse_input = sparse_local;
       }
-      auto rows = static_cast<INDEX_TYPE>(sp_local_receiver->proc_row_width);
-      auto cols = static_cast<INDEX_TYPE>(embedding_dim);
+      auto rows = (sp_local_receiver->proc_row_width;
+      auto cols = static_cast<int>(embedding_dim);
       auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
                                                       embedding_dim>>
