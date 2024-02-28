@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 
   reader.get()->parallel_read_MM<int64_t,int,VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
 
-
+  cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows<< "gCols" << shared_sparseMat.get()->gCols << endl;
   cout << " rank " << rank << " reading data from file path:  " << input_file<< " completed " << endl;
 
 
@@ -161,14 +161,31 @@ int main(int argc, char **argv) {
                                         grid.get()->col_world_size);
 
   // To enable full batch size
-//  if (spmm or spgemm) {
-//    batch_size = localARows;
-//  }
+  //  if (spmm or spgemm) {
+  //    batch_size = localARows;
+  //  }
+
+  shared_sparseMat.get()->batch_size = batch_size;
+  shared_sparseMat.get()->proc_row_width = localARows;
+  shared_sparseMat.get()->proc_col_width = localBRows;
+
+  vector<Tuple<VALUE_TYPE>> copiedVector(shared_sparseMat.get()->coords);
+  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
+                                                                                copiedVector, shared_sparseMat.get()->gRows,
+                                                                                shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
+                                                                                localARows, localBRows, false, true);
+
+  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
+                                                                                  copiedVector, shared_sparseMat.get()->gRows,
+                                                                                  shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
+                                                                                  localARows, localBRows, true, false);
+
+
 
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
 
   vector<Tuple<VALUE_TYPE>> sparse_coo;
-  auto sparse_input = shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
+  auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
   if (spgemm & save_results) {
     int local_cols = divide_and_round_up(dimension,grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
@@ -187,27 +204,10 @@ int main(int argc, char **argv) {
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
+    cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
   }
 
   auto end_io = std::chrono::high_resolution_clock::now();
-
-  shared_sparseMat.get()->batch_size = batch_size;
-  shared_sparseMat.get()->proc_row_width = localARows;
-  shared_sparseMat.get()->proc_col_width = localBRows;
-
-  cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows
-       << "gCols" << shared_sparseMat.get()->gCols << endl;
-
-  vector<Tuple<VALUE_TYPE>> copiedVector(shared_sparseMat.get()->coords);
-  auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
-      copiedVector, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
-      localARows, localBRows, false, true);
-
-  auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
-      copiedVector, shared_sparseMat.get()->gRows,
-      shared_sparseMat.get()->gCols, shared_sparseMat.get()->gNNz, batch_size,
-      localARows, localBRows, true, false);
 
   auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
       new GlobalAdjacency1DPartitioner(grid.get()));
