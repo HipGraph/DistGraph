@@ -149,6 +149,7 @@ public:
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
                                   Process3DGrid *grid, bool bfs_input = false) {
     std::mt19937 gen(seed);
+    std::mt19937 gen1(seed+1);
     std::normal_distribution<VALUE_TYPE> norm_dist(0, 1);
 
     if (bfs_input) {
@@ -165,9 +166,9 @@ public:
       INDEX_TYPE row;
       int count = 0;
       while (count < cols) {
-        row = uni_dist_rows(gen);
+        row = static_cast<INDEX_TYPE>(uni_dist_rows(gen));
         if (rows_taken.insert(row).second) {
-          auto index = uni_dist(gen);
+          INDEX_TYPE index = static_cast<INDEX_TYPE>(uni_dist(gen1));
           if (indexes_taken.insert(index).second) {
             cout<<" rank "<<grid->rank_in_col<<" count "<<count<<"index "<<index<<" row "<<row<<endl;
             Tuple<VALUE_TYPE> t;
