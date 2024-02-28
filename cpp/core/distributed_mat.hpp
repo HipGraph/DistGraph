@@ -16,7 +16,7 @@ public:
 
   unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
-  unique_ptr<vector<int>> nnz_count;
+  unique_ptr<vector<INDEX_TYPE>> nnz_count;
 
   unique_ptr<vector<vector<VALUE_TYPE>>> state_metadata;
 

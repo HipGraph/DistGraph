@@ -22,7 +22,7 @@ private:
       vector<vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>>>
       receive_indices_proc_map;
 
-  DenseMat<INDEX_TYPE,VALUE_TYPE>* state_holder;
+  DistributedMat* state_holder;
 
   int total_batches;
 
@@ -47,7 +47,7 @@ public:
                Process3DGrid *grid, double alpha, int total_batches,
                double tile_width_fraction, bool hash_spgemm = true,
                bool embedding = false, double merge_cost_factor = 1.0,
-               DenseMat<INDEX_TYPE,VALUE_TYPE>* state_holder=nullptr)
+               DistributedMat* state_holder=nullptr)
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
     tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
@@ -446,8 +446,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,
-                                batch_id);
+    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
   }
 
   void transfer_sparse_data(vector<INDEX_TYPE> &col_ids, int iteration, int batch_id) {
