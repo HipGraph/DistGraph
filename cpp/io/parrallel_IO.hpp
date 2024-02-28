@@ -158,7 +158,7 @@ public:
       std::unordered_set<INDEX_TYPE> rows_taken;
       INDEX_TYPE row;
       int count = 0;
-      do {
+      while (count < min_itr) {
         row = uni_dist_rows(gen);
         if (rows_taken.insert(row).second) {
           auto index = uni_dist(gen);
@@ -171,7 +171,7 @@ public:
             count++;
           }
         }
-      } while (count < min_itr);
+      }
     } else {
       auto expected_non_zeros = cols * density;
       for (INDEX_TYPE i = 0; i < rows; ++i) {
@@ -204,7 +204,7 @@ public:
 
     MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,
                   grid->col_world);
-    int increment = min(chunk_size,static_cast<int>(sparse_coo.size()));
+    int increment = min(chunk_size, static_cast<int>(sparse_coo.size()));
 
     for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += increment) {
       if (grid->rank_in_col == 0 and i == 0) {
