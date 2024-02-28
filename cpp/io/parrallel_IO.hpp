@@ -170,7 +170,7 @@ public:
             count++;
             break;
           }
-        } while(!rows_taken.insert(row).second and count<min_itr)
+        } while(!rows_taken.insert(row).second and count<min_itr);
     } else {
       auto expected_non_zeros = cols * density;
       for (INDEX_TYPE i = 0; i < rows; ++i) {
