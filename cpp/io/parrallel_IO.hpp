@@ -159,8 +159,8 @@ public:
       INDEX_TYPE start_col_index = grid->rank_in_col*cols;
       INDEX_TYPE end_col_index = min((grid->rank_in_col+1)*cols,global_cols);
 
-      std::uniform_real_distribution<VALUE_TYPE> uni_dist(start_col_index, end_col_index - 1);
-      std::uniform_real_distribution<VALUE_TYPE> uni_dist_rows(start_index, end_index - 1);
+      std::uniform_int_distribution<INDEX_TYPE> uni_dist(start_col_index, end_col_index - 1);
+      std::uniform_int_distribution<INDEX_TYPE> uni_dist_rows(start_index, end_index - 1);
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
       INDEX_TYPE row;
