@@ -37,13 +37,12 @@ public:
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<VALUE_TYPE> *coords,
            int num_coords, bool transpose) {
     int rank;
+    this->transpose = transpose;
+    this->num_coords = num_coords;
+    this->rows = rows;
+    this->cols = cols;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (num_coords > 0) {
-      this->transpose = transpose;
-      this->num_coords = num_coords;
-      this->rows = rows;
-      this->cols = cols;
-
 
       // This setup is really clunky, but I don't have time to fix it.
       vector<MKL_INT> rArray(num_coords, 0);
