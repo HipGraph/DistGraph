@@ -225,6 +225,7 @@ int main(int argc, char **argv) {
   shared_sparseMat_receiver.get()->initialize_CSR_blocks();
 
   if (spgemm){
+    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
     sparse_input->initialize_CSR_blocks();
   }
 
