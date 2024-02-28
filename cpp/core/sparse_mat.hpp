@@ -400,9 +400,9 @@ public:
   /**
    * Initialize the CSR from coords data structure
    */
-  void initialize_CSR_blocks(bool coords=false) {
+  void initialize_CSR_blocks(bool enforce_empty_csr=false) {
 
-    if (coords or coords.size()>0) {
+    if (enforce_empty_csr or coords.size()>0) {
       initialize_CSR_from_tuples();
     } else if (hash_spgemm and sparse_data_collector->size() > 0) {
       this->initialize_CSR_from_sparse_collector();
