@@ -43,7 +43,6 @@ public:
     int world_size = process_3D_grid->col_world_size;
     int my_rank = process_3D_grid->rank_in_col;
 
-    cout<<" rank "<<my_rank<<" coord size "<<sp_mat->coords.size()<<endl;
     Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
 
     if (world_size > 1) {
@@ -85,7 +84,6 @@ public:
         sendbuf[idx].col = coords[i].col;
         sendbuf[idx].value = coords[i].value;
       }
-      cout<<" rank "<<my_rank<<" total_send_coords "<<(sendcounts).size()<<endl;
       // Broadcast the number of nonzeros that each processor is going to
       // receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
@@ -98,7 +96,6 @@ public:
       int total_received_coords =
           std::accumulate(recvcounts.begin(), recvcounts.end(), 0);
 
-      cout<<" rank "<<my_rank<<" total_received_coords "<<total_received_coords<<endl;
       (sp_mat->coords).resize(total_received_coords);
 
       MPI_Alltoallv(sendbuf, sendcounts.data(), offsets.data(), SPTUPLE,

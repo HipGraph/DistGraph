@@ -38,7 +38,6 @@ public:
            int num_coords, bool transpose) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    cout<<" rank "<<rank<<"num_coords "<<num_coords<<" cols "<<cols<<endl;
     if (num_coords > 0) {
       this->transpose = transpose;
       this->num_coords = num_coords;
@@ -120,8 +119,6 @@ public:
           this->cols, (handler.get())->rowStart.data(),
           (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
           (handler.get())->values.data());
-      cout<<" rank "<<rank<<"mkl_sparse_d_create_csr  completed "<<num_coords<<" cols "<<cols<<endl;
-
       mkl_sparse_destroy(tempCSR);
     }else {
       handler->rowStart.resize(this->rows+1,0);
