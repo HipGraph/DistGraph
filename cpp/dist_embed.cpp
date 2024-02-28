@@ -170,8 +170,9 @@ int main(int argc, char **argv) {
   vector<Tuple<VALUE_TYPE>> sparse_coo;
 //  auto sparse_input = shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
   if (spgemm & save_results) {
+    int local_cols = divide_and_round_up(dimension,grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
-                                       dimension, density, 0,sparse_coo, grid.get(),true);
+                                       local_cols, density, 0,sparse_coo, grid.get(),true);
 //    INDEX_TYPE gROWs = static_cast<INDEX_TYPE>(localARows);
 //    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
 //    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());

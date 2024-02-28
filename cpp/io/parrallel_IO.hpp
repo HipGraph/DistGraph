@@ -144,16 +144,21 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void build_sparse_random_matrix(INDEX_TYPE rows,INDEX_TYPE global_rows, INDEX_TYPE cols,
+  void build_sparse_random_matrix(INDEX_TYPE rows,INDEX_TYPE global_rows, INDEX_TYPE cols,INDEX_TYPE global_cols,
                                   double density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
                                   Process3DGrid *grid, bool bfs_input = false) {
     std::mt19937 gen(seed);
     std::normal_distribution<VALUE_TYPE> norm_dist(0, 1);
-    std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
+
     if (bfs_input) {
       INDEX_TYPE start_index = grid->rank_in_col*rows;
       INDEX_TYPE end_index = min((grid->rank_in_col+1)*rows,global_rows);
+
+      INDEX_TYPE start_col_index = grid->rank_in_col*cols;
+      INDEX_TYPE end_col_index = min((grid->rank_in_col+1)*cols,global_cols);
+
+      std::uniform_real_distribution<VALUE_TYPE> uni_dist(start_col_index, end_col_index - 1);
       std::uniform_real_distribution<VALUE_TYPE> uni_dist_rows(start_index, end_index - 1);
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
@@ -177,6 +182,7 @@ public:
       }
     } else {
       auto expected_non_zeros = cols * density;
+      std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
       for (INDEX_TYPE i = 0; i < rows; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
