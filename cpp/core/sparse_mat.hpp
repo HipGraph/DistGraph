@@ -497,7 +497,7 @@ public:
                new_handler.values.begin());
         } else {
           for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
-            if ((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
+            if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
                 new_handler.col_idx.push_back(handle->col_idx[i]);
                 new_handler.values.push_back(handle->values[i]);
             }
