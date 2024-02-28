@@ -161,9 +161,9 @@ int main(int argc, char **argv) {
                                         grid.get()->col_world_size);
 
   // To enable full batch size
-  //  if (spmm or spgemm) {
-  //    batch_size = localARows;
-  //  }
+    if (spmm or spgemm) {
+      batch_size = localARows;
+    }
 
   shared_sparseMat.get()->batch_size = batch_size;
   shared_sparseMat.get()->proc_row_width = localARows;
