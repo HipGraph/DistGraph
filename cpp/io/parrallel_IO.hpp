@@ -12,7 +12,8 @@ using namespace distblas::core;
 using namespace combblas;
 namespace distblas::io {
 
-//typedef SpParMat<int64_t , double , SpDCCols<int64_t, double>> PSpMat_s32p64_Int;
+// typedef SpParMat<int64_t , double , SpDCCols<int64_t, double>>
+// PSpMat_s32p64_Int;
 
 /**
  * This class implements IO operations of DistBlas library.
@@ -28,7 +29,8 @@ public:
    * @param file_path
    */
   template <typename INDEX_TYPE, typename WEIGHT_VALUE, typename VALUE_TYPE>
-  void parallel_read_MM(string file_path, distblas::core::SpMat<VALUE_TYPE> *sp_mat,
+  void parallel_read_MM(string file_path,
+                        distblas::core::SpMat<VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
@@ -40,9 +42,10 @@ public:
     shared_ptr<CommGrid> simpleGrid;
     simpleGrid.reset(new CommGrid(WORLD, num_procs, 1));
 
-    SpParMat<INDEX_TYPE , WEIGHT_VALUE , SpDCCols<INDEX_TYPE, WEIGHT_VALUE>> G(simpleGrid);
-//    unique_ptr<PSpMat_s32p64_Int> G =
-//        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
+    SpParMat<INDEX_TYPE, WEIGHT_VALUE, SpDCCols<INDEX_TYPE, WEIGHT_VALUE>> G(
+        simpleGrid);
+    //    unique_ptr<PSpMat_s32p64_Int> G =
+    //        unique_ptr<PSpMat_s32p64_Int>(new PSpMat_s32p64_Int(simpleGrid));
 
     INDEX_TYPE nnz;
 
@@ -83,8 +86,8 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void parallel_write(string file_path, VALUE_TYPE *nCoordinates, INDEX_TYPE rows,
-                      uint64_t cols, Process3DGrid *grid,
+  void parallel_write(string file_path, VALUE_TYPE *nCoordinates,
+                      INDEX_TYPE rows, uint64_t cols, Process3DGrid *grid,
                       distblas::core::SpMat<VALUE_TYPE> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
@@ -141,72 +144,86 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void build_sparse_random_matrix(INDEX_TYPE rows, INDEX_TYPE cols, double density, int seed,
-                                  vector<Tuple<VALUE_TYPE>> &sparse_coo,Process3DGrid *grid) {
-
+  void build_sparse_random_matrix(INDEX_TYPE rows, INDEX_TYPE cols,
+                                  double density, int seed,
+                                  vector<Tuple<VALUE_TYPE>> &sparse_coo,
+                                  Process3DGrid *grid, bool bfs_input=false) {
     std::mt19937 gen(seed);
-//    std::uniform_real_distribution<double> uni_dist(0, 1);
     std::normal_distribution<VALUE_TYPE> norm_dist(0, 1);
-
-    auto expected_non_zeros  = cols*density;
-
-//    // follow row major order
-//    #pragma omp parallel for
-//    for (int i = 0; i < rows * cols; ++i) {
-//      if (uni_dist(gen) <= density) {
-//        T val = static_cast<VALUE_TYPE>(norm_dist(gen));
-//        Tuple<VALUE_TYPE> t;
-//        t.row = i / cols;  // Calculate row index
-//        t.col = i % cols;  // Calculate column index
-//        t.value = val;
-//
-//        #pragma omp critical
-//        sparse_coo.push_back(t);
-//      }
-//    }
-    std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols-1);
-        for (INDEX_TYPE i = 0; i < rows; ++i) {
-          for(INDEX_TYPE j=0;j<expected_non_zeros;j++){
-            VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
-            auto index = uni_dist(gen);
+    std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
+    if (bfs_input) {
+      int min_itr = min(rows, cols);
+      std::uniform_real_distribution<INDEX_TYPE> uni_dist_rows(0, rows - 1);
+      std::unordered_set<INDEX_TYPE> indexes_taken;
+      std::unordered_set<INDEX_TYPE> rows_taken;
+      INDEX_TYPE row;
+      int count=0;
+      do{
+        row = uni_dist_rows(gen);
+        auto index = uni_dist(gen);
+        while (indexes_taken.insert(index).second) {
             Tuple<VALUE_TYPE> t;
-            t.row = i ;  // Calculate row index
-            t.col = index;  // Calculate column index
-            t.value = val;
+            t.row = row;     // Calculate row index
+            t.col = index; // Calculate column index
+            t.value = 1;
             sparse_coo.push_back(t);
+            count++;
+            break;
           }
+        } while(!rows_taken.insert(row).second and count<min_itr)
+    } else {
+      auto expected_non_zeros = cols * density;
+      for (INDEX_TYPE i = 0; i < rows; ++i) {
+        for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
+          VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
+          auto index = uni_dist(gen);
+          Tuple<VALUE_TYPE> t;
+          t.row = i;     // Calculate row index
+          t.col = index; // Calculate column index
+          t.value = val;
+          sparse_coo.push_back(t);
         }
+      }
+    }
   }
 
-
   template <typename VALUE_TYPE>
-  void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo, Process3DGrid *grid, INDEX_TYPE local_rows, INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
+  void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
+                      Process3DGrid *grid, INDEX_TYPE local_rows,
+                      INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
     MPI_File fh;
-    MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_open(grid->col_world, file_path.c_str(),
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
 
-    INDEX_TYPE  global_sum = 0;
+    INDEX_TYPE global_sum = 0;
     INDEX_TYPE local_sum = sparse_coo.size();
 
-    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM, grid->col_world);
-
+    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,
+                  grid->col_world);
 
     for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += chunk_size) {
-      if (grid->rank_in_col==0 and i==0){
-        total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
+      if (grid->rank_in_col == 0 and i == 0) {
+        total_size += snprintf(
+            nullptr, 0,
+            "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
+            global_rows, global_cols, global_sum);
       }
-      int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
+      int elements_in_chunk =
+          min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         int col = static_cast<int>(t.col + 1);
-        INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
+        INDEX_TYPE row =
+            static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
       }
 
-      char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
+      char *buffer = (char *)malloc(total_size +
+                                    1); // +1 for the null-terminating character
       if (buffer == nullptr) {
         // Handle allocation failure
         cout << "Memory allocation failed." << endl;
@@ -214,19 +231,25 @@ public:
       }
 
       char *current_position = buffer;
-      if (i==0 and grid->rank_in_col==0){
-        current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
+      if (i == 0 and grid->rank_in_col == 0) {
+        current_position += snprintf(
+            current_position, total_size,
+            "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
+            global_rows, global_cols, global_sum);
       }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         int col = static_cast<int>(t.col + 1);
-        INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
-        current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", row, col, t.value);
+        INDEX_TYPE row =
+            static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
+        current_position += snprintf(current_position, total_size,
+                                     "%lu %lu %.5f\n", row, col, t.value);
       }
 
       MPI_Status status;
-      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,
+                             MPI_STATUS_IGNORE);
 
       // Free the dynamically allocated memory for each chunk
       free(buffer);
@@ -238,30 +261,39 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void parallel_write_csr(string file_path, CSRHandle *handle,Process3DGrid *grid, INDEX_TYPE local_rows, INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
+  void parallel_write_csr(string file_path, CSRHandle *handle,
+                          Process3DGrid *grid, INDEX_TYPE local_rows,
+                          INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
     MPI_File fh;
-    MPI_File_open(grid->col_world, file_path.c_str(), MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+    MPI_File_open(grid->col_world, file_path.c_str(),
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
 
-    INDEX_TYPE  global_sum = 0;
-    INDEX_TYPE local_sum = (*handle).rowStart[(*handle).rowStart.size()-1];
+    INDEX_TYPE global_sum = 0;
+    INDEX_TYPE local_sum = (*handle).rowStart[(*handle).rowStart.size() - 1];
 
-    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM, grid->col_world);
+    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,
+                  grid->col_world);
 
-    if (grid->rank_in_col==0){
-      total_size += snprintf(nullptr, 0, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
+    if (grid->rank_in_col == 0) {
+      total_size += snprintf(
+          nullptr, 0,
+          "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
+          global_rows, global_cols, global_sum);
     }
 
-    for(auto i=0;i<(*handle).rowStart.size();i++){
-      for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
-        INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
+    for (auto i = 0; i < (*handle).rowStart.size(); i++) {
+      for (auto j = (*handle).rowStart[i]; j < (*handle).rowStart[i + 1]; j++) {
+        INDEX_TYPE index = i + grid->rank_in_col * local_rows;
         INDEX_TYPE col_index = (*handle).col_idx[j];
         VALUE_TYPE value = (*handle).values[j];
-        total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", index, col_index,value);
+        total_size +=
+            snprintf(nullptr, 0, "%lu %lu %.5f\n", index, col_index, value);
       }
-      char *buffer = (char *)malloc(total_size + 1); // +1 for the null-terminating character
+      char *buffer = (char *)malloc(total_size +
+                                    1); // +1 for the null-terminating character
       if (buffer == nullptr) {
         // Handle allocation failure
         cout << "Memory allocation failed." << endl;
@@ -269,17 +301,22 @@ public:
       }
 
       char *current_position = buffer;
-      if (i==0 and grid->rank_in_col==0){
-        current_position += snprintf(current_position, total_size, "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n", global_rows, global_cols, global_sum);
+      if (i == 0 and grid->rank_in_col == 0) {
+        current_position += snprintf(
+            current_position, total_size,
+            "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
+            global_rows, global_cols, global_sum);
       }
-      for(auto j=(*handle).rowStart[i];j<(*handle).rowStart[i+1];j++){
-        INDEX_TYPE  index = i+ grid->rank_in_col*local_rows;
+      for (auto j = (*handle).rowStart[i]; j < (*handle).rowStart[i + 1]; j++) {
+        INDEX_TYPE index = i + grid->rank_in_col * local_rows;
         INDEX_TYPE col_index = (*handle).col_idx[j];
         VALUE_TYPE value = (*handle).values[j];
-        current_position += snprintf(current_position, total_size, "%lu %lu %.5f\n", index, col_index, value);
+        current_position += snprintf(current_position, total_size,
+                                     "%lu %lu %.5f\n", index, col_index, value);
       }
       MPI_Status status;
-      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR, MPI_STATUS_IGNORE);
+      MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,
+                             MPI_STATUS_IGNORE);
 
       // Free the dynamically allocated memory for each chunk
       free(buffer);
@@ -288,6 +325,5 @@ public:
 
     MPI_File_close(&fh);
   }
-
 };
 } // namespace distblas::io
