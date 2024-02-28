@@ -123,6 +123,8 @@ public:
       cout<<" rank "<<rank<<"mkl_sparse_d_create_csr  completed "<<num_coords<<" cols "<<cols<<endl;
 
       mkl_sparse_destroy(tempCSR);
+    }else {
+      handler->rowStart->resize(this->rows+1,0);
     }
   }
 
