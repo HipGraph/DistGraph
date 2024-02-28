@@ -38,7 +38,7 @@ public:
            int num_coords, bool transpose) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    cout<<" rank "<<rank<<"num_coords "<<num_coords<<endl;
+    cout<<" rank "<<rank<<"num_coords "<<num_coords<<" cols "<<cols<<endl;
     if (num_coords > 0) {
       this->transpose = transpose;
       this->num_coords = num_coords;
@@ -60,7 +60,6 @@ public:
         vArray[i] = static_cast<double>(coords[i].value);
       }
 
-      cout<<" rank "<<rank<<"data pop completed "<<num_coords<<endl;
       sparse_operation_t op;
       if (transpose) {
         op = SPARSE_OPERATION_TRANSPOSE;
@@ -74,7 +73,6 @@ public:
           &tempCOO, SPARSE_INDEX_BASE_ZERO, rows, cols, max(num_coords, 1),
           rArray.data(), cArray.data(), vArray.data());
 
-      cout<<" rank "<<rank<<"mkl_sparse_d_create_coo pop completed "<<num_coords<<endl;
       sparse_status_t status_csr =
           mkl_sparse_convert_csr(tempCOO, op, &tempCSR);
 
@@ -87,10 +85,8 @@ public:
       MKL_INT *rows_start, *rows_end, *col_idx;
       double *values;
 
-      cout<<" rank "<<rank<<"mkl_sparse_d_export_csr started "<<num_coords<<endl;
       mkl_sparse_d_export_csr(tempCSR, &indexing, &(this->rows), &(this->cols),
                               &rows_start, &rows_end, &col_idx, &values);
-      cout<<" rank "<<rank<<"mkl_sparse_d_export_csr pop completed "<<num_coords<<endl;
       int rv = 0;
       for (int i = 0; i < num_coords; i++) {
         while (rv < this->rows && i >= rows_start[rv + 1]) {
@@ -119,16 +115,14 @@ public:
              sizeof(MKL_INT) * max(num_coords, 1));
       memcpy((handler.get())->rowStart.data(), rows_start,
              sizeof(MKL_INT) * this->rows);
-      cout<<" rank "<<rank<<"memcpy  completed "<<num_coords<<endl;
       (handler.get())->rowStart[this->rows] = max(num_coords, 1);
 
-      cout<<" rank "<<rank<<"mkl_sparse_d_create_csr  started "<<num_coords<<endl;
       mkl_sparse_d_create_csr(
           &((handler.get())->mkl_handle), SPARSE_INDEX_BASE_ZERO, this->rows,
           this->cols, (handler.get())->rowStart.data(),
           (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
           (handler.get())->values.data());
-      cout<<" rank "<<rank<<"mkl_sparse_d_create_csr  completed "<<num_coords<<endl;
+      cout<<" rank "<<rank<<"mkl_sparse_d_create_csr  completed "<<num_coords<<" cols "<<cols<<endl;
 
       mkl_sparse_destroy(tempCSR);
     }
