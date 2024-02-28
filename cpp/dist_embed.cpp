@@ -221,16 +221,16 @@ int main(int argc, char **argv) {
 
 
 
-  shared_sparseMat.get()->initialize_CSR_blocks();
-  shared_sparseMat_sender.get()->initialize_CSR_blocks();
-  shared_sparseMat_receiver.get()->initialize_CSR_blocks();
+  shared_sparseMat.get()->initialize_CSR_blocks(true);
+  shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
+  shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
 
   if (spgemm){
     cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
     cout << " rank " << rank << " input partitioning started   " << endl;
 //    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
     cout << " rank " << rank << " input partitioning data completed  " << endl;
-    sparse_input->initialize_CSR_blocks();
+    sparse_input->initialize_CSR_blocks(true);
     cout << " rank " << rank << " input csr  completed  " << endl;
   }
 

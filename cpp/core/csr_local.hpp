@@ -30,7 +30,7 @@ public:
 
   bool transpose;
 
-  unique_ptr<CSRHandle> handler = nullptr;
+  unique_ptr<CSRHandle> handler = unique_ptr<CSRHandle>(new CSRHandle());
 
   CSRLocal() {}
 
@@ -44,8 +44,6 @@ public:
       this->num_coords = num_coords;
       this->rows = rows;
       this->cols = cols;
-
-      this->handler = unique_ptr<CSRHandle>(new CSRHandle());
 
 
       // This setup is really clunky, but I don't have time to fix it.
