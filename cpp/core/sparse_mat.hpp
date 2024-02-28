@@ -402,7 +402,7 @@ public:
    */
   void initialize_CSR_blocks(bool coords=false) {
 
-    if (coords) {
+    if (coords or coords.size()>0) {
       initialize_CSR_from_tuples();
     } else if (hash_spgemm and sparse_data_collector->size() > 0) {
       this->initialize_CSR_from_sparse_collector();
