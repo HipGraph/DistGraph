@@ -30,9 +30,8 @@ public:
       cachePtr;
   unique_ptr<vector<unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>>>
       tempCachePtr;
-  VALUE_TYPE *nCoordinates;
   Process3DGrid *grid;
-
+  VALUE_TYPE *nCoordinates;
   /**
    *
    * @param rows Number of rows of the matrix
@@ -54,15 +53,18 @@ public:
     this->tempCachePtr = std::make_unique<std::vector<
         std::unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>>>(
         grid->col_world_size);
-    nCoordinates =
+    this->nCoordinates =
         static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[rows * embedding_dim])));
 //    std::srand(this->grid->global_rank);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < embedding_dim; j++) {
         VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
-        nCoordinates[i * embedding_dim + j] = val;
+        this->nCoordinates[i * embedding_dim + j] = val;
       }
     }
+    this->nnz_count = make_unique<vector<INDEX_TYPE>>(rows,0);
+    this->state_metadata = make_unique<vector<vector<VALUE_TYPE>>>(rows,vector<VALUE_TYPE>(embedding_dim,0));
+
   }
 
   ~DenseMat() {}
@@ -101,7 +103,7 @@ public:
 
     int base_index = local_key * embedding_dim;
     std::copy(nCoordinates + base_index,
-              nCoordinates + base_index + embedding_dim, stdArray.data());
+              this->nCoordinates + base_index + embedding_dim, stdArray.data());
     return stdArray;
   }
 
@@ -144,7 +146,7 @@ public:
     for (int i = 0; i < rows; ++i) {
       fout << (i + 1) << " ";
       for (int j = 0; j < embedding_dim; ++j) {
-        fout << nCoordinates[i * embedding_dim + j] << " ";
+        fout << this->nCoordinates[i * embedding_dim + j] << " ";
       }
       fout << endl;
     }

@@ -4,6 +4,7 @@
 #include "data_comm.hpp"
 #include <math.h>
 #include <memory>
+#include "../core/dense_mat.hpp"
 
 using namespace distblas::core;
 using namespace std;
@@ -20,6 +21,8 @@ private:
   shared_ptr<
       vector<vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>>>
       receive_indices_proc_map;
+
+  DenseMat<INDEX_TYPE,VALUE_TYPE>* state_holder;
 
   int total_batches;
 
@@ -43,7 +46,8 @@ public:
                distblas::core::SpMat<VALUE_TYPE> *sparse_local,
                Process3DGrid *grid, double alpha, int total_batches,
                double tile_width_fraction, bool hash_spgemm = true,
-               bool embedding = false, double merge_cost_factor = 1.0)
+               bool embedding = false, double merge_cost_factor = 1.0,
+               DenseMat<INDEX_TYPE,VALUE_TYPE>* state_holder=nullptr)
       : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
     tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
@@ -52,6 +56,7 @@ public:
     this->hash_spgemm = hash_spgemm;
     this->embedding = embedding;
     this->merge_cost_factor = merge_cost_factor;
+    this->state_holder= state_holder;
     SparseTile<INDEX_TYPE, VALUE_TYPE>::tile_width_fraction =
         tile_width_fraction;
     receiver_proc_tile_map =
@@ -165,27 +170,25 @@ public:
         // calculating sending data cols
         this->sp_local_sender->find_col_ids_with_tiling(
             i, 0, this->grid->col_world_size, sender_proc_tile_map.get(),
-            send_indices_proc_map.get(), 0, "+", this->sparse_local);
+            send_indices_proc_map.get(), 0, "+", this->sparse_local,state_holder);
       }
       // This represents the case for pulling
       this->sparse_local->get_transferrable_datacount(
-          sender_proc_tile_map.get(), total_batches, true, false);
+          sender_proc_tile_map.get(), total_batches, true, false,state_holder);
 
       if (embedding) {
         this->sparse_local->get_transferrable_datacount(
             receiver_proc_tile_map.get(), total_batches, false, false);
       }
 
-      int tiles_per_process =
-          SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+      int tiles_per_process = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
       auto itr = total_batches * this->grid->col_world_size * tiles_per_process;
 
       auto per_process_messages = total_batches * tiles_per_process;
 
-      unique_ptr<vector<TileTuple<INDEX_TYPE>>> send_tile_meta =
-          make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
-      unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta =
-          make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
+      unique_ptr<vector<TileTuple<INDEX_TYPE>>> send_tile_meta = make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
+
+      unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta = make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
 
 #pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
@@ -282,7 +285,7 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf_cyclic,
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id, int starting_proc, int end_proc, int start_tile,
-      int end_tile, bool embedding=false) {
+      int end_tile, bool embedding=false, DistributedMat* state_holder=nullptr) {
 
     int total_receive_count = 0;
     shared_ptr<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>
@@ -316,7 +319,7 @@ public:
     for (int tile = start_tile; tile < end_tile; tile++) {
       for (const auto &pair : (*send_indices_proc_map)[batch_id][tile]) {
         auto col_id = pair.first;
-        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id,embedding);
+        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id,embedding,state_holder);
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0 and
               (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==

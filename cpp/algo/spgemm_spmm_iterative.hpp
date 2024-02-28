@@ -53,6 +53,9 @@ public:
   void execute(int iterations, int batch_size, VALUE_TYPE lr) {
 
     distblas::core::SpMat<VALUE_TYPE> *sparse_input = nullptr;
+    unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>> state_holder=
+        make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>>(grid,sp_local_receiver->proc_row_width);
+
     for (int i = 0; i < iterations; i++) {
       double output_sparsity = 0;
       if (i == 0) {
