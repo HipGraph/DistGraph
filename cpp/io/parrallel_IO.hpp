@@ -144,7 +144,7 @@ public:
   }
 
   template <typename VALUE_TYPE>
-  void build_sparse_random_matrix(INDEX_TYPE rows, INDEX_TYPE cols,
+  void build_sparse_random_matrix(INDEX_TYPE rows,INDEX_TYPE global_rows, INDEX_TYPE cols,
                                   double density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
                                   Process3DGrid *grid, bool bfs_input = false) {
@@ -153,7 +153,7 @@ public:
     std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
     if (bfs_input) {
       INDEX_TYPE start_index = grid->rank_in_col*rows;
-      INDEX_TYPE end_index = min((grid->rank_in_col+1)*rows,grid->gRows);
+      INDEX_TYPE end_index = min((grid->rank_in_col+1)*rows,global_rows);
       std::uniform_real_distribution<VALUE_TYPE> uni_dist_rows(start_index, end_index - 1);
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
