@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
   cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
 
   vector<Tuple<VALUE_TYPE>> sparse_coo;
-  auto sparse_input = make_shared<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
+  auto sparse_input = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get());
   if (spgemm & save_results) {
     int local_cols = divide_and_round_up(dimension,grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
