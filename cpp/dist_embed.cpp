@@ -225,8 +225,10 @@ int main(int argc, char **argv) {
   shared_sparseMat_receiver.get()->initialize_CSR_blocks();
 
   if (spgemm){
-//    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
+    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
+    cout << " rank " << rank << " input partitioning data completed  " << endl;
     sparse_input->initialize_CSR_blocks();
+    cout << " rank " << rank << " input csr  completed  " << endl;
   }
 
   cout << " rank " << rank << " CSR block initialization completed  " << endl;
