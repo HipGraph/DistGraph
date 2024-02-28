@@ -204,8 +204,9 @@ public:
 
     MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,
                   grid->col_world);
+    int increment = min(chunk_size,sparse_coo.size());
 
-    for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += chunk_size) {
+    for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += increment) {
       if (grid->rank_in_col == 0 and i == 0) {
         total_size += snprintf(
             nullptr, 0,
