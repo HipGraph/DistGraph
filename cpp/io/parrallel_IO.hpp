@@ -172,7 +172,7 @@ public:
             cout<<" rank "<<grid->rank_in_col<<" count "<<count<<"index "<<index<<" row "<<row<<endl;
             Tuple<VALUE_TYPE> t;
             t.row = row;   // Calculate row index
-            t.col = ; // Calculate column index
+            t.col = index ; // Calculate column index
             t.value = 1;
             sparse_coo.push_back(t);
             count++;
