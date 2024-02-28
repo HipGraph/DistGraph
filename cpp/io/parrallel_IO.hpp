@@ -164,10 +164,10 @@ public:
       std::unordered_set<INDEX_TYPE> rows_taken;
       INDEX_TYPE row;
       int count = 0;
-      while (count < cols) {
-        cout<<" rank "<<grid->rank_in_col<<" count "<<count<<endl;
+      while (count <= cols) {
         row = uni_dist_rows(gen);
         if (rows_taken.insert(row).second) {
+          cout<<" rank "<<grid->rank_in_col<<" count "<<count<<endl;
           auto index = uni_dist(gen);
           if (indexes_taken.insert(index).second) {
             Tuple<VALUE_TYPE> t;
