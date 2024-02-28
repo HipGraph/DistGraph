@@ -85,7 +85,7 @@ public:
         sendbuf[idx].col = coords[i].col;
         sendbuf[idx].value = coords[i].value;
       }
-      cout<<" rank "<<my_rank<<" total_send_coords "<<sendcounts.data()<<endl;
+      cout<<" rank "<<my_rank<<" total_send_coords "<<(*sendcounts).size()<<endl;
       // Broadcast the number of nonzeros that each processor is going to
       // receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,

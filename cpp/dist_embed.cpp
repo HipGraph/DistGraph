@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
   if (spgemm){
     cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
     cout << " rank " << rank << " input partitioning started   " << endl;
-    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
+//    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
     cout << " rank " << rank << " input partitioning data completed  " << endl;
     sparse_input->initialize_CSR_blocks();
     cout << " rank " << rank << " input csr  completed  " << endl;
