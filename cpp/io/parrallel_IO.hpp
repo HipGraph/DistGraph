@@ -147,7 +147,7 @@ public:
   void build_sparse_random_matrix(INDEX_TYPE rows, INDEX_TYPE cols,
                                   double density, int seed,
                                   vector<Tuple<VALUE_TYPE>> &sparse_coo,
-                                  Process3DGrid *grid, bool bfs_input=false) {
+                                  Process3DGrid *grid, bool bfs_input = false) {
     std::mt19937 gen(seed);
     std::normal_distribution<VALUE_TYPE> norm_dist(0, 1);
     std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
@@ -157,20 +157,21 @@ public:
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
       INDEX_TYPE row;
-      int count=0;
-      do{
+      int count = 0;
+      do {
         row = uni_dist_rows(gen);
-        auto index = uni_dist(gen);
-        while (indexes_taken.insert(index).second) {
+        if (rows_taken.insert(row).second) {
+          auto index = uni_dist(gen);
+          if (indexes_taken.insert(index).second) {
             Tuple<VALUE_TYPE> t;
-            t.row = row;     // Calculate row index
+            t.row = row;   // Calculate row index
             t.col = index; // Calculate column index
             t.value = 1;
             sparse_coo.push_back(t);
             count++;
-            break;
           }
-        } while(!rows_taken.insert(row).second and count<min_itr);
+        }
+      } while (count < min_itr);
     } else {
       auto expected_non_zeros = cols * density;
       for (INDEX_TYPE i = 0; i < rows; ++i) {
