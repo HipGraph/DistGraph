@@ -135,30 +135,30 @@ int main(int argc, char **argv) {
 
 
 //  // Creating reader
-//  auto reader = unique_ptr<ParallelIO>(new ParallelIO());
-//
-//  // Creating ProcessorGrid
-//  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(world_size, 1, 1, 1));
-//
-//  auto shared_sparseMat =
-//      shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
-//
-//  cout << " rank " << rank << " reading data from file path:  " << input_file
-//       << endl;
-//
-//  auto start_io = std::chrono::high_resolution_clock::now();
-//
-//  reader.get()->parallel_read_MM<int64_t,int,VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
-//
-//
-//  cout << " rank " << rank << " reading data from file path:  " << input_file<< " completed " << endl;
-//
-//
-//
-//  auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
-//                                        grid.get()->col_world_size);
-//  auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
-//                                        grid.get()->col_world_size);
+  auto reader = unique_ptr<ParallelIO>(new ParallelIO());
+
+  // Creating ProcessorGrid
+  auto grid = unique_ptr<Process3DGrid>(new Process3DGrid(world_size, 1, 1, 1));
+
+  auto shared_sparseMat =
+      shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
+
+  cout << " rank " << rank << " reading data from file path:  " << input_file
+       << endl;
+
+  auto start_io = std::chrono::high_resolution_clock::now();
+
+  reader.get()->parallel_read_MM<int64_t,int,VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
+
+
+  cout << " rank " << rank << " reading data from file path:  " << input_file<< " completed " << endl;
+
+
+
+  auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
+                                        grid.get()->col_world_size);
+  auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
+                                        grid.get()->col_world_size);
 //
 //  // To enable full batch size
 ////  if (spmm or spgemm) {
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
 //
 //  cout << " rank " << rank << " localBRows  " << localBRows << " localARows "<< localARows << endl;
 //
-//  vector<Tuple<VALUE_TYPE>> sparse_coo;
+  vector<Tuple<VALUE_TYPE>> sparse_coo;
 //  auto sparse_input = shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
   if (spgemm & save_results) {
     reader->build_sparse_random_matrix(localARows, dimension, density, 0,sparse_coo, grid.get(),true);
