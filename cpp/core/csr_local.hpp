@@ -124,7 +124,7 @@ public:
 
       mkl_sparse_destroy(tempCSR);
     }else {
-      handler->rowStart->resize(this->rows+1,0);
+      handler->rowStart.resize(this->rows+1,0);
     }
   }
 
