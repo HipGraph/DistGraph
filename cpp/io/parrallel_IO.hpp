@@ -162,10 +162,9 @@ public:
       std::uniform_real_distribution<VALUE_TYPE> uni_dist_rows(start_index, end_index - 1);
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
-      int min_itr = cols/grid->col_world_size;
       INDEX_TYPE row;
       int count = 0;
-      while (count < min_itr) {
+      while (count < cols) {
         cout<<" rank "<<grid->rank_in_col<<" count "<<count<<endl;
         row = uni_dist_rows(gen);
         if (rows_taken.insert(row).second) {
