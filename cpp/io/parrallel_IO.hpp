@@ -153,7 +153,7 @@ public:
     std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
     if (bfs_input) {
       int min_itr = min(rows, cols);
-      std::uniform_real_distribution<INDEX_TYPE> uni_dist_rows(0, rows - 1);
+      std::uniform_real_distribution<VALUE_TYPE> uni_dist_rows(0, rows - 1);
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
       INDEX_TYPE row;
