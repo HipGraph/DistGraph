@@ -83,7 +83,7 @@ public:
       output_sparsity =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
       output_sparsity =100 * (output_sparsity /(((sparse_out->csr_local_data)->handler->rowStart.size() - 1) *embedding_dim));
       (*(sparse_input->csr_local_data)) = (*(sparse_out->csr_local_data));
-      add_perf_stats(output_sparsity,"output_sparsity");
+      add_perf_stats(output_sparsity,"Output Sparsity");
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
       jobj[i]=json_perf_statistics();
