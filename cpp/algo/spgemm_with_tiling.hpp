@@ -191,7 +191,7 @@ public:
       if (communication and (symbolic or !output->hash_spgemm)) {
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
-                                        k, end_process, 0, tiles_per_process, state_holder);
+                                        k, end_process, 0, tiles_per_process,false, state_holder);
       }
       if (k == comm_initial_start) {
         // local computation
