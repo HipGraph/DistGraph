@@ -143,15 +143,17 @@ json distblas::core::json_perf_statistics() {
   for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();it++) {
     double val = total_time[*it];
 
-    MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    if (val>=0) {
+      MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    // We also have the call count for each statistic timed
-    if ((*it != "Remote Computed Tiles")){
-      val /= world_size;
-    }
+      // We also have the call count for each statistic timed
+      if ((*it != "Remote Computed Tiles")) {
+        val /= world_size;
+      }
 
-    if (rank == 0) {
-      j_obj[*it] = val;
+      if (rank == 0) {
+        j_obj[*it] = val;
+      }
     }
   }
   return j_obj;
