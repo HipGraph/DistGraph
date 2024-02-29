@@ -157,9 +157,8 @@ public:
       INDEX_TYPE end_index = min((grid->rank_in_col+1)*rows,global_rows);
 
       INDEX_TYPE start_col_index = grid->rank_in_col*cols;
-      INDEX_TYPE end_col_index = min((grid->rank_in_col+1)*cols,global_cols);
 
-      std::uniform_int_distribution<INDEX_TYPE> uni_dist(start_col_index, end_col_index - 1);
+      std::uniform_int_distribution<INDEX_TYPE> uni_dist(0, rows - 1);
       std::uniform_int_distribution<INDEX_TYPE> uni_dist_rows(start_index, end_index - 1);
       std::unordered_set<INDEX_TYPE> indexes_taken;
       std::unordered_set<INDEX_TYPE> rows_taken;
@@ -167,10 +166,10 @@ public:
       int count = 0;
       while (count < cols) {
         row = static_cast<INDEX_TYPE>(uni_dist_rows(gen));
+        row = min(start_col_index +row,global_rows);
         if (rows_taken.insert(row).second) {
           INDEX_TYPE index = static_cast<INDEX_TYPE>(uni_dist(gen1));
           if (indexes_taken.insert(index).second) {
-            cout<<" rank "<<grid->rank_in_col<<" count "<<count<<"index "<<index<<" row "<<row<<endl;
             Tuple<VALUE_TYPE> t;
             t.row = row;   // Calculate row index
             t.col = index ; // Calculate column index
