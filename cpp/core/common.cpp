@@ -143,7 +143,7 @@ json distblas::core::json_perf_statistics() {
     MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     // We also have the call count for each statistic timed
-    if (!((*it == "Remote Computed Tiles")or (*it == "Data transfers"))){
+    if ((*it != "Remote Computed Tiles")){
       val /= world_size;
     }
 
