@@ -20,7 +20,6 @@ public:
 
   unique_ptr<vector<vector<VALUE_TYPE>>> state_metadata;
 
-
   bool  hash_spgemm;
 
   DistributedMat() = default;

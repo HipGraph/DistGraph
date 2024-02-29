@@ -21,7 +21,7 @@ namespace distblas::core {
  * This class represents  the dense matrix.
  */
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
-class DenseMat : DistributedMat {
+class DenseMat : public DistributedMat {
 
 private:
 public:
@@ -40,7 +40,7 @@ public:
    * @param std  initialize with normal distribution with given standard
    * deviation
    */
-  DenseMat(Process3DGrid *grid, INDEX_TYPE rows) {
+  DenseMat(Process3DGrid *grid, INDEX_TYPE rows): DistributedMat() {
 
     this->rows = rows;
     this->grid = grid;
