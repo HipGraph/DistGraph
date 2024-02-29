@@ -96,6 +96,7 @@ public:
     #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
       auto bfs_frontier=(*(dense_mat->nnz_count))[i];
+      (*(dense_mat->nnz_count))[i]=0;
       for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
         auto d = handle->col_idx[j];
         (*(dense_mat->state_metadata))[i][d]=1;
