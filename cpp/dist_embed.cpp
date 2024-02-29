@@ -190,15 +190,15 @@ int main(int argc, char **argv) {
     int local_cols = divide_and_round_up(dimension,grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
                                        local_cols,dimension, density, 0,sparse_coo, grid.get(),true);
-    INDEX_TYPE gROWs = static_cast<INDEX_TYPE>(localARows);
-    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
-    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
-    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
-    int localBRows = static_cast<int>(dimension);
-    sparse_input =  make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
-                                                                   sparse_coo, gROWs,
-                                                                   gCols, gNNZ, batch_size,
-                                                                   localARows, localBRows, false, false);
+//    INDEX_TYPE gROWs = static_cast<INDEX_TYPE>(localARows);
+//    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
+//    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
+//    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
+//    int localBRows = static_cast<int>(dimension);
+//    sparse_input =  make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
+//                                                                   sparse_coo, gROWs,
+//                                                                   gCols, gNNZ, batch_size,
+//                                                                   localARows, localBRows, false, false);
   }else if (spgemm){
     reader.get()->parallel_read_MM<int64_t,VALUE_TYPE,VALUE_TYPE>(sparse_data_file, sparse_input.get(),false);
     sparse_input.get()->batch_size = batch_size;
