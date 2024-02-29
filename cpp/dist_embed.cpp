@@ -190,6 +190,7 @@ int main(int argc, char **argv) {
     int local_cols = divide_and_round_up(dimension,grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
                                        local_cols,dimension, density, 0,sparse_coo, grid.get(),true);
+    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
 //    INDEX_TYPE gROWs = static_cast<INDEX_TYPE>(localARows);
 //    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
 //    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
