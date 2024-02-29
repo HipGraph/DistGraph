@@ -93,7 +93,7 @@ public:
 
   void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim> *dense_mat){
     CSRHandle *handle = sparse_input->csr_local_data->handler.get();
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
       auto bfs_frontier=(*(dense_mat->nnz_count))[i];
       (*(dense_mat->nnz_count))[i]=0;
@@ -102,6 +102,7 @@ public:
         (*(dense_mat->state_metadata))[i][d]=1;
         (*(dense_mat->nnz_count))[i]++;
       }
+      cout<<" rank "<<grid->rank_in_col<<" new size "<<(*(dense_mat->nnz_count))[i]<<" previouse s ize"<<bfs_frontier<<endl;
       auto bfs_frontier_diff = (*(dense_mat->nnz_count))[i] - bfs_frontier;
       add_perf_stats(bfs_frontier_diff, "BFS Frontier");
     }
