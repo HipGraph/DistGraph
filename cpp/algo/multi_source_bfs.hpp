@@ -9,7 +9,7 @@ using namespace distblas::core;
 namespace distblas::algo {
 
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
-class SpGEMMSpMMIterative {
+class MultiSourceBFS {
 
 private:
   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
@@ -36,7 +36,7 @@ private:
   bool hash_spgemm = false;
 
 public:
-  SpGEMMSpMMIterative(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
+  MultiSourceBFS(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
                       distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
                       distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                       distblas::core::SpMat<VALUE_TYPE> *sparse_local,
