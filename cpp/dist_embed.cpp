@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
 
 //  dense_local->print_cache(i);
 //  dense_mat.get()->print_matrix_rowptr(-1);
-
+ json perf_stats;
   if (spmm) {
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
         new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
-    spgemm_algo.get()->execute(iterations, batch_size,lr);
+    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
     cout << " rank " << rank << " spgemm algo completed  " << endl;
 //    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
 //    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
@@ -335,7 +335,7 @@ int main(int argc, char **argv) {
   if (spgemm){
     j_obj["output_nnz"] = output_sparsity;
   }
-  j_obj["perf_stats"] = json_perf_statistics();
+  j_obj["perf_stats"] = perf_stats;
   if (rank == 0) {
     fout << j_obj.dump(4) << "," << endl;
   }

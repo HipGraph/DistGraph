@@ -50,12 +50,14 @@ public:
     this->hash_spgemm = hash_spgemm;
   }
 
-  void execute(int iterations, int batch_size, VALUE_TYPE lr) {
-
+  json execute(int iterations, int batch_size, VALUE_TYPE lr) {
+    json jobj;
     distblas::core::SpMat<VALUE_TYPE> *sparse_input = nullptr;
     unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>> state_holder= make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>>(grid,sp_local_receiver->proc_row_width);
 
     for (int i = 0; i < iterations; i++) {
+      auto t = start_clock();
+      size_t total_memory = 0;
       double output_sparsity = 0;
       if (i == 0) {
         sparse_input = sparse_local;
@@ -75,11 +77,18 @@ public:
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr);
       this->update_state_holder(sparse_input,state_holder.get());
 
+      total_memory += get_memory_usage();
+
+
       output_sparsity =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
       output_sparsity =100 * (output_sparsity /(((sparse_out->csr_local_data)->handler->rowStart.size() - 1) *embedding_dim));
-      cout << " rank " << grid->rank_in_col << " output sparsity "<< output_sparsity << endl;
       (*(sparse_input->csr_local_data)) = (*(sparse_out->csr_local_data));
+      add_perf_stats(output_sparsity,"output_sparsity");
+      add_perf_stats(total_memory, "Memory usage");
+      stop_clock_and_add(t, "Total Time");
+      jobj[i]=json_perf_statistics();
     }
+   return jobj;
   }
 
   void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim> *dense_mat){

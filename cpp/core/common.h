@@ -54,11 +54,11 @@ void reset_performance_timers();
 
 void stop_clock_and_add(my_timer_t &start, string counter_name);
 
-void add_memory(size_t mem, string counter_name);
+void add_perf_stats(size_t mem, string counter_name);
 
-void add_datatransfers(INDEX_TYPE count, string counter_name);
+void add_perf_stats(INDEX_TYPE count, string counter_name);
 
-void add_tiles(INDEX_TYPE count, string counter_name);
+void add_perf_stats(INDEX_TYPE count, string counter_name);
 
 void print_performance_statistics();
 

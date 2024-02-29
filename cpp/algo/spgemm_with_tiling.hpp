@@ -62,8 +62,8 @@ public:
   }
 
   void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr) {
-    auto t = start_clock();
-    size_t total_memory = 0;
+
+//    size_t total_memory = 0;
     int batches = 0;
     int last_batch_size = batch_size;
 
@@ -158,13 +158,13 @@ public:
           this->merge_remote_computations(
               j, batch_size, this->sparse_local_output, main_comm.get());
         }
-        total_memory += get_memory_usage();
+//        total_memory += get_memory_usage();
       }
       (this->sparse_local)->purge_cache();
     }
     (this->sparse_local_output)->initialize_CSR_blocks();
-    total_memory = total_memory / (iterations * batches);
-    add_memory(total_memory, "Memory usage");
+//    total_memory = total_memory / (iterations * batches);
+//    add_perf_stats(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
   }
 
@@ -275,7 +275,7 @@ public:
                                        csr_block, lr, batch_id, batch_size,
                                        block_size, symbolic, mode, output);
               if (itr == 0 and !symbolic) {
-                add_tiles(1, "Locally Computed Tiles");
+                add_perf_stats(1, "Locally Computed Tiles");
               }
             }
           }
@@ -307,7 +307,7 @@ public:
               sp_tile.initialize_hashtables();
             }
             if (itr == 0 and !symbolic) {
-              add_tiles(1, "Remote Computed Tiles");
+              add_perf_stats(1, "Remote Computed Tiles");
             }
           }
         }

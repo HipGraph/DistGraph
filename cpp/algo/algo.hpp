@@ -257,7 +257,7 @@ public:
       }
     }
     total_memory = total_memory / (iterations * batches);
-    add_memory(total_memory, "Memory usage");
+    add_perf_stats(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
   }
 

@@ -92,7 +92,7 @@ public:
     auto total_tiles =
         total_batches * this->grid->col_world_size * tiles_per_process;
 
-    add_tiles(total_tiles, "Total Tiles");
+    add_perf_stats(total_tiles, "Total Tiles");
 
     if (alpha == 0) {
 #pragma omp parallel for
@@ -211,9 +211,12 @@ public:
         }
       }
 
+      auto t = start_clock();
       MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
+      stop_clock_and_add(t, "Communication Time");
+      add_perf_stats(per_process_messages, "Data transfers");
 
       send_tile_meta->clear();
       send_tile_meta->resize(itr);
@@ -258,9 +261,12 @@ public:
       (receive_tile_meta)->resize(itr);
 
       if (embedding) {
+        auto t = start_clock();
         MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                      (*receive_tile_meta).data(), per_process_messages,
                      TILETUPLE, this->grid->col_world);
+        stop_clock_and_add(t, "Communication Time");
+        add_perf_stats(per_process_messages, "Data transfers");
 
 #pragma omp parallel for
         for (auto in = 0; in < itr; in++) {
@@ -425,7 +431,7 @@ public:
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-
+    add_perf_stats(1, "Data transfers");
     for (int i = 0; i < this->grid->col_world_size; i++) {
       this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
                                               this->receive_counts_cyclic[i - 1]
@@ -437,8 +443,6 @@ public:
       receivebuf->resize(total_receive_count);
     }
 
-    add_datatransfers(total_receive_count, "Data transfers");
-
     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
@@ -446,6 +450,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
+    add_perf_stats(1, "Data transfers");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
   }
 
@@ -530,6 +535,7 @@ public:
                   this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
                   SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
+    add_perf_stats(total_receive_count, "Data transfers");
     MPI_Request dumy;
     this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id); // we should not do this
 
@@ -687,6 +693,7 @@ public:
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
+    add_perf_stats(1, "Data transfers");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
       this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
@@ -699,7 +706,7 @@ public:
       receivebuf->resize(total_receive_count);
     }
 
-    add_datatransfers(total_receive_count, "Data transfers");
+
     //
     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
@@ -708,6 +715,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
+    add_perf_stats(total_receive_count, "Data transfers");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,batch_id,false);
   }
 
@@ -862,6 +870,7 @@ public:
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
+    add_perf_stats(1, "Data transfers");
     stop_clock_and_add(t, "Communication Time");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
@@ -875,7 +884,7 @@ public:
       receivebuf->resize(total_receive_count);
     }
 
-    add_datatransfers(total_receive_count, "Data transfers");
+
     //
     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
@@ -884,6 +893,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
+    add_perf_stats(total_receive_count, "Data transfers");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
                                        batch_id,true);
   }
