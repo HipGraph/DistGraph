@@ -494,6 +494,7 @@ public:
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
         } else {
+          cout<<" rank "<<grid->rank_in_col<<" trying to execute state_holder"<<" key"<<local_key<<endl;
           for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
             if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
                 new_handler.col_idx.push_back(handle->col_idx[i]);
