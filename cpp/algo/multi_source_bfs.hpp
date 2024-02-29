@@ -84,7 +84,9 @@ public:
       auto frontier =output_nnz - output_nnz_prev;
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
       add_perf_stats(output_nnz,"Output NNZ");
-      add_perf_stats(frontier,"BFS Frontier");
+      if (frontier>0) {
+        add_perf_stats(frontier, "BFS Frontier");
+      }
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
       jobj[i]=json_perf_statistics();
