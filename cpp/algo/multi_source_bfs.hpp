@@ -76,13 +76,14 @@ public:
 
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr);
       this->update_state_holder(sparse_input,state_holder.get());
-
       total_memory += get_memory_usage();
 
 
       output_nnz =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
+      auto frontier =output_nnz - (sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1];
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
       add_perf_stats(output_nnz,"Output NNZ");
+      add_perf_stats(frontier,"BFS Frontier");
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
       jobj[i]=json_perf_statistics();
@@ -93,7 +94,7 @@ public:
 
   void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim> *dense_mat){
     CSRHandle *handle = sparse_input->csr_local_data->handler.get();
-//    #pragma omp parallel for
+    #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
       auto bfs_frontier=(*(dense_mat->nnz_count))[i];
       (*(dense_mat->nnz_count))[i]=0;
@@ -102,13 +103,6 @@ public:
         (*(dense_mat->state_metadata))[i][d]=1;
         (*(dense_mat->nnz_count))[i]++;
       }
-      if (grid->rank_in_col==0) {
-        cout << " rank " << grid->rank_in_col << " new size "
-             << (*(dense_mat->nnz_count))[i] << " previouse s ize"
-             << bfs_frontier << endl;
-      }
-      auto bfs_frontier_diff = (*(dense_mat->nnz_count))[i] - bfs_frontier;
-      add_perf_stats(bfs_frontier_diff, "BFS Frontier");
     }
   }
 };
