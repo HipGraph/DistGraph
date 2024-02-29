@@ -94,6 +94,9 @@ void distblas::core::stop_clock_and_add(my_timer_t &start,string counter_name) {
 void distblas::core::add_perf_stats(size_t mem, string counter_name) {
   if (find(perf_counter_keys.begin(), perf_counter_keys.end(), counter_name) !=
       perf_counter_keys.end()) {
+    if (counter_name=="Data Transfers"){
+      mem = mem/(1024*1024);
+    }
     call_count[counter_name]++;
     total_time[counter_name] += mem;
   } else {

@@ -79,8 +79,8 @@ public:
       total_memory += get_memory_usage();
 
 
-      output_nnz =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
-      double output_nnz_prev = (sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1];
+      output_nnz =static_cast<double>((sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1]);
+      double output_nnz_prev = static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
       auto frontier =output_nnz - output_nnz_prev;
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
       add_perf_stats(output_nnz,"Output NNZ");
