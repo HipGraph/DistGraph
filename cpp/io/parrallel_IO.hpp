@@ -171,6 +171,7 @@ public:
           INDEX_TYPE index = static_cast<INDEX_TYPE>(uni_dist(gen1));
           if (indexes_taken.insert(index).second) {
             Tuple<VALUE_TYPE> t;
+            cout<<" rank "<<grid->rank_in_col<<" row "<<row<<" index "<<index<<endl;
             t.row = row;   // Calculate row index
             t.col = index ; // Calculate column index
             t.value = 1;
@@ -210,8 +211,8 @@ public:
     INDEX_TYPE global_sum = 0;
     INDEX_TYPE local_sum = sparse_coo.size();
 
-    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,
-                  grid->col_world);
+    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,grid->col_world);
+
     int increment = min(chunk_size, static_cast<int>(sparse_coo.size()));
 
     for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += increment) {
@@ -221,8 +222,7 @@ public:
             "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
             global_rows, global_cols, global_sum);
       }
-      int elements_in_chunk =
-          min(chunk_size, static_cast<int>(sparse_coo.size() - i));
+      int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
