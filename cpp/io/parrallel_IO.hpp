@@ -226,9 +226,8 @@ public:
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
-        int col = static_cast<int>(t.col + 1);
-        INDEX_TYPE row =
-            static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
+        INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1);
+        INDEX_TYPE col = static_cast<INDEX_TYPE>(t.col + 1);
         total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
       }
 
@@ -250,9 +249,8 @@ public:
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
-        int col = static_cast<int>(t.col + 1);
-        INDEX_TYPE row =
-            static_cast<INDEX_TYPE>(t.row + 1 + grid->rank_in_col * local_rows);
+        INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1);
+        INDEX_TYPE col = static_cast<INDEX_TYPE>(t.col + 1);
         current_position += snprintf(current_position, total_size,
                                      "%lu %lu %.5f\n", row, col, t.value);
       }
