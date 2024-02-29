@@ -484,13 +484,11 @@ public:
       }
     } else {
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
-
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
-
       if (handle->rowStart[local_key + 1] - handle->rowStart[local_key] > 0) {
-        new_handler.col_idx.resize(count);
-        new_handler.values.resize(count);
         if (state_holder==nullptr) {
+          new_handler.col_idx.resize(count);
+          new_handler.values.resize(count);
           copy(handle->col_idx.begin(), handle->col_idx.begin() + count,
                new_handler.col_idx.begin());
           copy(handle->values.begin(), handle->values.begin() + count,
