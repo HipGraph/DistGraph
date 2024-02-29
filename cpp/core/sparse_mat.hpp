@@ -485,6 +485,7 @@ public:
          }
       }
     } else {
+      cout<<" rank "<<grid->rank_in_col<<" access handler "<<endl;
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
       cout<<" rank "<<grid->rank_in_col<<" hamdler taken"<<endl;
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
