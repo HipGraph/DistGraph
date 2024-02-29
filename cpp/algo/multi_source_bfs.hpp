@@ -82,9 +82,9 @@ public:
     }
   }
 
-  void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_diem> *dense_mat){
+  void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim> *dense_mat){
     CSRHandle *handle = sparse_input->csr_local_data->handler.get();
-    #pragma omp paralle for
+    #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
       for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
         auto d = handle->col_idx[j];

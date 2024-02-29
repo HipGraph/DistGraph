@@ -49,6 +49,14 @@ public:
     if (other.dataCachePtr) {
       dataCachePtr = make_unique<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>>(*(other.dataCachePtr));
     }
+
+    if (other.nnz_count) {
+      dataCachePtr = make_unique<vector<INDEX_TYPE>>(*(other.nnz_count));
+    }
+
+    if (other.state_metadata) {
+      dataCachePtr = make_unique<vector<vector<VALUE_TYPE>>>(*(other.state_metadata));
+    }
   }
 
   void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols, bool reset_dense=true){
