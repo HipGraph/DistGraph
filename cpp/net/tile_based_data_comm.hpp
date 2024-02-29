@@ -216,7 +216,7 @@ public:
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
       stop_clock_and_add(t, "Communication Time");
-      add_perf_stats(per_process_messages, "Data transfers");
+      add_perf_stats(per_process_messages*this->grid->col_world, "Data transfers");
 
       send_tile_meta->clear();
       send_tile_meta->resize(itr);
@@ -266,7 +266,7 @@ public:
                      (*receive_tile_meta).data(), per_process_messages,
                      TILETUPLE, this->grid->col_world);
         stop_clock_and_add(t, "Communication Time");
-        add_perf_stats(per_process_messages, "Data transfers");
+        add_perf_stats(per_process_messages*this->grid->col_world, "Data transfers");
 
 #pragma omp parallel for
         for (auto in = 0; in < itr; in++) {
@@ -431,7 +431,7 @@ public:
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(1, "Data transfers");
+    add_perf_stats(this->grid->col_world, "Data transfers");
     for (int i = 0; i < this->grid->col_world_size; i++) {
       this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
                                               this->receive_counts_cyclic[i - 1]
@@ -450,7 +450,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(1, "Data transfers");
+    add_perf_stats(total_receive_count*(2*sp_tuple_max_dim+row_max), "Data transfers");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
   }
 
@@ -535,7 +535,7 @@ public:
                   this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
                   SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(total_receive_count, "Data transfers");
+    add_perf_stats(total_receive_count*(2*sp_tuple_max_dim+row_max), "Data transfers");
     MPI_Request dumy;
     this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id); // we should not do this
 
@@ -693,7 +693,7 @@ public:
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(1, "Data transfers");
+    add_perf_stats(this->grid->col_world, "Data transfers");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
       this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
@@ -715,7 +715,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(total_receive_count, "Data transfers");
+    add_perf_stats(total_receive_count*(2*sp_tuple_max_dim+row_max), "Data transfers");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,batch_id,false);
   }
 
@@ -870,7 +870,7 @@ public:
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
-    add_perf_stats(1, "Data transfers");
+    add_perf_stats(this->grid->col_world, "Data transfers");
     stop_clock_and_add(t, "Communication Time");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
@@ -893,7 +893,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(total_receive_count, "Data transfers");
+    add_perf_stats(total_receive_count*(2*sp_tuple_max_dim+row_max), "Data transfers");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,
                                        batch_id,true);
   }
