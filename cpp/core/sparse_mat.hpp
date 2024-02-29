@@ -469,6 +469,7 @@ public:
   }
 
   CSRHandle fetch_local_data(INDEX_TYPE local_key, bool embedding = false,DistributedMat* state_holder=nullptr) {
+    cout<<" rank "<<grid->rank_in_col<<" trying key"<<local_key<<endl;
     CSRHandle new_handler;
     INDEX_TYPE global_key = (col_partitioned) ? local_key: local_key + proc_row_width * grid->rank_in_col;
     new_handler.row_idx.resize(1, global_key);
