@@ -141,10 +141,11 @@ json distblas::core::json_perf_statistics() {
     double val = total_time[*it];
 
     MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    total_time[*it]=0; //reset values
-    // We also have the call count for each statistic timed
-    val /= world_size;
 
+    // We also have the call count for each statistic timed
+    if (*it != "Remote Computed Tiles"){
+      val /= world_size;
+    }
     if (rank == 0) {
       j_obj[*it] = val;
     }

@@ -87,6 +87,7 @@ public:
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
       jobj[i]=json_perf_statistics();
+      reset_performance_timers();
     }
    return jobj;
   }

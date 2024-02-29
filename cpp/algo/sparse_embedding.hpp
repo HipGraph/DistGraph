@@ -278,9 +278,6 @@ public:
                                        dst_start_index, dst_end_index,
                                        csr_block, lr, batch_id, batch_size,
                                        block_size, symbolic, mode, output);
-              if (itr == 0 and !symbolic) {
-                add_perf_stats(1, "Locally Computed Tiles");
-              }
             }
           }
         }
