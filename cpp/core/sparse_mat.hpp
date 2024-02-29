@@ -473,6 +473,7 @@ public:
     CSRHandle new_handler;
     INDEX_TYPE global_key = (col_partitioned) ? local_key: local_key + proc_row_width * grid->rank_in_col;
     new_handler.row_idx.resize(1, global_key);
+    cout<<" rank "<<grid->rank_in_col<<" global key"<<global_key<<" available "<<endl;
     if (embedding) {
       if (this->hash_spgemm) {
       } else {
@@ -485,7 +486,9 @@ public:
       }
     } else {
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
+      cout<<" rank "<<grid->rank_in_col<<" hamdler taken"<<endl;
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
+      cout<<" rank "<<grid->rank_in_col<<" count "<<count<<endl;
       if (handle->rowStart[local_key + 1] - handle->rowStart[local_key] > 0) {
         if (state_holder==nullptr) {
           new_handler.col_idx.resize(count);
