@@ -81,7 +81,7 @@ public:
 
 
       output_nnz =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
-      (*(sparse_input->csr_local_data)) = make_unique<CSRLocal<VALUE_TYPE>>((*(sparse_out->csr_local_data)));
+      (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
       add_perf_stats(output_nnz,"Output NNZ");
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
@@ -95,11 +95,14 @@ public:
     CSRHandle *handle = sparse_input->csr_local_data->handler.get();
     #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
+      auto bfs_frontier=(*(dense_mat->nnz_count))[i];
       for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
         auto d = handle->col_idx[j];
         (*(dense_mat->state_metadata))[i][d]=1;
         (*(dense_mat->nnz_count))[i]++;
       }
+      auto bfs_frontier_diff = (*(dense_mat->nnz_count))[i] - bfs_frontier;
+      add_perf_stats(bfs_frontier_diff, "BFS Frontier");
     }
   }
 };
