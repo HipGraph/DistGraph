@@ -58,7 +58,7 @@ public:
     for (int i = 0; i < iterations; i++) {
       auto t = start_clock();
       size_t total_memory = 0;
-      double output_sparsity = 0;
+      double output_nnz = 0;
       if (i == 0) {
         sparse_input = sparse_local;
       }
@@ -80,10 +80,9 @@ public:
       total_memory += get_memory_usage();
 
 
-      output_sparsity =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
-      output_sparsity =100 * (output_sparsity /(((sparse_out->csr_local_data)->handler->rowStart.size() - 1) *embedding_dim));
-      (*(sparse_input->csr_local_data)) = (*(sparse_out->csr_local_data));
-      add_perf_stats(output_sparsity,"Output Sparsity");
+      output_nnz =(sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1];
+      (*(sparse_input->csr_local_data)) = make_unique<CSRLocal<VALUE_TYPE>>((*(sparse_out->csr_local_data)));
+      add_perf_stats(output_nnz,"Output NNZ");
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
       jobj[i]=json_perf_statistics();
