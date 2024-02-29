@@ -51,11 +51,11 @@ public:
     }
 
     if (other.nnz_count) {
-      dataCachePtr = make_unique<vector<INDEX_TYPE>>(*(other.nnz_count));
+      nnz_count = make_unique<vector<INDEX_TYPE>>(*(other.nnz_count));
     }
 
     if (other.state_metadata) {
-      dataCachePtr = make_unique<vector<vector<VALUE_TYPE>>>(*(other.state_metadata));
+      state_metadata = make_unique<vector<vector<VALUE_TYPE>>>(*(other.state_metadata));
     }
   }
 
