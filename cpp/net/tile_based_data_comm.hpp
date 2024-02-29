@@ -216,7 +216,7 @@ public:
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
       stop_clock_and_add(t, "Communication Time");
-      add_perf_stats(sizeof(TileTuple)*per_process_messages*this->grid->col_world, "Data transfers");
+      add_perf_stats(sizeof(TileTuple<INDEX_TYPE>)*per_process_messages*this->grid->col_world, "Data transfers");
 
       send_tile_meta->clear();
       send_tile_meta->resize(itr);
@@ -266,7 +266,7 @@ public:
                      (*receive_tile_meta).data(), per_process_messages,
                      TILETUPLE, this->grid->col_world);
         stop_clock_and_add(t, "Communication Time");
-        add_perf_stats(sizeof(TileTuple)*per_process_messages*this->grid->col_world, "Data transfers");
+        add_perf_stats(sizeof(TileTuple<INDEX_TYPE>)*per_process_messages*this->grid->col_world, "Data transfers");
 
 #pragma omp parallel for
         for (auto in = 0; in < itr; in++) {
@@ -535,7 +535,7 @@ public:
                   this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
                   SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(total_receive_count**sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
+    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
     MPI_Request dumy;
     this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id); // we should not do this
 
@@ -715,7 +715,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(total_receive_count**sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
+    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
     this->store_remotely_computed_data(sendbuf_cyclic, receivebuf, iteration,batch_id,false);
   }
 
