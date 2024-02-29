@@ -102,7 +102,11 @@ public:
         (*(dense_mat->state_metadata))[i][d]=1;
         (*(dense_mat->nnz_count))[i]++;
       }
-      cout<<" rank "<<grid->rank_in_col<<" new size "<<(*(dense_mat->nnz_count))[i]<<" previouse s ize"<<bfs_frontier<<endl;
+      if (grid->rank_in_col==0) {
+        cout << " rank " << grid->rank_in_col << " new size "
+             << (*(dense_mat->nnz_count))[i] << " previouse s ize"
+             << bfs_frontier << endl;
+      }
       auto bfs_frontier_diff = (*(dense_mat->nnz_count))[i] - bfs_frontier;
       add_perf_stats(bfs_frontier_diff, "BFS Frontier");
     }
