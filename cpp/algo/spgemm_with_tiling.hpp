@@ -86,7 +86,7 @@ public:
         unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
             new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
                 sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
-                batches, tile_width_fraction, hash_spgemm,state_holder));
+                batches, tile_width_fraction, hash_spgemm));
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>> update_ptr =

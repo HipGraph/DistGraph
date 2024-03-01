@@ -872,7 +872,7 @@ public:
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
-    MPI_Barrier(this->grid->col_world);
+//    MPI_Barrier(this->grid->col_world);
 //    auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
