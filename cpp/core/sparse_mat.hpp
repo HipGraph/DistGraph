@@ -381,7 +381,7 @@ public:
   /**
    * Initialize the CSR from coords data structure
    */
-  void initialize_CSR_blocks(bool enforce_empty_csr=false) {
+  void initialize_CSR_blocks(bool enforce_empty_csr=false,DistributedMat* state_holder=nullptr) {
 
     if (enforce_empty_csr or coords.size()>0) {
       initialize_CSR_from_tuples();
@@ -389,7 +389,7 @@ public:
       this->initialize_CSR_from_sparse_collector();
     } else if (dense_collector->size() > 0) {
       this->initialize_CSR_from_dense_collector(this->proc_row_width,
-                                                this->proc_col_width);
+                                                this->proc_col_width,state_holder);
     }
   }
 
