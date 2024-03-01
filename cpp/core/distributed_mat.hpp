@@ -66,7 +66,7 @@ public:
       vector<Tuple<VALUE_TYPE>> coords_local;
       for (auto j = 0; j < (*dense_collector)[i].size(); j++) {
 
-        if (state_holder=nullptr and (*dense_collector)[i][j] != 0) {
+        if (state_holder==nullptr and (*dense_collector)[i][j] != 0) {
           Tuple<VALUE_TYPE> t;
           t.col = j;
           t.row = i;
