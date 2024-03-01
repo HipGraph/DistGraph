@@ -485,11 +485,8 @@ public:
          }
       }
     } else {
-      cout<<" rank "<<grid->rank_in_col<<" access handler "<<endl;
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
-      cout<<" rank "<<grid->rank_in_col<<" hamdler taken"<<endl;
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
-      cout<<" rank "<<grid->rank_in_col<<" count "<<count<<endl;
       if (handle->rowStart[local_key + 1] - handle->rowStart[local_key] > 0) {
         if (state_holder==nullptr) {
           new_handler.col_idx.resize(count);
@@ -499,13 +496,15 @@ public:
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
         } else {
-          cout<<" rank "<<grid->rank_in_col<<" trying to execute state_holder"<<" key"<<local_key<<endl;
+          int nnz_send=0
           for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
             if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
                 new_handler.col_idx.push_back(handle->col_idx[i]);
                 new_handler.values.push_back(handle->values[i]);
+                nnz_send++;
             }
           }
+          add_perf_stats(nnz_send, "Data transfers");
         }
       }
     }
