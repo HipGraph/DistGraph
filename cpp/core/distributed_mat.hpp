@@ -74,7 +74,7 @@ public:
           coords_local.push_back(t);
           (*dense_collector)[i][j]=0;
 
-        } else if (state_holder != nullptr and (*dense_collector)[i][j] != 0 and (*(state_holder->state_metadata))[i][j]==0)) {
+        } else if (state_holder != nullptr and (*dense_collector)[i][j] != 0 and (*(state_holder->state_metadata))[i][j]==0) {
             Tuple<VALUE_TYPE> t;
             t.col = j;
             t.row = i;
