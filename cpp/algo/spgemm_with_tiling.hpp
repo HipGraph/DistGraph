@@ -162,7 +162,7 @@ public:
       }
       (this->sparse_local)->purge_cache();
     }
-    (this->sparse_local_output)->initialize_CSR_blocks(state_holder);
+    (this->sparse_local_output)->initialize_CSR_blocks(false,state_holder);
 //    total_memory = total_memory / (iterations * batches);
 //    add_perf_stats(total_memory, "Memory usage");
 //    stop_clock_and_add(t, "Total Time");
@@ -191,7 +191,7 @@ public:
       if (communication and (symbolic or !output->hash_spgemm)) {
 
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
-                                        k, end_process, 0, tiles_per_process,false, state_holder);
+                                        k, end_process, 0, tiles_per_process,false);
       }
       if (k == comm_initial_start) {
         // local computation
