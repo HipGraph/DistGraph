@@ -56,7 +56,6 @@ public:
     unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>> state_holder= make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>>(grid,sp_local_receiver->proc_row_width);
 
     for (int i = 0; i < iterations; i++) {
-      auto t = start_clock();
       size_t total_memory = 0;
       double output_nnz = 0;
       if (i == 0) {
@@ -74,8 +73,10 @@ public:
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
                   sync, tile_width_fraction, hash_spgemm,state_holder.get()));
 
+      auto t = start_clock();
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr);
       this->update_state_holder(sparse_input,state_holder.get());
+      stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
 
 
@@ -87,7 +88,7 @@ public:
         add_perf_stats(output_nnz, "BFS Frontier");
       }
       add_perf_stats(total_memory, "Memory usage");
-      stop_clock_and_add(t, "Total Time");
+
       jobj[i]=json_perf_statistics();
       reset_performance_timers();
     }
