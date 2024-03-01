@@ -447,7 +447,7 @@ public:
     }
 
     MPI_Barrier(this->grid->col_world);
-    t = start_clock();
+    auto t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
