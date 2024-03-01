@@ -211,6 +211,7 @@ public:
         }
       }
 
+      MPI_Barrier(this->grid->col_world);
       auto t = start_clock();
       MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
@@ -261,6 +262,7 @@ public:
       (receive_tile_meta)->resize(itr);
 
       if (embedding) {
+        MPI_Barrier(this->grid->col_world);
         auto t = start_clock();
         MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                      (*receive_tile_meta).data(), per_process_messages,
@@ -426,6 +428,7 @@ public:
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
+    MPI_Barrier(this->grid->col_world);
     auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
@@ -443,6 +446,7 @@ public:
       receivebuf->resize(total_receive_count);
     }
 
+    MPI_Barrier(this->grid->col_world);
     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
@@ -528,7 +532,7 @@ public:
       current.rows[1] =current.rows[1]+num_of_copying_data;
       (*sendbuf).push_back(current);
     }
-
+    MPI_Barrier(this->grid->col_world);
     auto t = start_clock();
     MPI_Alltoallv((*sendbuf).data(), this->send_counts_cyclic.data(), this->sdispls_cyclic.data(),
                   SPARSETUPLE, (*receivebuf_ptr.get()).data(),
@@ -688,6 +692,7 @@ public:
              (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
       }
     }
+    MPI_Barrier(this->grid->col_world);
     auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
@@ -708,6 +713,7 @@ public:
 
 
     //
+    MPI_Barrier(this->grid->col_world);
     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
@@ -866,6 +872,7 @@ public:
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
+    MPI_Barrier(this->grid->col_world);
     auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
@@ -886,6 +893,7 @@ public:
 
 
     //
+    MPI_Barrier(this->grid->col_world);
     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
