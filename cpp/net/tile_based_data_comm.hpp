@@ -212,11 +212,11 @@ public:
       }
 
       MPI_Barrier(this->grid->col_world);
-      auto t = start_clock();
+//      auto t = start_clock();
       MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
                    this->grid->col_world);
-      stop_clock_and_add(t, "Communication Time");
+//      stop_clock_and_add(t, "Communication Time");
 //      add_perf_stats(sizeof(TileTuple<INDEX_TYPE>)*per_process_messages*this->grid->col_world_size, "Data transfers");
 
       send_tile_meta->clear();
@@ -262,12 +262,12 @@ public:
       (receive_tile_meta)->resize(itr);
 
       if (embedding) {
-        MPI_Barrier(this->grid->col_world);
-        auto t = start_clock();
+//        MPI_Barrier(this->grid->col_world);
+//        auto t = start_clock();
         MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                      (*receive_tile_meta).data(), per_process_messages,
                      TILETUPLE, this->grid->col_world);
-        stop_clock_and_add(t, "Communication Time");
+//        stop_clock_and_add(t, "Communication Time");
 //        add_perf_stats(sizeof(TileTuple<INDEX_TYPE>)*per_process_messages*this->grid->col_world_size, "Data transfers");
 
 #pragma omp parallel for
@@ -429,11 +429,11 @@ public:
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
     MPI_Barrier(this->grid->col_world);
-    auto t = start_clock();
+//    auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
-    stop_clock_and_add(t, "Communication Time");
+//    stop_clock_and_add(t, "Communication Time");
 //    add_perf_stats(sizeof(int)*this->grid->col_world_size, "Data transfers");
     for (int i = 0; i < this->grid->col_world_size; i++) {
       this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
@@ -692,12 +692,12 @@ public:
              (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
       }
     }
-    MPI_Barrier(this->grid->col_world);
-    auto t = start_clock();
+//    MPI_Barrier(this->grid->col_world);
+//    auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
-    stop_clock_and_add(t, "Communication Time");
+//    stop_clock_and_add(t, "Communication Time");
 //    add_perf_stats(sizeof(int)*this->grid->col_world_size, "Data transfers");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
@@ -873,12 +873,12 @@ public:
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
     MPI_Barrier(this->grid->col_world);
-    auto t = start_clock();
+//    auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
                  this->receive_counts_cyclic.data(), 1, MPI_INT,
                  this->grid->col_world);
 //    add_perf_stats(sizeof(int)*this->grid->col_world_size, "Data transfers");
-    stop_clock_and_add(t, "Communication Time");
+//    stop_clock_and_add(t, "Communication Time");
 
     for (int i = 0; i < this->grid->col_world_size; i++) {
       this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
