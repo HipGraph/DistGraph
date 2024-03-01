@@ -72,7 +72,7 @@ public:
                                                        embedding_dim>(
                   sp_local_native, sp_local_receiver, sp_local_sender,
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
-                  sync, tile_width_fraction, hash_spgemm,state_holder.get()));
+                  sync, tile_width_fraction, hash_spgemm));
 
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr);
       this->update_state_holder(sparse_input,state_holder.get());
