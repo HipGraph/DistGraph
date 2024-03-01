@@ -80,12 +80,11 @@ public:
 
 
       output_nnz =static_cast<double>((sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1]);
-      double output_nnz_prev = static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
-      auto frontier =output_nnz - output_nnz_prev;
+      double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
-      add_perf_stats(output_nnz,"Output NNZ");
-      if (frontier>0) {
-        add_perf_stats(frontier, "BFS Frontier");
+      add_perf_stats(totalSum,"Output NNZ");
+      if (output_nnz>0) {
+        add_perf_stats(output_nnz, "BFS Frontier");
       }
       add_perf_stats(total_memory, "Memory usage");
       stop_clock_and_add(t, "Total Time");
@@ -100,7 +99,6 @@ public:
     #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
       auto bfs_frontier=(*(dense_mat->nnz_count))[i];
-      (*(dense_mat->nnz_count))[i]=0;
       for(auto j=handle->rowStart[i];j<handle->rowStart[i+1];j++){
         auto d = handle->col_idx[j];
         (*(dense_mat->state_metadata))[i][d]=1;
