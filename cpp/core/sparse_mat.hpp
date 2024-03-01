@@ -496,7 +496,7 @@ public:
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
         } else {
-          int nnz_send=0
+          int nnz_send=0;
           for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
             if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
                 new_handler.col_idx.push_back(handle->col_idx[i]);
