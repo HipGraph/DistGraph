@@ -61,7 +61,7 @@ public:
     this->hash_spgemm = hash_spgemm;
   }
 
-  void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr) {
+  void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr, bool enable_remote=true) {
 
 //    size_t total_memory = 0;
     int batches = 0;
@@ -99,7 +99,7 @@ public:
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
     cout << " rank " << grid->rank_in_col << " on board data starting " << endl;
-    main_comm.get()->onboard_data();
+    main_comm.get()->onboard_data(enable_remote);
 
     cout << " rank " << grid->rank_in_col << " on board data completed "
          << endl;

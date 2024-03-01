@@ -161,7 +161,7 @@ public:
 
   ~TileDataComm() {}
 
-  void onboard_data() {
+  void onboard_data(bool enable_remote_compute=true) {
     if (this->alpha == 0) {
       for (int i = 0; i < total_batches; i++) {
         this->sp_local_receiver->find_col_ids_with_tiling(
@@ -206,7 +206,7 @@ public:
         t.send_merge_count =
             (*sender_proc_tile_map)[i][j][k].total_receivable_datacount;
         (*send_tile_meta)[index] = t;
-        if (t.count > t.send_merge_count and !embedding) {
+        if (t.count > t.send_merge_count and !embedding and enable_remote_compute) {
           (*sender_proc_tile_map)[i][j][k].mode = 0;
         }
       }
@@ -249,7 +249,7 @@ public:
                 t.count;
             (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount =
                 t.send_merge_count;
-            if (t.count <= t.send_merge_count) {
+            if (t.count <= t.send_merge_count or !enable_remote_compute) {
               (*receiver_proc_tile_map)[i][j][k].mode = 0;
             } else {
               (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive remote computed data
