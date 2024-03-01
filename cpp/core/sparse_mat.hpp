@@ -485,25 +485,26 @@ public:
     } else {
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
+      add_perf_stats(count, "Data transfers");
       if (handle->rowStart[local_key + 1] - handle->rowStart[local_key] > 0) {
-        if (state_holder==nullptr) {
+//        if (state_holder==nullptr) {
           new_handler.col_idx.resize(count);
           new_handler.values.resize(count);
           copy(handle->col_idx.begin(), handle->col_idx.begin() + count,
                new_handler.col_idx.begin());
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
-        } else {
-          int nnz_send=0;
-          for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
-            if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
-                new_handler.col_idx.push_back(handle->col_idx[i]);
-                new_handler.values.push_back(handle->values[i]);
-                nnz_send++;
-            }
-          }
-          add_perf_stats(nnz_send, "Data transfers");
-        }
+//        } else {
+//          int nnz_send=0;
+//          for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
+//            if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
+//                new_handler.col_idx.push_back(handle->col_idx[i]);
+//                new_handler.values.push_back(handle->values[i]);
+//                nnz_send++;
+//            }
+//          }
+//          add_perf_stats(nnz_send, "Data transfers");
+//        }
       }
     }
     return new_handler;
