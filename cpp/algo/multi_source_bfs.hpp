@@ -68,7 +68,7 @@ public:
 
       auto density =   (bfs_frontier/(sp_local_receiver->proc_row_width*embedding_dim))*100;
       bool enable_remote = density>1.0?true:false;
-      cout<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
+      cout<<grid->rank_in_col<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
           spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
               INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
