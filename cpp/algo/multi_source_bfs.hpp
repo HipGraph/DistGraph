@@ -67,7 +67,12 @@ public:
       bfs_frontier =static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
 
       auto density =   (bfs_frontier/(sp_local_receiver->proc_row_width*embedding_dim))*100;
-      bool enable_remote = density>1.0?true:false;
+      int enable_mode = density>1.0?1:0;
+      int global_mode;
+      MPI_Allreduce(&enable_mode, &global_mode, 1, MPI_INT, MPI_SUM,grid->col_world);
+      bool enable_remote = global_mode>0?true:false;
+
+
       cout<<grid->rank_in_col<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
           spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
