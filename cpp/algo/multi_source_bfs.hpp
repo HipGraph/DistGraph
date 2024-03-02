@@ -74,7 +74,7 @@ public:
                   sync, tile_width_fraction, hash_spgemm,state_holder.get()));
 
       auto t = start_clock();
-      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
+      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       this->update_state_holder(sparse_input,state_holder.get());
       stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
