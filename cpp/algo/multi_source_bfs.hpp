@@ -64,6 +64,11 @@ public:
       auto rows =  sp_local_receiver->proc_row_width;
       auto cols = static_cast<INDEX_TYPE>(embedding_dim);
       auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
+      bfs_frontier =static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
+
+      auto density =   bfs_frontier/(sparse_input->proc_row_width*sparse_input->proc_col_width)*100;
+      bool enable_remote = density>10?true:false;
+
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
           spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
               INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
@@ -74,13 +79,13 @@ public:
                   sync, tile_width_fraction, hash_spgemm,state_holder.get()));
 
       auto t = start_clock();
-      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
+      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,enable_remote);
       this->update_state_holder(sparse_input,state_holder.get());
       stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
 
 
-      bfs_frontier =static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
+
       double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
       add_perf_stats(totalSum,"Output NNZ");
