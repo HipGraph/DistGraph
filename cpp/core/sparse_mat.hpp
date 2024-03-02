@@ -492,7 +492,7 @@ public:
 
   void get_transferrable_datacount(
       vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,
-      int total_batches, bool col_id_set, bool indices_only, DistributedMat* state_holder=nullptr) {
+      int total_batches, bool col_id_set, bool indices_only) {
 
     CSRHandle *handle = (this->csr_local_data.get())->handler.get();
     int tiles_per_process =
@@ -509,9 +509,6 @@ public:
       if (col_id_set and !indices_only) {
         for (auto it = tile.col_id_set.begin(); it != tile.col_id_set.end();++it) {
           total_count += handle->rowStart[(*it) + 1] - handle->rowStart[(*it)];
-          if (state_metadata!= nullptr){
-            total_count - total_count-(*(state_holder->nnz_count))[(*it)];
-          }
         }
         (*tile_map)[i][j][k].total_transferrable_datacount = total_count;
 

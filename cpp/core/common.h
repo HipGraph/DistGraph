@@ -86,8 +86,8 @@ template <typename VALUE_TYPE> struct Tuple {
 template <typename INDEX_TYPE> struct TileTuple {
   int batch_id;
   int tile_id;
-  INDEX_TYPE count;
-  INDEX_TYPE send_merge_count;
+  INDEX_TYPE count=0;
+  INDEX_TYPE send_merge_count=0;
   int mode=0;
 };
 
