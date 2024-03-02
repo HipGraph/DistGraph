@@ -170,11 +170,11 @@ public:
         // calculating sending data cols
         this->sp_local_sender->find_col_ids_with_tiling(
             i, 0, this->grid->col_world_size, sender_proc_tile_map.get(),
-            send_indices_proc_map.get(), 0, "+", this->sparse_local,state_holder);
+            send_indices_proc_map.get(), 0, "+", this->sparse_local);
       }
       // This represents the case for pulling
       this->sparse_local->get_transferrable_datacount(
-          sender_proc_tile_map.get(), total_batches, true, false,state_holder);
+          sender_proc_tile_map.get(), total_batches, true, false);
 
       if (embedding) {
         this->sparse_local->get_transferrable_datacount(
@@ -251,7 +251,7 @@ public:
             if (t.count <= t.send_merge_count or !enable_remote_compute) {
               (*receiver_proc_tile_map)[i][j][k].mode = 0;
             } else {
-//              (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive remote computed data
+              (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive remote computed data
             }
           }
         }
@@ -326,7 +326,7 @@ public:
     for (int tile = start_tile; tile < end_tile; tile++) {
       for (const auto &pair : (*send_indices_proc_map)[batch_id][tile]) {
         auto col_id = pair.first;
-        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id,embedding,state_holder);
+        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id,embedding);
         for (int i = 0; i < sending_procs.size(); i++) {
           if (pair.second.count(sending_procs[i]) > 0 and
               (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==

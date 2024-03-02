@@ -62,7 +62,7 @@ private:
   void find_col_ids_for_pulling_with_tiling(int batch_id, int starting_proc, int end_proc,
       vector<vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>>*id_to_proc_mapping,
       vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,
-      string semring = "+", SpMat<VALUE_TYPE> *input_data = nullptr, DistributedMat* state_holder=nullptr) {
+      string semring = "+", SpMat<VALUE_TYPE> *input_data = nullptr) {
     int rank = grid->rank_in_col;
     int world_size = grid->col_world_size;
 
@@ -88,26 +88,18 @@ private:
               auto col_val = handle->col_idx[j];
               int tile_id = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tile_id(
                     batch_id, col_val, proc_col_width, procs[r]);
-              bool insert_col_value =state_holder==nullptr?true:false;
                 if (semring == "+" and input_data != nullptr) {
                   CSRHandle *input_handle = input_data->csr_local_data->handler.get();
                   if (input_handle->rowStart[col_val + 1] -input_handle->rowStart[col_val] >0) {
                     for (auto h = input_handle->rowStart[col_val];h < input_handle->rowStart[col_val + 1]; h++) {
-                      if (state_holder==nullptr or (*(state_holder->state_metadata))[col_val][h]==0) {
                         unique_per_row[tile_id].insert(input_handle->col_idx[h]);
-                        insert_col_value=true;
-                      }
                     }
                   }
                 }
-                if (insert_col_value) {
-                  (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
-                  (*id_to_proc_mapping)[batch_id][tile_id][col_val][procs[r]] =true;
-                }
-
+                (*tile_map)[batch_id][procs[r]][tile_id].insert(col_val);
+                (*id_to_proc_mapping)[batch_id][tile_id][col_val][procs[r]] =true;
             }
-            for (int tile = 0;
-                 tile < SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();tile++) {
+            for (int tile = 0;tile < SparseTile<INDEX_TYPE,VALUE_TYPE>::get_tiles_per_process_row();tile++) {
               (*tile_map)[batch_id][procs[r]][tile].total_receivable_datacount += unique_per_row[tile].size();
             }
           }
@@ -123,8 +115,7 @@ private:
             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];j++) {
               auto col_val = handle->col_idx[j];
               INDEX_TYPE dst_start = batch_id * batch_size;
-              INDEX_TYPE dst_end_index =
-                  std::min((batch_id + 1) * batch_size, proc_row_width);
+              INDEX_TYPE dst_end_index =std::min((batch_id + 1) * batch_size, proc_row_width);
               if (col_val >= dst_start and col_val < dst_end_index) {
                 {
                   (*tile_map)[batch_id][procs[r]][tile_id].insert(i);
@@ -456,19 +447,19 @@ public:
       vector<vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>>
           *id_to_proc_mapping,
       bool mode, string semring = "+",
-      SpMat<VALUE_TYPE> *input_data = nullptr, distblas::core::DistributedMat* state_holder=nullptr) {
+      SpMat<VALUE_TYPE> *input_data = nullptr) {
 
     if (mode == 0) {
       find_col_ids_for_pulling_with_tiling(
           batch_id, starting_proc, end_proc, id_to_proc_mapping,
-          proc_to_id_mapping, semring, input_data,state_holder);
+          proc_to_id_mapping, semring, input_data);
     } else {
       //      find_col_ids_for_pushing_with_tiling(batch_id,
       //      starting_proc,end_proc,proc_to_id_mapping,id_to_proc_mapping);
     }
   }
 
-  CSRHandle fetch_local_data(INDEX_TYPE local_key, bool embedding = false,DistributedMat* state_holder=nullptr) {
+  CSRHandle fetch_local_data(INDEX_TYPE local_key, bool embedding = false) {
     CSRHandle new_handler;
     INDEX_TYPE global_key = (col_partitioned) ? local_key: local_key + proc_row_width * grid->rank_in_col;
     new_handler.row_idx.resize(1, global_key);
@@ -485,26 +476,15 @@ public:
     } else {
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
-      add_perf_stats(count, "Data transfers");
+
       if (handle->rowStart[local_key + 1] - handle->rowStart[local_key] > 0) {
-//        if (state_holder==nullptr) {
           new_handler.col_idx.resize(count);
           new_handler.values.resize(count);
           copy(handle->col_idx.begin(), handle->col_idx.begin() + count,
                new_handler.col_idx.begin());
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
-//        } else {
-//          int nnz_send=0;
-//          for(auto i=handle->rowStart[local_key];i<handle->rowStart[local_key + 1];i++){
-//            if (((*(state_holder->state_metadata))[local_key][handle->col_idx[i]])==0){
-//                new_handler.col_idx.push_back(handle->col_idx[i]);
-//                new_handler.values.push_back(handle->values[i]);
-//                nnz_send++;
-//            }
-//          }
-//          add_perf_stats(nnz_send, "Data transfers");
-//        }
+          add_perf_stats(count, "Data transfers");
       }
     }
     return new_handler;
