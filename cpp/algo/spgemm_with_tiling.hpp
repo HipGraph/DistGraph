@@ -287,7 +287,7 @@ public:
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
                                      lr, batch_id, batch_size, block_size,
-                                     symbolic, mode, &sp_tile,state_holder);
+                                     symbolic, mode, &sp_tile);
             if (symbolic) {
               sp_tile.initialize_hashtables();
             }
