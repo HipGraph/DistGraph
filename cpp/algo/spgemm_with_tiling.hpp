@@ -149,10 +149,10 @@ public:
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
           if (enable_remote) {
-            this->calc_t_dist_grad_rowptr(
-                (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
-                batch_size, considering_batch_size, 2, 0,
-                this->grid->col_world_size, false, main_comm.get(), nullptr);
+//            this->calc_t_dist_grad_rowptr(
+//                (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
+//                batch_size, considering_batch_size, 2, 0,
+//                this->grid->col_world_size, false, main_comm.get(), nullptr);
 //            main_comm->receive_remotely_computed_data(
 //                sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
 //                this->grid->col_world_size, 0, total_tiles);
@@ -253,25 +253,11 @@ public:
           int total_tiles =
               SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
           for (int tile = 0; tile < total_tiles; tile++) {
-            if ((*main_com
-                      ->receiver_proc_tile_map)[batch_id][computing_rank][tile]
-                    .mode == 0) {
-              auto source_start_index =
-                  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank]
-                                                     [tile]
-                                                         .row_starting_index;
-              auto source_end_index =
-                  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank]
-                                                     [tile]
-                                                         .row_end_index;
-              auto dst_start_index =
-                  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank]
-                                                     [tile]
-                                                         .col_start_index;
-              auto dst_end_index =
-                  (*main_com->receiver_proc_tile_map)[batch_id][computing_rank]
-                                                     [tile]
-                                                         .col_end_index;
+            if ((*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].mode == 0) {
+              auto source_start_index =(*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_starting_index;
+              auto source_end_index =(*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].row_end_index;
+              auto dst_start_index =(*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_start_index;
+              auto dst_end_index =(*main_com->receiver_proc_tile_map)[batch_id][computing_rank][tile].col_end_index;
               calc_embedding_row_major(source_start_index, source_end_index,
                                        dst_start_index, dst_end_index,
                                        csr_block, lr, batch_id, batch_size,
@@ -298,10 +284,10 @@ public:
             auto dst_start_index = sp_tile.col_start_index;
             auto dst_end_index = sp_tile.col_end_index;
             sp_tile.initialize_output_DS_if(0, symbolic);
-//            calc_embedding_row_major(source_start_index, source_end_index,
-//                                     dst_start_index, dst_end_index, csr_block,
-//                                     lr, batch_id, batch_size, block_size,
-//                                     symbolic, mode, &sp_tile,state_holder);
+            calc_embedding_row_major(source_start_index, source_end_index,
+                                     dst_start_index, dst_end_index, csr_block,
+                                     lr, batch_id, batch_size, block_size,
+                                     symbolic, mode, &sp_tile,state_holder);
             if (symbolic) {
               sp_tile.initialize_hashtables();
             }
