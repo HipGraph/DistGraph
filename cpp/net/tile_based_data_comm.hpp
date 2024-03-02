@@ -211,7 +211,6 @@ public:
         }
       }
 
-      MPI_Barrier(this->grid->col_world);
 //      auto t = start_clock();
       MPI_Alltoall((*send_tile_meta).data(), per_process_messages, TILETUPLE,
                    (*receive_tile_meta).data(), per_process_messages, TILETUPLE,
@@ -252,7 +251,7 @@ public:
             if (t.count <= t.send_merge_count or !enable_remote_compute) {
               (*receiver_proc_tile_map)[i][j][k].mode = 0;
             } else {
-              (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive remote computed data
+//              (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive remote computed data
             }
           }
         }
