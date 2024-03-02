@@ -57,7 +57,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
       size_t total_memory = 0;
-      double output_nnz = 0;
+      double bfs_frontier = 0;
       if (i == 0) {
         sparse_input = sparse_local;
       }
@@ -80,12 +80,12 @@ public:
       total_memory += get_memory_usage();
 
 
-      output_nnz =static_cast<double>((sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size() - 1]);
+      bfs_frontier =static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
       double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
       add_perf_stats(totalSum,"Output NNZ");
-      if (output_nnz>0) {
-        add_perf_stats(output_nnz, "BFS Frontier");
+      if (bfs_frontier>0) {
+        add_perf_stats(bfs_frontier, "BFS Frontier");
       }
       add_perf_stats(total_memory, "Memory usage");
 
