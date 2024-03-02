@@ -306,7 +306,7 @@ public:
                            INDEX_TYPE dst_start_index, INDEX_TYPE dst_end_index,
                            CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE lr,
                            int batch_id, int batch_size, int block_size,
-                           bool symbolic, int mode, DistributedMat *output, DistributedMat *state_holder=nullptr) {
+                           bool symbolic, int mode, DistributedMat *output) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
@@ -383,9 +383,7 @@ public:
               } else {
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
-                  if (state_holder == nullptr or (mode==2 and (*(state_holder->state_metadata))[local_dst][d] == 0)) {
-                    (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
-                  }
+                  (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
               }
             } else {
