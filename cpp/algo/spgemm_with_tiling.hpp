@@ -328,9 +328,7 @@ public:
                     : dst_id;
             int target_rank =
                 (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
-            bool fetch_from_cache =
-                (target_rank == (this->grid)->rank_in_col or mode == 2) ? false
-                                                                        : true;
+            bool fetch_from_cache = !(target_rank == (this->grid)->rank_in_col or mode == 2);
 
             vector<INDEX_TYPE> remote_cols;
             vector<VALUE_TYPE> remote_values;
