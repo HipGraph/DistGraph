@@ -105,7 +105,7 @@ public:
     }else {
       auto len = row_end_index - row_starting_index;
       this->initialize_CSR_from_dense_collector(len,dimension);
-      cout<<" CSR count"<<this->csr_local_data->rowStart[this->csr_local_data->rowStart.size()-1]<<" collected count "<<total_receivable_datacount<<endl;
+      cout<<" CSR count"<<this->csr_local_data->handler->rowStart[this->this->csr_local_data->handler->rowStart.size()-1]<<" collected count "<<total_receivable_datacount<<endl;
     }
   }
   void initialize_dataCache(){
