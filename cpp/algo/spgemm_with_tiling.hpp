@@ -464,11 +464,11 @@ public:
                 (*(sp_tile.dataCachePtr))[index];
             if (cache_entry.cols.size() > 0) {
               for (int k = 0; k < cache_entry.cols.size(); k++) {
-                value_map[k] += cache_entry.values[k];
                 if (!this->hash_spgemm) {
-                  (*(output->dense_collector))[index][k] +=
-                      cache_entry.values[k];
+                  (*(output->dense_collector))[index][k] +=cache_entry.values[k];
+                  continue;
                 }
+                value_map[k] += cache_entry.values[k];
               }
             }
             (*(sp_tile.dataCachePtr))[index] = newEntry;
@@ -492,10 +492,8 @@ public:
         if (value_map.size() > 0) {
           for (int k = 0; k < available_spots.size(); k++) {
             for (auto it = value_map.begin(); it != value_map.end(); ++it) {
-              (*(output->sparse_data_collector))[index][available_spots[k]]
-                  .col = (*it).first;
-              (*(output->sparse_data_collector))[index][available_spots[k]]
-                  .value = (*it).second;
+              (*(output->sparse_data_collector))[index][available_spots[k]].col = (*it).first;
+              (*(output->sparse_data_collector))[index][available_spots[k]].value = (*it).second;
               value_map.erase((*it).first);
               break;
             }
