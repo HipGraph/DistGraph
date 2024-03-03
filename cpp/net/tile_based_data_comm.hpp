@@ -815,6 +815,7 @@ public:
                 copy(sparse_tuple.values.begin(),
                      sparse_tuple.values.begin() + num_of_copying_data,
                      latest.values.begin() + col_index_offset);
+                add_perf_stats(num_of_copying_data, "Data transfers");
               }
               (*data_buffer_ptr)[sending_procs[i]]
                                 [this->send_counts_cyclic[sending_procs[i]] -
@@ -850,6 +851,7 @@ public:
                 (*data_buffer_ptr)[sending_procs[i]]
                                   [this->send_counts_cyclic[sending_procs[i]] -
                                    1] = latest;
+                add_perf_stats(remaining_data_items, "Data transfers");
               }
             }
           }
