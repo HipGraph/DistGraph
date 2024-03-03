@@ -484,7 +484,6 @@ public:
                new_handler.col_idx.begin());
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
-          add_perf_stats(count, "Data transfers");
       }
     }
     return new_handler;

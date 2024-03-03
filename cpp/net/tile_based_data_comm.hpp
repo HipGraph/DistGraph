@@ -328,9 +328,7 @@ public:
         auto col_id = pair.first;
         CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id,embedding);
         for (int i = 0; i < sending_procs.size(); i++) {
-          if (pair.second.count(sending_procs[i]) > 0 and
-              (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==
-                  1) {
+          if (pair.second.count(sending_procs[i]) > 0 and (*sender_proc_tile_map)[batch_id][sending_procs[i]][tile].mode ==1) {
             if (this->send_counts_cyclic[sending_procs[i]] == 0) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
               current.rows[0] =
@@ -341,24 +339,17 @@ public:
               this->send_counts_cyclic[sending_procs[i]]++;
             }
 
-            SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest =
-                (*data_buffer_ptr)[sending_procs[i]]
-                                  [this->send_counts_cyclic[sending_procs[i]] -
-                                   1];
+            SpTuple<VALUE_TYPE, sp_tuple_max_dim> latest =(*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] -1];
             auto row_index_offset = latest.rows[0];
             auto col_index_offset = latest.rows[1];
-            if (row_index_offset >= row_max or
-                col_index_offset >= sp_tuple_max_dim) {
+            if (row_index_offset >= row_max or col_index_offset >= sp_tuple_max_dim) {
               SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-              current.rows[0] =
-                  2; // rows first two indices are already taken for metadata
+              current.rows[0] =2; // rows first two indices are already taken for metadata
               current.rows[1] = 0;
               (*data_buffer_ptr)[sending_procs[i]].push_back(current);
               total_send_count++;
               this->send_counts_cyclic[sending_procs[i]]++;
-              latest = (*data_buffer_ptr)
-                  [sending_procs[i]]
-                  [this->send_counts_cyclic[sending_procs[i]] - 1];
+              latest = (*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] - 1];
               row_index_offset = latest.rows[0];
               col_index_offset = latest.rows[1];
             }
@@ -381,6 +372,7 @@ public:
               copy(sparse_tuple.values.begin(),
                    sparse_tuple.values.begin() + num_of_copying_data,
                    latest.values.begin() + col_index_offset);
+              add_perf_stats(num_of_copying_data, "Data transfers");
             }
             (*data_buffer_ptr)[sending_procs[i]]
                               [this->send_counts_cyclic[sending_procs[i]] - 1] =
@@ -414,6 +406,7 @@ public:
               (*data_buffer_ptr)[sending_procs[i]]
                                 [this->send_counts_cyclic[sending_procs[i]] -
                                  1] = latest;
+              add_perf_stats(remaining_data_items, "Data transfers");
             }
           }
         }
