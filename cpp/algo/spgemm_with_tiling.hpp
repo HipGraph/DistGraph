@@ -442,39 +442,37 @@ public:
                           this->sp_local_receiver->proc_row_width),
                  this->sp_local_receiver->gRows);
 
-    vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map =
-        main_comm->receiver_proc_tile_map.get();
-    int tiles_per_process_row =
-        SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
-#pragma omp parallel for schedule(static)
+    vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map = main_comm->receiver_proc_tile_map.get();
+    int tiles_per_process_row = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+    #pragma omp parallel for schedule(static)
     for (auto i = source_start_index; i < source_end_index; i++) {
       INDEX_TYPE index = i - source_start_index;
       unordered_map<INDEX_TYPE, VALUE_TYPE> value_map;
       for (int ra = 0; ra < this->grid->col_world_size; ra++) {
-        for (int j = 0; j < tiles_per_process_row; j++) {
-          SparseTile<INDEX_TYPE, VALUE_TYPE> &sp_tile =
-              (*tile_map)[batch_id][ra][j];
-          if (sp_tile.mode == 1) {
-            SparseCacheEntry<VALUE_TYPE> newEntry;
-            SparseCacheEntry<VALUE_TYPE> &cache_entry =
-                (*(sp_tile.dataCachePtr))[index];
-            if (cache_entry.cols.size() > 0) {
-              for (int k = 0; k < cache_entry.cols.size(); k++) {
-                if (!this->hash_spgemm) {
-                  (*(output->dense_collector))[index][k] +=cache_entry.values[k];
-                  continue;
+        if (ra!=this->grid->rank_in_col) {
+          for (int j = 0; j < tiles_per_process_row; j++) {
+            SparseTile<INDEX_TYPE, VALUE_TYPE> &sp_tile =(*tile_map)[batch_id][ra][j];
+            if (sp_tile.mode == 1) {
+              SparseCacheEntry<VALUE_TYPE> newEntry;
+              SparseCacheEntry<VALUE_TYPE> &cache_entry =(*(sp_tile.dataCachePtr))[index];
+              if (cache_entry.cols.size() > 0) {
+                for (int k = 0; k < cache_entry.cols.size(); k++) {
+                  auto d = cache_entry.cols[k];
+                  if (!this->hash_spgemm) {
+                    (*(output->dense_collector))[index][d] += cache_entry.values[k];
+                    continue;
+                  }
+                  value_map[d] += cache_entry.values[k];
                 }
-                value_map[k] += cache_entry.values[k];
               }
+              (*(sp_tile.dataCachePtr))[index] = newEntry;
             }
-            (*(sp_tile.dataCachePtr))[index] = newEntry;
           }
         }
       }
       if (this->hash_spgemm) {
         vector<INDEX_TYPE> available_spots;
-        for (auto k = 0; k < (*(output->sparse_data_collector))[index].size();
-             k++) {
+        for (auto k = 0; k < (*(output->sparse_data_collector))[index].size();k++) {
           auto d = (*(output->sparse_data_collector))[index][k].col;
           if (d > 0 and value_map.find(d) != value_map.end()) {
             (*(output->sparse_data_collector))[index][k].value +=
