@@ -336,6 +336,9 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
+              if (arrayMap.find(dst_id)==arrayMap.end()){
+                continue; //this key does not contain any data.
+              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values = arrayMap[dst_id].values;
             }
