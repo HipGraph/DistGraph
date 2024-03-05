@@ -335,14 +335,14 @@ int main(int argc, char **argv) {
   j_obj["beta"] = beta;
   j_obj["algo"] = "Embedding";
   j_obj["p"] = world_size;
-  j_obj["sparsity"] = density;
+//  j_obj["sparsity"] = density;
   j_obj["data_set"] = data_set_name;
   j_obj["d"] = dimension;
   j_obj["batch_size"] = batch_size;
   j_obj["tile_width_fraction"] = tile_width_fraction;
-  if (spgemm){
-    j_obj["output_nnz"] = output_sparsity;
-  }
+//  if (spgemm){
+//    j_obj["output_nnz"] = output_sparsity;
+//  }
   j_obj["perf_stats"] = perf_stats;
   if (rank == 0) {
     fout << j_obj.dump(4) << "," << endl;
