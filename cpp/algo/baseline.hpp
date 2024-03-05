@@ -75,6 +75,7 @@ public:
       stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
       auto sparsity = 1 - density;
+      add_perf_stats(output_nnz, "Output NNZ");
       if (sparsity>0) {
         add_perf_stats(sparsity, "Sparsity");
       }
