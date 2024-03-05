@@ -64,11 +64,11 @@ public:
               new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
                                                        embedding_dim>(
                   sp_local_native, sp_local_receiver, sp_local_sender,
-                  sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
-                  sync, tile_width_fraction, hash_spgemm,state_holder.get()));
+                  sparse_local, sparse_out.get(), grid, alpha, beta, col_major,
+                  sync, tile_width_fraction, hash_spgemm));
 
       auto t = start_clock();
-      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,enable_remote);
+      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
       double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
       auto density =   (output_nnz/(sp_local_receiver->proc_row_width*embedding_dim))*100;
