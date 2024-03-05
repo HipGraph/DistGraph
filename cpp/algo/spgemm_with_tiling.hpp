@@ -149,15 +149,22 @@ public:
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
           if (enable_remote) {
+            auto t = start_clock();
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
                 batch_size, considering_batch_size, 2, 0,
                 this->grid->col_world_size, false, main_comm.get(), nullptr);
+            stop_clock_and_add(t, "Remote SpGEMM");
+
+
             main_comm->receive_remotely_computed_data(
                 sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
                 this->grid->col_world_size, 0, total_tiles);
+
+            auto t = start_clock();
             this->merge_remote_computations(
                 j, batch_size, this->sparse_local_output, main_comm.get());
+            stop_clock_and_add(t, "Remote Merge Time");
           }
         }
 //        total_memory += get_memory_usage();
@@ -197,9 +204,11 @@ public:
       }
       if (k == comm_initial_start) {
         // local computation
+        auto t = start_clock();
         this->calc_t_dist_grad_rowptr(
             csr_block, lr, iteration, batch, batch_size, considering_batch_size,
             0, first_execution_proc, prev_start, symbolic, main_comm, output);
+        stop_clock_and_add(t, "Local SpGEMM");
 
       } else if (k > comm_initial_start) {
         int prev_end_process =
@@ -214,9 +223,11 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
+    auto t = start_clock();
     this->calc_t_dist_grad_rowptr(
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
+    stop_clock_and_add(t, "Local SpGEMM");
     // dense_local->invalidate_cache(i, j, true);
   }
 
