@@ -71,10 +71,10 @@ public:
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
       double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
-      auto density =   (output_nnz/(sp_local_receiver->proc_row_width*embedding_dim))*100;
+      double density =   (output_nnz/static_cast<double >((sp_local_receiver->proc_row_width*embedding_dim)))*100;
       stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
-      auto sparsity = 1 - density;
+      auto sparsity = 100 - density;
       add_perf_stats(output_nnz, "Output NNZ");
       if (sparsity>0) {
         add_perf_stats(sparsity, "Sparsity");
