@@ -292,17 +292,17 @@ int main(int argc, char **argv) {
 //                grid.get(),
 //                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-//        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
-//                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//                shared_sparseMat_sender.get(), sparse_input.get(),
-//                grid.get(),
-//                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
+            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
+                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                shared_sparseMat_sender.get(), sparse_input.get(),
+                grid.get(),
+                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
-//    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
+    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
     cout << " rank " << rank << " spgemm algo completed  " << endl;
 //    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
 //    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
@@ -327,29 +327,29 @@ int main(int argc, char **argv) {
   }
   cout << " rank " << rank << " algo completed  " << endl;
 //
-//  ofstream fout;
-//  fout.open("perf_output", std::ios_base::app);
-//////
-//  json j_obj;
-//  j_obj["alpha"] = alpha;
-//  j_obj["beta"] = beta;
-//  j_obj["algo"] = "Embedding";
-//  j_obj["p"] = world_size;
-////  j_obj["sparsity"] = density;
-//  j_obj["data_set"] = data_set_name;
-//  j_obj["d"] = dimension;
-//  j_obj["batch_size"] = batch_size;
-//  j_obj["tile_width_fraction"] = tile_width_fraction;
-////  if (spgemm){
-////    j_obj["output_nnz"] = output_sparsity;
-////  }
-//  j_obj["perf_stats"] = perf_stats;
-//  if (rank == 0) {
-//    fout << j_obj.dump(4) << "," << endl;
-//  }
+  ofstream fout;
+  fout.open("perf_output", std::ios_base::app);
 ////
-//  fout.close();
-  //
+  json j_obj;
+  j_obj["alpha"] = alpha;
+  j_obj["beta"] = beta;
+  j_obj["algo"] = "Embedding";
+  j_obj["p"] = world_size;
+//  j_obj["sparsity"] = density;
+  j_obj["data_set"] = data_set_name;
+  j_obj["d"] = dimension;
+  j_obj["batch_size"] = batch_size;
+  j_obj["tile_width_fraction"] = tile_width_fraction;
+//  if (spgemm){
+//    j_obj["output_nnz"] = output_sparsity;
+//  }
+  j_obj["perf_stats"] = perf_stats;
+  if (rank == 0) {
+    fout << j_obj.dump(4) << "," << endl;
+  }
+//
+  fout.close();
+
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
  if(spgemm & save_results){
    reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);

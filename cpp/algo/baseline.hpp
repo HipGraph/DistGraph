@@ -69,21 +69,21 @@ public:
 
       auto t = start_clock();
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
-//      auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
-//      double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
-//      double density =   (output_nnz/static_cast<double >((sp_local_receiver->proc_row_width*embedding_dim)))*100;
-//      stop_clock_and_add(t, "Total Time");
-//      total_memory += get_memory_usage();
-//      auto sparsity = 100 - density;
-//      add_perf_stats(output_nnz, "Output NNZ");
-//      if (sparsity>0) {
-//        add_perf_stats(sparsity, "Sparsity");
-//      }
-//
-//      add_perf_stats(total_memory, "Memory usage");
-//
-//      jobj[i]=json_perf_statistics();
-//      reset_performance_timers();
+      auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
+      double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
+      double density =   (output_nnz/static_cast<double >((sp_local_receiver->proc_row_width*embedding_dim)))*100;
+      stop_clock_and_add(t, "Total Time");
+      total_memory += get_memory_usage();
+      auto sparsity = 100 - density;
+      add_perf_stats(output_nnz, "Output NNZ");
+      if (sparsity>0) {
+        add_perf_stats(sparsity, "Sparsity");
+      }
+
+      add_perf_stats(total_memory, "Memory usage");
+
+      jobj[i]=json_perf_statistics();
+      reset_performance_timers();
     }
     return jobj;
   }
