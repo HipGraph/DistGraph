@@ -421,40 +421,40 @@ public:
         }
       }
     }
-    (*sendbuf_cyclic).resize(total_send_count);
-    for (int i = 0; i < this->grid->col_world_size; i++) {
-      this->sdispls_cyclic[i] = (i > 0) ? this->sdispls_cyclic[i - 1] +
-                                              this->send_counts_cyclic[i - 1]
-                                        : this->sdispls_cyclic[i];
-      copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
-           (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
-    }
-    MPI_Barrier(this->grid->col_world);
+//    (*sendbuf_cyclic).resize(total_send_count);
+//    for (int i = 0; i < this->grid->col_world_size; i++) {
+//      this->sdispls_cyclic[i] = (i > 0) ? this->sdispls_cyclic[i - 1] +
+//                                              this->send_counts_cyclic[i - 1]
+//                                        : this->sdispls_cyclic[i];
+//      copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
+//           (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
+//    }
+//    MPI_Barrier(this->grid->col_world);
+////    auto t = start_clock();
+//    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
+//                 this->receive_counts_cyclic.data(), 1, MPI_INT,
+//                 this->grid->col_world);
+////    stop_clock_and_add(t, "Communication Time");
+////    add_perf_stats(sizeof(int)*this->grid->col_world_size, "Data transfers");
+//    for (int i = 0; i < this->grid->col_world_size; i++) {
+//      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
+//                                              this->receive_counts_cyclic[i - 1]
+//                                        : this->rdispls_cyclic[i];
+//      total_receive_count += this->receive_counts_cyclic[i];
+//    }
+//
+//    if (total_receive_count > 0) {
+//      receivebuf->resize(total_receive_count);
+//    }
+//
+//    MPI_Barrier(this->grid->col_world);
 //    auto t = start_clock();
-    MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
-                 this->receive_counts_cyclic.data(), 1, MPI_INT,
-                 this->grid->col_world);
+//    MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
+//                  this->sdispls_cyclic.data(), SPARSETUPLE,
+//                  (*receivebuf).data(), this->receive_counts_cyclic.data(),
+//                  this->rdispls_cyclic.data(), SPARSETUPLE,
+//                  this->grid->col_world);
 //    stop_clock_and_add(t, "Communication Time");
-//    add_perf_stats(sizeof(int)*this->grid->col_world_size, "Data transfers");
-    for (int i = 0; i < this->grid->col_world_size; i++) {
-      this->rdispls_cyclic[i] = (i > 0) ? this->rdispls_cyclic[i - 1] +
-                                              this->receive_counts_cyclic[i - 1]
-                                        : this->rdispls_cyclic[i];
-      total_receive_count += this->receive_counts_cyclic[i];
-    }
-
-    if (total_receive_count > 0) {
-      receivebuf->resize(total_receive_count);
-    }
-
-    MPI_Barrier(this->grid->col_world);
-    auto t = start_clock();
-    MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
-                  this->sdispls_cyclic.data(), SPARSETUPLE,
-                  (*receivebuf).data(), this->receive_counts_cyclic.data(),
-                  this->rdispls_cyclic.data(), SPARSETUPLE,
-                  this->grid->col_world);
-    stop_clock_and_add(t, "Communication Time");
 //    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
 //    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
   }
