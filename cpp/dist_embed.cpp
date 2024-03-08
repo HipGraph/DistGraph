@@ -326,34 +326,34 @@ int main(int argc, char **argv) {
     embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
   }
   cout << " rank " << rank << " algo completed  " << endl;
-
-  ofstream fout;
-  fout.open("perf_output", std::ios_base::app);
-////
-  json j_obj;
-  j_obj["alpha"] = alpha;
-  j_obj["beta"] = beta;
-  j_obj["algo"] = "Embedding";
-  j_obj["p"] = world_size;
-//  j_obj["sparsity"] = density;
-  j_obj["data_set"] = data_set_name;
-  j_obj["d"] = dimension;
-  j_obj["batch_size"] = batch_size;
-  j_obj["tile_width_fraction"] = tile_width_fraction;
-//  if (spgemm){
-//    j_obj["output_nnz"] = output_sparsity;
-//  }
-  j_obj["perf_stats"] = perf_stats;
-  if (rank == 0) {
-    fout << j_obj.dump(4) << "," << endl;
-  }
 //
-  fout.close();
+//  ofstream fout;
+//  fout.open("perf_output", std::ios_base::app);
+//////
+//  json j_obj;
+//  j_obj["alpha"] = alpha;
+//  j_obj["beta"] = beta;
+//  j_obj["algo"] = "Embedding";
+//  j_obj["p"] = world_size;
+////  j_obj["sparsity"] = density;
+//  j_obj["data_set"] = data_set_name;
+//  j_obj["d"] = dimension;
+//  j_obj["batch_size"] = batch_size;
+//  j_obj["tile_width_fraction"] = tile_width_fraction;
+////  if (spgemm){
+////    j_obj["output_nnz"] = output_sparsity;
+////  }
+//  j_obj["perf_stats"] = perf_stats;
+//  if (rank == 0) {
+//    fout << j_obj.dump(4) << "," << endl;
+//  }
+////
+//  fout.close();
   //
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
- if(spgemm & save_results){
-   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
- }
+// if(spgemm & save_results){
+//   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
+// }
 
 
   MPI_Finalize();
