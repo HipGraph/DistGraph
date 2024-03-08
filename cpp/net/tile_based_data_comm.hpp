@@ -948,6 +948,10 @@ public:
     sendbuf->clear();
     sendbuf->shrink_to_fit();
   }
+
+  inline void update_local_input(SpMat<VALUE_TYPE>* sparse_input){
+    (*(this->sparse_local->csr_local_data)) =(*(sparse_input->csr_local_data));
+  }
 };
 
 } // namespace distblas::net

@@ -54,6 +54,21 @@ public:
     json jobj;
     distblas::core::SpMat<VALUE_TYPE> *sparse_input = nullptr;
     unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>> state_holder= make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>>(grid,sp_local_receiver->proc_row_width);
+    int batches=0;
+    if (sp_local_receiver->proc_row_width % batch_size == 0) {
+      batches =
+          static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+    } else {
+      batches =
+          static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+    }
+
+    auto main_comm =
+        unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+            new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+                sp_local_receiver, sp_local_sender, sparse_input, grid, alpha,
+                batches, tile_width_fraction, hash_spgemm));
+    main_comm.get()->onboard_data(false);
 
     for (int i = 0; i < iterations; i++) {
       size_t total_memory = 0;
@@ -71,7 +86,6 @@ public:
       int global_mode;
       MPI_Allreduce(&enable_mode, &global_mode, 1, MPI_INT, MPI_SUM,grid->col_world);
       bool enable_remote = global_mode>0?true:false;
-      int batches=0;
 
       cout<<grid->rank_in_col<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
@@ -83,21 +97,8 @@ public:
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
                   sync, tile_width_fraction, hash_spgemm,state_holder.get()));
 
-      if (sp_local_receiver->proc_row_width % batch_size == 0) {
-        batches =
-            static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
-      } else {
-        batches =
-            static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-      }
 
-      auto main_comm =
-          unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-              new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-                  sp_local_receiver, sp_local_sender, sparse_input, grid, alpha,
-                  batches, tile_width_fraction, hash_spgemm));
       auto t = start_clock();
-      main_comm.get()->onboard_data(false);
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false, main_comm.get());
       this->update_state_holder(sparse_input,state_holder.get());
       stop_clock_and_add(t, "Total Time");
@@ -105,6 +106,7 @@ public:
 
       double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
+      main_comm->update_local_input(sparse_input);
       add_perf_stats(totalSum,"Output NNZ");
       if (bfs_frontier>0) {
         add_perf_stats(bfs_frontier, "BFS Frontier");
