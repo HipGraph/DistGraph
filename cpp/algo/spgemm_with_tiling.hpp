@@ -146,7 +146,6 @@ public:
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
-          cout << " rank " << grid->rank_in_col << " execute_pull_model_computations completed " << j << endl;
           if (enable_remote) {
             auto t = start_clock();
             this->calc_t_dist_grad_rowptr(
@@ -198,9 +197,7 @@ public:
 
       if (communication and (symbolic or !output->hash_spgemm)) {
 
-        cout<<" rank "<<grid->rank_in_col<<" transferring started "<<endl;
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,k, end_process, 0, tiles_per_process,false);
-        cout<<" rank "<<grid->rank_in_col<<" transferr completed "<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -224,9 +221,9 @@ public:
 
     // updating last remote fetched data vectors
     auto t = start_clock();
-//    this->calc_t_dist_grad_rowptr(
-//        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
-//        prev_start, prev_end_process, symbolic, main_comm, output);
+    this->calc_t_dist_grad_rowptr(
+        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
+        prev_start, prev_end_process, symbolic, main_comm, output);
     stop_clock_and_add(t, "Local SpGEMM");
     // dense_local->invalidate_cache(i, j, true);
   }
@@ -395,54 +392,51 @@ public:
               } else {
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
-                  if (d>=embedding_dim){
-                    cout<<" rank "<<grid->rank_in_col<<" d "<<d<<endl;
-                  }
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
               }
             } else {
-//              int count = remote_cols.size();
-//              if (symbolic) {
-//                INDEX_TYPE val =
-//                    (*(output->sparse_data_counter))[index] + count;
-//                (*(output->sparse_data_counter))[index] =
-//                    std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
-//              } else if (output->hash_spgemm) {
-//                INDEX_TYPE ht_size =
-//                    (*(output->sparse_data_collector))[index].size();
-//                for (int m = 0; m < remote_cols.size(); m++) {
-//                  auto d = remote_cols[m];
-//                  auto value = lr * remote_values[m];
-//                  INDEX_TYPE hash = (d * hash_scale) & (ht_size - 1);
-//                  int max_count = 10;
-//                  int count = 0;
-//                  while (count < max_count) {
-//                    if ((*(output->sparse_data_collector))[index][hash].col ==
-//                        d) {
-//                      (*(output->sparse_data_collector))[index][hash].value =
-//                          (*(output->sparse_data_collector))[index][hash]
-//                              .value +
-//                          value;
-//                      break;
-//                    } else if ((*(output->sparse_data_collector))[index][hash]
-//                                   .col == -1) {
-//                      (*(output->sparse_data_collector))[index][hash].col = d;
-//                      (*(output->sparse_data_collector))[index][hash].value =
-//                          value;
-//                      break;
-//                    } else {
-//                      hash = (hash + 100) & (ht_size - 1);
-//                      count++;
-//                    }
-//                  }
-//                }
-//              } else {
-//                for (int m = 0; m < remote_cols.size(); m++) {
-//                  auto d = remote_cols[m];
-//                  (*(output->dense_collector))[index][d] +=lr * remote_values[m];
-//                }
-//              }
+              int count = remote_cols.size();
+              if (symbolic) {
+                INDEX_TYPE val =
+                    (*(output->sparse_data_counter))[index] + count;
+                (*(output->sparse_data_counter))[index] =
+                    std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
+              } else if (output->hash_spgemm) {
+                INDEX_TYPE ht_size =
+                    (*(output->sparse_data_collector))[index].size();
+                for (int m = 0; m < remote_cols.size(); m++) {
+                  auto d = remote_cols[m];
+                  auto value = lr * remote_values[m];
+                  INDEX_TYPE hash = (d * hash_scale) & (ht_size - 1);
+                  int max_count = 10;
+                  int count = 0;
+                  while (count < max_count) {
+                    if ((*(output->sparse_data_collector))[index][hash].col ==
+                        d) {
+                      (*(output->sparse_data_collector))[index][hash].value =
+                          (*(output->sparse_data_collector))[index][hash]
+                              .value +
+                          value;
+                      break;
+                    } else if ((*(output->sparse_data_collector))[index][hash]
+                                   .col == -1) {
+                      (*(output->sparse_data_collector))[index][hash].col = d;
+                      (*(output->sparse_data_collector))[index][hash].value =
+                          value;
+                      break;
+                    } else {
+                      hash = (hash + 100) & (ht_size - 1);
+                      count++;
+                    }
+                  }
+                }
+              } else {
+                for (int m = 0; m < remote_cols.size(); m++) {
+                  auto d = remote_cols[m];
+                  (*(output->dense_collector))[index][d] +=lr * remote_values[m];
+                }
+              }
             }
           }
         }
