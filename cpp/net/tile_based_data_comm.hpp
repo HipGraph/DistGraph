@@ -411,7 +411,7 @@ public:
                   (*data_buffer_ptr)
                       [sending_procs[i]]
                       [this->send_counts_cyclic[sending_procs[i]] - 1] = latest;
-                  add_perf_stats(remaining_data_items, "Data transfers");
+                  add_perf_stats(num_of_copying_data, "Data transfers");
                   offset +=num_of_copying_data;
                 }
               }while(remaining_data_items>0);
@@ -454,7 +454,7 @@ public:
                   this->rdispls_cyclic.data(), SPARSETUPLE,
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
+//    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
   }
 
