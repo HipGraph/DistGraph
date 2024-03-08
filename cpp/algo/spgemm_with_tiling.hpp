@@ -25,6 +25,8 @@ private:
   // record temp local output
   unique_ptr<vector<unordered_map<INDEX_TYPE, VALUE_TYPE>>> output_ptr;
 
+  TileDataComm<INDEX_TYPE ,VALUE_TYPE ,embedding_dim> *communicator;
+
   // cache size controlling hyper parameter
   double alpha = 0;
 
@@ -50,12 +52,13 @@ public:
       distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
       Process3DGrid *grid, double alpha, double beta, bool col_major,
       bool sync_comm, double tile_width_fraction, bool hash_spgemm,
+      TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>* communicator=nullptr,
       distblas::core::DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>*state_holder = nullptr)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local),
         grid(grid), alpha(alpha), beta(beta), col_major(col_major),
         sync(sync_comm), sparse_local_output(sparse_local_output),
-        tile_width_fraction(tile_width_fraction), state_holder(state_holder)
+        tile_width_fraction(tile_width_fraction),communicator(communicator),state_holder(state_holder)
 
   {
     this->hash_spgemm = hash_spgemm;
@@ -83,12 +86,14 @@ public:
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
 
-     auto  main_comm =
+    if (communicator==nullptr) {
+      communicator =
           unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
               new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
                   sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
-                  batches, tile_width_fraction, hash_spgemm));
-       main_comm.get()->onboard_data(enable_remote);
+                  batches, tile_width_fraction, hash_spgemm)).get();
+      communicator->onboard_data(enable_remote);
+    }
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>> update_ptr =
@@ -126,12 +131,12 @@ public:
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(
               csr_block, lr, i, j, batch_size, considering_batch_size, 0, 0, 0,
-              false, main_comm.get(), this->sparse_local_output);
+              false, communicator, this->sparse_local_output);
 
         } else {
           if ((this->sparse_local_output)->hash_spgemm) {
             this->execute_pull_model_computations(
-                sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
+                sendbuf_ptr.get(), update_ptr.get(), i, j, communicator,
                 csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
                 true, this->sparse_local_output);
 
@@ -141,11 +146,11 @@ public:
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
                 batch_size, considering_batch_size, 2, 0,
-                this->grid->col_world_size, true, main_comm.get(), nullptr);
+                this->grid->col_world_size, true, communicator, nullptr);
           }
 
           this->execute_pull_model_computations(
-              sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
+              sendbuf_ptr.get(), update_ptr.get(), i, j, communicator,
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
           if (enable_remote) {
@@ -153,17 +158,17 @@ public:
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
                 batch_size, considering_batch_size, 2, 0,
-                this->grid->col_world_size, false, main_comm.get(), nullptr);
+                this->grid->col_world_size, false, communicator, nullptr);
             stop_clock_and_add(t, "Remote SpGEMM");
 
 
-            main_comm->receive_remotely_computed_data(
+            communicator->receive_remotely_computed_data(
                 sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
                 this->grid->col_world_size, 0, total_tiles);
 
              t = start_clock();
             this->merge_remote_computations(
-                j, batch_size, this->sparse_local_output, main_comm.get());
+                j, batch_size, this->sparse_local_output, communicator);
             stop_clock_and_add(t, "Remote Merge Time");
           }
         }

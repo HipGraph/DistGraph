@@ -95,7 +95,7 @@ public:
                                                        embedding_dim>(
                   sp_local_native, sp_local_receiver, sp_local_sender,
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
-                  sync, tile_width_fraction, hash_spgemm,state_holder.get()));
+                  sync, tile_width_fraction, hash_spgemm,main_comm.get(),state_holder.get()));
 
 
       auto t = start_clock();
