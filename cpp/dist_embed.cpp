@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
     sparse_input =  make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
                                                                    sparse_coo, gROWs,
                                                                    gCols, gNNZ, batch_size,
-                                                                   localARows, dimension, false, false);
+                                                                   localARows, localBRows, false, false);
   }else if (spgemm){
     reader.get()->parallel_read_MM<int64_t,VALUE_TYPE,VALUE_TYPE>(sparse_data_file, sparse_input.get(),false);
     sparse_input.get()->batch_size = batch_size;
@@ -292,12 +292,12 @@ int main(int argc, char **argv) {
 //                grid.get(),
 //                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
-            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
-                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                shared_sparseMat_sender.get(), sparse_input.get(),
-                grid.get(),
-                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+//        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
+//                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+//                shared_sparseMat_sender.get(), sparse_input.get(),
+//                grid.get(),
+//                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -351,9 +351,9 @@ int main(int argc, char **argv) {
 //  fout.close();
   //
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
-// if(spgemm & save_results){
-//   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
-// }
+ if(spgemm & save_results){
+   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
+ }
 
 
   MPI_Finalize();
