@@ -99,7 +99,7 @@ public:
 
 
       auto t = start_clock();
-      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false, main_comm.get());
+      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       this->update_state_holder(sparse_input,state_holder.get());
       stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
