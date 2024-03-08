@@ -456,7 +456,7 @@ public:
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 //    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
-    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
+//    this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
   }
 
   void transfer_sparse_data(vector<INDEX_TYPE> &col_ids, int iteration, int batch_id) {
