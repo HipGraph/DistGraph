@@ -206,9 +206,9 @@ public:
       if (k == comm_initial_start) {
         // local computation
         auto t = start_clock();
-//        this->calc_t_dist_grad_rowptr(
-//            csr_block, lr, iteration, batch, batch_size, considering_batch_size,
-//            0, first_execution_proc, prev_start, symbolic, main_comm, output);
+        this->calc_t_dist_grad_rowptr(
+            csr_block, lr, iteration, batch, batch_size, considering_batch_size,
+            0, first_execution_proc, prev_start, symbolic, main_comm, output);
         stop_clock_and_add(t, "Local SpGEMM");
 
       } else if (k > comm_initial_start) {
