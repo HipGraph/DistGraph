@@ -293,6 +293,7 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id, int starting_proc, int end_proc, int start_tile,
       int end_tile, bool embedding=false, DistributedMat* state_holder=nullptr) {
+    auto t = start_clock();
 
     int total_receive_count = 0;
     shared_ptr<vector<vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>>>
@@ -428,6 +429,7 @@ public:
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
            (*sendbuf_cyclic).begin() + this->sdispls_cyclic[i]);
     }
+    stop_clock_and_add(t, "Communication Data Loading");
     MPI_Barrier(this->grid->col_world);
 //    auto t = start_clock();
     MPI_Alltoall(this->send_counts_cyclic.data(), 1, MPI_INT,
@@ -447,7 +449,8 @@ public:
     }
 
     MPI_Barrier(this->grid->col_world);
-    auto t = start_clock();
+
+     t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), this->send_counts_cyclic.data(),
                   this->sdispls_cyclic.data(), SPARSETUPLE,
                   (*receivebuf).data(), this->receive_counts_cyclic.data(),
@@ -455,7 +458,9 @@ public:
                   this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
 //    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
+     t = start_clock();
     this->populate_sparse_cache(sendbuf_cyclic, receivebuf, iteration,batch_id);
+    stop_clock_and_add(t, "Communicated Data Store");
   }
 
   void transfer_sparse_data(vector<INDEX_TYPE> &col_ids, int iteration, int batch_id) {

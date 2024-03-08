@@ -125,15 +125,6 @@ public:
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-
-        // One process computations without MPI operations
-        if (this->grid->col_world_size == 1) {
-          // local computations for 1 process
-          this->calc_t_dist_grad_rowptr(
-              csr_block, lr, i, j, batch_size, considering_batch_size, 0, 0, 0,
-              false, communicator, this->sparse_local_output);
-
-        } else {
           if ((this->sparse_local_output)->hash_spgemm) {
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j, communicator,
@@ -170,13 +161,15 @@ public:
             this->merge_remote_computations(
                 j, batch_size, this->sparse_local_output, communicator);
             stop_clock_and_add(t, "Remote Merge Time");
-          }
         }
 //        total_memory += get_memory_usage();
       }
       (this->sparse_local)->purge_cache();
     }
+    auto t = start_clock();
     (this->sparse_local_output)->initialize_CSR_blocks(false,state_holder);
+    stop_clock_and_add(t, "CSR Conversion");
+
 //    total_memory = total_memory / (iterations * batches);
 //    add_perf_stats(total_memory, "Memory usage");
 //    stop_clock_and_add(t, "Total Time");
