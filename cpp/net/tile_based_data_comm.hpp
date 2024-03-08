@@ -377,20 +377,15 @@ public:
                      latest.values.begin() + col_index_offset);
                 add_perf_stats(num_of_copying_data, "Data transfers");
               }
-              (*data_buffer_ptr)[sending_procs[i]]
-                                [this->send_counts_cyclic[sending_procs[i]] -
-                                 1] = latest;
+              (*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] -1] = latest;
               if (remaining_data_items > 0) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-                current.rows[0] =
-                    2; // rows first two indices are already taken for metadata
+                current.rows[0] =2; // rows first two indices are already taken for metadata
                 current.rows[1] = 0;
                 (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                 total_send_count++;
                 this->send_counts_cyclic[sending_procs[i]]++;
-                latest = (*data_buffer_ptr)
-                    [sending_procs[i]]
-                    [this->send_counts_cyclic[sending_procs[i]] - 1];
+                latest = (*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] - 1];
                 row_index_offset = latest.rows[0];
                 col_index_offset = latest.rows[1];
                 latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
@@ -398,17 +393,15 @@ public:
                 latest.rows[0] = row_index_offset + 2;
                 latest.rows[1] = latest.rows[1] + remaining_data_items;
 
-                copy(sparse_tuple.col_idx.begin() + num_of_copying_data - 1,
-                     sparse_tuple.col_idx.begin() + num_of_copying_data - 1 +
-                         remaining_data_items,
-                     latest.cols.begin());
-                copy(sparse_tuple.values.begin() + num_of_copying_data - 1,
-                     sparse_tuple.values.begin() + num_of_copying_data - 1 +
-                         remaining_data_items,
-                     latest.values.begin());
-                (*data_buffer_ptr)[sending_procs[i]]
-                                  [this->send_counts_cyclic[sending_procs[i]] -
-                                   1] = latest;
+//                copy(sparse_tuple.col_idx.begin() + num_of_copying_data - 1,
+//                     sparse_tuple.col_idx.begin() + num_of_copying_data - 1 +
+//                         remaining_data_items,
+//                     latest.cols.begin());
+//                copy(sparse_tuple.values.begin() + num_of_copying_data - 1,
+//                     sparse_tuple.values.begin() + num_of_copying_data - 1 +
+//                         remaining_data_items,
+//                     latest.values.begin());
+                (*data_buffer_ptr)[sending_procs[i]][this->send_counts_cyclic[sending_procs[i]] -1] = latest;
                 add_perf_stats(remaining_data_items, "Data transfers");
               }
             }
