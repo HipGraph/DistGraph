@@ -326,8 +326,7 @@ public:
     for (int tile = start_tile; tile < end_tile; tile++) {
       for (const auto &pair : (*send_indices_proc_map)[batch_id][tile]) {
         auto col_id = pair.first;
-        CSRHandle sparse_tuple =
-            (this->sparse_local)->fetch_local_data(col_id, embedding);
+        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id, embedding);
         if (sparse_tuple.col_idx.size() > 0) {
           for (int i = 0; i < sending_procs.size(); i++) {
             if (pair.second.count(sending_procs[i]) > 0 and
@@ -335,8 +334,7 @@ public:
                         .mode == 1) {
               if (this->send_counts_cyclic[sending_procs[i]] == 0) {
                 SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
-                current.rows[0] =
-                    2; // rows first two indices are already taken for metadata
+                current.rows[0] =2; // rows first two indices are already taken for metadata
                 current.rows[1] = 0;
                 (*data_buffer_ptr)[sending_procs[i]].push_back(current);
                 total_send_count++;

@@ -101,11 +101,9 @@ public:
     cout << " rank " << grid->rank_in_col << " on board data starting " << endl;
     main_comm.get()->onboard_data(enable_remote);
 
-    cout << " rank " << grid->rank_in_col << " on board data completed "
-         << endl;
+    cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
-    int total_tiles =
-        SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+    int total_tiles = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
 
     CSRLocal<VALUE_TYPE> *csr_block =
         (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
@@ -199,8 +197,10 @@ public:
 
       if (communication and (symbolic or !output->hash_spgemm)) {
 
+        cout<<" rank "<<grid->rank_in_col<<" transferring started "<<endl;
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process,false);
+        cout<<" rank "<<grid->rank_in_col<<" transferr completed "<<endl;
       }
       if (k == comm_initial_start) {
         // local computation
@@ -224,9 +224,9 @@ public:
 
     // updating last remote fetched data vectors
     auto t = start_clock();
-    this->calc_t_dist_grad_rowptr(
-        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
-        prev_start, prev_end_process, symbolic, main_comm, output);
+//    this->calc_t_dist_grad_rowptr(
+//        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
+//        prev_start, prev_end_process, symbolic, main_comm, output);
     stop_clock_and_add(t, "Local SpGEMM");
     // dense_local->invalidate_cache(i, j, true);
   }
