@@ -61,7 +61,7 @@ public:
     this->hash_spgemm = hash_spgemm;
   }
 
-  void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr, bool enable_remote=true) {
+  void algo_spgemm(int iterations, int batch_size, VALUE_TYPE lr, bool enable_remote=true,TileDataComm<INDEX_TYPE,VALUE_TYPE,embedding_dim>* main_comm=nullptr) {
 
 //    size_t total_memory = 0;
     int batches = 0;
@@ -82,11 +82,14 @@ public:
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto main_comm =
-        unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-            new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-                sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
-                batches, tile_width_fraction, hash_spgemm));
+    if (main_comm==nullptr){
+       main_comm =
+          unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+              new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+                  sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
+                  batches, tile_width_fraction, hash_spgemm));
+       main_comm.get()->onboard_data(enable_remote);
+    }
 
     // Buffer used for receive MPI operations data
     unique_ptr<std::vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>> update_ptr =
@@ -99,7 +102,7 @@ public:
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
     cout << " rank " << grid->rank_in_col << " on board data starting " << endl;
-    main_comm.get()->onboard_data(enable_remote);
+
 
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 

@@ -71,7 +71,7 @@ public:
       int global_mode;
       MPI_Allreduce(&enable_mode, &global_mode, 1, MPI_INT, MPI_SUM,grid->col_world);
       bool enable_remote = global_mode>0?true:false;
-
+      int batches=0;
 
       cout<<grid->rank_in_col<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
@@ -83,13 +83,25 @@ public:
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
                   sync, tile_width_fraction, hash_spgemm,state_holder.get()));
 
+      if (sp_local_receiver->proc_row_width % batch_size == 0) {
+        batches =
+            static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+      } else {
+        batches =
+            static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+      }
+
+      auto main_comm =
+          unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+              new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+                  sp_local_receiver, sp_local_sender, sparse_input, grid, alpha,
+                  batches, tile_width_fraction, hash_spgemm));
       auto t = start_clock();
-      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,enable_remote);
+      main_comm.get()->onboard_data(false);
+      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false, main_comm.get());
       this->update_state_holder(sparse_input,state_holder.get());
       stop_clock_and_add(t, "Total Time");
       total_memory += get_memory_usage();
-
-
 
       double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
       (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
