@@ -381,7 +381,7 @@ public:
               do {
                 if (remaining_data_items > 0) {
 
-                   num_of_copying_data = min(remaining_data_items, sp_tuple_max_dim);
+                   num_of_copying_data = min(remaining_data_items, static_cast<INDEX_TYPE>(sp_tuple_max_dim));
                    remaining_data_items = remaining_data_items - num_of_copying_data;
 
                   SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
