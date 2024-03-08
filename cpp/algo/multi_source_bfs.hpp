@@ -66,7 +66,7 @@ public:
     auto main_comm =
         unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
             new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-                sp_local_receiver, sp_local_sender, sparse_input, grid, alpha,
+                sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
                 batches, tile_width_fraction, hash_spgemm));
     main_comm.get()->onboard_data(false);
 
