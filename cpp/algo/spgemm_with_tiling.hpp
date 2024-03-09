@@ -154,7 +154,7 @@ public:
                 sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
                 this->grid->col_world_size, 0, total_tiles);
 
-             t = start_clock();
+            auto t = start_clock();
             this->merge_remote_computations(
                 j, batch_size, this->sparse_local_output, communicator);
             stop_clock_and_add(t, "Remote Merge Time");
