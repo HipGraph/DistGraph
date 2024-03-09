@@ -224,7 +224,7 @@ public:
     this->calc_t_dist_grad_rowptr(
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
-    stop_clock_and_add(t, "Local SpGEMM");
+    stop_clock_and_add(t, "Remote SpGEMM");
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -369,12 +369,8 @@ public:
                     int max_count = 10;
                     int count = 0;
                     while (count < max_count) {
-                      if ((*(output->sparse_data_collector))[index][hash].col ==
-                          d) {
-                        (*(output->sparse_data_collector))[index][hash].value =
-                            (*(output->sparse_data_collector))[index][hash]
-                                .value +
-                            value;
+                      if ((*(output->sparse_data_collector))[index][hash].col ==d) {
+                        (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value +value;
                         break;
                       } else if ((*(output->sparse_data_collector))[index][hash]
                                      .col == -1) {
