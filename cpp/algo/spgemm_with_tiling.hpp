@@ -445,7 +445,6 @@ public:
             }
           }
         }
-        timing_info[index] /= 16;
       }
     }
   }
