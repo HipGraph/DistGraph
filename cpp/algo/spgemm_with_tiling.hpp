@@ -145,13 +145,10 @@ public:
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
           if (enable_remote) {
-            auto t = start_clock();
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
                 batch_size, considering_batch_size, 2, 0,
                 this->grid->col_world_size, false, communicator, nullptr);
-            stop_clock_and_add(t, "Remote SpGEMM");
-
 
             communicator->receive_remotely_computed_data(
                 sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
