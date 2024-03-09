@@ -102,7 +102,6 @@ public:
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       stop_clock_and_add(t, "Total Time");
       double totalLocalSpGEMM = std::accumulate((spgemm_algo->timing_info).begin(), (spgemm_algo->timing_info).end(), 0.0);
-      cout<<"SpGEMM"<<totalLocalSpGEMM<<endl;
       add_perf_stats(totalLocalSpGEMM,"Local SpGEMM");
 //      t = start_clock();
 //      sparse_out->initialize_CSR_blocks(false);
