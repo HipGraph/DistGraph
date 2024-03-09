@@ -164,7 +164,7 @@ public:
         }
 //        total_memory += get_memory_usage();
       }
-      (this->sparse_local)->purge_cache();
+//      (this->sparse_local)->purge_cache();
     }
     auto t = start_clock();
     (this->sparse_local_output)->initialize_CSR_blocks(false,state_holder);
