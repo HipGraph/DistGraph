@@ -44,6 +44,7 @@ private:
   bool hash_spgemm = false;
 
 public:
+  vector<double> timing_info;
   SpGEMMAlgoWithTiling(
       distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
       distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
@@ -61,6 +62,7 @@ public:
         tile_width_fraction(tile_width_fraction),communicator(communicator),state_holder(state_holder)
 
   {
+    timing_info = vector<double>(sp_local_receiver->proc_row_width,0);
     this->hash_spgemm = hash_spgemm;
   }
 
@@ -242,12 +244,10 @@ public:
           static_cast<INDEX_TYPE>(this->sp_local_receiver->proc_col_width *
                                   (this->grid->rank_in_col + 1)),
           this->sp_local_receiver->gCols);
-      auto t = start_clock();
       calc_embedding_row_major(source_start_index, source_end_index,
                                dst_start_index, dst_end_index, csr_block, lr,
                                batch_id, batch_size, block_size, symbolic, mode,
                                output);
-      stop_clock_and_add(t, "Local SpGEMM");
     } else if (mode == 1) { // remote pull
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
@@ -387,10 +387,13 @@ public:
 //                mode==0?stop_clock_and_add(t, "Local SpGEMM"):
 //                          stop_clock_and_add(t, "Remote SpGEMM");
               } else {
+               auto t= start_clock();
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
+                auto time = stop_clock_get_elapsed(t);
+                timing_info[index]+=time;
               }
             } else {
               int count = remote_cols.size();
@@ -431,11 +434,13 @@ public:
                 }
 //                stop_clock_and_add(t, "Local SpGEMM");
               } else {
-
+                auto t= start_clock();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   (*(output->dense_collector))[index][d] +=lr * remote_values[m];
                 }
+                auto time = stop_clock_get_elapsed(t);
+                timing_info[index]+=time;
               }
             }
           }
