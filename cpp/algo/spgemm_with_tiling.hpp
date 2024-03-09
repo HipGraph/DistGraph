@@ -242,10 +242,12 @@ public:
           static_cast<INDEX_TYPE>(this->sp_local_receiver->proc_col_width *
                                   (this->grid->rank_in_col + 1)),
           this->sp_local_receiver->gCols);
+      auto t = start_clock();
       calc_embedding_row_major(source_start_index, source_end_index,
                                dst_start_index, dst_end_index, csr_block, lr,
                                batch_id, batch_size, block_size, symbolic, mode,
                                output);
+      stop_clock_and_add(t, "Local SpGEMM");
     } else if (mode == 1) { // remote pull
       for (int r = start_process; r < end_process; r++) {
         if (r != grid->rank_in_col) {
@@ -288,6 +290,7 @@ public:
             auto dst_start_index = sp_tile.col_start_index;
             auto dst_end_index = sp_tile.col_end_index;
             sp_tile.initialize_output_DS_if(0, symbolic);
+
             calc_embedding_row_major(source_start_index, source_end_index,
                                      dst_start_index, dst_end_index, csr_block,
                                      lr, batch_id, batch_size, block_size,
@@ -384,13 +387,10 @@ public:
 //                mode==0?stop_clock_and_add(t, "Local SpGEMM"):
 //                          stop_clock_and_add(t, "Remote SpGEMM");
               } else {
-                auto t = start_clock();
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
-                mode==0?stop_clock_and_add(t, "Local SpGEMM"):
-                          stop_clock_and_add(t, "Remote SpGEMM");
               }
             } else {
               int count = remote_cols.size();
@@ -431,12 +431,11 @@ public:
                 }
 //                stop_clock_and_add(t, "Local SpGEMM");
               } else {
-                auto t = start_clock();
+
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   (*(output->dense_collector))[index][d] +=lr * remote_values[m];
                 }
-                stop_clock_and_add(t, "Local SpGEMM");
               }
             }
           }
