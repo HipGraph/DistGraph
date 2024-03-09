@@ -163,7 +163,7 @@ my_timer_t distblas::core::start_clock() {
 
 double distblas::core::stop_clock_get_elapsed(my_timer_t &start) {
   auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double,std::milli> diff = end - start;
+  std::chrono::duration<double> diff = end - start;
   return diff.count();
 }
 
