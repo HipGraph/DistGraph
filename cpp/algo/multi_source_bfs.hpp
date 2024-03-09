@@ -102,10 +102,10 @@ public:
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       stop_clock_and_add(t, "Total Time");
 
-      t = start_clock();
-      sparse_out->initialize_CSR_blocks(false);
+//      t = start_clock();
+//      sparse_out->initialize_CSR_blocks(false);
       this->update_state_holder(sparse_input,state_holder.get());
-      stop_clock_and_add(t, "CSR Conversion");
+//      stop_clock_and_add(t, "CSR Conversion");
       total_memory += get_memory_usage();
 
       double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
