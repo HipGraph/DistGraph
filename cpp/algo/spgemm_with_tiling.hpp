@@ -393,7 +393,6 @@ public:
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
                 auto time = stop_clock_get_elapsed(t);
-                cout<<time<<" "<<endl;
                 timing_info[index]+=time;
               }
             } else {
