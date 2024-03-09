@@ -445,7 +445,7 @@ public:
             }
           }
         }
-        timing_info[index] = timing_info[index]/omp_get_num_threads();
+        timing_info[index] /= 16;
       }
     }
   }
