@@ -201,11 +201,11 @@ public:
       }
       if (k == comm_initial_start) {
         // local computation
-        auto t = start_clock();
+
         this->calc_t_dist_grad_rowptr(
             csr_block, lr, iteration, batch, batch_size, considering_batch_size,
             0, first_execution_proc, prev_start, symbolic, main_comm, output);
-        stop_clock_and_add(t, "Local SpGEMM");
+
 
       } else if (k > comm_initial_start) {
         int prev_end_process =
@@ -220,11 +220,10 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-    auto t = start_clock();
     this->calc_t_dist_grad_rowptr(
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
-    stop_clock_and_add(t, "Remote SpGEMM");
+
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -318,8 +317,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static) // enable for full batch training or
-                                          // // batch size larger than 1000000
+      #pragma omp parallel for schedule(static) // enable for full batch training or
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = (mode == 0 or mode == 1) ? i : i - source_start_index;
@@ -361,6 +359,7 @@ public:
               } else if (output->hash_spgemm) {
 
                 INDEX_TYPE ht_size =(*(output->sparse_data_collector))[index].size();
+                auto t = start_clock();
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
                   if (state_holder == nullptr or (mode==2 and (*(state_holder->state_metadata))[local_dst][d] == 0)) {
@@ -385,11 +384,17 @@ public:
                     }
                   }
                 }
+                mode==0?stop_clock_and_add(t, "Local SpGEMM"):
+                          stop_clock_and_add(t, "Remote SpGEMM");
               } else {
+                auto t = start_clock();
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
+
+                mode==0?stop_clock_and_add(t, "Local SpGEMM"):
+                          stop_clock_and_add(t, "Remote SpGEMM");
               }
             } else {
               int count = remote_cols.size();
@@ -401,6 +406,7 @@ public:
               } else if (output->hash_spgemm) {
                 INDEX_TYPE ht_size =
                     (*(output->sparse_data_collector))[index].size();
+                auto t = start_clock();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   auto value = lr * remote_values[m];
@@ -427,11 +433,14 @@ public:
                     }
                   }
                 }
+                stop_clock_and_add(t, "Local SpGEMM");
               } else {
+                auto t = start_clock();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
                   (*(output->dense_collector))[index][d] +=lr * remote_values[m];
                 }
+                stop_clock_and_add(t, "Local SpGEMM");
               }
             }
           }
