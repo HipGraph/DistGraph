@@ -393,7 +393,7 @@ public:
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
                 }
                 auto time = stop_clock_get_elapsed(t);
-                timing_info[index]+=time/;
+                timing_info[index]+=time;
               }
             } else {
               int count = remote_cols.size();
@@ -445,7 +445,7 @@ public:
             }
           }
         }
-        timing_info[index] =timing_info[index]/omp_get_num_threads();
+        timing_info[index] = timing_info[index]/omp_get_num_threads();
       }
     }
   }
