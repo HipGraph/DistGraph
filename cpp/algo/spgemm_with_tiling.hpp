@@ -25,7 +25,7 @@ private:
   // record temp local output
   unique_ptr<vector<unordered_map<INDEX_TYPE, VALUE_TYPE>>> output_ptr;
 
-  TileDataComm<INDEX_TYPE ,VALUE_TYPE ,embedding_dim> *communicator;
+  TileDataComm<INDEX_TYPE ,VALUE_TYPE ,embedding_dim> *communicator=nullptr;
 
   // cache size controlling hyper parameter
   double alpha = 0;
