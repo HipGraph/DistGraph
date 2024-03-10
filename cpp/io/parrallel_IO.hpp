@@ -183,12 +183,13 @@ public:
     } else {
       auto expected_non_zeros = global_cols * density;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
+      INDEX_TYPE start_index = grid->rank_in_col*rows;
       for (INDEX_TYPE i = 0; i < rows; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
           auto index = uni_dist(gen);
           Tuple<VALUE_TYPE> t;
-          t.row = i;     // Calculate row index
+          t.row = start_index+i;     // Calculate row index
           t.col = index; // Calculate column index
           t.value = val;
           sparse_coo.push_back(t);
