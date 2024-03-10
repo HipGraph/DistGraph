@@ -181,7 +181,7 @@ public:
         }
       }
     } else {
-      auto expected_non_zeros = cols * density;
+      auto expected_non_zeros = global_cols * density;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
       for (INDEX_TYPE i = 0; i < rows; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
