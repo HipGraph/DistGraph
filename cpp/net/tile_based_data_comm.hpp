@@ -363,7 +363,7 @@ public:
               INDEX_TYPE pending_col_pos = sp_tuple_max_dim - col_index_offset;
               INDEX_TYPE num_of_copying_data = min(offset, pending_col_pos);
               INDEX_TYPE remaining_data_items = offset - num_of_copying_data;
-              offset +=num_of_copying_data;
+              offset =num_of_copying_data;
               latest.rows[row_index_offset] = sparse_tuple.row_idx[0];
               latest.rows[row_index_offset + 1] = num_of_copying_data;
               latest.rows[0] = row_index_offset + 2;
