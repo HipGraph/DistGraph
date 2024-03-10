@@ -61,6 +61,7 @@ public:
     }
 
     for (int i = 0; i < iterations; i++) {
+      auto t = start_clock();
       size_t total_memory = 0;
       auto rows =  sp_local_receiver->proc_row_width;
       auto cols = static_cast<INDEX_TYPE>(embedding_dim);
@@ -81,7 +82,7 @@ public:
                   sparse_local, sparse_out.get(), grid, alpha, beta, col_major,
                   sync, tile_width_fraction, hash_spgemm,main_comm.get()));
 
-      auto t = start_clock();
+
       spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       stop_clock_and_add(t, "Total Time");
       auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
