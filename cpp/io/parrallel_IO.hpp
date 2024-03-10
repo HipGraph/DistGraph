@@ -182,7 +182,7 @@ public:
       }
     } else {
       auto expected_non_zeros = global_cols * density;
-      std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, cols - 1);
+      std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, global_cols - 1);
       INDEX_TYPE start_index = grid->rank_in_col*rows;
       for (INDEX_TYPE i = 0; i < rows; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
