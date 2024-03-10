@@ -219,9 +219,9 @@ public:
     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
     // updating last remote fetched data vectors
-//    this->calc_t_dist_grad_rowptr(
-//        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
-//        prev_start, prev_end_process, symbolic, main_comm, output);
+    this->calc_t_dist_grad_rowptr(
+        csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
+        prev_start, prev_end_process, symbolic, main_comm, output);
 
     // dense_local->invalidate_cache(i, j, true);
   }
@@ -437,7 +437,7 @@ public:
                 auto t= start_clock();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
-                  (*(output->dense_collector))[index][d] +=lr * remote_values[m];
+//                  (*(output->dense_collector))[index][d] +=lr * remote_values[m];
                 }
                 auto time = stop_clock_get_elapsed(t);
                 timing_info[index]+=time;
