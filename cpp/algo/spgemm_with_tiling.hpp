@@ -437,7 +437,7 @@ public:
                 auto t= start_clock();
                 for (int m = 0; m < remote_cols.size(); m++) {
                   auto d = remote_cols[m];
-//                  (*(output->dense_collector))[index][d] +=lr * remote_values[m];
+                  (*(output->dense_collector))[index][d] +=lr * remote_values[m];
                 }
                 auto time = stop_clock_get_elapsed(t);
                 timing_info[index]+=time;
