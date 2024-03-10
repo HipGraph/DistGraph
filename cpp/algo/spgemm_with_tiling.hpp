@@ -201,9 +201,9 @@ public:
       if (k == comm_initial_start) {
         // local computation
 
-//        this->calc_t_dist_grad_rowptr(
-//            csr_block, lr, iteration, batch, batch_size, considering_batch_size,
-//            0, first_execution_proc, prev_start, symbolic, main_comm, output);
+        this->calc_t_dist_grad_rowptr(
+            csr_block, lr, iteration, batch, batch_size, considering_batch_size,
+            0, first_execution_proc, prev_start, symbolic, main_comm, output);
 
 
       } else if (k > comm_initial_start) {
