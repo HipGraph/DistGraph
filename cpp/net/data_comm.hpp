@@ -530,7 +530,7 @@ public:
         auto offset_so_far = 0;
         for (auto k = 2; k < row_offset; k = k + 2) {
           auto key = sp_tuple.rows[k];
-          auto count = sp_tuple.rows[k + 1];
+          auto copying_count = sp_tuple.rows[k + 1];
           if ((*(this->sparse_local)->tempCachePtr)[i].find(key) ==
               (*(this->sparse_local)->tempCachePtr)[i].end()) {
             SparseCacheEntry<VALUE_TYPE> sp_entry;
@@ -540,19 +540,19 @@ public:
             sp_entry.values = vector<VALUE_TYPE>();
             (*(this->sparse_local)->tempCachePtr)[i][key] = sp_entry;
           }
-          if (count > 0) {
+          if (copying_count > 0) {
             SparseCacheEntry<VALUE_TYPE> cache_entry =
                 (*(this->sparse_local)->tempCachePtr)[i][key];
             auto entry_offset = cache_entry.cols.size();
-            cache_entry.cols.resize(entry_offset + count);
-            cache_entry.values.resize(entry_offset + count);
+            cache_entry.cols.resize(entry_offset + copying_count);
+            cache_entry.values.resize(entry_offset + copying_count);
             copy(sp_tuple.cols.begin() + offset_so_far,
-                 sp_tuple.cols.begin() + offset_so_far + count,
+                 sp_tuple.cols.begin() + offset_so_far + copying_count,
                  cache_entry.cols.begin() + entry_offset);
             copy(sp_tuple.values.begin() + offset_so_far,
-                 sp_tuple.values.begin() + offset_so_far + count,
+                 sp_tuple.values.begin() + offset_so_far + copying_count,
                  cache_entry.values.begin() + entry_offset);
-            offset_so_far += count;
+            offset_so_far += copying_count;
             (*(this->sparse_local)->tempCachePtr)[i][key] = cache_entry;
           }
         }
