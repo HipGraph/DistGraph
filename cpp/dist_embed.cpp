@@ -285,19 +285,19 @@ int main(int argc, char **argv) {
 //            grid.get(),
 //            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
-            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
-                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                shared_sparseMat_sender.get(), sparse_input.get(),
-                grid.get(),
-                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-//        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
+//        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
 //                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
 //                shared_sparseMat_sender.get(), sparse_input.get(),
 //                grid.get(),
 //                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+
+        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
+            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
+                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                shared_sparseMat_sender.get(), sparse_input.get(),
+                grid.get(),
+                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
 
     MPI_Barrier(MPI_COMM_WORLD);
