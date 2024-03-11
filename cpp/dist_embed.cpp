@@ -188,9 +188,9 @@ int main(int argc, char **argv) {
   vector<Tuple<VALUE_TYPE>> sparse_coo;
   auto sparse_input = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get());
   if (spgemm & save_results) {
-    int local_cols = divide_and_round_up(dimension,grid->col_world_size);
-    reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
-                                       local_cols,dimension, density, 0,sparse_coo, grid.get(),false);
+    int local_cols = divide_and_round_up(40000000,grid->col_world_size);
+    reader->build_sparse_random_matrix(local_cols, 40000000,
+                                       local_cols,40000000, density, 0,sparse_coo, grid.get(),false);
 //    cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
 //    INDEX_TYPE gROWs = shared_sparseMat.get()->gRows;
 //    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
@@ -208,147 +208,147 @@ int main(int argc, char **argv) {
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
   }
 
-  auto end_io = std::chrono::high_resolution_clock::now();
-
-  auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
-      new GlobalAdjacency1DPartitioner(grid.get()));
-
-  cout << " rank " << rank << " partitioning data started  " << endl;
-
-  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_sender.get());
-  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_receiver.get());
-  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat.get());
-
-  cout << " rank " << rank << " partitioning data completed  " << endl;
-
-
-
-  shared_sparseMat.get()->initialize_CSR_blocks(true);
-  shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
-  shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
-
-  if (spgemm){
-    cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
-    cout << " rank " << rank << " input partitioning started   " << endl;
-//    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
-    cout << " rank " << rank << " input partitioning data completed  " << endl;
-    sparse_input->initialize_CSR_blocks(true);
-    cout << " rank " << rank << " input csr  completed  " << endl;
-  }
-
-  cout << " rank " << rank << " CSR block initialization completed  " << endl;
-
-//  dense_local->print_cache(i);
-//  dense_mat.get()->print_matrix_rowptr(-1);
- json perf_stats;
-  if (spmm) {
-    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
-    auto dense_mat_output = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
-
-    unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
-
-        embedding_algo =
-            unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
-                new distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
-                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                    shared_sparseMat_sender.get(), dense_mat.get(),
-                    dense_mat_output.get(), grid.get(), alpha, beta, col_major, sync_comm));
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << " spmm algo started  " << endl;
-    embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
-
-  }else if(spgemm){
-    bool has_spgemm =dimension>spa_threshold?true:false;
-//    auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm);
-
-//    unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//                new distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
+//  auto end_io = std::chrono::high_resolution_clock::now();
+//
+//  auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
+//      new GlobalAdjacency1DPartitioner(grid.get()));
+//
+//  cout << " rank " << rank << " partitioning data started  " << endl;
+//
+//  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_sender.get());
+//  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_receiver.get());
+//  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat.get());
+//
+//  cout << " rank " << rank << " partitioning data completed  " << endl;
+//
+//
+//
+//  shared_sparseMat.get()->initialize_CSR_blocks(true);
+//  shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
+//  shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
+//
+//  if (spgemm){
+//    cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
+//    cout << " rank " << rank << " input partitioning started   " << endl;
+////    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
+//    cout << " rank " << rank << " input partitioning data completed  " << endl;
+//    sparse_input->initialize_CSR_blocks(true);
+//    cout << " rank " << rank << " input csr  completed  " << endl;
+//  }
+//
+//  cout << " rank " << rank << " CSR block initialization completed  " << endl;
+//
+////  dense_local->print_cache(i);
+////  dense_mat.get()->print_matrix_rowptr(-1);
+// json perf_stats;
+//  if (spmm) {
+//    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
+//    auto dense_mat_output = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
+//
+//    unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
+//
+//        embedding_algo =
+//            unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//                new distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
 //                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//                    shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
-//                    grid.get(),
-//                    alpha, beta,col_major,sync_comm));
-
-//    unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//        new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
-//            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
-//            grid.get(),
-//            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-//    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//        new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
-//            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
-//            grid.get(),
-//            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-//        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
+//                    shared_sparseMat_sender.get(), dense_mat.get(),
+//                    dense_mat_output.get(), grid.get(), alpha, beta, col_major, sync_comm));
+//
+//    MPI_Barrier(MPI_COMM_WORLD);
+//    cout << " rank " << rank << " spmm algo started  " << endl;
+//    embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
+//
+//  }else if(spgemm){
+//    bool has_spgemm =dimension>spa_threshold?true:false;
+////    auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm);
+//
+////    unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+////                new distblas::algo::SpGEMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
+////                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+////                    shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+////                    grid.get(),
+////                    alpha, beta,col_major,sync_comm));
+//
+////    unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>>(
+////        new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE, dimension>(
+////            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+////            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+////            grid.get(),
+////            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+//
+////    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
+////        new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
+////            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+////            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
+////            grid.get(),
+////            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+//
+////        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
+////            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
+////                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+////                shared_sparseMat_sender.get(), sparse_input.get(),
+////                grid.get(),
+////                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+//
+//        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
 //                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
 //                shared_sparseMat_sender.get(), sparse_input.get(),
 //                grid.get(),
 //                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
-            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
-                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                shared_sparseMat_sender.get(), sparse_input.get(),
-                grid.get(),
-                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << " spgemm algo started  " << endl;
-    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
-    cout << " rank " << rank << " spgemm algo completed  " << endl;
-//    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
-//    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
-//    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
-
-  }else {
-    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
-
-    unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
-
-        embedding_algo =
-            unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
-                new distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
-                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                    shared_sparseMat_sender.get(), dense_mat.get(), grid.get(),
-                    alpha, beta, 5, -5,col_major,sync_comm));
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << " embedding algo started  " << endl;
-    embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
-  }
-  cout << " rank " << rank << " algo completed  " << endl;
 //
-  ofstream fout;
-  fout.open("perf_output", std::ios_base::app);
-////
-  json j_obj;
-  j_obj["alpha"] = alpha;
-  j_obj["beta"] = beta;
-  j_obj["algo"] = "Embedding";
-  j_obj["p"] = world_size;
-//  j_obj["sparsity"] = density;
-  j_obj["data_set"] = data_set_name;
-  j_obj["d"] = dimension;
-  j_obj["batch_size"] = batch_size;
-  j_obj["tile_width_fraction"] = tile_width_fraction;
-//  if (spgemm){
-//    j_obj["output_nnz"] = output_sparsity;
+//
+//    MPI_Barrier(MPI_COMM_WORLD);
+//    cout << " rank " << rank << " spgemm algo started  " << endl;
+//    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
+//    cout << " rank " << rank << " spgemm algo completed  " << endl;
+////    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
+////    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
+////    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
+//
+//  }else {
+//    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
+//
+//    unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
+//
+//        embedding_algo =
+//            unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//                new distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
+//                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+//                    shared_sparseMat_sender.get(), dense_mat.get(), grid.get(),
+//                    alpha, beta, 5, -5,col_major,sync_comm));
+//
+//    MPI_Barrier(MPI_COMM_WORLD);
+//    cout << " rank " << rank << " embedding algo started  " << endl;
+//    embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
 //  }
-  j_obj["perf_stats"] = perf_stats;
-  if (rank == 0) {
-    fout << j_obj.dump(4) << "," << endl;
-  }
-//
-  fout.close();
+//  cout << " rank " << rank << " algo completed  " << endl;
+////
+//  ofstream fout;
+//  fout.open("perf_output", std::ios_base::app);
+//////
+//  json j_obj;
+//  j_obj["alpha"] = alpha;
+//  j_obj["beta"] = beta;
+//  j_obj["algo"] = "Embedding";
+//  j_obj["p"] = world_size;
+////  j_obj["sparsity"] = density;
+//  j_obj["data_set"] = data_set_name;
+//  j_obj["d"] = dimension;
+//  j_obj["batch_size"] = batch_size;
+//  j_obj["tile_width_fraction"] = tile_width_fraction;
+////  if (spgemm){
+////    j_obj["output_nnz"] = output_sparsity;
+////  }
+//  j_obj["perf_stats"] = perf_stats;
+//  if (rank == 0) {
+//    fout << j_obj.dump(4) << "," << endl;
+//  }
+////
+//  fout.close();
 
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
  if(spgemm & save_results){
