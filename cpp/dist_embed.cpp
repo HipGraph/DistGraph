@@ -188,9 +188,9 @@ int main(int argc, char **argv) {
   vector<Tuple<VALUE_TYPE>> sparse_coo;
   auto sparse_input = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get());
   if (spgemm & save_results) {
-    int local_cols = divide_and_round_up(4000000,grid->col_world_size);
-    reader->build_sparse_random_matrix(local_cols, 4000000,
-                                       local_cols,4000000, density, 0,sparse_coo, grid.get(),false);
+    int local_cols = divide_and_round_up(40000000,grid->col_world_size);
+    reader->build_sparse_random_matrix(local_cols, 40000000,
+                                       local_cols,40000000, density, 0,sparse_coo, grid.get(),false);
 //    cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
 //    INDEX_TYPE gROWs = shared_sparseMat.get()->gRows;
 //    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
@@ -352,8 +352,8 @@ int main(int argc, char **argv) {
 
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
  if(spgemm & save_results){
-   int local_cols = divide_and_round_up(4000000,grid->col_world_size);
-   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,4000000,4000000);
+   int local_cols = divide_and_round_up(40000000,grid->col_world_size);
+   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,40000000,40000000);
  }
 
 
