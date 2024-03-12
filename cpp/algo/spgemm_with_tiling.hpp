@@ -359,8 +359,6 @@ public:
               } else if (output->hash_spgemm) {
                 auto t= start_clock();
                 INDEX_TYPE ht_size =(*(output->sparse_data_collector))[index].size();
-//                auto t = start_clock();
-
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
                   auto d = (handle->col_idx[k]);
                   if (state_holder == nullptr or (mode==2 and (*(state_holder->state_metadata))[local_dst][d] == 0)) {
@@ -385,8 +383,8 @@ public:
                     }
                   }
                 }
-                mode==0?stop_clock_and_add(t, "Local SpGEMM"):
-                          stop_clock_and_add(t, "Remote SpGEMM");
+                auto time = stop_clock_get_elapsed(t);
+                timing_info[index]+=time;
               } else {
                auto t= start_clock();
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
