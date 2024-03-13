@@ -242,9 +242,10 @@ public:
                     receive_counts_cyclic.data(), rdispls_cyclic.data(),
                     DENSETUPLE, grid->col_world);
       MPI_Request dumy;
+      stop_clock_and_add(t, "Communication Time");
       this->populate_cache(sendbuf_cyclic, receivebuf, &dumy, true, iteration,
                            batch_id, temp_cache);
-      stop_clock_and_add(t, "Communication Time");
+
     }
   }
 
@@ -383,10 +384,10 @@ public:
       copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),
            (*sendbuf_cyclic).begin() + sdispls_cyclic[i]);
     }
-    auto t = start_clock();
+//    auto t = start_clock();
     MPI_Alltoall(send_counts_cyclic.data(), 1, MPI_INT,
                  receive_counts_cyclic.data(), 1, MPI_INT, grid->col_world);
-    stop_clock_and_add(t, "Communication Time");
+//    stop_clock_and_add(t, "Communication Time");
 
     for (int i = 0; i < grid->col_world_size; i++) {
       rdispls_cyclic[i] =
