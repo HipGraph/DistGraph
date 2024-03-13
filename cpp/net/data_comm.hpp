@@ -402,7 +402,7 @@ public:
 
     add_perf_stats(total_receive_count, "Data transfers");
 
-    t = start_clock();
+   auto t = start_clock();
     MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                   sdispls_cyclic.data(), SPARSETUPLE, (*receivebuf).data(),
                   receive_counts_cyclic.data(), rdispls_cyclic.data(),
