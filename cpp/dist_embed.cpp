@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
                 shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                 shared_sparseMat_sender.get(), sparse_input.get(),
                 grid.get(),
-                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+                alpha, beta,col_major,sync_comm, tile_width_fraction,false));
 
 
         MPI_Barrier(MPI_COMM_WORLD);

@@ -77,7 +77,7 @@ public:
                       sp_local_sender, dense_mat.get(),
                       dense_mat_output.get(), grid, alpha, beta, col_major, sync));
 
-      cout << " rank " << rank << " spmm algo started  " << endl;
+      cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
       embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
 
       stop_clock_and_add(t, "Total Time");
