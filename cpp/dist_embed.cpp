@@ -22,6 +22,7 @@
 #include "algo/sparse_embedding.hpp"
 #include "algo/multi_source_bfs.hpp"
 #include "algo/baseline.hpp"
+#include "algo/baseline_spmm.hpp"
 
 using json = nlohmann::json;
 
@@ -242,23 +243,18 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix_rowptr(-1);
  json perf_stats;
   if (spmm) {
-    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
-    auto dense_mat_output = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
+        unique_ptr<distblas::algo::BaselineSpMM<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::BaselineSpMM<INDEX_TYPE, VALUE_TYPE, dimension>>(
+            new distblas::algo::BaselineSpMM<INDEX_TYPE, VALUE_TYPE, dimension>(
+                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                shared_sparseMat_sender.get(), sparse_input.get(),
+                grid.get(),
+                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-    unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
 
-        embedding_algo =
-            unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>(
-                new distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, dimension>(
-                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                    shared_sparseMat_sender.get(), dense_mat.get(),
-                    dense_mat_output.get(), grid.get(), alpha, beta, col_major, sync_comm));
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << " spmm algo started  " << endl;
-    embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
+        MPI_Barrier(MPI_COMM_WORLD);
+        cout << " rank " << rank << " SpMM algo started  " << endl;
+        perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
+        cout << " rank " << rank << " SpMM algo completed  " << endl;
 
   }else if(spgemm){
     bool has_spgemm =dimension>spa_threshold?true:false;

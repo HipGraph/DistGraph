@@ -233,7 +233,7 @@ public:
       receivebuf->resize(total_receive_count);
     }
 
-    add_perf_stats(total_receive_count, "Data transfers");
+    add_perf_stats(total_send_count*embedding_dim, "Data transfers");
 
     if (synchronous) {
       auto t = start_clock();

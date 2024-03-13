@@ -56,7 +56,8 @@ add_library(disembed_lib SHARED
         cpp/algo/spgemm_with_tiling.hpp
         cpp/algo/sparse_embedding.hpp
         cpp/algo/multi_source_bfs.hpp
-        cpp/algo/baseline.hpp)
+        cpp/algo/baseline.hpp
+        cpp/algo/baseline_spmm.hpp)
 
 SET(BUILD_TESTS "" ON)
 
