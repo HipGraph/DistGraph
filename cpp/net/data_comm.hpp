@@ -236,6 +236,7 @@ public:
     add_perf_stats(total_send_count*embedding_dim, "Data transfers");
 
     if (synchronous) {
+      MPI_Barrier(grid->col_world);
       auto t = start_clock();
       MPI_Alltoallv((*sendbuf_cyclic).data(), send_counts_cyclic.data(),
                     sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
