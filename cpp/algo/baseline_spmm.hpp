@@ -78,7 +78,7 @@ public:
                       dense_mat_output.get(), grid, alpha, beta, col_major, sync));
 
       cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
-      embedding_algo.get()->algo_spmm(iterations, batch_size, lr);
+      embedding_algo.get()->algo_spmm(1, batch_size, lr);
 
       stop_clock_and_add(t, "Total Time");
       double totalLocalSpGEMM = std::accumulate((embedding_algo->timing_info).begin(), (embedding_algo->timing_info).end(), 0.0)/16;
