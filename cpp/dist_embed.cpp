@@ -209,26 +209,27 @@ int main(int argc, char **argv) {
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
   }
 
-  auto end_io = std::chrono::high_resolution_clock::now();
+  if (!save_results) {
+    auto end_io = std::chrono::high_resolution_clock::now();
 
-  auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
-      new GlobalAdjacency1DPartitioner(grid.get()));
+    auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
+        new GlobalAdjacency1DPartitioner(grid.get()));
 
-  cout << " rank " << rank << " partitioning data started  " << endl;
+    cout << " rank " << rank << " partitioning data started  " << endl;
 
-  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_sender.get());
-  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_receiver.get());
-  partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat.get());
+    partitioner.get()->partition_data<VALUE_TYPE>(
+        shared_sparseMat_sender.get());
+    partitioner.get()->partition_data<VALUE_TYPE>(
+        shared_sparseMat_receiver.get());
+    partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat.get());
 
-  cout << " rank " << rank << " partitioning data completed  " << endl;
+    cout << " rank " << rank << " partitioning data completed  " << endl;
 
-
-
-  shared_sparseMat.get()->initialize_CSR_blocks(true);
-  shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
-  shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
-
-  if (spgemm){
+    shared_sparseMat.get()->initialize_CSR_blocks(true);
+    shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
+    shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
+  }
+  if (spgemm and !save_results){
     cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
     cout << " rank " << rank << " input partitioning started   " << endl;
 //    partitioner.get()->partition_data<VALUE_TYPE>(sparse_input.get());
