@@ -256,7 +256,7 @@ int main(int argc, char **argv) {
         perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
         cout << " rank " << rank << " SpMM algo completed  " << endl;
 
-  }else if(spgemm){
+  }else if(spgemm and !save_results){
     bool has_spgemm =dimension>spa_threshold?true:false;
 //    auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm);
 
@@ -323,29 +323,30 @@ int main(int argc, char **argv) {
   }
   cout << " rank " << rank << " algo completed  " << endl;
 //
-  ofstream fout;
-  fout.open("perf_output", std::ios_base::app);
-////
-  json j_obj;
-  j_obj["alpha"] = alpha;
-  j_obj["beta"] = beta;
-  j_obj["algo"] = "Embedding";
-  j_obj["p"] = world_size;
-//  j_obj["sparsity"] = density;
-  j_obj["data_set"] = data_set_name;
-  j_obj["d"] = dimension;
-  j_obj["batch_size"] = batch_size;
-  j_obj["tile_width_fraction"] = tile_width_fraction;
-//  if (spgemm){
-//    j_obj["output_nnz"] = output_sparsity;
-//  }
-  j_obj["perf_stats"] = perf_stats;
-  if (rank == 0) {
-    fout << j_obj.dump(4) << "," << endl;
+  if (!save_results) {
+    ofstream fout;
+    fout.open("perf_output", std::ios_base::app);
+    ////
+    json j_obj;
+    j_obj["alpha"] = alpha;
+    j_obj["beta"] = beta;
+    j_obj["algo"] = "Embedding";
+    j_obj["p"] = world_size;
+    //  j_obj["sparsity"] = density;
+    j_obj["data_set"] = data_set_name;
+    j_obj["d"] = dimension;
+    j_obj["batch_size"] = batch_size;
+    j_obj["tile_width_fraction"] = tile_width_fraction;
+    //  if (spgemm){
+    //    j_obj["output_nnz"] = output_sparsity;
+    //  }
+    j_obj["perf_stats"] = perf_stats;
+    if (rank == 0) {
+      fout << j_obj.dump(4) << "," << endl;
+    }
+    //
+    fout.close();
   }
-//
-  fout.close();
-
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
  if(spgemm & save_results){
    int local_cols = divide_and_round_up(static_cast<int>(dimension),grid->col_world_size);
