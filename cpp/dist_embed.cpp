@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
 //    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
 //    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
 
-  }else {
+  }else if (!save_results){
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
         new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
 
