@@ -386,13 +386,15 @@ public:
                 auto time = stop_clock_get_elapsed(t);
                 timing_info[index]+=time;
               } else {
-               auto t= start_clock();
+
                 for (auto k = handle->rowStart[local_dst];k < handle->rowStart[local_dst + 1]; k++) {
+                  auto t= start_clock();
                   auto d = (handle->col_idx[k]);
                   (*(output->dense_collector))[index][d] += lr * (handle->values[k]);
+                  auto time = stop_clock_get_elapsed(t);
+                  timing_info[index]+=time;
                 }
-                auto time = stop_clock_get_elapsed(t);
-                timing_info[index]+=time;
+
               }
             } else {
               int count = remote_cols.size();
@@ -436,13 +438,15 @@ public:
                 timing_info[index]+=time;
 //                stop_clock_and_add(t, "Local SpGEMM");
               } else {
-                auto t= start_clock();
+
                 for (int m = 0; m < remote_cols.size(); m++) {
+                  auto t= start_clock();
                   auto d = remote_cols[m];
                   (*(output->dense_collector))[index][d] +=lr * remote_values[m];
+                  auto time = stop_clock_get_elapsed(t);
+                  timing_info[index]+=time;
                 }
-                auto time = stop_clock_get_elapsed(t);
-                timing_info[index]+=time;
+
               }
             }
           }
