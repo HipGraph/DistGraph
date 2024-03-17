@@ -58,6 +58,7 @@ public:
       int len = 5;
       iterations = iterations+1;
     }
+    int count_i=0;
     for(int w=0;w<len;w++ ){
       tile_width_fraction = fraction_array[w];
       for(int h=0;h<len;h++){
@@ -71,6 +72,7 @@ public:
               static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
         }
         for (int i = 0; i < iterations; i++) {
+
           auto t = start_clock();
           bool enabled =false;
           size_t total_memory = 0;
@@ -124,7 +126,8 @@ public:
           out["tile_width_fraction"] = fraction_array[w];
           out["tile_height_fraction"] = fraction_array[h];
           out["remote_enabled"] =  enabled;
-          jobj[i]=out;
+          jobj[count_i]=out;
+          count_i++;
           reset_performance_timers();
         }
       }
