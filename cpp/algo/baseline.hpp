@@ -72,6 +72,7 @@ public:
         }
         for (int i = 0; i < iterations; i++) {
           auto t = start_clock();
+          bool enabled =false;
           size_t total_memory = 0;
           auto rows =  sp_local_receiver->proc_row_width;
           auto cols = static_cast<INDEX_TYPE>(embedding_dim);
@@ -85,6 +86,7 @@ public:
             main_comm.get()->onboard_data(false);
           }else {
             main_comm.get()->onboard_data(true);
+            enabled =true;
           }
 
 
@@ -121,6 +123,7 @@ public:
           json out = json_perf_statistics();
           out["tile_width_fraction"] = fraction_array[w];
           out["tile_height_fraction"] = fraction_array[h];
+          out["remote_enabled"] =  enabled;
           jobj[i]=out;
           reset_performance_timers();
         }

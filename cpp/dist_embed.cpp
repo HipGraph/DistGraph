@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
       tile_height_fraction = atof(argv[p + 1]);
     }else if (strcmp(argv[p], "-enable_remote") == 0) {
       int res = atof(argv[p + 1]);
-      enable_remote = enable_remote == 1 ? true : false;
+      enable_remote = res == 1 ? true : false;
     }
   }
 
