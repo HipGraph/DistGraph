@@ -41,7 +41,7 @@ public:
                  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                  distblas::core::SpMat<VALUE_TYPE> *sparse_local,
                  Process3DGrid *grid, double alpha, double beta, bool col_major,
-                 bool sync_comm, double tile_width_fraction, bool hash_spgemm)
+                 bool sync_comm, double tile_width_fraction,bool hash_spgemm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local),
         grid(grid), alpha(alpha), beta(beta), col_major(col_major),
@@ -51,69 +51,82 @@ public:
 
   json execute(int iterations, int batch_size, VALUE_TYPE lr, bool test_remote=false) {
     json jobj;
-    int batches=0;
-    if (sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
-    } else {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-    }
+
+    double[] fraction_array = {0.1,0.25,0.5,0.75,1};
+    int len =1;
     if (test_remote){
+      int len = fraction_array.size();
       iterations = iterations+1;
     }
-    for (int i = 0; i < iterations; i++) {
-      auto t = start_clock();
-      size_t total_memory = 0;
-      auto rows =  sp_local_receiver->proc_row_width;
-      auto cols = static_cast<INDEX_TYPE>(embedding_dim);
-      auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
-      auto main_comm =
-          unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-              new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-                  sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
-                  batches, tile_width_fraction, hash_spgemm));
-      if (i%iterations==0){
-        main_comm.get()->onboard_data(false);
-      }else {
-        main_comm.get()->onboard_data(true);
+    for(int w=0;w<len;w++ ){
+      tile_width_fraction = fraction_array[w];
+      for(int h=0;h<len;h++){
+        batch_size = sp_local_receiver->proc_row_width * fraction_array[h];
+        int batches=0;
+        if (sp_local_receiver->proc_row_width % batch_size == 0) {
+          batches =
+              static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+        } else {
+          batches =
+              static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+        }
+        for (int i = 0; i < iterations; i++) {
+          auto t = start_clock();
+          size_t total_memory = 0;
+          auto rows =  sp_local_receiver->proc_row_width;
+          auto cols = static_cast<INDEX_TYPE>(embedding_dim);
+          auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
+          auto main_comm =
+              unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+                  new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+                      sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
+                      batches, tile_width_fraction, hash_spgemm));
+          if (i%iterations==0){
+            main_comm.get()->onboard_data(false);
+          }else {
+            main_comm.get()->onboard_data(true);
+          }
+
+
+          unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
+              spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
+                  INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+                  new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
+                                                           embedding_dim>(
+                      sp_local_native, sp_local_receiver, sp_local_sender,
+                      sparse_local, sparse_out.get(), grid, alpha, beta, col_major,
+                      sync, tile_width_fraction, hash_spgemm,main_comm.get()));
+
+          if (i%iterations==0){
+            spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
+          }else {
+            spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
+          }
+
+          stop_clock_and_add(t, "Total Time");
+          auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
+          double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
+          double density =   (output_nnz/static_cast<double >((sp_local_receiver->proc_row_width*embedding_dim)))*100;
+
+          double totalLocalSpGEMM = std::accumulate((spgemm_algo->timing_info).begin(), (spgemm_algo->timing_info).end(), 0.0)/16;
+          add_perf_stats(totalLocalSpGEMM,"Local SpGEMM");
+          total_memory += get_memory_usage();
+          auto sparsity = 100 - density;
+          add_perf_stats(output_nnz, "Output NNZ");
+          if (sparsity>0) {
+            add_perf_stats(sparsity, "Sparsity");
+          }
+
+          add_perf_stats(total_memory, "Memory usage");
+          json out = json_perf_statistics();
+          out["tile_width_fraction"] = fraction_array[w];
+          out["tile_height_fraction"] = fraction_array[h];
+          jobj[i]=out
+          reset_performance_timers();
+        }
       }
-
-
-      unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
-          spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
-              INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-              new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
-                                                       embedding_dim>(
-                  sp_local_native, sp_local_receiver, sp_local_sender,
-                  sparse_local, sparse_out.get(), grid, alpha, beta, col_major,
-                  sync, tile_width_fraction, hash_spgemm,main_comm.get()));
-
-      if (i%iterations==0){
-        spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
-      }else {
-        spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
-      }
-
-      stop_clock_and_add(t, "Total Time");
-      auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
-      double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
-      double density =   (output_nnz/static_cast<double >((sp_local_receiver->proc_row_width*embedding_dim)))*100;
-
-      double totalLocalSpGEMM = std::accumulate((spgemm_algo->timing_info).begin(), (spgemm_algo->timing_info).end(), 0.0)/16;
-      add_perf_stats(totalLocalSpGEMM,"Local SpGEMM");
-      total_memory += get_memory_usage();
-      auto sparsity = 100 - density;
-      add_perf_stats(output_nnz, "Output NNZ");
-      if (sparsity>0) {
-        add_perf_stats(sparsity, "Sparsity");
-      }
-
-      add_perf_stats(total_memory, "Memory usage");
-
-      jobj[i]=json_perf_statistics();
-      reset_performance_timers();
     }
+
     return jobj;
   }
 
