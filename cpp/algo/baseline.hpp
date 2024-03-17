@@ -121,7 +121,7 @@ public:
           json out = json_perf_statistics();
           out["tile_width_fraction"] = fraction_array[w];
           out["tile_height_fraction"] = fraction_array[h];
-          jobj[i]=out
+          jobj[i]=out;
           reset_performance_timers();
         }
       }
