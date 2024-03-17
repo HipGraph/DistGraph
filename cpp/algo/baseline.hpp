@@ -49,7 +49,7 @@ public:
     this->hash_spgemm = hash_spgemm;
   }
 
-  json execute(int iterations, int batch_size, VALUE_TYPE lr) {
+  json execute(int iterations, int batch_size, VALUE_TYPE lr, bool test_remote=false) {
     json jobj;
     int batches=0;
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
@@ -59,7 +59,9 @@ public:
       batches =
           static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
     }
-
+    if (test_remote){
+      iterations = iterations+1;
+    }
     for (int i = 0; i < iterations; i++) {
       auto t = start_clock();
       size_t total_memory = 0;
@@ -71,7 +73,12 @@ public:
               new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
                   sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
                   batches, tile_width_fraction, hash_spgemm));
-      main_comm.get()->onboard_data(false);
+      if (i%iterations==0){
+        main_comm.get()->onboard_data(false);
+      }else {
+        main_comm.get()->onboard_data(true);
+      }
+
 
       unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
           spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
@@ -82,8 +89,12 @@ public:
                   sparse_local, sparse_out.get(), grid, alpha, beta, col_major,
                   sync, tile_width_fraction, hash_spgemm,main_comm.get()));
 
+      if (i%iterations==0){
+        spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
+      }else {
+        spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
+      }
 
-      spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
       stop_clock_and_add(t, "Total Time");
       auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
       double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
