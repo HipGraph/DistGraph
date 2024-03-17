@@ -67,7 +67,8 @@ int main(int argc, char **argv) {
 
   double output_sparsity=0;
 
-   double tile_width_fraction=0.5;
+   double tile_width_fraction=1;
+   double tile_height_fraction=1;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
@@ -112,6 +113,8 @@ int main(int argc, char **argv) {
       sparse_data_file = argv[p + 1];
     } else if (strcmp(argv[p], "-tile_width_fraction") == 0) {
       tile_width_fraction = atof(argv[p + 1]);
+    }else if (strcmp(argv[p], "-tile_height_fraction") == 0) {
+      tile_height_fraction = atof(argv[p + 1]);
     }
   }
 
@@ -165,6 +168,10 @@ int main(int argc, char **argv) {
   // To enable full batch size
     if (spmm or spgemm) {
       batch_size = localARows;
+    }
+
+    if (spgemm and tile_height_fraction<1){
+      batch_size = localARows*tile_height_fraction;
     }
 
   shared_sparseMat.get()->batch_size = batch_size;
