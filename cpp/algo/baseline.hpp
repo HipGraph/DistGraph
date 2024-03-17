@@ -52,10 +52,10 @@ public:
   json execute(int iterations, int batch_size, VALUE_TYPE lr, bool test_remote=false) {
     json jobj;
 
-    double[] fraction_array = {0.1,0.25,0.5,0.75,1};
+    double fraction_array[] = {0.1,0.25,0.5,0.75,1};
     int len =1;
     if (test_remote){
-      int len = fraction_array.size();
+      int len = 5;
       iterations = iterations+1;
     }
     for(int w=0;w<len;w++ ){
