@@ -55,7 +55,7 @@ public:
     double fraction_array[] = {0.1,0.25,0.5,0.75,1};
     int len =1;
     if (test_remote){
-      int len = 5;
+      len = 5;
       iterations = iterations+1;
     }
     int count_i=0;
