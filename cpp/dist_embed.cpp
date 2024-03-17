@@ -69,6 +69,7 @@ int main(int argc, char **argv) {
 
    double tile_width_fraction=1;
    double tile_height_fraction=1;
+   bool enable_remote=false;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
@@ -115,6 +116,9 @@ int main(int argc, char **argv) {
       tile_width_fraction = atof(argv[p + 1]);
     }else if (strcmp(argv[p], "-tile_height_fraction") == 0) {
       tile_height_fraction = atof(argv[p + 1]);
+    }else if (strcmp(argv[p], "-enable_remote") == 0) {
+      int res = atof(argv[p + 1]);
+      enable_remote = enable_remote == 1 ? true : false;
     }
   }
 
@@ -289,24 +293,24 @@ int main(int argc, char **argv) {
 //            grid.get(),
 //            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
-            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
-                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                shared_sparseMat_sender.get(), sparse_input.get(),
-                grid.get(),
-                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-//        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
+//        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
+//            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
 //                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
 //                shared_sparseMat_sender.get(), sparse_input.get(),
 //                grid.get(),
 //                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
+        unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
+            new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
+                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                shared_sparseMat_sender.get(), sparse_input.get(),
+                grid.get(),
+                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " spgemm algo started  " << endl;
-    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
+    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr,enable_remote);
     cout << " rank " << rank << " spgemm algo completed  " << endl;
 //    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
 //    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
