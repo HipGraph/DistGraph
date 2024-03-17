@@ -52,10 +52,10 @@ public:
   json execute(int iterations, int batch_size, VALUE_TYPE lr, bool test_remote=false) {
     json jobj;
 
-    double fraction_array[] = {0.1,0.25,0.5,0.75,1};
+    double fraction_array[] = {0.25,0.5,0.75,1};
     int len =1;
     if (test_remote){
-      len = 5;
+      len = 4;
       iterations = iterations+1;
     }
     int count_i=0;
@@ -64,9 +64,6 @@ public:
       for(int h=0;h<len;h++){
         batch_size = sp_local_receiver->proc_row_width * fraction_array[h];
         sp_local_receiver->batch_size = batch_size;
-        sp_local_sender->batch_size=batch_size;
-        sparse_local->batch_size=batch_size;
-        sp_local_native->batch_size=batch_size;
         int batches=0;
         if (sp_local_receiver->proc_row_width % batch_size == 0) {
           batches =
