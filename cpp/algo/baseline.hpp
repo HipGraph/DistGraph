@@ -95,7 +95,7 @@ public:
                       batches, tile_width_fraction, hash_spgemm));
           if (i%iterations==0){
             main_comm.get()->onboard_data(false);
-          }else {
+          }else if (test_remote){
             main_comm.get()->onboard_data(true);
             enabled =true;
           }
@@ -112,7 +112,7 @@ public:
 
           if (i%iterations==0){
             spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
-          }else {
+          }else if (test_remote) {
             spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
           }
 
