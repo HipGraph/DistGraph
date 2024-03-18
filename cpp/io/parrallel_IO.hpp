@@ -228,8 +228,8 @@ public:
         }else {
           total_size += snprintf(
               nullptr, 0,
-              "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu\n",
-              global_rows, global_cols);
+              "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu %lu\n\n",
+              global_rows, global_cols,global_sum);
         }
       }
       int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
@@ -264,8 +264,8 @@ public:
         }else {
           current_position += snprintf(
               current_position, total_size,
-              "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu\n",
-              global_rows, global_cols);
+              "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu %lu\n",
+              global_rows, global_cols,global_sum);
         }
       }
 
