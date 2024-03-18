@@ -60,14 +60,18 @@ public:
     }
     int count_i=0;
     for(int w=0;w<len;w++ ){
-      tile_width_fraction = fraction_array[w];
-      for(int h=0;h<len;h++){
-        batch_size = sp_local_receiver->proc_row_width * fraction_array[h];
-        sp_local_receiver->batch_size = batch_size;
-        sp_local_sender->batch_size = batch_size;
-        sparse_local->batch_size = batch_size;
-        sp_local_native->batch_size=batch_size;
+      if (test_remote) {
+        tile_width_fraction = fraction_array[w];
+      }
 
+      for(int h=0;h<len;h++){
+        if (test_remote){
+          batch_size = sp_local_receiver->proc_row_width * fraction_array[h];
+          sp_local_receiver->batch_size = batch_size;
+          sp_local_sender->batch_size = batch_size;
+          sparse_local->batch_size = batch_size;
+          sp_local_native->batch_size=batch_size;
+        }
         int batches=0;
         if (sp_local_receiver->proc_row_width % batch_size == 0) {
           batches =
