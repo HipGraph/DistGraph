@@ -185,7 +185,7 @@ public:
       auto expected_non_zeros = 32;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, global_cols - 1);
       INDEX_TYPE start_index = grid->rank_in_col*rows;
-      INDEX_TYPE end_index = min(static_cast<INDEX_TYPE>((grid->rank_in_col+1)*rows),global_rows)
+      INDEX_TYPE end_index = min(static_cast<INDEX_TYPE>((grid->rank_in_col+1)*rows),global_rows);
       for (INDEX_TYPE i = start_index; i < end_index; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
