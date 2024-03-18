@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
   if (spgemm & save_results) {
     int local_cols = divide_and_round_up(static_cast<int>(dimension),grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
-                                       local_cols,static_cast<int>(dimension), density, 0,sparse_coo, grid.get(),true);
+                                       local_cols,static_cast<int>(dimension), density, 0,sparse_coo, grid.get(),false);
 //    cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
 //    INDEX_TYPE gROWs = shared_sparseMat.get()->gRows;
 //    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);

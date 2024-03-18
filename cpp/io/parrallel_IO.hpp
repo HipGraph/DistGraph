@@ -181,7 +181,8 @@ public:
         }
       }
     } else {
-      auto expected_non_zeros = global_cols* density;
+//      auto expected_non_zeros = global_cols* density;
+      auto expected_non_zeros = 32;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, global_cols - 1);
       INDEX_TYPE start_index = grid->rank_in_col*rows;
       for (INDEX_TYPE i = 0; i < rows; ++i) {
@@ -191,7 +192,7 @@ public:
           Tuple<VALUE_TYPE> t;
           t.row = start_index+i;     // Calculate row index
           t.col = index; // Calculate column index
-          t.value = val;
+//          t.value = val;
           sparse_coo.push_back(t);
         }
       }
@@ -201,7 +202,7 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
                       Process3DGrid *grid, INDEX_TYPE local_rows,
-                      INDEX_TYPE global_rows, INDEX_TYPE global_cols) {
+                      INDEX_TYPE global_rows, INDEX_TYPE global_cols, bool boolean_matrix=false) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
@@ -218,10 +219,17 @@ public:
 
     for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += increment) {
       if (grid->rank_in_col == 0 and i == 0) {
-        total_size += snprintf(
-            nullptr, 0,
-            "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
-            global_rows, global_cols, global_sum);
+        if (!boolean_matrix) {
+          total_size += snprintf(
+              nullptr, 0,
+              "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
+              global_rows, global_cols, global_sum);
+        }else {
+          total_size += snprintf(
+              nullptr, 0,
+              "%%%MatrixMarket matrix coordinate real general\n%lu %lu\n",
+              global_rows, global_cols);
+        }
       }
       int elements_in_chunk = min(chunk_size, static_cast<int>(sparse_coo.size() - i));
 
@@ -229,7 +237,12 @@ public:
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1);
         INDEX_TYPE col = static_cast<INDEX_TYPE>(t.col + 1);
-        total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
+        if (!boolean_matrix){
+          total_size += snprintf(nullptr, 0, "%lu %lu %.5f\n", row, col, t.value);
+        }else {
+          total_size += snprintf(nullptr, 0, "%lu %lu\n", row, col);
+        }
+
       }
 
       char *buffer = (char *)malloc(total_size +
@@ -242,18 +255,31 @@ public:
 
       char *current_position = buffer;
       if (i == 0 and grid->rank_in_col == 0) {
-        current_position += snprintf(
-            current_position, total_size,
-            "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
-            global_rows, global_cols, global_sum);
+        if (!boolean_matrix) {
+          current_position += snprintf(
+              current_position, total_size,
+              "%%%MatrixMarket matrix coordinate real general\n%lu %lu\n",
+              global_rows, global_cols);
+        }else {
+          current_position += snprintf(
+              current_position, total_size,
+              "%%%MatrixMarket matrix coordinate real general\n%lu %lu\n",
+              global_rows, global_cols);
+        }
       }
 
       for (int j = 0; j < elements_in_chunk; ++j) {
         Tuple<VALUE_TYPE> t = sparse_coo[i + j];
         INDEX_TYPE row = static_cast<INDEX_TYPE>(t.row + 1);
         INDEX_TYPE col = static_cast<INDEX_TYPE>(t.col + 1);
-        current_position += snprintf(current_position, total_size,
-                                     "%lu %lu %.5f\n", row, col, t.value);
+        if (!boolean_matrix){
+          current_position += snprintf(current_position, total_size,
+                                       "%lu %lu %.5f\n", row, col, t.value);
+        }else {
+          current_position += snprintf(current_position, total_size,
+                                       "%lu %lu\n", row, col);
+        }
+
       }
 
       MPI_Status status;
