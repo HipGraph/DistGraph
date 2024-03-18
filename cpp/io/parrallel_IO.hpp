@@ -193,7 +193,7 @@ public:
           Tuple<VALUE_TYPE> t;
           t.row = i;     // Calculate row index
           t.col = index; // Calculate column index
-//          t.value = val;
+          t.value = val;
           sparse_coo.push_back(t);
         }
       }
