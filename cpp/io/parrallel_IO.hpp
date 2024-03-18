@@ -258,8 +258,8 @@ public:
         if (!boolean_matrix) {
           current_position += snprintf(
               current_position, total_size,
-              "%%%MatrixMarket matrix coordinate real general\n%lu %lu\n",
-              global_rows, global_cols);
+              "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
+              global_rows, global_cols,global_sum);
         }else {
           current_position += snprintf(
               current_position, total_size,
