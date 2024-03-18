@@ -185,12 +185,13 @@ public:
       auto expected_non_zeros = 32;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, global_cols - 1);
       INDEX_TYPE start_index = grid->rank_in_col*rows;
-      for (INDEX_TYPE i = 0; i < rows; ++i) {
+      INDEX_TYPE end_index = min(static_cast<INDEX_TYPE>((grid->rank_in_col+1)*rows),global_rows)
+      for (INDEX_TYPE i = start_index; i < end_index; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
           auto index = uni_dist(gen);
           Tuple<VALUE_TYPE> t;
-          t.row = start_index+i;     // Calculate row index
+          t.row = i;     // Calculate row index
           t.col = index; // Calculate column index
 //          t.value = val;
           sparse_coo.push_back(t);
