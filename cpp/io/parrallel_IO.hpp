@@ -228,7 +228,7 @@ public:
         }else {
           total_size += snprintf(
               nullptr, 0,
-              "%%%MatrixMarket matrix coordinate real general\n%lu %lu\n",
+              "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu\n",
               global_rows, global_cols);
         }
       }
@@ -264,7 +264,7 @@ public:
         }else {
           current_position += snprintf(
               current_position, total_size,
-              "%%%MatrixMarket matrix coordinate real general\n%lu %lu\n",
+              "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu\n",
               global_rows, global_cols);
         }
       }
