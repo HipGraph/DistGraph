@@ -138,8 +138,8 @@ public:
 
           add_perf_stats(total_memory, "Memory usage");
           json out = json_perf_statistics();
-          out["tile_width_fraction"] = fraction_array[w];
-          out["tile_height_fraction"] = fraction_array[h];
+//          out["tile_width_fraction"] = fraction_array[w];
+//          out["tile_height_fraction"] = fraction_array[h];
           out["remote_enabled"] =  enabled;
           jobj[i]=out;
 //          count_i++;
