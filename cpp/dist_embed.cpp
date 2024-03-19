@@ -332,6 +332,7 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " embedding algo started  " << endl;
     embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
+    reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
   }
   cout << " rank " << rank << " algo completed  " << endl;
 //
