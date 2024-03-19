@@ -52,26 +52,26 @@ public:
   json execute(int iterations, int batch_size, VALUE_TYPE lr, bool test_remote=false) {
     json jobj;
 
-    double fraction_array[] = {0.25,0.5,0.75,1};
-    int len =1;
-    if (test_remote){
-      len = 4;
-      iterations = iterations+1;
-    }
-    int count_i=0;
-    for(int w=0;w<len;w++ ){
-      if (test_remote) {
-        tile_width_fraction = fraction_array[w];
-      }
-
-      for(int h=0;h<len;h++){
-        if (test_remote){
-          batch_size = sp_local_receiver->proc_row_width * fraction_array[h];
-          sp_local_receiver->batch_size = batch_size;
-          sp_local_sender->batch_size = batch_size;
-          sparse_local->batch_size = batch_size;
-          sp_local_native->batch_size=batch_size;
-        }
+//    double fraction_array[] = {0.25,0.5,0.75,1};
+//    int len =1;
+//    if (test_remote){
+//      len = 4;
+//      iterations = iterations+1;
+//    }
+//    int count_i=0;
+//    for(int w=0;w<len;w++ ){
+//      if (test_remote) {
+//        tile_width_fraction = fraction_array[w];
+//      }
+//
+//      for(int h=0;h<len;h++){
+//        if (test_remote){
+//          batch_size = sp_local_receiver->proc_row_width * fraction_array[h];
+//          sp_local_receiver->batch_size = batch_size;
+//          sp_local_sender->batch_size = batch_size;
+//          sparse_local->batch_size = batch_size;
+//          sp_local_native->batch_size=batch_size;
+//        }
         int batches=0;
         if (sp_local_receiver->proc_row_width % batch_size == 0) {
           batches =
@@ -93,13 +93,16 @@ public:
                   new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
                       sp_local_receiver, sp_local_sender, sparse_local, grid, alpha,
                       batches, tile_width_fraction, hash_spgemm));
-          if (i%iterations==0){
+//          if (test_remote) {
+//            if (i % iterations == 0) {
+//              main_comm.get()->onboard_data(false);
+//            } else if (test_remote) {
+//              main_comm.get()->onboard_data(true);
+//              enabled = true;
+//            }
+//          }else {
             main_comm.get()->onboard_data(false);
-          }else if (test_remote){
-            main_comm.get()->onboard_data(true);
-            enabled =true;
-          }
-
+//          }
 
           unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
               spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
@@ -110,12 +113,15 @@ public:
                       sparse_local, sparse_out.get(), grid, alpha, beta, col_major,
                       sync, tile_width_fraction, hash_spgemm,main_comm.get()));
 
-          if (i%iterations==0){
-            spgemm_algo.get()->algo_spgemm(1, batch_size, lr,false);
-          }else if (test_remote) {
-            spgemm_algo.get()->algo_spgemm(1, batch_size, lr,true);
-          }
-
+//          if (test_remote) {
+//            if (i % iterations == 0) {
+//              spgemm_algo.get()->algo_spgemm(1, batch_size, lr, false);
+//            } else {
+//              spgemm_algo.get()->algo_spgemm(1, batch_size, lr, true);
+//            }
+//          } else {
+            spgemm_algo.get()->algo_spgemm(1, batch_size, lr, false);
+//          }
           stop_clock_and_add(t, "Total Time");
           auto size_r = sparse_out->csr_local_data->handler->rowStart.size();
           double output_nnz = sparse_out->csr_local_data->handler->rowStart[size_r-1];
@@ -139,8 +145,8 @@ public:
           count_i++;
           reset_performance_timers();
         }
-      }
-    }
+//      }
+//    }
 
     return jobj;
   }
