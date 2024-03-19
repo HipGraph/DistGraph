@@ -141,8 +141,8 @@ public:
           out["tile_width_fraction"] = fraction_array[w];
           out["tile_height_fraction"] = fraction_array[h];
           out["remote_enabled"] =  enabled;
-          jobj[count_i]=out;
-          count_i++;
+          jobj[i]=out;
+//          count_i++;
           reset_performance_timers();
         }
 //      }
