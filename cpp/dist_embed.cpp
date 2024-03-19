@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                     shared_sparseMat_sender.get(), dense_mat.get(), grid.get(),
                     alpha, beta, 5, -5,col_major,sync_comm));
-
+    perf_stats = json_perf_statistics();
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " embedding algo started  " << endl;
     embedding_algo.get()->algo_force2_vec_ns(iterations, batch_size, ns, lr);
