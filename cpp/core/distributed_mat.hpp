@@ -58,7 +58,7 @@ public:
     }
   }
 
-  void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols,distblas::core::DistributedMat* state_holder=nullptr){
+  void initialize_CSR_from_dense_collector(INDEX_TYPE proc_row_width,INDEX_TYPE gCols,distblas::core::DistributedMat* state_holder=nullptr,VALUE_TYPE comparator=0){
     unique_ptr<vector<Tuple<VALUE_TYPE>>> coords_ptr= make_unique<vector<Tuple<VALUE_TYPE>>>(vector<Tuple<VALUE_TYPE>>());
 
 #pragma omp parallel for
@@ -66,7 +66,7 @@ public:
       vector<Tuple<VALUE_TYPE>> coords_local;
       for (auto j = 0; j < (*dense_collector)[i].size(); j++) {
 
-        if (state_holder==nullptr and (*dense_collector)[i][j] != 0) {
+        if (state_holder==nullptr and (*dense_collector)[i][j] != comparator) {
           Tuple<VALUE_TYPE> t;
           t.col = j;
           t.row = i;
@@ -74,7 +74,7 @@ public:
           coords_local.push_back(t);
           (*dense_collector)[i][j]=0;
 
-        } else if (state_holder != nullptr and (*dense_collector)[i][j] != 0 and (*(state_holder->state_metadata))[i][j]==0) {
+        } else if (state_holder != nullptr and (*dense_collector)[i][j] != comparator and (*(state_holder->state_metadata))[i][j]==comparator) {
             Tuple<VALUE_TYPE> t;
             t.col = j;
             t.row = i;
