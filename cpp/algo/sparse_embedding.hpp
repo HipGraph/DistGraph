@@ -430,6 +430,8 @@ public:
                 int local_tracker = (mode==2)?0:local_handle->rowStart[index];
                 int local_tracker_end = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle->rowStart[index + 1];
                 int count = 0;
+                VALUE_TYPE attrc=0;
+                vector<INDEX_TYPE> indexes_to_updates;
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle->col_idx[local_tracker]
@@ -441,32 +443,31 @@ public:
                     break;
                   } else if (remote_d == INT_MAX or local_d < remote_d) {
                     auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
-                    VALUE_TYPE attrc = local_value * local_value;
-                    VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale(attrc * d1);
-                    (*(output->dense_collector))[index][local_d] += (lr)*l;
+                     attrc += local_value * local_value;
+                    indexes_to_updates.push_back(local_d);
                     local_tracker++;
                     count++;
                   } else if (local_d == INT_MAX or remote_d < local_d) {
                     auto remote_value = handle->values[remote_tracker];
-                    VALUE_TYPE attrc = remote_value * remote_value;
-                    VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale(attrc * d1);
-                    (*(output->dense_collector))[index][remote_d] += (lr)*l;
+                     attrc += remote_value * remote_value;
+                    indexes_to_updates.push_back(remote_d);
                     remote_tracker++;
                     count++;
                   } else {
                     auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
                     auto remote_value = handle->values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
-                    VALUE_TYPE attrc = value * value;
-                    VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale(attrc * d1);
-                    (*(output->dense_collector))[index][remote_d] += (lr)*l;
+                     attrc += value * value;
+                    indexes_to_updates.push_back(remote_d);
                     local_tracker++;
                     remote_tracker++;
                     count = count + 2;
                   }
+                }
+                VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
+                VALUE_TYPE l = scale(attrc * d1);
+                for(INDEX_TYPE i=0;i<indexes_to_update.size();i++){
+                  (*(output->dense_collector))[index][indexes_to_update[i]] += (lr)*l;
                 }
               }
             } else {
@@ -517,6 +518,8 @@ public:
                 int local_tracker = local_handle->rowStart[index];
                 int local_tracker_end = local_handle->rowStart[index + 1];
                 int count = 0;
+                vector<INDEX_TYPE> indexes_to_updates;
+                VALUE_TYPE attrc=0;
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? local_handle->col_idx[local_tracker]
@@ -528,32 +531,31 @@ public:
                     break;
                   } else if (remote_d == INT_MAX or local_d < remote_d) {
                     auto local_value = local_handle->values[local_tracker];
-                    VALUE_TYPE attrc = local_value * local_value;
-                    VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale(attrc * d1);
-                    (*(output->dense_collector))[index][local_d] += (lr)*l;
+                     attrc += local_value * local_value;
+                     indexes_to_updates.push_back(local_d);
                     local_tracker++;
                     count++;
                   } else if (local_d == INT_MAX or remote_d < local_d) {
                     auto remote_value = remote_values[remote_tracker];
-                    VALUE_TYPE attrc = remote_value * remote_value;
-                    VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale(attrc * d1);
-                    (*(output->dense_collector))[index][remote_d] += (lr)*l;
+                     attrc += remote_value * remote_value;
+                    indexes_to_updates.push_back(remote_d);
                     remote_tracker++;
                     count++;
                   } else {
                     auto local_value = local_handle->values[local_tracker];
                     auto remote_value = remote_values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
-                    VALUE_TYPE attrc = value * value;
-                    VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
-                    VALUE_TYPE l = scale(attrc * d1);
-                    (*(output->dense_collector))[index][remote_d] += (lr)*l;
+                     attrc += value * value;
+                     indexes_to_updates.push_back(remote_d);
                     local_tracker++;
                     remote_tracker++;
                     count = count + 2;
                   }
+                }
+                VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
+                VALUE_TYPE l = scale(attrc * d1);
+                for(INDEX_TYPE i=0;i<indexes_to_update.size();i++){
+                  (*(output->dense_collector))[index][indexes_to_update[i]] += (lr)*l;
                 }
               }
             }
