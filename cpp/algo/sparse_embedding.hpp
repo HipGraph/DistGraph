@@ -143,15 +143,15 @@ public:
           //                this->grid->col_world_size, true, main_comm.get(),
           //                nullptr);
           //          }
-//          main_comm->transfer_sparse_data(random_number_vec,i,j);
-//          this->calc_t_dist_replus_rowptr( random_number_vec,
-//                                          lr, j, batch_size,
-//                                          considering_batch_size,this->sparse_local_output);
+          main_comm->transfer_sparse_data(random_number_vec,i,j);
+          this->calc_t_dist_replus_rowptr( random_number_vec,
+                                          lr, j, batch_size,
+                                          considering_batch_size,this->sparse_local_output);
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output,enable_remote);
-           cout<<" grid "<<grid->rank_in_col<<" execute_pull_model_computations completed"<<i<<j<<endl;
+
           if (enable_remote) {
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
@@ -202,12 +202,9 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !output->hash_spgemm)) {
-
-        cout<<" grid "<<grid->rank_in_col<<" transfer_sparse_data started"<<endl;
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process,
                                         true);
-        cout<<" grid "<<grid->rank_in_col<<" transfer_sparse_data completed"<<endl;
         if (enable_remote_computation) {
           main_comm->transfer_remotely_computable_data(
               sendbuf, receivebuf, iteration, batch, k, end_process, 0,
@@ -219,7 +216,6 @@ public:
         this->calc_t_dist_grad_rowptr(
             csr_block, lr, iteration, batch, batch_size, considering_batch_size,
             0, first_execution_proc, prev_start, symbolic, main_comm, output);
-        cout<<" grid "<<grid->rank_in_col<<" calc_t_dist_grad_rowptr local completed"<<endl;
 
       } else if (k > comm_initial_start) {
         int prev_end_process =
