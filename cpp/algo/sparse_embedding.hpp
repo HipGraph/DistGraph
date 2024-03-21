@@ -66,7 +66,7 @@ public:
     this->sparse_local= sparse_input.get();
     auto t_knn = start_clock();
     auto expected_nnz_per_row = embedding_dim*density;
-    this->preserveHighestK(this->sparse_local->dense_collector.get(),expected_nnz_per_row);
+//    this->preserveHighestK(this->sparse_local->dense_collector.get(),expected_nnz_per_row);
     (this->sparse_local)->initialize_CSR_blocks();
     stop_clock_and_add(t, "KNN Time");
 
@@ -169,7 +169,7 @@ public:
         total_memory += get_memory_usage();
       }
       auto t_knn = start_clock();
-      this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
+//      this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
       (this->sparse_local_output)->initialize_CSR_blocks();
       cout<<" rank "<<this->grid->rank_in_col<<" before size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<"nnz "
            <<(*(this->sparse_local->csr_local_data)).handler->rowStart[(*(this->sparse_local->csr_local_data)).handler->rowStart.size()-1]<<"nnz output"<<(*(this->sparse_local_output->csr_local_data)).handler->rowStart[(*(this->sparse_local_output->csr_local_data)).handler->rowStart.size()-1] <<endl;
