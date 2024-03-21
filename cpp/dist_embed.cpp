@@ -71,6 +71,8 @@ int main(int argc, char **argv) {
    double tile_height_fraction=1;
    bool enable_remote=false;
 
+   bool sparse_embedding=false;
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -105,6 +107,9 @@ int main(int argc, char **argv) {
     }else if (strcmp(argv[p], "-spgemm") == 0) {
       int enable_spgemm = atoi(argv[p + 1]);
       spgemm = enable_spgemm == 1 ? true : false;
+    }else if (strcmp(argv[p], "-sparse_embedding") == 0) {
+      int res = atof(argv[p + 1]);
+      sparse_embedding = res == 1 ? true : false;
     }else if (strcmp(argv[p], "-density") == 0) {
       density = atof(argv[p + 1]);
     }else if (strcmp(argv[p], "-save_results") == 0) {
@@ -316,7 +321,18 @@ int main(int argc, char **argv) {
 //    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
 //    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
 
-  }else if (!save_results){
+  }else if (sparse_embedding and !save_results){
+    bool has_spgemm =dimension>spa_threshold?true:false;
+    auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm,true);
+    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
+            new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
+                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                shared_sparseMat_sender.get(), sparse_out.get(),
+                grid.get(),
+                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+    spgemm_algo.get()->algo_sparse_embedding(iterations, batch_size,ns,lr,density);
+    perf_stats = json_perf_statistics();
+  } else if (!save_results) {
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
         new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
 

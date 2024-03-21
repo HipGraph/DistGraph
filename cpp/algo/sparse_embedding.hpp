@@ -44,24 +44,31 @@ public:
   SparseEmbedding(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
                   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
                   distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-                  distblas::core::SpMat<VALUE_TYPE> *sparse_local,
                   distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
                   Process3DGrid *grid, double alpha, double beta,
                   bool col_major, bool sync_comm, double tile_width_fraction,
                   bool hash_spgemm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
-        sp_local_sender(sp_local_sender), sparse_local(sparse_local),
-        grid(grid), alpha(alpha), beta(beta), col_major(col_major),
+        sp_local_sender(sp_local_sender),grid(grid), alpha(alpha),
+        beta(beta), col_major(col_major),
         sync(sync_comm), sparse_local_output(sparse_local_output),
         tile_width_fraction(tile_width_fraction) {
     this->hash_spgemm = hash_spgemm;
   }
 
-  void algo_sparse_embedding(int iterations, int batch_size,int ns, VALUE_TYPE lr) {
+  void algo_sparse_embedding(int iterations, int batch_size,int ns, VALUE_TYPE lr,double density=1.0, bool enable_remote=true) {
     auto t = start_clock();
     size_t total_memory = 0;
     int batches = 0;
     int last_batch_size = batch_size;
+
+    auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim,has_spgemm,true);
+    this->sparse_local= sparse_input.get();
+    auto t_knn = start_clock();
+    auto expected_nnz_per_row = embedding_dim*density;
+    this->preserveHighestK(this->sparse_local->dense_collector.get(),expected_nnz_per_row);
+    (this->sparse_local)->initialize_CSR_blocks();
+    stop_clock_and_add(t, "KNN Time");
 
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
       batches =
@@ -92,7 +99,7 @@ public:
             new vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>>());
 
     this->sparse_local->build_computable_represention();
-    main_comm.get()->onboard_data();
+    main_comm.get()->onboard_data(enable_remote);
     cout << " rank " << grid->rank_in_col << " on board data completed "<< endl;
 
     int total_tiles = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
@@ -104,7 +111,6 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
-
       for (int j = 0; j < batches; j++) {
         cout << " rank " << grid->rank_in_col << " batch " << j << endl;
         int seed = j + i;
@@ -146,20 +152,27 @@ public:
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
 
-          this->calc_t_dist_grad_rowptr(
-              (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
-              batch_size, considering_batch_size, 2, 0,
-              this->grid->col_world_size, false, main_comm.get(), nullptr);
+          if (enable_remote) {
+            this->calc_t_dist_grad_rowptr(
+                (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
+                batch_size, considering_batch_size, 2, 0,
+                this->grid->col_world_size, false, main_comm.get(), nullptr);
 
-          main_comm->receive_remotely_computed_data(
-              sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
-              this->grid->col_world_size, 0, total_tiles);
+            main_comm->receive_remotely_computed_data(
+                sendbuf_ptr.get(), update_ptr.get(), i, j, 0,
+                this->grid->col_world_size, 0, total_tiles);
 
-          this->merge_remote_computations(
-              j, batch_size, this->sparse_local_output, main_comm.get());
+            this->merge_remote_computations(
+                j, batch_size, this->sparse_local_output, main_comm.get());
+          }
         }
         total_memory += get_memory_usage();
       }
+      auto t_knn = start_clock();
+      this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
+      (this->sparse_local_output)->initialize_CSR_blocks();
+      (*(this->sparse_local->csr_local_data)) =(*(this->sparse_local_output->csr_local_data));
+      stop_clock_and_add(t, "KNN Time");
       (this->sparse_local)->purge_cache();
     }
     (this->sparse_local_output)->initialize_CSR_blocks();
@@ -761,6 +774,24 @@ public:
       return -MAX_BOUND;
     else
       return v;
+  }
+
+  void preserveHighestK(vector<std::vector<VALUE_TYPE>> *matrix,  int k) {
+    // Check if index is within bounds
+    int len = (*matrix).size();
+    #pragma omp parallel for
+    for(auto i=0;i<len;i++) {
+      // Get the row at the given index
+      std::vector<int> &row = matrix[i];
+
+      // Sort the row in descending order
+      std::sort(row.begin(), row.end(), std::greater<int>());
+
+      // Reset values beyond k to 0
+      for (size_t i = k; i < row.size(); ++i) {
+        row[i] = 0;
+      }
+    }
   }
 };
 } // namespace distblas::algo

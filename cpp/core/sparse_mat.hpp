@@ -346,7 +346,7 @@ public:
   }
 
   SpMat(Process3DGrid *grid, INDEX_TYPE proc_row_width,  INDEX_TYPE proc_col_width,
-        bool hash_spgemm)
+        bool hash_spgemm, bool random_initialize=false)
       : DistributedMat() {
     this->grid = grid;
     this->tempCachePtr = std::make_unique<std::vector<
@@ -366,6 +366,14 @@ public:
     } else {
       this->dense_collector = make_unique<vector<vector<VALUE_TYPE>>>(
           proc_row_width, vector<VALUE_TYPE>(proc_col_width, 0));
+      if (random_initialize){
+        for (int i = 0; i < proc_row_width; i++) {
+          for (int j = 0; j < proc_col_width; j++) {
+            VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
+            (*this->dense_collector)[i][j] = val;
+          }
+        }
+      }
     }
   }
 
