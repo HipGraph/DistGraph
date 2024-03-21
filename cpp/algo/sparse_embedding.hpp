@@ -183,6 +183,8 @@ public:
         //      cout<<" rank "<<this->grid->rank_in_col<<" after size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<" nnz "<<(*(this->sparse_local->csr_local_data)).handler->rowStart[(*(this->sparse_local->csr_local_data)).handler->rowStart.size()-1]<<endl;
         stop_clock_and_add(t, "KNN Time");
         (this->sparse_local)->purge_cache();
+      } else {
+        (*(this->sparse_local_output)->dense_collector) = (*(this->sparse_local)->dense_collector);
       }
     }
     total_memory = total_memory / (iterations * batches);
