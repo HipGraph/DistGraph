@@ -150,7 +150,7 @@ public:
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
-              false, this->sparse_local_output);
+              false, this->sparse_local_output,enable_remote);
            cout<<" grid "<<grid->rank_in_col<<" execute_pull_model_computations completed"<<i<<j<<endl;
           if (enable_remote) {
             this->calc_t_dist_grad_rowptr(
@@ -189,7 +189,7 @@ public:
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size,
       int considering_batch_size, double lr, int comm_initial_start,
       int first_execution_proc, bool communication, bool symbolic,
-      DistributedMat *output) {
+      DistributedMat *output, bool enable_remote_computation) {
 
     int proc_length = get_proc_length(beta, this->grid->col_world_size);
     int prev_start = comm_initial_start;
@@ -206,9 +206,11 @@ public:
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process,
                                         true);
-        main_comm->transfer_remotely_computable_data(
-            sendbuf, receivebuf, iteration, batch, k, end_process, 0,
-            tiles_per_process, true);
+        if (enable_remote_computation) {
+          main_comm->transfer_remotely_computable_data(
+              sendbuf, receivebuf, iteration, batch, k, end_process, 0,
+              tiles_per_process, true);
+        }
       }
       if (k == comm_initial_start) {
         // local computation
