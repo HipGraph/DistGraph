@@ -151,7 +151,7 @@ public:
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output);
-
+           cout<<" grid "<<grid->rank_in_col<<" execute_pull_model_computations completed"<<i<<j<<endl;
           if (enable_remote) {
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
