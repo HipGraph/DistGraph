@@ -776,13 +776,13 @@ public:
       return v;
   }
 
-  void preserveHighestK(vector<std::vector<VALUE_TYPE>> *matrix,  int k) {
+  void preserveHighestK(vector<vector<VALUE_TYPE>> *matrix,  int k) {
     // Check if index is within bounds
     int len = (*matrix).size();
     #pragma omp parallel for
     for(auto i=0;i<len;i++) {
       // Get the row at the given index
-      std::vector<VALUE_TYPE> &row = matrix[i];
+      std::vector<VALUE_TYPE> &row = (*matrix)[i];
 
       // Sort the row in descending order
       std::sort(row.begin(), row.end(), std::greater<VALUE_TYPE>());
