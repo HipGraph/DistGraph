@@ -206,6 +206,7 @@ public:
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process,
                                         true);
+        cout<<" grid "<<grid->rank_in_col<<" transfer_sparse_data completed"<<endl;
         if (enable_remote_computation) {
           main_comm->transfer_remotely_computable_data(
               sendbuf, receivebuf, iteration, batch, k, end_process, 0,
@@ -217,6 +218,7 @@ public:
         this->calc_t_dist_grad_rowptr(
             csr_block, lr, iteration, batch, batch_size, considering_batch_size,
             0, first_execution_proc, prev_start, symbolic, main_comm, output);
+        cout<<" grid "<<grid->rank_in_col<<" calc_t_dist_grad_rowptr local completed"<<endl;
 
       } else if (k > comm_initial_start) {
         int prev_end_process =
@@ -234,6 +236,7 @@ public:
     this->calc_t_dist_grad_rowptr(
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
+    cout<<" grid "<<grid->rank_in_col<<" calc_t_dist_grad_rowptr remote completed"<<i<<j<<endl;
     // dense_local->invalidate_cache(i, j, true);
   }
 
