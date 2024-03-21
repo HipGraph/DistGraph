@@ -332,6 +332,8 @@ int main(int argc, char **argv) {
                 alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
     spgemm_algo.get()->algo_sparse_embedding(iterations, batch_size,ns,lr,density,enable_remote);
     perf_stats = json_perf_statistics();
+    reader->parallel_write(output_file+"/embedding.txt",sparse_out.get()->dense_collector.get(),
+                           localARows, dimension, grid.get(),shared_sparseMat.get());
   } else if (!save_results) {
     auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
         new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));

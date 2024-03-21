@@ -143,6 +143,65 @@ public:
     MPI_File_close(&fh);
   }
 
+
+  template <typename VALUE_TYPE>
+  void parallel_write(string file_path, vector<vector<VALUE_TYPE>> *matrix,
+                      INDEX_TYPE rows, uint64_t cols, Process3DGrid *grid,
+                      distblas::core::SpMat<VALUE_TYPE> *sp_mat) {
+    MPI_File fh;
+    MPI_File_open(grid->col_world, file_path.c_str(),
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+
+    uint64_t expected_rows = rows;
+    if (grid->rank_in_col == grid->col_world_size - 1) {
+      auto expected_last_rows = sp_mat->gRows - rows * grid->rank_in_col;
+      cout << " expected rows " << expected_last_rows << endl;
+      expected_rows = min(expected_last_rows, rows);
+    }
+
+    //    int offset= rows-expected_rows;
+    cout << " rank :" << grid->rank_in_col << " expected rows " << expected_rows
+         << endl;
+    size_t total_size = 0;
+    for (INDEX_TYPE i = 0; i < expected_rows; ++i) {
+      total_size +=
+          snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
+      for (int j = 0; j < cols; ++j) {
+        total_size += snprintf(nullptr, 0, " %.5f", matrix[i][j]);
+      }
+      total_size += snprintf(nullptr, 0, "\n");
+    }
+
+    // Allocate memory dynamically
+    char *buffer =
+        (char *)malloc(total_size + 1); // +1 for the null-terminating character
+    if (buffer == nullptr) {
+      // Handle allocation failure
+      cout << "Memory allocation failed." << endl;
+      return;
+    }
+
+    char *current_position = buffer;
+
+    for (INDEX_TYPE i = 0; i < expected_rows; ++i) {
+      current_position += snprintf(current_position, total_size, "%lu",
+                                   i + 1 + grid->rank_in_col * rows);
+      for (int j = 0; j < cols; ++j) {
+        current_position += snprintf(current_position, total_size, " %.5f",
+                                     matrix[i][j]);
+      }
+      current_position += snprintf(current_position, total_size, "\n");
+    }
+
+    MPI_File_write_ordered(fh, buffer, current_position - buffer, MPI_CHAR,
+                           MPI_STATUS_IGNORE);
+
+    // Free the dynamically allocated memory
+    free(buffer);
+
+    MPI_File_close(&fh);
+  }
+
   template <typename VALUE_TYPE>
   void build_sparse_random_matrix(INDEX_TYPE rows,INDEX_TYPE global_rows, INDEX_TYPE cols,INDEX_TYPE global_cols,
                                   double density, int seed,
