@@ -171,10 +171,10 @@ public:
       auto t_knn = start_clock();
       this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
       (this->sparse_local_output)->initialize_CSR_blocks();
-      cout<<" rank "<<this->grid->rank_in_col<<" before size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<endl;
+      cout<<" rank "<<this->grid->rank_in_col<<" before size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<"nnz "<<(*(this->sparse_local->csr_local_data)).handler->rowStart[(*(this->sparse_local->csr_local_data)).handler->rowStart.size()-1]<<endl;
       (*(this->sparse_local->csr_local_data)) =(*(this->sparse_local_output->csr_local_data));
-      cout<<" rank "<<this->grid->rank_in_col<<" after size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<endl;
       main_comm->update_local_input(this->sparse_local);
+      cout<<" rank "<<this->grid->rank_in_col<<" after size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<" nnz "<<(*(this->sparse_local->csr_local_data)).handler->rowStart[(*(this->sparse_local->csr_local_data)).handler->rowStart.size()-1]<<endl;
       stop_clock_and_add(t, "KNN Time");
       (this->sparse_local)->purge_cache();
     }
