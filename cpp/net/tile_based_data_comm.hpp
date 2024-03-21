@@ -221,7 +221,7 @@ public:
       send_tile_meta->clear();
       send_tile_meta->resize(itr);
 
-//#pragma omp parallel for
+#pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -238,7 +238,6 @@ public:
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
             st.mode = 1;
           } else {
-            cout<<" rank "<<this->grid->rank_in_col<<" trying to set remote compiuting for "<<j<<" batch "<<i<<" k "<<k<<endl;
             (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive//// remote computed data
             st.mode = 0;
           }
@@ -270,7 +269,7 @@ public:
 //        stop_clock_and_add(t, "Communication Time");
 //        add_perf_stats(sizeof(TileTuple<INDEX_TYPE>)*per_process_messages*this->grid->col_world_size, "Data transfers");
 
-//#pragma omp parallel for
+#pragma omp parallel for
         for (auto in = 0; in < itr; in++) {
           auto i = in / (this->grid->col_world_size * tiles_per_process);
           auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -280,7 +279,6 @@ public:
           TileTuple<INDEX_TYPE> st = (*receive_tile_meta)[index];
           if (st.batch_id == i and st.tile_id == k){
               if (st.mode == 0) {
-                cout<<" rank "<<this->grid->rank_in_col<<" setting "<<j<<" batch "<<i<<" k "<<k<<endl;
                 (*sender_proc_tile_map)[i][j][k].mode = 0;
                 (*sender_proc_tile_map)[i][j][k].initialize_dataCache();
               }

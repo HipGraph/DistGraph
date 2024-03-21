@@ -236,7 +236,7 @@ public:
     this->calc_t_dist_grad_rowptr(
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
-    cout<<" grid "<<grid->rank_in_col<<" calc_t_dist_grad_rowptr remote completed"<<endl;
+
     // dense_local->invalidate_cache(i, j, true);
   }
 
@@ -344,7 +344,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static) // enable for full batch training or
+//#pragma omp parallel for schedule(static) // enable for full batch training or
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index =
@@ -372,6 +372,9 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
+              if (arrayMap.find(global_col_id)== arrayMap.end()){
+                cout<<" rank "<<this->grid->rank_in_col<<" trying to access "<<global_col_id<<" failed "<<endl;
+              }
               remote_cols = arrayMap[dst_id].cols;
               remote_values = arrayMap[dst_id].values;
             }
