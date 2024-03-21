@@ -190,7 +190,7 @@ public:
 
       unique_ptr<vector<TileTuple<INDEX_TYPE>>> receive_tile_meta = make_unique<vector<TileTuple<INDEX_TYPE>>>(itr);
 
-#pragma omp parallel for
+      #pragma omp parallel for
       for (auto in = 0; in < itr; in++) {
         auto i = in / (this->grid->col_world_size * tiles_per_process);
         auto j = (in / tiles_per_process) % this->grid->col_world_size;
@@ -202,9 +202,9 @@ public:
         t.batch_id = i;
         t.tile_id = k;
         t.count =
-            (*sender_proc_tile_map)[i][j][k].total_transferrable_datacount;
+            (*sender_proc_tile_map)[i][j][k].total_transferrable_datacount; // individual data vectors transffered
         t.send_merge_count =
-            (*sender_proc_tile_map)[i][j][k].total_receivable_datacount;
+            (*sender_proc_tile_map)[i][j][k].total_receivable_datacount; // remote computation total data vectors
         (*send_tile_meta)[index] = t;
         if (t.count > t.send_merge_count and !embedding and enable_remote_compute and j != this->grid->rank_in_col) {
           (*sender_proc_tile_map)[i][j][k].mode = 0;
@@ -234,7 +234,7 @@ public:
           st.batch_id = i;
           st.tile_id = k;
           auto remote_cost = (merge_cost_factor*t.send_merge_count) +  (*receiver_proc_tile_map)[i][j][k].total_transferrable_datacount;
-          if (t.count <= remote_cost) {
+          if (t.count <= remote_cost or !enable_remote_compute) {
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
             st.mode = 1;
           } else {
