@@ -203,6 +203,7 @@ public:
 
       if (communication and (symbolic or !output->hash_spgemm)) {
 
+        out<<" grid "<<grid->rank_in_col<<" transfer_sparse_data started"<<endl;
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
                                         k, end_process, 0, tiles_per_process,
                                         true);
