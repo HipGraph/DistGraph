@@ -143,7 +143,7 @@ public:
           //                this->grid->col_world_size, true, main_comm.get(),
           //                nullptr);
           //          }
-          main_comm->transfer_sparse_data(random_number_vec,i,j);
+//          main_comm->transfer_sparse_data(random_number_vec,i,j);
 //          this->calc_t_dist_replus_rowptr( random_number_vec,
 //                                          lr, j, batch_size,
 //                                          considering_batch_size,this->sparse_local_output);
