@@ -144,10 +144,10 @@ public:
           //                this->grid->col_world_size, true, main_comm.get(),
           //                nullptr);
           //          }
-//          main_comm->transfer_sparse_data(random_number_vec,i,j);
-//          this->calc_t_dist_replus_rowptr( random_number_vec,
-//                                          lr, j, batch_size,
-//                                          considering_batch_size,this->sparse_local_output);
+          main_comm->transfer_sparse_data(random_number_vec,i,j);
+          this->calc_t_dist_replus_rowptr( random_number_vec,
+                                          lr, j, batch_size,
+                                          considering_batch_size,this->sparse_local_output);
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
@@ -611,6 +611,8 @@ public:
           int local_tracker = local_handle->rowStart[row_id];
           int local_tracker_end = local_handle->rowStart[row_id + 1];
           int count = 0;
+          VALUE_TYPE repuls=0;
+          vector<INDEX_TYPE> indexs_to_updates;
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
                                ? local_handle->col_idx[local_tracker]
@@ -622,33 +624,33 @@ public:
               break;
             } else if (remote_d == INT_MAX or local_d < remote_d) {
               auto local_value = local_handle->values[local_tracker];
-              VALUE_TYPE repuls = local_value * local_value;
-              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-              VALUE_TYPE l = scale(repuls * d1);
-              (*(output->dense_collector))[row_id][local_d] += (lr)*l;
+               repuls += local_value * local_value;
+              indexs_to_updates.push_back(local_d);
               local_tracker++;
               count++;
             } else if (local_d == INT_MAX or remote_d < local_d) {
               auto remote_value = remote_values[remote_tracker];
-              VALUE_TYPE repuls = remote_value * remote_value;
-              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-              VALUE_TYPE l = scale(repuls * d1);
-              (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
+               repuls += remote_value * remote_value;
+              indexs_to_updates.push_back(remote_d);
               remote_tracker++;
               count++;
             } else {
               auto local_value = local_handle->values[local_tracker];
               auto remote_value = remote_values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
-              VALUE_TYPE repuls = value * value;
-              VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-              VALUE_TYPE l = scale(repuls * d1);
-              (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
+               repuls += value * value;
+              indexs_to_updates.push_back(remote_d);
               local_tracker++;
               remote_tracker++;
               count = count + 2;
             }
           }
+          VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
+          VALUE_TYPE l = scale(repuls * d1);
+          for(INDEX_TYPE local_d:indexs_to_updates){
+            (*(output->dense_collector))[row_id][local_d] += (lr)*l;
+          }
+
         } else {
           CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
           CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
@@ -660,6 +662,8 @@ public:
           int local_tracker = local_handle->rowStart[row_id];
           int local_tracker_end = local_handle->rowStart[row_id + 1];
           int count = 0;
+          VALUE_TYPE  repuls=0;
+          vector<INDEX_TYPE> indexs_to_updates;
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
                                ? local_handle->col_idx[local_tracker]
@@ -671,32 +675,34 @@ public:
               break;
             } else if (remote_d == INT_MAX or local_d < remote_d) {
               auto local_value =local_handle->values[local_tracker];
-              VALUE_TYPE repuls = local_value * local_value;
+               repuls += local_value * local_value;
               VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls));
               VALUE_TYPE l = scale(repuls * d1);
               (*(output->dense_collector))[row_id][local_d] += (lr)*l;
+              indexs_to_updates.push_back(local_d);
               local_tracker++;
               count++;
             } else if (local_d == INT_MAX or remote_d < local_d) {
               auto remote_value = handle->values[remote_tracker];
-              VALUE_TYPE repuls = remote_value * remote_value;
-              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-              VALUE_TYPE l = scale(repuls * d1);
-              (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
+               repuls += remote_value * remote_value;
+              indexs_to_updates.push_back(remote_d);
               remote_tracker++;
               count++;
             } else {
               auto local_value =local_handle->values[local_tracker];
               auto remote_value = handle->values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
-              VALUE_TYPE repuls = value * value;
-              VALUE_TYPE d1 =  2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-              VALUE_TYPE l = scale(repuls * d1);
-              (*(output->dense_collector))[row_id][remote_d] += (lr)*l;
+              repuls += value * value;
+              indexs_to_updates.push_back(remote_d);
               local_tracker++;
               remote_tracker++;
               count = count + 2;
             }
+          }
+          VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
+          VALUE_TYPE l = scale(repuls * d1);
+          for(INDEX_TYPE local_d:indexs_to_updates){
+            (*(output->dense_collector))[row_id][local_d] += (lr)*l;
           }
         }
       }
