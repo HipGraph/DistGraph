@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 
   // Initialize MPI DataTypes
 
-  if (!spgemm) {
+  if (!(spgemm or sparse_embedding)) {
     initialize_mpi_datatypes<VALUE_TYPE, dimension>();
   }else{
     initialize_mpi_datatypes<VALUE_TYPE, sp_tuple_max_dim>();
