@@ -236,7 +236,7 @@ public:
     this->calc_t_dist_grad_rowptr(
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
-    cout<<" grid "<<grid->rank_in_col<<" calc_t_dist_grad_rowptr remote completed"<<i<<j<<endl;
+    cout<<" grid "<<grid->rank_in_col<<" calc_t_dist_grad_rowptr remote completed"<<endl;
     // dense_local->invalidate_cache(i, j, true);
   }
 
