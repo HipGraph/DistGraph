@@ -372,8 +372,8 @@ public:
             if (fetch_from_cache) {
               unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>
                   &arrayMap = (*this->sparse_local->tempCachePtr)[target_rank];
-              if (arrayMap.find(global_col_id)== arrayMap.end()){
-                cout<<" rank "<<this->grid->rank_in_col<<" trying to access "<<global_col_id<<" failed "<<endl;
+              if (arrayMap.find(dst_id)== arrayMap.end()){
+                cout<<" rank "<<this->grid->rank_in_col<<" trying to access "<<dst_id<<" failed "<<endl;
               }
               remote_cols = arrayMap[dst_id].cols;
               remote_values = arrayMap[dst_id].values;
