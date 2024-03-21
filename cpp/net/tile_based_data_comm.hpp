@@ -238,7 +238,7 @@ public:
             (*receiver_proc_tile_map)[i][j][k].mode = 0;
             st.mode = 1;
           } else {
-            cout<<" rank "<<grid->rank_in_col<<" trying to set remote compiuting for "<<j<<" batch "<<i<<" k "<<k<<endl;
+            cout<<" rank "<<this->grid->rank_in_col<<" trying to set remote compiuting for "<<j<<" batch "<<i<<" k "<<k<<endl;
             (*receiver_proc_tile_map)[i][j][k].initialize_dataCache(); // initialize data cache to receive//// remote computed data
             st.mode = 0;
           }
@@ -280,7 +280,7 @@ public:
           TileTuple<INDEX_TYPE> st = (*receive_tile_meta)[index];
           if (st.batch_id == i and st.tile_id == k){
               if (st.mode == 0) {
-                cout<<" rank "<<grid->rank_in_col<<" setting "<<j<<" batch "<<i<<" k "<<k<<endl;
+                cout<<" rank "<<this->grid->rank_in_col<<" setting "<<j<<" batch "<<i<<" k "<<k<<endl;
                 (*sender_proc_tile_map)[i][j][k].mode = 0;
                 (*sender_proc_tile_map)[i][j][k].initialize_dataCache();
               }
