@@ -466,8 +466,8 @@ public:
                 }
                 VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                 VALUE_TYPE l = scale(attrc * d1);
-                for(INDEX_TYPE i=0;i<indexes_to_update.size();i++){
-                  (*(output->dense_collector))[index][indexes_to_update[i]] += (lr)*l;
+                for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
+                  (*(output->dense_collector))[index][indexes_to_updates[i]] += (lr)*l;
                 }
               }
             } else {
@@ -554,8 +554,8 @@ public:
                 }
                 VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
                 VALUE_TYPE l = scale(attrc * d1);
-                for(INDEX_TYPE i=0;i<indexes_to_update.size();i++){
-                  (*(output->dense_collector))[index][indexes_to_update[i]] += (lr)*l;
+                for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
+                  (*(output->dense_collector))[index][indexes_to_updates[i]] += (lr)*l;
                 }
               }
             }
