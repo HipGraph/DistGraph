@@ -111,8 +111,9 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
+      cout << " rank " << grid->rank_in_col << " iteration " << i << endl;
       for (int j = 0; j < batches; j++) {
-        cout << " rank " << grid->rank_in_col << " batch " << j << endl;
+//        cout << " rank " << grid->rank_in_col << " batch " << j << endl;
         int seed = j + i;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
