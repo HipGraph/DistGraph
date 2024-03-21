@@ -330,7 +330,7 @@ int main(int argc, char **argv) {
                 shared_sparseMat_sender.get(), sparse_out.get(),
                 grid.get(),
                 alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-    spgemm_algo.get()->algo_sparse_embedding(iterations, batch_size,ns,lr,density,enable_remote);
+//    spgemm_algo.get()->algo_sparse_embedding(iterations, batch_size,ns,lr,density,enable_remote);
     perf_stats = json_perf_statistics();
     reader->parallel_write(output_file+"/embedding.txt",sparse_out.get()->dense_collector.get(),
                            localARows, dimension, grid.get(),shared_sparseMat.get());
