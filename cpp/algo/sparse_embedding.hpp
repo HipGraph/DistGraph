@@ -62,7 +62,7 @@ public:
     int batches = 0;
     int last_batch_size = batch_size;
 
-    auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim,has_spgemm,true);
+    auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim,hash_spgemm,true);
     this->sparse_local= sparse_input.get();
     auto t_knn = start_clock();
     auto expected_nnz_per_row = embedding_dim*density;
@@ -782,10 +782,10 @@ public:
     #pragma omp parallel for
     for(auto i=0;i<len;i++) {
       // Get the row at the given index
-      std::vector<int> &row = matrix[i];
+      std::vector<VALUE_TYPE> &row = matrix[i];
 
       // Sort the row in descending order
-      std::sort(row.begin(), row.end(), std::greater<int>());
+      std::sort(row.begin(), row.end(), std::greater<VALUE_TYPE>());
 
       // Reset values beyond k to 0
       for (size_t i = k; i < row.size(); ++i) {
