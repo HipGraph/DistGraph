@@ -167,7 +167,7 @@ public:
       total_size +=
           snprintf(nullptr, 0, "%lu", i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
-        total_size += snprintf(nullptr, 0, " %.5f", matrix[i][j]);
+        total_size += snprintf(nullptr, 0, " %.5f", (*matrix)[i][j]);
       }
       total_size += snprintf(nullptr, 0, "\n");
     }
@@ -188,7 +188,7 @@ public:
                                    i + 1 + grid->rank_in_col * rows);
       for (int j = 0; j < cols; ++j) {
         current_position += snprintf(current_position, total_size, " %.5f",
-                                     matrix[i][j]);
+                                     (*matrix)[i][j]);
       }
       current_position += snprintf(current_position, total_size, "\n");
     }
