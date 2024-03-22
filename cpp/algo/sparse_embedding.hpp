@@ -51,7 +51,7 @@ public:
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender),grid(grid), alpha(alpha),
         beta(beta), col_major(col_major),
-        sync(sync_comm), sparse_local_output(sparse_local_output),
+        sync(sync_comm), sparse_local_output(sparse_local_output),sparse_local(sparse_local_output),
         tile_width_fraction(tile_width_fraction) {
     this->hash_spgemm = hash_spgemm;
   }
@@ -62,22 +62,19 @@ public:
     int batches = 0;
     int last_batch_size = batch_size;
 
-    auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim,hash_spgemm,true);
-    this->sparse_local= sparse_input.get();
+//    auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim,hash_spgemm,true);
+
     auto t_knn = start_clock();
     auto expected_nnz_per_row = embedding_dim*density;
 //    this->preserveHighestK(this->sparse_local->dense_collector.get(),expected_nnz_per_row);
-    (this->sparse_local)->initialize_CSR_blocks(false,nullptr,static_cast<VALUE_TYPE>(INT_MIN));
+    (this->sparse_local)->initialize_CSR_blocks(false,nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
     stop_clock_and_add(t, "KNN Time");
 
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
     } else {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-      last_batch_size =
-          sp_local_receiver->proc_row_width - batch_size * (batches - 1);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+      last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
     cout << " rank " << grid->rank_in_col << " total batches " << batches<< endl;
@@ -174,13 +171,8 @@ public:
         //      this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
         (this->sparse_local_output)
             ->initialize_CSR_blocks(false, nullptr,
-                                    static_cast<VALUE_TYPE>(INT_MIN));
-        //      cout<<" rank "<<this->grid->rank_in_col<<" before size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<"nnz "
-        //           <<(*(this->sparse_local->csr_local_data)).handler->rowStart[(*(this->sparse_local->csr_local_data)).handler->rowStart.size()-1]<<"nnz output"<<(*(this->sparse_local_output->csr_local_data)).handler->rowStart[(*(this->sparse_local_output->csr_local_data)).handler->rowStart.size()-1] <<endl;
-        (*(this->sparse_local->csr_local_data)) =
-            (*(this->sparse_local_output->csr_local_data));
-        main_comm->update_local_input(this->sparse_local);
-        //      cout<<" rank "<<this->grid->rank_in_col<<" after size "<<(*(this->sparse_local->csr_local_data)).handler->rowStart.size()<<" nnz "<<(*(this->sparse_local->csr_local_data)).handler->rowStart[(*(this->sparse_local->csr_local_data)).handler->rowStart.size()-1]<<endl;
+                                    static_cast<VALUE_TYPE>(INT_MIN),false);
+        main_comm->update_local_input(this->sparse_local_output);
         stop_clock_and_add(t, "KNN Time");
         (this->sparse_local)->purge_cache();
       }
