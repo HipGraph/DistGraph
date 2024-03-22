@@ -518,7 +518,7 @@ public:
 
     for (int j = 0; j < send_col_ids_list.size(); j++) {
       int local_key = send_col_ids_list[j] - (this->grid->rank_in_col) * (this->sp_local_receiver)->proc_row_width;
-      CSRHandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true);
+      CSRHandle sparse_tuple  =(this->sparse_local)->fetch_local_data(local_key,true, static_cast<VALUE_TYPE>(INT_MIN));
 
       SpTuple<VALUE_TYPE, sp_tuple_max_dim> current;
       INDEX_TYPE num_of_copying_data = sparse_tuple.col_idx.size();

@@ -82,7 +82,7 @@ public:
 //    auto sparse_input = make_unique<distblas::core::SpMat<VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim,hash_spgemm,true);
 
     auto t_knn = start_clock();
-    auto expected_nnz_per_row = embedding_dim*density;
+    auto expected_nnz_per_row = static_cast<int>(embedding_dim*density);
 //    this->preserveHighestK(this->sparse_local->dense_collector.get(),expected_nnz_per_row);
     (this->sparse_local)->initialize_CSR_blocks(false,nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
     stop_clock_and_add(t, "KNN Time");
@@ -125,7 +125,6 @@ public:
     int considering_batch_size = batch_size;
 
     for (int i = 0; i < iterations; i++) {
-      cout << " rank " << grid->rank_in_col << " iteration " << i << endl;
       for (int j = 0; j < batches; j++) {
 //        cout << " rank " << grid->rank_in_col << " batch " << j << endl;
         int seed = j + i;
@@ -184,8 +183,17 @@ public:
         total_memory += get_memory_usage();
       }
         auto t_knn = start_clock();
-        this->preserveHighestK(this->sparse_local_output->dense_collector.get(),
-                               expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
+        this->sparse_local_output->initialize_CSR_blocks(false,nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
+        size_t  size_r = this->sparse_local_output->csr_local_data->handler->rowStart.size();
+        double output_nnz = this->sparse_local_output->csr_local_data->handler->rowStart[size_r-1];
+        auto output_nnz_per_row = static_cast<int>(output_nnz/this->sp_local_receiver->proc_row_width);
+        cout<<" rank "<<grid->rank_in_col<<"iteration "<<i<<" expected nnz per row "<<expected_nnz_per_row<<" output nnz per row"<<output_nnz_per_row<<endl;
+        if (output_nnz_per_row>expected_nnz_per_row){
+          this->preserveHighestK(this->sparse_local_output->dense_collector.get(),
+                                 expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
+        }
+
+
         stop_clock_and_add(t, "KNN Time");
         (this->sparse_local)->purge_cache();
     }
