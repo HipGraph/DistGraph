@@ -93,7 +93,7 @@ public:
       batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
       last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
-
+    (this->sparse_local)->initialize_batch_collector(batch_size);
     cout << " rank " << grid->rank_in_col << " total batches " << batches<< endl;
 
     // This communicator is being used for negative updates and in alpha > 0 to
@@ -181,6 +181,7 @@ public:
           }
         }
         total_memory += get_memory_usage();
+        (this->sparse_local)->merge_batch_collector(j);
       }
       if (i<iterations-1) {
         auto t_knn = start_clock();
@@ -453,10 +454,10 @@ public:
 
                 for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
                   VALUE_TYPE l = scale(values_to_updates[i] * d1);
-                  (*(output->dense_collector))[index][indexes_to_updates[i]] += (lr)*l;
+                  (*(output->batch_collector))[index][indexes_to_updates[i]] += (lr)*l;
                 }
             } else {
-              CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
+                CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
                 int local_count = local_handle.col_idx.size();
                 int remote_count = remote_cols.size();
                 int total_count = local_count + remote_count;
@@ -507,7 +508,7 @@ public:
 
                 for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
                   VALUE_TYPE l = scale(values_to_updates[i] * d1);
-                  (*(output->dense_collector))[index][indexes_to_updates[i]] += (lr)*l;
+                  (*(output->batch_collector))[index][indexes_to_updates[i]] += (lr)*l;
                 }
               }
             }
@@ -602,7 +603,7 @@ public:
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
-            (*(output->dense_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
+            (*(output->batch_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
           }
 
         } else {
@@ -657,7 +658,7 @@ public:
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
-            (*(output->dense_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
+            (*(output->batch_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
           }
         }
       }

@@ -12,6 +12,8 @@ public:
 
   unique_ptr<vector<vector<VALUE_TYPE>>> dense_collector;
 
+  unique_ptr<vector<vector<VALUE_TYPE>>> batch_collector;
+
   unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
   unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
@@ -93,6 +95,8 @@ public:
   void initialize_CSR_from_sparse_collector() {
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
+
+
 
 };
 

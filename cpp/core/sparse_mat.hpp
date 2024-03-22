@@ -377,6 +377,23 @@ public:
     }
   }
 
+  void initialize_batch_collector(INDEX_TYPE batch_size) {
+    this->batch_collector = make_unique<vector<vector<VALUE_TYPE>>>(
+        batch_size, vector<VALUE_TYPE>(proc_col_width, 0));
+  }
+
+  void merge_batch_collector(INDEX_TYPE batch_id) {
+    auto starting_index = batch_id*batch_size;
+    auto end_index = min(starting_index+batch_size, proc_row_width);
+   #pragma omp parallel for
+    for(auto i=0;i<end_index;i++){
+      for(auto j=0;j<proc_col_width;j++){
+        (*this->dense_collector)[i][j] += (*this->batch_collector)[i][j];
+        (*this->batch_collector)[i][j]=0;
+      }
+    }
+  }
+
   /**
    * Initialize the CSR from coords data structure
    */
