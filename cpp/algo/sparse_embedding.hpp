@@ -183,12 +183,11 @@ public:
         }
         total_memory += get_memory_usage();
       }
-      if (i<iterations-1) {
         auto t_knn = start_clock();
-        this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
+        this->preserveHighestK(this->sparse_local_output->dense_collector.get(),
+                               expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
         stop_clock_and_add(t, "KNN Time");
         (this->sparse_local)->purge_cache();
-      }
     }
     total_memory = total_memory / (iterations * batches);
     add_perf_stats(total_memory, "Memory usage");
@@ -813,7 +812,7 @@ public:
   }
 
 
-  void preserveHighestK(vector<vector<VALUE_TYPE>> *matrix,  int k) {
+  void preserveHighestK(vector<vector<VALUE_TYPE>> *matrix,  int k, VALUE_TYPE nullify_value) {
     // Check if index is within bounds
     int len = (*matrix).size();
 
@@ -824,7 +823,14 @@ public:
         index_value_pair<INDEX_TYPE,VALUE_TYPE> a;
         queue.push(a);
       }
-
+      auto nullify_count = embedding_dim - k;
+      auto count=0;
+      while(count<nullify_count){
+        index_value_pair<INDEX_TYPE,VALUE_TYPE> a =  queue.top();
+        (*matrix)[i][a.index]=nullify_value;
+        queue.pop();
+        count++;
+      }
     }
   }
 };
