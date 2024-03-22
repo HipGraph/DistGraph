@@ -189,7 +189,7 @@ public:
         size_t size_r =this->sparse_local_output->csr_local_data->handler->rowStart.size();
         double output_nnz = this->sparse_local_output->csr_local_data->handler->rowStart[size_r - 1];
         auto output_nnz_per_row = static_cast<int>(output_nnz / this->sp_local_receiver->proc_row_width);
-        cout << " rank " << grid->rank_in_col << "iteration " << i<< " expected nnz per row " << expected_nnz_per_row<< " output nnz per row" << output_nnz_per_row << endl;
+//        cout << " rank " << grid->rank_in_col << "iteration " << i<< " expected nnz per row " << expected_nnz_per_row<< " output nnz per row" << output_nnz_per_row << endl;
         if (output_nnz_per_row > expected_nnz_per_row) {
           this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
         }
