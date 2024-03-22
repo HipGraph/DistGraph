@@ -814,13 +814,14 @@ public:
 
   void preserveHighestK(vector<vector<VALUE_TYPE>> *matrix,  int k, VALUE_TYPE nullify_value) {
     // Check if index is within bounds
-    int len = (*matrix).size();
 
     #pragma omp parallel for
-    for(auto i=0;i<len;i++) {
+    for(auto i=0;i<(*matrix).size();i++) {
       std::priority_queue<index_value_pair<INDEX_TYPE,VALUE_TYPE>,vector<index_value_pair<INDEX_TYPE,VALUE_TYPE>>,MIN_HEAP_OPERATOR<INDEX_TYPE,VALUE_TYPE>> queue;
       for(auto j=0;j<(*matrix)[i].size();j++){
         index_value_pair<INDEX_TYPE,VALUE_TYPE> a;
+        a.index = j;
+        a.value = (*matrix)[i][j];
         queue.push(a);
       }
       auto nullify_count = embedding_dim - k;
