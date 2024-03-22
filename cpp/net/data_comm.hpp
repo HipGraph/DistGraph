@@ -519,7 +519,7 @@ public:
   inline void populate_sparse_cache(
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf,
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
-      int batch_id) {
+      int batch_id, bool repulsive=false) {
 
     #pragma omp parallel for
     for (int i = 0; i < this->grid->col_world_size; i++) {
@@ -536,7 +536,7 @@ public:
           if (copying_count>128){
             cout<<this->grid->rank_in_col<<" key "<<key<<"  copying_count "<<copying_count<<endl;
           }
-          if ((*(this->sparse_local)->tempCachePtr)[i].find(key) ==
+          if (repulsive or (*(this->sparse_local)->tempCachePtr)[i].find(key) ==
               (*(this->sparse_local)->tempCachePtr)[i].end() or ((*(this->sparse_local)->tempCachePtr)[i][key].inserted_itr != iteration or (*(this->sparse_local)->tempCachePtr)[i][key].inserted_batch_id != batch_id)) {
             SparseCacheEntry<VALUE_TYPE> sp_entry;
             sp_entry.inserted_itr = iteration;

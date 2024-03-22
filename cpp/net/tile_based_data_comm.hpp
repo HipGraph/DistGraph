@@ -545,7 +545,7 @@ public:
                   SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
     MPI_Request dumy;
-    this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id); // we should not do this
+    this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id,true); // we should not do this
   }
 
   inline void transfer_remotely_computable_data(
