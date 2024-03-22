@@ -11,6 +11,22 @@ using namespace distblas::core;
 
 namespace distblas::algo {
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
+
+template <typename INDEX_TYPE, typename VALUE_TYPE>
+struct index_value_pair {
+  INDEX_TYPE index;
+  VALUE_TYPE value;
+};
+
+template <typename INDEX_TYPE, typename VALUE_TYPE>
+struct MIN_HEAP_OPERATOR {
+  bool operator()(const index_value_pair<INDEX_TYPE, VALUE_TYPE>& a, const index_value_pair<INDEX_TYPE, VALUE_TYPE>& b) const {
+    return a.value < b.value; // Change to a.value > b.value for max heap
+  }
+};
+
+
+
 class SparseEmbedding {
 
 private:
@@ -168,8 +184,7 @@ public:
       }
       if (i<iterations-1) {
         auto t_knn = start_clock();
-        //      this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
-//        (this->sparse_local)->initialize_CSR_blocks(false, nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
+        this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row);
         stop_clock_and_add(t, "KNN Time");
         (this->sparse_local)->purge_cache();
       }
@@ -796,21 +811,19 @@ public:
       return v;
   }
 
+
   void preserveHighestK(vector<vector<VALUE_TYPE>> *matrix,  int k) {
     // Check if index is within bounds
     int len = (*matrix).size();
+
     #pragma omp parallel for
     for(auto i=0;i<len;i++) {
-      // Get the row at the given index
-      std::vector<VALUE_TYPE> &row = (*matrix)[i];
-
-      // Sort the row in descending order
-      std::sort(row.begin(), row.end(), std::greater<VALUE_TYPE>());
-
-      // Reset values beyond k to 0
-      for (size_t i = k; i < row.size(); ++i) {
-        row[i] = 0;
+      priority_queue<index_value_pair<INDEX_TYPE,VALUE_TYPE>,vector<index_value_pair<INDEX_TYPE,VALUE_TYPE>,MIN_HEAP_OPERATOR<INDEX_TYPE,VALUE_TYPE>> queue;
+      for(auto j=0;j<(*matrix)[i].size();j++){
+        VALUE_TYPE  val = (*matrix)[i][j];
+        queue.push(val);
       }
+
     }
   }
 };
