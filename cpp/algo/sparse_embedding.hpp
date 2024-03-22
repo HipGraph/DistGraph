@@ -10,7 +10,6 @@ using namespace Eigen;
 using namespace distblas::core;
 
 namespace distblas::algo {
-template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 
 template <typename INDEX_TYPE, typename VALUE_TYPE>
 struct index_value_pair {
@@ -26,7 +25,7 @@ struct MIN_HEAP_OPERATOR {
 };
 
 
-
+template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class SparseEmbedding {
 
 private:
