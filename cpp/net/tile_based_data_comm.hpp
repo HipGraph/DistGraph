@@ -532,6 +532,7 @@ public:
       copy(sparse_tuple.values.begin(),
            sparse_tuple.values.begin() + num_of_copying_data,
            current.values.begin());
+      add_perf_stats(num_of_copying_data, "Data transfers");
       current.rows[0] =  current.rows[0]+2;
       current.rows[1] =current.rows[1]+num_of_copying_data;
       (*sendbuf).push_back(current);
@@ -543,11 +544,8 @@ public:
                   this->receive_counts_cyclic.data(), this->rdispls_cyclic.data(),
                   SPARSETUPLE, this->grid->col_world);
     stop_clock_and_add(t, "Communication Time");
-//    add_perf_stats(total_receive_count*sizeof(SpTuple<VALUE_TYPE,sp_tuple_max_dim>), "Data transfers");
     MPI_Request dumy;
     this->populate_sparse_cache(sendbuf.get(), receivebuf_ptr.get(),  iteration,batch_id); // we should not do this
-
-    //    delete[] sendbuf;
   }
 
   inline void transfer_remotely_computable_data(

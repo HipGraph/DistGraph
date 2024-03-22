@@ -533,6 +533,9 @@ public:
         for (auto k = 2; k < row_offset; k = k + 2) {
           auto key = sp_tuple.rows[k];
           auto copying_count = sp_tuple.rows[k + 1];
+          if (copying_count>128){
+            cout<<this->grid->rank_in_col<<" key "<<key<<"  copying_count "<<copying_count<<endl;
+          }
           if ((*(this->sparse_local)->tempCachePtr)[i].find(key) ==
               (*(this->sparse_local)->tempCachePtr)[i].end() or ((*(this->sparse_local)->tempCachePtr)[i][key].inserted_itr != iteration or (*(this->sparse_local)->tempCachePtr)[i][key].inserted_batch_id != batch_id)) {
             SparseCacheEntry<VALUE_TYPE> sp_entry;
