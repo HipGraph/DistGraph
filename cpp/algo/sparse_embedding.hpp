@@ -408,7 +408,7 @@ public:
                 int total_count = local_count + remote_count;
                 int remote_tracker = 0;
                 int remote_tracker_end = remote_count;
-                int local_tracker = 0
+                int local_tracker = 0;
                 int local_tracker_end = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_count;
                 int count = 0;
                 VALUE_TYPE attrc=0;
@@ -455,7 +455,6 @@ public:
                   VALUE_TYPE l = scale(values_to_updates[i] * d1);
                   (*(output->dense_collector))[index][indexes_to_updates[i]] += (lr)*l;
                 }
-              }
             } else {
               int count = remote_cols.size();
               CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
@@ -516,7 +515,6 @@ public:
           }
         }
       }
-    }
   }
 
   inline void calc_t_dist_replus_rowptr(vector<INDEX_TYPE> &col_ids, VALUE_TYPE lr,
