@@ -1,6 +1,8 @@
 #pragma once
 #include "../core/sparse_mat_tile.hpp"
 #include "../net/tile_based_data_comm.hpp"
+#include <queue>
+#include
 
 using namespace std;
 using namespace distblas::core;
@@ -817,7 +819,7 @@ public:
 
     #pragma omp parallel for
     for(auto i=0;i<len;i++) {
-      priority_queue<index_value_pair<INDEX_TYPE,VALUE_TYPE>,vector<index_value_pair<INDEX_TYPE,VALUE_TYPE>,MIN_HEAP_OPERATOR<INDEX_TYPE,VALUE_TYPE>> queue;
+      std::priority_queue<index_value_pair<INDEX_TYPE,VALUE_TYPE>,vector<index_value_pair<INDEX_TYPE,VALUE_TYPE>>,MIN_HEAP_OPERATOR<INDEX_TYPE,VALUE_TYPE>> queue;
       for(auto j=0;j<(*matrix)[i].size();j++){
         index_value_pair<INDEX_TYPE,VALUE_TYPE> a;
         queue.push(a);
