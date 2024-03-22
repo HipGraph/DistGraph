@@ -72,18 +72,14 @@ public:
           t.row = i;
           t.value = (*dense_collector)[i][j];
           coords_local.push_back(t);
-          if (clear_dense_collector){
-            (*dense_collector)[i][j]=0;
-          }
         } else if (state_holder != nullptr and (*dense_collector)[i][j] != comparator and (*(state_holder->state_metadata))[i][j]==comparator) {
             Tuple<VALUE_TYPE> t;
             t.col = j;
             t.row = i;
             t.value = (*dense_collector)[i][j];
             coords_local.push_back(t);
-            if (clear_dense_collector){
-              (*dense_collector)[i][j]=0;
-            }
+        }else if ((*dense_collector)[i][j] == comparator and clear_dense_collector){
+          (*dense_collector)[i][j]=0;
         }
       }
 #pragma omp critical

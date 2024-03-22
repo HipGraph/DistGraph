@@ -194,7 +194,9 @@ public:
         }
         stop_clock_and_add(t, "KNN Time");
       }else if (i==iterations-1) {
+        auto t_knn = start_clock();
         this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), true);
+        stop_clock_and_add(t, "KNN Time");
       }
       (this->sparse_local)->purge_cache();
     }
