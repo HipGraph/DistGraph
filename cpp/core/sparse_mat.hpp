@@ -388,8 +388,9 @@ public:
    #pragma omp parallel for
     for(auto i=0;i<end_index;i++){
       for(auto j=0;j<proc_col_width;j++){
-        (*this->dense_collector)[i][j] += (*this->batch_collector)[i][j];
-        (*this->batch_collector)[i][j]=0;
+
+        (*this->dense_collector)[i][j] += (*this->batch_collector)[i-starting_index][j];
+        (*this->batch_collector)[i-starting_index][j]=0;
       }
     }
   }

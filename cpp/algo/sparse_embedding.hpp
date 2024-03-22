@@ -181,7 +181,7 @@ public:
           }
         }
         total_memory += get_memory_usage();
-//        (this->sparse_local_output)->merge_batch_collector(j);
+        (this->sparse_local_output)->merge_batch_collector(j);
       }
       if (i<iterations-1) {
         auto t_knn = start_clock();
