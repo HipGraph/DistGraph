@@ -398,6 +398,10 @@ public:
               }
               remote_cols = arrayMap[dst_id].cols;
               remote_values = arrayMap[dst_id].values;
+            }else {
+              CSRHandle handle =  this->sparse_local->fetch_local_data(local_dst,true,static_cast<VALUE_TYPE>(INT_MIN));
+              remote_cols = handle.col_idx;
+              remote_values = handle.values;
             }
 
             CSRHandle *handle =
