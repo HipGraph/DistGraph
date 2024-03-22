@@ -454,7 +454,8 @@ public:
 
                 for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
                   VALUE_TYPE l = scale(values_to_updates[i] * d1);
-                  (*(output->batch_collector))[index][indexes_to_updates[i]] += (lr)*l;
+                  auto starting_offset = batch_id*batch_size;
+                  (*(output->batch_collector))[index-starting_offset][indexes_to_updates[i]] += (lr)*l;
                 }
             } else {
                 CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
@@ -508,7 +509,8 @@ public:
 
                 for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
                   VALUE_TYPE l = scale(values_to_updates[i] * d1);
-                  (*(output->batch_collector))[index][indexes_to_updates[i]] += (lr)*l;
+                  auto starting_offset = batch_id*batch_size;
+                  (*(output->batch_collector))[index-starting_offset][indexes_to_updates[i]] += (lr)*l;
                 }
               }
             }
@@ -603,7 +605,8 @@ public:
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
-            (*(output->batch_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
+            auto starting_offset = batch_id*batch_size;
+            (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[i]] += (lr)*l;
           }
 
         } else {
@@ -658,7 +661,8 @@ public:
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
-            (*(output->batch_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
+            auto starting_offset = batch_id*batch_size;
+            (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[i]] += (lr)*l;
           }
         }
       }
