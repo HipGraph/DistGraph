@@ -182,20 +182,21 @@ public:
         }
         total_memory += get_memory_usage();
       }
+      if (i<iterations-1) {
         auto t_knn = start_clock();
-        this->sparse_local_output->initialize_CSR_blocks(false,nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
-        size_t  size_r = this->sparse_local_output->csr_local_data->handler->rowStart.size();
-        double output_nnz = this->sparse_local_output->csr_local_data->handler->rowStart[size_r-1];
-        auto output_nnz_per_row = static_cast<int>(output_nnz/this->sp_local_receiver->proc_row_width);
-        cout<<" rank "<<grid->rank_in_col<<"iteration "<<i<<" expected nnz per row "<<expected_nnz_per_row<<" output nnz per row"<<output_nnz_per_row<<endl;
-        if (output_nnz_per_row>expected_nnz_per_row){
-          this->preserveHighestK(this->sparse_local_output->dense_collector.get(),
-                                 expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
+        this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), false);
+        size_t size_r =this->sparse_local_output->csr_local_data->handler->rowStart.size();
+        double output_nnz = this->sparse_local_output->csr_local_data->handler->rowStart[size_r - 1];
+        auto output_nnz_per_row = static_cast<int>(output_nnz / this->sp_local_receiver->proc_row_width);
+        cout << " rank " << grid->rank_in_col << "iteration " << i<< " expected nnz per row " << expected_nnz_per_row<< " output nnz per row" << output_nnz_per_row << endl;
+        if (output_nnz_per_row > expected_nnz_per_row) {
+          this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
         }
-
-
         stop_clock_and_add(t, "KNN Time");
-        (this->sparse_local)->purge_cache();
+      }else if (i==iterations-1) {
+        this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), true);
+      }
+      (this->sparse_local)->purge_cache();
     }
     total_memory = total_memory / (iterations * batches);
     add_perf_stats(total_memory, "Memory usage");
