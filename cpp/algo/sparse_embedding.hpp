@@ -182,22 +182,22 @@ public:
         }
         total_memory += get_memory_usage();
       }
-//      if (i<iterations-1) {
-//        auto t_knn = start_clock();
-//        this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), false);
-//        size_t size_r =this->sparse_local_output->csr_local_data->handler->rowStart.size();
-//        double output_nnz = this->sparse_local_output->csr_local_data->handler->rowStart[size_r - 1];
-//        auto output_nnz_per_row = static_cast<int>(output_nnz / this->sp_local_receiver->proc_row_width);
-//        cout << " rank " << grid->rank_in_col << "iteration " << i<< " expected nnz per row " << expected_nnz_per_row<< " output nnz per row" << output_nnz_per_row << endl;
-//        if (output_nnz_per_row > expected_nnz_per_row) {
-//          this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
-//        }
-//        stop_clock_and_add(t_knn, "KNN Time");
-//      }else if (i==iterations-1) {
-//        auto t_knn = start_clock();
-//        this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), true);
-//        stop_clock_and_add(t_knn, "KNN Time");
-//      }
+      if (i<iterations-1) {
+        auto t_knn = start_clock();
+        this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), false);
+        size_t size_r =this->sparse_local_output->csr_local_data->handler->rowStart.size();
+        double output_nnz = this->sparse_local_output->csr_local_data->handler->rowStart[size_r - 1];
+        auto output_nnz_per_row = static_cast<int>(output_nnz / this->sp_local_receiver->proc_row_width);
+        cout << " rank " << grid->rank_in_col << "iteration " << i<< " expected nnz per row " << expected_nnz_per_row<< " output nnz per row" << output_nnz_per_row << endl;
+        if (output_nnz_per_row > expected_nnz_per_row) {
+          this->preserveHighestK(this->sparse_local_output->dense_collector.get(),expected_nnz_per_row, static_cast<VALUE_TYPE>(INT_MIN));
+        }
+        stop_clock_and_add(t_knn, "KNN Time");
+      }else if (i==iterations-1) {
+        auto t_knn = start_clock();
+        this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), true);
+        stop_clock_and_add(t_knn, "KNN Time");
+      }
       (this->sparse_local)->purge_cache();
     }
     total_memory = total_memory / (iterations * batches);
@@ -398,10 +398,6 @@ public:
               }
               remote_cols = arrayMap[dst_id].cols;
               remote_values = arrayMap[dst_id].values;
-            }else {
-              CSRHandle handle =  this->sparse_local->fetch_local_data(local_dst,true,static_cast<VALUE_TYPE>(INT_MIN));
-              remote_cols = handle.col_idx;
-              remote_values = handle.values;
             }
 
             CSRHandle *handle =
@@ -441,11 +437,12 @@ public:
                 }
               } else {
                 CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
+                CSRHandle remote_handle = this->sparse_local->fetch_local_data(local_dst,true,static_cast<INDEX_TYPE>(INT_MIN));
                 int local_count = (mode==2)?(*(output->dataCachePtr))[index].cols.size() :local_handle->rowStart[index + 1] - local_handle->rowStart[index];
-                int remote_count = handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
+                int remote_count = remote_handle.col_idx.size();
                 int total_count = local_count + remote_count;
-                int remote_tracker = handle->rowStart[local_dst];
-                int remote_tracker_end = handle->rowStart[local_dst + 1];
+                int remote_tracker = 0;
+                int remote_tracker_end = remote_count;
                 int local_tracker = (mode==2)?0:local_handle->rowStart[index];
                 int local_tracker_end = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle->rowStart[index + 1];
                 int count = 0;
@@ -457,7 +454,7 @@ public:
                                      ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle->col_idx[local_tracker]
                                      : INT_MAX;
                   auto remote_d = (remote_tracker < remote_tracker_end)
-                                      ? handle->col_idx[remote_tracker]
+                                      ? remote_handle.col_idx[remote_tracker]
                                       : INT_MAX;
                   if (local_d == INT_MAX and remote_d == INT_MAX) {
                     break;
@@ -469,7 +466,7 @@ public:
                     local_tracker++;
                     count++;
                   } else if (local_d == INT_MAX or remote_d < local_d) {
-                    auto remote_value = handle->values[remote_tracker];
+                    auto remote_value = remote_handle.values[remote_tracker];
                      attrc += remote_value * remote_value;
                     indexes_to_updates.push_back(remote_d);
                     values_to_updates.push_back(-1*remote_value);
@@ -477,7 +474,7 @@ public:
                     count++;
                   } else {
                     auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
-                    auto remote_value = handle->values[remote_tracker];
+                    auto remote_value = remote_handle.values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
                      attrc += value * value;
                     indexes_to_updates.push_back(remote_d);
