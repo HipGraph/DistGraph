@@ -93,7 +93,7 @@ public:
       batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
       last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
-    (this->sparse_local)->initialize_batch_collector(batch_size);
+    (this->sparse_local_output)->initialize_batch_collector(batch_size);
     cout << " rank " << grid->rank_in_col << " total batches " << batches<< endl;
 
     // This communicator is being used for negative updates and in alpha > 0 to
@@ -181,7 +181,7 @@ public:
           }
         }
         total_memory += get_memory_usage();
-        (this->sparse_local)->merge_batch_collector(j);
+//        (this->sparse_local_output)->merge_batch_collector(j);
       }
       if (i<iterations-1) {
         auto t_knn = start_clock();
