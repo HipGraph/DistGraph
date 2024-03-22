@@ -402,8 +402,8 @@ public:
             }
 
             if (!fetch_from_cache) {
-              CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
-              CSRHandle remote_handle = this->sparse_local->fetch_local_data(local_dst,true,static_cast<INDEX_TYPE>(INT_MIN));
+              CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
+              CSRHandle remote_handle = this->sparse_local->fetch_local_data(local_dst,true,static_cast<VALUE_TYPE>(INT_MIN));
                 int local_count = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle.col_idx.size();
                 int remote_count = remote_handle.col_idx.size();
                 int total_count = local_count + remote_count;
@@ -458,7 +458,7 @@ public:
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[i]] += (lr)*l;
                 }
             } else {
-                CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
+                CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
                 int local_count = local_handle.col_idx.size();
                 int remote_count = remote_cols.size();
                 int total_count = local_count + remote_count;
@@ -555,7 +555,7 @@ public:
         }
 
         if (fetch_from_cache) {
-          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(row_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
+          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           int local_count =local_handle.col_idx.size();
           int remote_count = remote_cols.size();
           int total_count = local_count + remote_count;
@@ -610,8 +610,8 @@ public:
           }
 
         } else {
-          CSRHandle handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
-          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
+          CSRHandle handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
+          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           int local_count = local_handle.col_idx.size();
           int remote_count = handle.col_idx.size();
           int total_count = local_count + remote_count;
