@@ -682,13 +682,13 @@ public:
           }
 
         } else {
-          CSRHandle *handle = ((this->sparse_local)->csr_local_data)->handler.get();
+          CSRHandle handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
           CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
           int local_count = local_handle->rowStart[row_id + 1] - local_handle->rowStart[row_id];
-          int remote_count = handle->rowStart[local_col_id + 1] - handle->rowStart[local_col_id];
+          int remote_count = handle.col_idx.size();
           int total_count = local_count + remote_count;
-          int remote_tracker = handle->rowStart[local_col_id];
-          int remote_tracker_end = handle->rowStart[local_col_id + 1];
+          int remote_tracker = 0;
+          int remote_tracker_end = remote_count;
           int local_tracker = local_handle->rowStart[row_id];
           int local_tracker_end = local_handle->rowStart[row_id + 1];
           int count = 0;
@@ -700,7 +700,7 @@ public:
                                ? local_handle->col_idx[local_tracker]
                                : INT_MAX;
             auto remote_d = (remote_tracker < remote_tracker_end)
-                                ? handle->col_idx[remote_tracker]
+                                ? handle.col_idx[remote_tracker]
                                 : INT_MAX;
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
@@ -712,7 +712,7 @@ public:
               local_tracker++;
               count++;
             } else if (local_d == INT_MAX or remote_d < local_d) {
-              auto remote_value = handle->values[remote_tracker];
+              auto remote_value = handle.values[remote_tracker];
                repuls += remote_value * remote_value;
               indexs_to_updates.push_back(remote_d);
               values_to_updates.push_back(-1*remote_value);
@@ -720,7 +720,7 @@ public:
               count++;
             } else {
               auto local_value =local_handle->values[local_tracker];
-              auto remote_value = handle->values[remote_tracker];
+              auto remote_value = handle.values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
               repuls += value * value;
               indexs_to_updates.push_back(remote_d);
