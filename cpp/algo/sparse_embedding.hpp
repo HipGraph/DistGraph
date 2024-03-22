@@ -219,17 +219,14 @@ public:
     int proc_length = get_proc_length(beta, this->grid->col_world_size);
     int prev_start = comm_initial_start;
 
-    auto tiles_per_process =
-        SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+    auto tiles_per_process = SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
     for (int k = prev_start; k < this->grid->col_world_size; k += proc_length) {
       int end_process = get_end_proc(k, beta, this->grid->col_world_size);
 
       MPI_Request req;
 
       if (communication and (symbolic or !output->hash_spgemm)) {
-        main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,
-                                        k, end_process, 0, tiles_per_process,
-                                        true);
+        main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,k, end_process, 0, tiles_per_process,true);
         if (enable_remote_computation) {
           main_comm->transfer_remotely_computable_data(
               sendbuf, receivebuf, iteration, batch, k, end_process, 0,
@@ -369,8 +366,7 @@ public:
 #pragma omp parallel for schedule(static) // enable for full batch training or
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
-        INDEX_TYPE index =
-            (mode == 0 or mode == 1) ? i : i - source_start_index;
+        INDEX_TYPE index = (mode == 0 or mode == 1) ? i : i - source_start_index;
         int max_reach = 0;
 
         for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
@@ -427,14 +423,14 @@ public:
                                       : INT_MAX;
                   if (local_d == INT_MAX and remote_d == INT_MAX) {
                     break;
-                  } else if (remote_d == INT_MAX or local_d < remote_d) {
+                  } else if ( local_d < remote_d) {
                     auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle.values[local_tracker];
                      attrc += local_value * local_value;
                     indexes_to_updates.push_back(local_d);
                     values_to_updates.push_back(local_value);
                     local_tracker++;
                     count++;
-                  } else if (local_d == INT_MAX or remote_d < local_d) {
+                  } else if (remote_d < local_d) {
                     auto remote_value = remote_handle.values[remote_tracker];
                      attrc += remote_value * remote_value;
                     indexes_to_updates.push_back(remote_d);
@@ -485,14 +481,14 @@ public:
                                       : INT_MAX;
                   if (local_d == INT_MAX and remote_d == INT_MAX) {
                     break;
-                  } else if (remote_d == INT_MAX or local_d < remote_d) {
+                  } else if (local_d < remote_d) {
                     auto local_value = local_handle.values[local_tracker];
                      attrc += local_value * local_value;
                      indexes_to_updates.push_back(local_d);
                      values_to_updates.push_back(local_value);
                     local_tracker++;
                     count++;
-                  } else if (local_d == INT_MAX or remote_d < local_d) {
+                  } else if (remote_d < local_d) {
                     auto remote_value = remote_values[remote_tracker];
                      attrc += remote_value * remote_value;
                     indexes_to_updates.push_back(remote_d);
@@ -531,7 +527,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -586,14 +582,14 @@ public:
                                 : INT_MAX;
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
-            } else if (remote_d == INT_MAX or local_d < remote_d) {
+            } else if (local_d < remote_d) {
               auto local_value = local_handle.values[local_tracker];
                repuls += local_value * local_value;
               indexs_to_updates.push_back(local_d);
               values_to_updates.push_back(local_value);
               local_tracker++;
               count++;
-            } else if (local_d == INT_MAX or remote_d < local_d) {
+            } else if (remote_d < local_d) {
               auto remote_value = remote_values[remote_tracker];
                repuls += remote_value * remote_value;
               indexs_to_updates.push_back(remote_d);
@@ -643,14 +639,14 @@ public:
                                 : INT_MAX;
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
-            } else if (remote_d == INT_MAX or local_d < remote_d) {
+            } else if (local_d < remote_d) {
               auto local_value =local_handle.values[local_tracker];
                repuls += local_value * local_value;
               indexs_to_updates.push_back(local_d);
               values_to_updates.push_back(local_value);
               local_tracker++;
               count++;
-            } else if (local_d == INT_MAX or remote_d < local_d) {
+            } else if (remote_d < local_d) {
               auto remote_value = handle.values[remote_tracker];
                repuls += remote_value * remote_value;
               indexs_to_updates.push_back(remote_d);
