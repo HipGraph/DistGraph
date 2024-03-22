@@ -493,7 +493,7 @@ public:
           copy(handle->values.begin(), handle->values.begin() + count,
                new_handler.values.begin());
       }
-//    }
+    }
     return new_handler;
   }
 
