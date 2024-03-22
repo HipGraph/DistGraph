@@ -525,7 +525,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -567,6 +567,7 @@ public:
           VALUE_TYPE repuls=0;
           vector<INDEX_TYPE> indexs_to_updates;
           vector<VALUE_TYPE> values_to_updates;
+          cout<<" rand fetch cache "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<endl;
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
                                ? local_handle.col_idx[local_tracker]
@@ -602,6 +603,7 @@ public:
               count = count + 2;
             }
           }
+          cout<<" rand  fetch  cache completed "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<endl;
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
@@ -623,6 +625,7 @@ public:
           VALUE_TYPE  repuls=0;
           vector<VALUE_TYPE> values_to_updates;
           vector<INDEX_TYPE> indexs_to_updates;
+          cout<<" rand  not   cahce "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<endl;
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
                                ? local_handle.col_idx[local_tracker]
@@ -658,6 +661,7 @@ public:
               count = count + 2;
             }
           }
+          cout<<" rand  not   cahce compled "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<endl;
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
           for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
