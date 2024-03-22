@@ -327,7 +327,7 @@ public:
     for (int tile = start_tile; tile < end_tile; tile++) {
       for (const auto &pair : (*send_indices_proc_map)[batch_id][tile]) {
         auto col_id = pair.first;
-        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id, embedding);
+        CSRHandle sparse_tuple = (this->sparse_local)->fetch_local_data(col_id, embedding,static_cast<VALUE_TYPE>(INT_MIN));
         if (sparse_tuple.col_idx.size() > 0) {
           for (int i = 0; i < sending_procs.size(); i++) {
             if (pair.second.count(sending_procs[i]) > 0 and
@@ -591,7 +591,7 @@ public:
         if (spTile.mode ==1) {
           for (auto it=spTile.row_id_set.begin(); it!= spTile.row_id_set.end();++it) {
             auto index = *it;
-            CSRHandle sparse_tuple =(this->sparse_local)->fetch_local_data(index,embedding);
+            CSRHandle sparse_tuple =(this->sparse_local)->fetch_local_data(index,embedding,static_cast<VALUE_TYPE>(INT_MIN));
 
             if (sparse_tuple.col_idx.size() > 0) {
               if (this->send_counts_cyclic[sending_procs[i]] == 0) {

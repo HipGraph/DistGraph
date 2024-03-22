@@ -165,7 +165,6 @@ public:
           }
         }
         total_memory += get_memory_usage();
-        (this->sparse_local)->initialize_CSR_blocks(false, nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
       }
       if (i<iterations-1) {
         auto t_knn = start_clock();

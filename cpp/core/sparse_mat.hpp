@@ -467,21 +467,21 @@ public:
     }
   }
 
-  CSRHandle fetch_local_data(INDEX_TYPE local_key, bool embedding = false) {
+  CSRHandle fetch_local_data(INDEX_TYPE local_key, bool embedding = false, VALUE_TYPE comparing_value=0) {
     CSRHandle new_handler;
     INDEX_TYPE global_key = (col_partitioned) ? local_key: local_key + proc_row_width * grid->rank_in_col;
     new_handler.row_idx.resize(1, global_key);
-//    if (embedding) {
-//      if (this->hash_spgemm) {
-//      } else {
-//         for(auto i=0;i<(*this->dense_collector)[local_key].size();i++){
-//           if ((*this->dense_collector)[local_key][i]!=0){
-//             new_handler.col_idx.push_back(i);
-//             new_handler.values.push_back(i);
-//           }
-//         }
-//      }
-//    } else {
+    if (embedding) {
+      if (this->hash_spgemm) {
+      } else {
+         for(auto i=0;i<(*this->dense_collector)[local_key].size();i++){
+           if ((*this->dense_collector)[local_key][i]!=comparing_value){
+             new_handler.col_idx.push_back(i);
+             new_handler.values.push_back(i);
+           }
+         }
+      }
+    } else {
       CSRHandle *handle = (this->csr_local_data.get())->handler.get();
       int count = handle->rowStart[local_key + 1] - handle->rowStart[local_key];
 
