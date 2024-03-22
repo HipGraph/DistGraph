@@ -386,7 +386,7 @@ public:
     auto starting_index = batch_id*batch_size;
     auto end_index = min(starting_index+batch_size, proc_row_width);
    #pragma omp parallel for
-    for(auto i=0;i<end_index;i++){
+    for(auto i=starting_index;i<end_index;i++){
       for(auto j=0;j<proc_col_width;j++){
 
         (*this->dense_collector)[i][j] += (*this->batch_collector)[i-starting_index][j];
