@@ -400,58 +400,23 @@ public:
               remote_values = arrayMap[dst_id].values;
             }
 
-            CSRHandle *handle =
-                ((this->sparse_local)->csr_local_data)->handler.get();
-
             if (!fetch_from_cache) {
-              int count =
-                  handle->rowStart[local_dst + 1] - handle->rowStart[local_dst];
-              if (symbolic) {
-                INDEX_TYPE val =
-                    (*(output->sparse_data_counter))[index] + count;
-                (*(output->sparse_data_counter))[index] =
-                    std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
-              } else if (output->hash_spgemm) {
-                INDEX_TYPE ht_size =
-                    (*(output->sparse_data_collector))[index].size();
-                for (auto k = handle->rowStart[local_dst];
-                     k < handle->rowStart[local_dst + 1]; k++) {
-                  auto d = (handle->col_idx[k]);
-                  INDEX_TYPE hash = (d * hash_scale) & (ht_size - 1);
-                  auto value = lr * handle->values[k];
-                  int max_count = 10;
-                  int count = 0;
-                  while (count < max_count) {
-                    if ((*(output->sparse_data_collector))[index][hash].col ==d) {
-                      (*(output->sparse_data_collector))[index][hash].value = (*(output->sparse_data_collector))[index][hash].value +value;
-                      break;
-                    } else if ((*(output->sparse_data_collector))[index][hash].col == -1) {
-                      (*(output->sparse_data_collector))[index][hash].col = d;
-                      (*(output->sparse_data_collector))[index][hash].value =value;
-                      break;
-                    } else {
-                      hash = (hash + 100) & (ht_size - 1);
-                      count++;
-                    }
-                  }
-                }
-              } else {
-                CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
-                CSRHandle remote_handle = this->sparse_local->fetch_local_data(local_dst,true,static_cast<INDEX_TYPE>(INT_MIN));
-                int local_count = (mode==2)?(*(output->dataCachePtr))[index].cols.size() :local_handle->rowStart[index + 1] - local_handle->rowStart[index];
+              CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
+              CSRHandle remote_handle = this->sparse_local->fetch_local_data(local_dst,true,static_cast<INDEX_TYPE>(INT_MIN));
+                int local_count = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle.col_idx.size();
                 int remote_count = remote_handle.col_idx.size();
                 int total_count = local_count + remote_count;
                 int remote_tracker = 0;
                 int remote_tracker_end = remote_count;
-                int local_tracker = (mode==2)?0:local_handle->rowStart[index];
-                int local_tracker_end = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle->rowStart[index + 1];
+                int local_tracker = 0
+                int local_tracker_end = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_count;
                 int count = 0;
                 VALUE_TYPE attrc=0;
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
-                                     ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle->col_idx[local_tracker]
+                                     ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx.size();
                                      : INT_MAX;
                   auto remote_d = (remote_tracker < remote_tracker_end)
                                       ? remote_handle.col_idx[remote_tracker]
@@ -459,7 +424,7 @@ public:
                   if (local_d == INT_MAX and remote_d == INT_MAX) {
                     break;
                   } else if (remote_d == INT_MAX or local_d < remote_d) {
-                    auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
+                    auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle.values[local_tracker];
                      attrc += local_value * local_value;
                     indexes_to_updates.push_back(local_d);
                     values_to_updates.push_back(local_value);
@@ -473,7 +438,7 @@ public:
                     remote_tracker++;
                     count++;
                   } else {
-                    auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle->values[local_tracker];
+                    auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle.values[local_tracker];
                     auto remote_value = remote_handle.values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
                      attrc += value * value;
@@ -493,58 +458,21 @@ public:
               }
             } else {
               int count = remote_cols.size();
-              if (symbolic) {
-                INDEX_TYPE val =
-                    (*(output->sparse_data_counter))[index] + count;
-                (*(output->sparse_data_counter))[index] =
-                    std::min(val, static_cast<INDEX_TYPE>(embedding_dim));
-              } else if (output->hash_spgemm) {
-                INDEX_TYPE ht_size =
-                    (*(output->sparse_data_collector))[index].size();
-                for (int m = 0; m < remote_cols.size(); m++) {
-                  auto d = remote_cols[m];
-                  auto value = lr * remote_values[m];
-                  INDEX_TYPE hash = (d * hash_scale) & (ht_size - 1);
-                  int max_count = 10;
-                  int count = 0;
-                  while (count < max_count) {
-                    if ((*(output->sparse_data_collector))[index][hash].col ==
-                        d) {
-                      (*(output->sparse_data_collector))[index][hash].value =
-                          (*(output->sparse_data_collector))[index][hash]
-                              .value +
-                          value;
-                      break;
-                    } else if ((*(output->sparse_data_collector))[index][hash]
-                                   .col == -1) {
-                      (*(output->sparse_data_collector))[index][hash].col = d;
-                      (*(output->sparse_data_collector))[index][hash].value =
-                          value;
-                      break;
-                    } else {
-                      hash = (hash + 100) & (ht_size - 1);
-                      count++;
-                    }
-                  }
-                }
-              } else {
-                CSRHandle *local_handle =
-                    this->sparse_local->csr_local_data->handler.get();
-                int local_count = local_handle->rowStart[index + 1] -
-                                  local_handle->rowStart[index];
+              CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
+                int local_count = local_handle.col_idx.size();
                 int remote_count = remote_cols.size();
                 int total_count = local_count + remote_count;
                 int remote_tracker = 0;
                 int remote_tracker_end = remote_cols.size();
-                int local_tracker = local_handle->rowStart[index];
-                int local_tracker_end = local_handle->rowStart[index + 1];
+                int local_tracker = 0;
+                int local_tracker_end = local_count;
                 int count = 0;
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
                 VALUE_TYPE attrc=0;
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
-                                     ? local_handle->col_idx[local_tracker]
+                                     ? local_handle.col_idx[local_tracker]
                                      : INT_MAX;
                   auto remote_d = (remote_tracker < remote_tracker_end)
                                       ? remote_cols[remote_tracker]
@@ -552,7 +480,7 @@ public:
                   if (local_d == INT_MAX and remote_d == INT_MAX) {
                     break;
                   } else if (remote_d == INT_MAX or local_d < remote_d) {
-                    auto local_value = local_handle->values[local_tracker];
+                    auto local_value = local_handle.values[local_tracker];
                      attrc += local_value * local_value;
                      indexes_to_updates.push_back(local_d);
                      values_to_updates.push_back(local_value);
@@ -566,7 +494,7 @@ public:
                     remote_tracker++;
                     count++;
                   } else {
-                    auto local_value = local_handle->values[local_tracker];
+                    auto local_value = local_handle.values[local_tracker];
                     auto remote_value = remote_values[remote_tracker];
                     VALUE_TYPE value = local_value - remote_value;
                      attrc += value * value;
@@ -627,22 +555,21 @@ public:
         }
 
         if (fetch_from_cache) {
-          CSRHandle *local_handle =
-              this->sparse_local->csr_local_data->handler.get();
-          int local_count = local_handle->rowStart[row_id + 1] -local_handle->rowStart[row_id];
+          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(row_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
+          int local_count =local_handle.col_idx.size();
           int remote_count = remote_cols.size();
           int total_count = local_count + remote_count;
           int remote_tracker = 0;
           int remote_tracker_end = remote_cols.size();
-          int local_tracker = local_handle->rowStart[row_id];
-          int local_tracker_end = local_handle->rowStart[row_id + 1];
+          int local_tracker = 0;
+          int local_tracker_end = local_count;
           int count = 0;
           VALUE_TYPE repuls=0;
           vector<INDEX_TYPE> indexs_to_updates;
           vector<VALUE_TYPE> values_to_updates;
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
-                               ? local_handle->col_idx[local_tracker]
+                               ? local_handle.col_idx[local_tracker]
                                : INT_MAX;
             auto remote_d = (remote_tracker < remote_tracker_end)
                                 ? remote_cols[remote_tracker]
@@ -650,7 +577,7 @@ public:
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
             } else if (remote_d == INT_MAX or local_d < remote_d) {
-              auto local_value = local_handle->values[local_tracker];
+              auto local_value = local_handle.values[local_tracker];
                repuls += local_value * local_value;
               indexs_to_updates.push_back(local_d);
               values_to_updates.push_back(local_value);
@@ -664,7 +591,7 @@ public:
               remote_tracker++;
               count++;
             } else {
-              auto local_value = local_handle->values[local_tracker];
+              auto local_value = local_handle.values[local_tracker];
               auto remote_value = remote_values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
                repuls += value * value;
@@ -683,21 +610,21 @@ public:
 
         } else {
           CSRHandle handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
-          CSRHandle *local_handle = this->sparse_local->csr_local_data->handler.get();
-          int local_count = local_handle->rowStart[row_id + 1] - local_handle->rowStart[row_id];
+          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<INDEX_TYPE>(INT_MIN)));
+          int local_count = local_handle.col_idx.size();
           int remote_count = handle.col_idx.size();
           int total_count = local_count + remote_count;
           int remote_tracker = 0;
           int remote_tracker_end = remote_count;
-          int local_tracker = local_handle->rowStart[row_id];
-          int local_tracker_end = local_handle->rowStart[row_id + 1];
+          int local_tracker =0;
+          int local_tracker_end = local_handle.col_idx.size();
           int count = 0;
           VALUE_TYPE  repuls=0;
           vector<VALUE_TYPE> values_to_updates;
           vector<INDEX_TYPE> indexs_to_updates;
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
-                               ? local_handle->col_idx[local_tracker]
+                               ? local_handle.col_idx[local_tracker]
                                : INT_MAX;
             auto remote_d = (remote_tracker < remote_tracker_end)
                                 ? handle.col_idx[remote_tracker]
@@ -705,7 +632,7 @@ public:
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
             } else if (remote_d == INT_MAX or local_d < remote_d) {
-              auto local_value =local_handle->values[local_tracker];
+              auto local_value =local_handle.values[local_tracker];
                repuls += local_value * local_value;
               indexs_to_updates.push_back(local_d);
               values_to_updates.push_back(local_value);
@@ -719,7 +646,7 @@ public:
               remote_tracker++;
               count++;
             } else {
-              auto local_value =local_handle->values[local_tracker];
+              auto local_value =local_handle.values[local_tracker];
               auto remote_value = handle.values[remote_tracker];
               VALUE_TYPE value = local_value - remote_value;
               repuls += value * value;
