@@ -160,11 +160,12 @@ public:
           this->calc_t_dist_replus_rowptr( random_number_vec,
                                           lr, j, batch_size,
                                           considering_batch_size,this->sparse_local_output);
+          (this->sparse_local)->purge_cache();
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
               false, this->sparse_local_output,enable_remote);
-
+          (this->sparse_local)->purge_cache();
           if (enable_remote) {
             this->calc_t_dist_grad_rowptr(
                 (this->sp_local_sender)->csr_local_data.get(), lr, i, j,
@@ -199,7 +200,6 @@ public:
         this->sparse_local_output->initialize_CSR_blocks(false, nullptr, static_cast<VALUE_TYPE>(INT_MIN), true);
         stop_clock_and_add(t_knn, "KNN Time");
       }
-      (this->sparse_local)->purge_cache();
     }
     total_memory = total_memory / (iterations * batches);
     add_perf_stats(total_memory, "Memory usage");
