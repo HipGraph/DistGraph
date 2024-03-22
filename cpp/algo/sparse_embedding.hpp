@@ -820,8 +820,8 @@ public:
     for(auto i=0;i<len;i++) {
       priority_queue<index_value_pair<INDEX_TYPE,VALUE_TYPE>,vector<index_value_pair<INDEX_TYPE,VALUE_TYPE>,MIN_HEAP_OPERATOR<INDEX_TYPE,VALUE_TYPE>> queue;
       for(auto j=0;j<(*matrix)[i].size();j++){
-        VALUE_TYPE  val = (*matrix)[i][j];
-        queue.push(val);
+        index_value_pair<INDEX_TYPE,VALUE_TYPE> a;
+        queue.push(a);
       }
 
     }
