@@ -534,8 +534,8 @@ public:
           auto key = sp_tuple.rows[k];
           auto copying_count = sp_tuple.rows[k + 1];
           if (force_delete or (*(this->sparse_local)->tempCachePtr)[i].find(key) ==
-              (*(this->sparse_local)->tempCachePtr)[i].end() or ((*(this->sparse_local)->tempCachePtr)[i][key].inserted_itr==iteration
-               or (*(this->sparse_local)->tempCachePtr)[i][key].inserted_batch_id)==batch_id or ((*(this->sparse_local)->tempCachePtr)[i][key].force_delete)) {
+              (*(this->sparse_local)->tempCachePtr)[i].end() or ((*(this->sparse_local)->tempCachePtr)[i][key].inserted_itr!=iteration
+               or (*(this->sparse_local)->tempCachePtr)[i][key].inserted_batch_id)!=batch_id or ((*(this->sparse_local)->tempCachePtr)[i][key].force_delete)) {
             SparseCacheEntry<VALUE_TYPE> sp_entry;
             sp_entry.inserted_itr = iteration;
             sp_entry.inserted_batch_id = batch_id;
