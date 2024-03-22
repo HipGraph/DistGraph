@@ -119,6 +119,7 @@ template <typename VALUE_TYPE> struct SparseCacheEntry {
   vector<INDEX_TYPE> cols = vector<INDEX_TYPE>();
   int inserted_batch_id;
   int inserted_itr;
+  bool force_delete;
 };
 
 
