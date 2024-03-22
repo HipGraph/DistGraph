@@ -126,7 +126,7 @@ public:
 
     for (int i = 0; i < iterations; i++) {
       for (int j = 0; j < batches; j++) {
-//        cout << " rank " << grid->rank_in_col << " batch " << j << endl;
+        cout << " rank " << grid->rank_in_col << " batch " << j << endl;
         int seed = j + i;
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
@@ -179,9 +179,10 @@ public:
             this->merge_remote_computations(
                 j, batch_size, this->sparse_local_output, main_comm.get());
           }
+          (this->sparse_local_output)->merge_batch_collector(j,batch_size);
         }
         total_memory += get_memory_usage();
-        (this->sparse_local_output)->merge_batch_collector(j);
+
       }
       if (i<iterations-1) {
         auto t_knn = start_clock();
