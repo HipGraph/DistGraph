@@ -22,7 +22,7 @@ struct index_value_pair {
 template <typename INDEX_TYPE, typename VALUE_TYPE>
 struct MIN_HEAP_OPERATOR {
   bool operator()(const index_value_pair<INDEX_TYPE, VALUE_TYPE>& a, const index_value_pair<INDEX_TYPE, VALUE_TYPE>& b) const {
-    return a.value < b.value; // Change to a.value > b.value for max heap
+    return a.value > b.value; // Change to a.value > b.value for max heap
   }
 };
 
