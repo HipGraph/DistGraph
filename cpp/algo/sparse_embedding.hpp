@@ -156,11 +156,11 @@ public:
           //                this->grid->col_world_size, true, main_comm.get(),
           //                nullptr);
           //          }
-          main_comm->transfer_sparse_data(random_number_vec,i,j);
-          this->calc_t_dist_replus_rowptr( random_number_vec,
-                                          lr, j, batch_size,
-                                          considering_batch_size,this->sparse_local_output);
-          (this->sparse_local)->purge_cache();
+//          main_comm->transfer_sparse_data(random_number_vec,i,j);
+//          this->calc_t_dist_replus_rowptr( random_number_vec,
+//                                          lr, j, batch_size,
+//                                          considering_batch_size,this->sparse_local_output);
+//          (this->sparse_local)->purge_cache();
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
@@ -415,6 +415,9 @@ public:
                 VALUE_TYPE attrc=0;
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
+                if (total_count>256){
+                  cout<<" rand fetch cache local "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<" lcoal "<<local_count<<" remote "<<remote_count<<" batch "<<batch_id<<" "<<endl;
+                }
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx.size()
@@ -470,6 +473,9 @@ public:
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
                 VALUE_TYPE attrc=0;
+                if (total_count>256){
+                  cout<<" rand fetch cache remote attrc "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<" lcoal "<<local_count<<" remote "<<remote_count<<" batch "<<batch_id<<" "<<endl;
+                }
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? local_handle.col_idx[local_tracker]
