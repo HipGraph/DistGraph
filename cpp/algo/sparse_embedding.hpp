@@ -652,9 +652,9 @@ public:
             }
           }
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-          for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
+          for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
             VALUE_TYPE l = scale(values_to_updates[i] * d1);
-            (*(output->dense_collector))[row_id][local_d] += (lr)*l;
+            (*(output->dense_collector))[row_id][indexs_to_updates[i]] += (lr)*l;
           }
 
         } else {
