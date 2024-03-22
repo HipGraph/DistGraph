@@ -84,6 +84,7 @@ public:
     auto t_knn = start_clock();
     auto expected_nnz_per_row = static_cast<int>(embedding_dim*density);
 //    this->preserveHighestK(this->sparse_local->dense_collector.get(),expected_nnz_per_row);
+    this->sparse_local = sparse_local_output;
     (this->sparse_local)->initialize_CSR_blocks(false,nullptr,static_cast<VALUE_TYPE>(INT_MIN),false);
     stop_clock_and_add(t, "KNN Time");
 
@@ -527,22 +528,19 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
         INDEX_TYPE global_col_id = col_ids[j];
         bool fetch_from_cache = false;
-        INDEX_TYPE local_col_id =
-            global_col_id -
-            static_cast<INDEX_TYPE>(((grid)->rank_in_col *
-                                     (this->sp_local_receiver)->proc_row_width));
-        int owner_rank = static_cast<int>(
-            global_col_id / (this->sp_local_receiver)->proc_row_width);
+        INDEX_TYPE local_col_id = global_col_id - static_cast<INDEX_TYPE>(((grid)->rank_in_col * (this->sp_local_receiver)->proc_row_width));
+        int owner_rank = static_cast<int>(global_col_id / (this->sp_local_receiver)->proc_row_width);
 
         if (owner_rank != (grid)->rank_in_col) {
           fetch_from_cache = true;
         }
+
         vector<INDEX_TYPE> remote_cols;
         vector<VALUE_TYPE> remote_values;
 
