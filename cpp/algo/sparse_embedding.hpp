@@ -416,7 +416,7 @@ public:
                 vector<VALUE_TYPE> values_to_updates;
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
-                                     ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx.size();
+                                     ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx.size()
                                      : INT_MAX;
                   auto remote_d = (remote_tracker < remote_tracker_end)
                                       ? remote_handle.col_idx[remote_tracker]
@@ -456,7 +456,6 @@ public:
                   (*(output->dense_collector))[index][indexes_to_updates[i]] += (lr)*l;
                 }
             } else {
-              int count = remote_cols.size();
               CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<INDEX_TYPE>(INT_MIN));
                 int local_count = local_handle.col_idx.size();
                 int remote_count = remote_cols.size();
