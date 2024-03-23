@@ -392,7 +392,7 @@ public:
           (*this->dense_collector)[i][j] += (*this->batch_collector)[i-starting_index][j];
           (*this->batch_collector)[i-starting_index][j]=0;
         }else {
-//          (*this->dense_collector)[i][j]=(*this->batch_collector)[i-starting_index][j];
+          (*this->dense_collector)[i][j]=(*this->batch_collector)[i-starting_index][j];
           (*this->batch_collector)[i-starting_index][j]=0;
         }
       }
