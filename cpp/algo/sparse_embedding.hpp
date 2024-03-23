@@ -429,7 +429,7 @@ public:
                 for(INDEX_TYPE k=0;k<indexes_to_updates.size();k++){
                   VALUE_TYPE l = scale(values_to_updates[k] * d1);
                   auto starting_offset = batch_id*batch_size;
-                  cout<<" indexes_to_updates[k] "<<indexes_to_updates[k]<<"values_to_updates[k]  "<<values_to_updates[k]<<endl
+                  cout<<" indexes_to_updates[k] "<<indexes_to_updates[k]<<"values_to_updates[k]  "<<values_to_updates[k]<<endl;
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
             } else {
@@ -485,7 +485,7 @@ public:
                 for(INDEX_TYPE k=0;k<indexes_to_updates.size();k++){
                   VALUE_TYPE l = scale(values_to_updates[k] * d1);
                   auto starting_offset = batch_id*batch_size;
-                  cout<<" remote indexes_to_updates[k] "<<indexes_to_updates[k]<<"values_to_updates[k]  "<<values_to_updates[k]<<endl
+                  cout<<" remote indexes_to_updates[k] "<<indexes_to_updates[k]<<"values_to_updates[k]  "<<values_to_updates[k]<<endl;
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
               }
