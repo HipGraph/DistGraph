@@ -347,7 +347,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or
+#pragma omp parallel for schedule(static) // enable for full batch training or
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = (mode == 0 or mode == 1) ? i : i - source_start_index;
