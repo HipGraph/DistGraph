@@ -391,7 +391,7 @@ public:
                 VALUE_TYPE attrc=0;
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
-                auto time= start_clock();
+                 auto t= start_clock();
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx[local_tracker]
@@ -449,7 +449,7 @@ public:
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
                 VALUE_TYPE attrc=0;
-                auto time= start_clock();
+                auto t= start_clock();
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? local_handle.col_idx[local_tracker]
@@ -546,7 +546,7 @@ public:
           VALUE_TYPE repuls=0;
           vector<INDEX_TYPE> indexs_to_updates;
           vector<VALUE_TYPE> values_to_updates;
-          auto time= start_clock();
+          auto t= start_clock();
           if (total_count>256){
             cout<<" rand fetch cache "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<" lcoal "<<local_count<<" remote "<<remote_count<<" batch "<<batch_id<<" "<<endl;
           }
@@ -608,7 +608,7 @@ public:
           VALUE_TYPE  repuls=0;
           vector<VALUE_TYPE> values_to_updates;
           vector<INDEX_TYPE> indexs_to_updates;
-          auto time= start_clock();
+          auto t= start_clock();
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
                                ? local_handle.col_idx[local_tracker]
