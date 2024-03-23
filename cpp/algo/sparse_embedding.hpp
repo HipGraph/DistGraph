@@ -58,6 +58,7 @@ private:
   bool hash_spgemm = false;
 
 public:
+  vector<double> timing_info;
   SparseEmbedding(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
                   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
                   distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
@@ -388,7 +389,7 @@ public:
                 VALUE_TYPE attrc=0;
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
-
+                auto time= start_clock();
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx[local_tracker]
@@ -431,6 +432,8 @@ public:
                   auto starting_offset = batch_id*batch_size;
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
+                auto time = stop_clock_get_elapsed(t);
+                timing_info[index]+=time;
             } else {
                 CSRHandle local_handle = this->sparse_local_output->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
                 int local_count = local_handle.col_idx.size();
@@ -444,6 +447,7 @@ public:
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
                 VALUE_TYPE attrc=0;
+                auto time= start_clock();
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? local_handle.col_idx[local_tracker]
@@ -486,6 +490,8 @@ public:
                   auto starting_offset = batch_id*batch_size;
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
+                auto time = stop_clock_get_elapsed(t);
+                timing_info[index]+=time;
               }
             }
           }
@@ -538,6 +544,7 @@ public:
           VALUE_TYPE repuls=0;
           vector<INDEX_TYPE> indexs_to_updates;
           vector<VALUE_TYPE> values_to_updates;
+          auto time= start_clock();
           if (total_count>256){
             cout<<" rand fetch cache "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<" lcoal "<<local_count<<" remote "<<remote_count<<" batch "<<batch_id<<" "<<endl;
           }
@@ -583,6 +590,8 @@ public:
             auto starting_offset = batch_id*batch_size;
             (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
+          auto time = stop_clock_get_elapsed(t);
+          timing_info[index]+=time;
         } else {
           CSRHandle handle = ((this->sparse_local_output)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           CSRHandle local_handle = ((this->sparse_local_output)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
@@ -597,7 +606,7 @@ public:
           VALUE_TYPE  repuls=0;
           vector<VALUE_TYPE> values_to_updates;
           vector<INDEX_TYPE> indexs_to_updates;
-
+          auto time= start_clock();
           while (count < total_count) {
             auto local_d = (local_tracker < local_tracker_end)
                                ? local_handle.col_idx[local_tracker]
@@ -639,6 +648,8 @@ public:
             auto starting_offset = batch_id*batch_size;
             (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
+          auto time = stop_clock_get_elapsed(t);
+          timing_info[index]+=time;
         }
       }
     }
