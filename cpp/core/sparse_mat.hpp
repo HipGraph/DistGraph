@@ -391,8 +391,10 @@ public:
         if ((*this->dense_collector)[i][j]!=static_cast<VALUE_TYPE>(INT_MIN)){
           (*this->dense_collector)[i][j] += (*this->batch_collector)[i-starting_index][j];
           (*this->batch_collector)[i-starting_index][j]=0;
+        }else {
+          (*this->dense_collector)[i][j]=(*this->batch_collector)[i-starting_index][j];
+          (*this->batch_collector)[i-starting_index][j]=0;
         }
-
       }
     }
   }

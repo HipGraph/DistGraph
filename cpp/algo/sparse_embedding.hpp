@@ -143,9 +143,7 @@ public:
         } else {
 
           main_comm->transfer_sparse_data(random_number_vec,i,j);
-          this->calc_t_dist_replus_rowptr( random_number_vec,
-                                          lr, j, batch_size,
-                                          considering_batch_size,this->sparse_local_output);
+          this->calc_t_dist_replus_rowptr( random_number_vec,lr, j, batch_size,considering_batch_size,this->sparse_local_output);
           this->execute_pull_model_computations(
               sendbuf_ptr.get(), update_ptr.get(), i, j, main_comm.get(),
               csr_block, batch_size, considering_batch_size, lr, 1, 0, true,
@@ -359,16 +357,9 @@ public:
              j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
-            INDEX_TYPE local_dst =
-                (mode == 0 or mode == 1)
-                    ? dst_id - (this->grid)->rank_in_col *
-                                   (this->sp_local_receiver)->proc_col_width
-                    : dst_id;
-            int target_rank =
-                (int)(dst_id / (this->sp_local_receiver)->proc_col_width);
-            bool fetch_from_cache =
-                (target_rank == (this->grid)->rank_in_col or mode == 2) ? false
-                                                                        : true;
+            INDEX_TYPE local_dst = (mode == 0 or mode == 1)? dst_id - (this->grid)->rank_in_col *(this->sp_local_receiver)->proc_col_width: dst_id;
+            int target_rank =(int)(dst_id / (this->sp_local_receiver)->proc_col_width);
+            bool fetch_from_cache = (target_rank == (this->grid)->rank_in_col or mode == 2) ? false: true;
 
             vector<INDEX_TYPE> remote_cols;
             vector<VALUE_TYPE> remote_values;
@@ -384,8 +375,8 @@ public:
             }
 
             if (!fetch_from_cache) {
-              CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
-              CSRHandle remote_handle = this->sparse_local->fetch_local_data(local_dst,true,static_cast<VALUE_TYPE>(INT_MIN));
+              CSRHandle local_handle = this->sparse_local_output->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
+              CSRHandle remote_handle = this->sparse_local_output->fetch_local_data(local_dst,true,static_cast<VALUE_TYPE>(INT_MIN));
                 int local_count = (mode==2)?(*(output->dataCachePtr))[index].cols.size():local_handle.col_idx.size();
                 int remote_count = remote_handle.col_idx.size();
                 int total_count = local_count + remote_count;
@@ -435,13 +426,13 @@ public:
                 }
                 VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
 
-                for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
-                  VALUE_TYPE l = scale(values_to_updates[i] * d1);
+                for(INDEX_TYPE k=0;k<indexes_to_updates.size();k++){
+                  VALUE_TYPE l = scale(values_to_updates[k] * d1);
                   auto starting_offset = batch_id*batch_size;
-                  (*(output->batch_collector))[index-starting_offset][indexes_to_updates[i]] += (lr)*l;
+                  (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
             } else {
-                CSRHandle local_handle = this->sparse_local->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
+                CSRHandle local_handle = this->sparse_local_output->fetch_local_data(index,true,static_cast<VALUE_TYPE>(INT_MIN));
                 int local_count = local_handle.col_idx.size();
                 int remote_count = remote_cols.size();
                 int total_count = local_count + remote_count;
@@ -490,10 +481,10 @@ public:
                 }
                 VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
 
-                for(INDEX_TYPE i=0;i<indexes_to_updates.size();i++){
-                  VALUE_TYPE l = scale(values_to_updates[i] * d1);
+                for(INDEX_TYPE k=0;k<indexes_to_updates.size();k++){
+                  VALUE_TYPE l = scale(values_to_updates[k] * d1);
                   auto starting_offset = batch_id*batch_size;
-                  (*(output->batch_collector))[index-starting_offset][indexes_to_updates[i]] += (lr)*l;
+                  (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
               }
             }
@@ -535,7 +526,7 @@ public:
         }
 
         if (fetch_from_cache) {
-          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
+          CSRHandle local_handle = ((this->sparse_local_output)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           int local_count =local_handle.col_idx.size();
           int remote_count = remote_cols.size();
           int total_count = local_count + remote_count;
@@ -587,15 +578,15 @@ public:
             }
           }
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-          for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
-            VALUE_TYPE l = scale(values_to_updates[i] * d1);
+          for(INDEX_TYPE k=0;k<indexs_to_updates.size();k++){
+            VALUE_TYPE l = scale(values_to_updates[k] * d1);
             auto starting_offset = batch_id*batch_size;
-            (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[i]] += (lr)*l;
+            (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
 
         } else {
-          CSRHandle handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
-          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
+          CSRHandle handle = ((this->sparse_local_output)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
+          CSRHandle local_handle = ((this->sparse_local_output)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           int local_count = local_handle.col_idx.size();
           int remote_count = handle.col_idx.size();
           int total_count = local_count + remote_count;
@@ -647,10 +638,10 @@ public:
             }
           }
           VALUE_TYPE d1 = 2.0 / ((repuls + 0.000001) * (1.0 + repuls));
-          for(INDEX_TYPE i=0;i<indexs_to_updates.size();i++){
-            VALUE_TYPE l = scale(values_to_updates[i] * d1);
+          for(INDEX_TYPE k=0;k<indexs_to_updates.size();k++){
+            VALUE_TYPE l = scale(values_to_updates[k] * d1);
             auto starting_offset = batch_id*batch_size;
-            (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[i]] += (lr)*l;
+            (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
         }
       }
