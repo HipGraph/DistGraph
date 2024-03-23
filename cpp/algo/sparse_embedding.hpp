@@ -605,9 +605,6 @@ public:
             auto remote_d = (remote_tracker < remote_tracker_end)
                                 ? handle.col_idx[remote_tracker]
                                 : INT_MAX;
-            if (local_d!=remote_d){
-              cout<<" rand fetch cache "<<this->grid->rank_in_col<<" wring ids  "<<row_id<<" local_d "<<local_d<<" local_col_id "<<local_col_id<<" remote_d "<<remote_d<<endl;
-            }
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
             } else if (local_d < remote_d) {
