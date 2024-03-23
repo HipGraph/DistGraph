@@ -186,6 +186,8 @@ public:
       }
       (this->sparse_local)->purge_cache();
     }
+    double totalLocalSpGEMM = std::accumulate((timing_info).begin(), (timing_info).end(), 0.0)/16;
+    add_perf_stats(totalLocalSpGEMM,"Local SpGEMM");
     total_memory = total_memory / (iterations * batches);
     add_perf_stats(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
