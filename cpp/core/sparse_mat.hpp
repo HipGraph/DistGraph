@@ -498,8 +498,9 @@ public:
       } else {
          for(auto i=0;i<(*this->dense_collector)[local_key].size();i++){
            if ((*this->dense_collector)[local_key][i]!=comparing_value){
+             double value = static_cast<double>((*this->dense_collector)[local_key][i]);
              new_handler.col_idx.push_back(i);
-             new_handler.values.push_back(i);
+             new_handler.values.push_back(value);
            }
          }
       }
