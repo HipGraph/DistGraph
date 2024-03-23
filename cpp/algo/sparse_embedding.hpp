@@ -593,7 +593,7 @@ public:
             (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
           auto time = stop_clock_get_elapsed(t);
-          timing_info[index]+=time;
+          timing_info[row_id]+=time;
         } else {
           CSRHandle handle = ((this->sparse_local_output)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           CSRHandle local_handle = ((this->sparse_local_output)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
@@ -651,7 +651,7 @@ public:
             (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
           auto time = stop_clock_get_elapsed(t);
-          timing_info[index]+=time;
+          timing_info[row_id]+=time;
         }
       }
     }
