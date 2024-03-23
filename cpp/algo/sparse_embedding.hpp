@@ -347,7 +347,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-#pragma omp parallel for schedule(static) // enable for full batch training or
+//#pragma omp parallel for schedule(static) // enable for full batch training or
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = (mode == 0 or mode == 1) ? i : i - source_start_index;
@@ -429,6 +429,7 @@ public:
                 for(INDEX_TYPE k=0;k<indexes_to_updates.size();k++){
                   VALUE_TYPE l = scale(values_to_updates[k] * d1);
                   auto starting_offset = batch_id*batch_size;
+                  cout<<" indexes_to_updates[k] "<<indexes_to_updates[k]<<"values_to_updates[k]  "<<values_to_updates[k]<<endl
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
             } else {
@@ -484,6 +485,7 @@ public:
                 for(INDEX_TYPE k=0;k<indexes_to_updates.size();k++){
                   VALUE_TYPE l = scale(values_to_updates[k] * d1);
                   auto starting_offset = batch_id*batch_size;
+                  cout<<" remote indexes_to_updates[k] "<<indexes_to_updates[k]<<"values_to_updates[k]  "<<values_to_updates[k]<<endl
                   (*(output->batch_collector))[index-starting_offset][indexes_to_updates[k]] += (lr)*l;
                 }
               }
