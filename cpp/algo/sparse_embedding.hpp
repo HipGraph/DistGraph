@@ -431,6 +431,7 @@ public:
                     values_to_updates.push_back(local_value);
                     local_tracker++;
                     count++;
+                    cout<<" rank attac "<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else if (remote_d < local_d) {
                     auto remote_value = remote_handle.values[remote_tracker];
                      attrc += remote_value * remote_value;
@@ -438,6 +439,7 @@ public:
                     values_to_updates.push_back(-1*remote_value);
                     remote_tracker++;
                     count++;
+                    cout<<" rank attac"<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else {
                     auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle.values[local_tracker];
                     auto remote_value = remote_handle.values[remote_tracker];
@@ -489,6 +491,7 @@ public:
                      values_to_updates.push_back(local_value);
                     local_tracker++;
                     count++;
+                    cout<<" rank remote "<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else if (remote_d < local_d) {
                     auto remote_value = remote_values[remote_tracker];
                      attrc += remote_value * remote_value;
@@ -496,6 +499,7 @@ public:
                     values_to_updates.push_back(-1*remote_value);
                     remote_tracker++;
                     count++;
+                    cout<<" rank remote "<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else {
                     auto local_value = local_handle.values[local_tracker];
                     auto remote_value = remote_values[remote_tracker];
