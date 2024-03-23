@@ -364,7 +364,7 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or
+#pragma omp parallel for schedule(static) // enable for full batch training or
       for (INDEX_TYPE i = source_start_index; i < source_end_index; i++) {
 
         INDEX_TYPE index = (mode == 0 or mode == 1) ? i : i - source_start_index;
@@ -412,9 +412,7 @@ public:
                 VALUE_TYPE attrc=0;
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
-                if (total_count>256){
-                  cout<<" rand fetch cache local "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<" lcoal "<<local_count<<" remote "<<remote_count<<" batch "<<batch_id<<" "<<endl;
-                }
+
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? (mode==2)?(*(output->dataCachePtr))[index].cols[local_tracker]:local_handle.col_idx[local_tracker]
@@ -431,7 +429,6 @@ public:
                     values_to_updates.push_back(local_value);
                     local_tracker++;
                     count++;
-                    cout<<" rank attac "<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else if (remote_d < local_d) {
                     auto remote_value = remote_handle.values[remote_tracker];
                      attrc += remote_value * remote_value;
@@ -439,7 +436,6 @@ public:
                     values_to_updates.push_back(-1*remote_value);
                     remote_tracker++;
                     count++;
-                    cout<<" rank attac"<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else {
                     auto local_value = mode==2?(*(output->dataCachePtr))[index].values[local_tracker]:local_handle.values[local_tracker];
                     auto remote_value = remote_handle.values[remote_tracker];
@@ -472,9 +468,6 @@ public:
                 vector<INDEX_TYPE> indexes_to_updates;
                 vector<VALUE_TYPE> values_to_updates;
                 VALUE_TYPE attrc=0;
-                if (total_count>256){
-                  cout<<" rand fetch cache remote attrc "<<this->grid->rank_in_col<<" count "<<count<<" total "<<total_count<<" lcoal "<<local_count<<" remote "<<remote_count<<" batch "<<batch_id<<" "<<endl;
-                }
                 while (count < total_count) {
                   auto local_d = (local_tracker < local_tracker_end)
                                      ? local_handle.col_idx[local_tracker]
@@ -491,7 +484,6 @@ public:
                      values_to_updates.push_back(local_value);
                     local_tracker++;
                     count++;
-                    cout<<" rank remote "<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else if (remote_d < local_d) {
                     auto remote_value = remote_values[remote_tracker];
                      attrc += remote_value * remote_value;
@@ -499,7 +491,6 @@ public:
                     values_to_updates.push_back(-1*remote_value);
                     remote_tracker++;
                     count++;
-                    cout<<" rank remote "<<this->grid->rank_in_col<<" local_d "<<local_d<<" remote_d "<<remote_d<<endl;
                   } else {
                     auto local_value = local_handle.values[local_tracker];
                     auto remote_value = remote_values[remote_tracker];
