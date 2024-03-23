@@ -72,6 +72,7 @@ public:
         sync(sync_comm), sparse_local_output(sparse_local_output),sparse_local(sparse_local_output),
         tile_width_fraction(tile_width_fraction) {
     this->hash_spgemm = hash_spgemm;
+    timing_info = vector<double>(sp_local_receiver->proc_row_width,0);
   }
 
   void algo_sparse_embedding(int iterations, int batch_size,int ns, VALUE_TYPE lr,double density=1.0, bool enable_remote=true) {
