@@ -508,7 +508,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-//    #pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -558,7 +558,6 @@ public:
             auto remote_d = (remote_tracker < remote_tracker_end)
                                 ? remote_cols[remote_tracker]
                                 : INT_MAX;
-            cout<<" rand fetch cache "<<this->grid->rank_in_col<<" row id "<<row_id<<" local_d "<<local_d<<" global_col_id "<<global_col_id<<" remote_d "<<remote_d<<endl;
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
             } else if (local_d < remote_d) {
@@ -596,7 +595,7 @@ public:
 
         } else {
           CSRHandle handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
-          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
+          CSRHandle local_handle = ((this->sparse_local)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           int local_count = local_handle.col_idx.size();
           int remote_count = handle.col_idx.size();
           int total_count = local_count + remote_count;
@@ -616,6 +615,9 @@ public:
             auto remote_d = (remote_tracker < remote_tracker_end)
                                 ? handle.col_idx[remote_tracker]
                                 : INT_MAX;
+            if (local_d!=remote_d){
+              cout<<" rand fetch cache "<<this->grid->rank_in_col<<" wring ids  "<<row_id<<" local_d "<<local_d<<" local_col_id "<<local_col_id<<" remote_d "<<remote_d<<endl;
+            }
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
             } else if (local_d < remote_d) {
