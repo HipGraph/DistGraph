@@ -141,22 +141,7 @@ public:
               false, main_comm.get(), this->sparse_local_output);
 
         } else {
-          //          if ((this->sparse_local_output)->hash_spgemm) {
-          //            this->execute_pull_model_computations(
-          //                sendbuf_ptr.get(), update_ptr.get(), i, j,
-          //                main_comm.get(), csr_block, batch_size,
-          //                considering_batch_size, lr, 1, 0, true, true,
-          //                this->sparse_local_output);
-          //
-          //            (this->sparse_local_output)->initialize_hashtables();
-          //
-          //            // compute remote computations
-          //            this->calc_t_dist_grad_rowptr(
-          //                (this->sp_local_sender)->csr_local_data.get(), lr,
-          //                i, j, batch_size, considering_batch_size, 2, 0,
-          //                this->grid->col_world_size, true, main_comm.get(),
-          //                nullptr);
-          //          }
+
           main_comm->transfer_sparse_data(random_number_vec,i,j);
           this->calc_t_dist_replus_rowptr( random_number_vec,
                                           lr, j, batch_size,
@@ -523,7 +508,7 @@ public:
 
     int row_base_index = batch_id * batch_size;
 
-    #pragma omp parallel for schedule(static)
+//    #pragma omp parallel for schedule(static)
     for (int i = 0; i < block_size; i++) {
       INDEX_TYPE row_id = static_cast<INDEX_TYPE>(i + row_base_index);
       for (int j = 0; j < col_ids.size(); j++) {
@@ -573,6 +558,7 @@ public:
             auto remote_d = (remote_tracker < remote_tracker_end)
                                 ? remote_cols[remote_tracker]
                                 : INT_MAX;
+            cout<<" rand fetch cache "<<this->grid->rank_in_col<<" row id "<<row_id<<" local_d "<<local_d<<" global_col_id "<<global_col_id<<" remote_d "<<remote_d<<endl;
             if (local_d == INT_MAX and remote_d == INT_MAX) {
               break;
             } else if (local_d < remote_d) {
