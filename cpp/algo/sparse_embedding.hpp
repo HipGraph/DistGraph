@@ -583,7 +583,6 @@ public:
             auto starting_offset = batch_id*batch_size;
             (*(output->batch_collector))[row_id-starting_offset][indexs_to_updates[k]] += (lr)*l;
           }
-
         } else {
           CSRHandle handle = ((this->sparse_local_output)->fetch_local_data(local_col_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
           CSRHandle local_handle = ((this->sparse_local_output)->fetch_local_data(row_id,true,static_cast<VALUE_TYPE>(INT_MIN)));
