@@ -31,7 +31,7 @@ public:
   template <typename INDEX_TYPE, typename WEIGHT_VALUE, typename VALUE_TYPE>
   void parallel_read_MM(string file_path,
                         distblas::core::SpMat<VALUE_TYPE> *sp_mat,
-                        bool copy_col_to_value) {
+                        bool copy_col_to_value, bool boolean_input=false) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
 
@@ -67,7 +67,9 @@ public:
       coords[i].col = get<1>(values[i]);
       if (copy_col_to_value) {
         coords[i].value = get<1>(values[i]);
-      } else {
+      }else if (boolean_input){
+        coords[i].value= 1;
+      }else {
         coords[i].value = get<2>(values[i]);
       }
     }
