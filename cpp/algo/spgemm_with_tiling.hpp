@@ -195,8 +195,9 @@ public:
       MPI_Request req;
 
       if (communication and (symbolic or !output->hash_spgemm)) {
-
+        auto t = start_clock();
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,k, end_process, 0, tiles_per_process,false);
+        stop_clock_and_add(t, "CombinedComm Time");
       }
       if (k == comm_initial_start) {
         // local computation
