@@ -281,7 +281,7 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
                       Process3DGrid *grid, INDEX_TYPE local_rows,
-                      INDEX_TYPE global_rows, INDEX_TYPE global_cols,INDEX_TYPE global_sum, bool boolean_matrix=false, bool print_header=false,) {
+                      INDEX_TYPE global_rows, INDEX_TYPE global_cols,INDEX_TYPE global_sum, bool boolean_matrix=false, bool print_header=false) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
