@@ -255,6 +255,10 @@ public:
       INDEX_TYPE local_total = (end_index-start_index)*expected_non_zeros;
       MPI_Allreduce(&local_total, &global_sum, 1, MPI_UINT64_T, MPI_SUM,grid->col_world);
 
+      MPI_File fh;
+      MPI_File_open(grid->col_world, file_path.c_str(),
+                    MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+
       for (INDEX_TYPE i = start_index; i < end_index; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
@@ -266,7 +270,7 @@ public:
           sparse_coo.push_back(t);
           if (sparse_coo.size()>=chunk_size) {
             bool print_header = itr == 0?true:false;
-            this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,print_header);
+            this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,print_header);
             itr++;
             sparse_coo.clear();
           }
@@ -275,16 +279,17 @@ public:
       if (sparse_coo.size()>0){
         this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,false);
       }
+      MPI_File_close(&fh);
     }
   }
 
   template <typename VALUE_TYPE>
-  void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
+  void parallel_write(MPI_File &fh,string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
                       Process3DGrid *grid, INDEX_TYPE local_rows,
                       INDEX_TYPE global_rows, INDEX_TYPE global_cols,INDEX_TYPE global_sum, bool boolean_matrix=false, bool print_header=false) {
-    MPI_File fh;
-    MPI_File_open(grid->col_world, file_path.c_str(),
-                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+//    MPI_File fh;
+//    MPI_File_open(grid->col_world, file_path.c_str(),
+//                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
@@ -366,7 +371,7 @@ public:
     }
 
     // Ensure that all processes have completed their writes
-    MPI_File_close(&fh);
+
   }
 
   template <typename VALUE_TYPE>
