@@ -270,7 +270,6 @@ public:
           sparse_coo.push_back(t);
           if (sparse_coo.size()>=chunk_size) {
             bool print_header = itr == 0?true:false;
-            cout<<grid->rank_in_col<<" print_header "<<print_header<<endl;
             this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,print_header);
             itr++;
             sparse_coo.clear();
@@ -305,7 +304,6 @@ public:
               "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
               global_rows, global_cols, global_sum);
         }else {
-          cout<<grid->rank_in_col<<" printing header"<<endl;
           total_size += snprintf(
               nullptr, 0,
               "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu %lu\n\n",
@@ -342,7 +340,6 @@ public:
               "%%%MatrixMarket matrix coordinate real general\n%lu %lu %lu\n",
               global_rows, global_cols,global_sum);
         }else {
-          cout<<grid->rank_in_col<<" printing header"<<endl;
           current_position += snprintf(
               current_position, total_size,
               "%%%MatrixMarket matrix coordinate pattern general\n%lu %lu %lu\n",
