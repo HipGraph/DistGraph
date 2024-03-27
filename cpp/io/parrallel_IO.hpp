@@ -207,7 +207,7 @@ public:
   template <typename VALUE_TYPE>
   void build_sparse_random_matrix(INDEX_TYPE rows,INDEX_TYPE global_rows, INDEX_TYPE cols,INDEX_TYPE global_cols,
                                   double density, int seed,
-                                  vector<Tuple<VALUE_TYPE>> &sparse_coo,
+                                  vector<Tuple<VALUE_TYPE>> &sparse_coo,string file_path,
                                   Process3DGrid *grid, bool bfs_input = false) {
     std::mt19937 gen(seed);
     std::mt19937 gen1(seed+1);
@@ -242,11 +242,13 @@ public:
         }
       }
     } else {
-      auto expected_non_zeros = max(static_cast<int>(global_cols* density),1);
+      auto expected_non_zeros = global_cols* density;
 //      auto expected_non_zeros = 32;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, global_cols - 1);
       INDEX_TYPE start_index = grid->rank_in_col*rows;
       INDEX_TYPE end_index = min(static_cast<INDEX_TYPE>((grid->rank_in_col+1)*rows),global_rows);
+      int chunk_size = 100000;
+      int itr=0;
       for (INDEX_TYPE i = start_index; i < end_index; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
@@ -256,7 +258,15 @@ public:
           t.col = index; // Calculate column index
           t.value = val;
           sparse_coo.push_back(t);
+          if (sparse_coo.size()>=chunk_size) {
+            this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,true,itr==0);
+            itr++;
+            sparse_coo.clear();
+          }
         }
+      }
+      if (sparse_coo.size()>0){
+        this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,true,itr==0);
       }
     }
   }
@@ -264,7 +274,7 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
                       Process3DGrid *grid, INDEX_TYPE local_rows,
-                      INDEX_TYPE global_rows, INDEX_TYPE global_cols, bool boolean_matrix=false) {
+                      INDEX_TYPE global_rows, INDEX_TYPE global_cols, bool boolean_matrix=false, bool print_header=false) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
@@ -280,7 +290,7 @@ public:
     int increment = min(chunk_size, static_cast<int>(sparse_coo.size()));
 
     for (INDEX_TYPE i = 0; i < sparse_coo.size(); i += increment) {
-      if (grid->rank_in_col == 0 and i == 0) {
+      if (grid->rank_in_col == 0 and i == 0 and print_header) {
         if (!boolean_matrix) {
           total_size += snprintf(
               nullptr, 0,
@@ -316,7 +326,7 @@ public:
       }
 
       char *current_position = buffer;
-      if (i == 0 and grid->rank_in_col == 0) {
+      if (i == 0 and grid->rank_in_col == 0 and print_header) {
         if (!boolean_matrix) {
           current_position += snprintf(
               current_position, total_size,

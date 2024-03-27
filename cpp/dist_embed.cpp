@@ -207,8 +207,9 @@ int main(int argc, char **argv) {
   if (spgemm & save_results) {
     int local_cols = divide_and_round_up(static_cast<int>(dimension),grid->col_world_size);
     reader->build_sparse_random_matrix(localARows, shared_sparseMat.get()->gRows,
-                                       local_cols,static_cast<int>(dimension), density, 0,sparse_coo, grid.get(),false);
-//    cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
+                                       local_cols,static_cast<int>(dimension), density, 0,sparse_coo,
+                                       output_file+"/sparse_local.txt",grid.get(),false);
+    cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
 //    INDEX_TYPE gROWs = shared_sparseMat.get()->gRows;
 //    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
 //    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
@@ -382,7 +383,7 @@ int main(int argc, char **argv) {
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
  if(spgemm & save_results){
    int local_cols = divide_and_round_up(static_cast<int>(dimension),grid->col_world_size);
-   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,shared_sparseMat.get()->gRows,static_cast<int>(dimension),true);
+//   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,shared_sparseMat.get()->gRows,static_cast<int>(dimension),true);
  }
 
 
