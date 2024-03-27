@@ -277,7 +277,7 @@ public:
         }
       }
       if (sparse_coo.size()>0){
-        this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,false);
+        this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,false);
       }
       MPI_File_close(&fh);
     }
