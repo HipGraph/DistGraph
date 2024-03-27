@@ -242,13 +242,19 @@ public:
         }
       }
     } else {
-      auto expected_non_zeros = global_cols* density;
+      auto expected_non_zeros = max(static_cast<int>(global_cols* density),1);
 //      auto expected_non_zeros = 32;
       std::uniform_real_distribution<VALUE_TYPE> uni_dist(0, global_cols - 1);
       INDEX_TYPE start_index = grid->rank_in_col*rows;
       INDEX_TYPE end_index = min(static_cast<INDEX_TYPE>((grid->rank_in_col+1)*rows),global_rows);
       int chunk_size = 100000;
       int itr=0;
+
+      INDEX_TYPE global_sum;
+
+      INDEX_TYPE local_total = (end_index-start_index)*expected_non_zeros;
+      MPI_Allreduce(&local_total, &global_sum, 1, MPI_UINT64_T, MPI_SUM,grid->col_world);
+
       for (INDEX_TYPE i = start_index; i < end_index; ++i) {
         for (INDEX_TYPE j = 0; j < expected_non_zeros; j++) {
           VALUE_TYPE val = static_cast<VALUE_TYPE>(norm_dist(gen));
@@ -259,14 +265,15 @@ public:
           t.value = val;
           sparse_coo.push_back(t);
           if (sparse_coo.size()>=chunk_size) {
-            this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,true,itr==0);
+            bool print_header = itr == 0?true:false;
+            this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,print_header);
             itr++;
             sparse_coo.clear();
           }
         }
       }
       if (sparse_coo.size()>0){
-        this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,true,itr==0);
+        this->parallel_write(file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,false);
       }
     }
   }
@@ -274,18 +281,13 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
                       Process3DGrid *grid, INDEX_TYPE local_rows,
-                      INDEX_TYPE global_rows, INDEX_TYPE global_cols, bool boolean_matrix=false, bool print_header=false) {
+                      INDEX_TYPE global_rows, INDEX_TYPE global_cols,INDEX_TYPE global_sum, bool boolean_matrix=false, bool print_header=false,) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
     int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
-
-    INDEX_TYPE global_sum = 0;
-    INDEX_TYPE local_sum = sparse_coo.size();
-
-    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,grid->col_world);
 
     int increment = min(chunk_size, static_cast<int>(sparse_coo.size()));
 
