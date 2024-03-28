@@ -275,7 +275,7 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<Tuple<VALUE_TYPE>> &sparse_coo,
                       Process3DGrid *grid, INDEX_TYPE local_rows,
-                      INDEX_TYPE global_rows, INDEX_TYPE global_cols,INDEX_TYPE global_sum, bool boolean_matrix=false) {
+                      INDEX_TYPE global_rows, INDEX_TYPE global_cols, bool boolean_matrix=false) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
@@ -283,6 +283,10 @@ public:
     int chunk_size = 100000; // Number of elements to write at a time
     size_t total_size = 0;
 
+    INDEX_TYPE local_sum = sparse_coo.size();
+    INDEX_TYPE global_sum;
+
+    MPI_Allreduce(&local_sum, &global_sum, 1, MPI_UINT64_T, MPI_SUM,grid->col_world);
 
 
     int increment = min(chunk_size, static_cast<int>(sparse_coo.size()));
