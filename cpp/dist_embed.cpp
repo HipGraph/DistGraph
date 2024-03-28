@@ -383,7 +383,7 @@ int main(int argc, char **argv) {
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
  if(spgemm & save_results){
    int local_cols = divide_and_round_up(static_cast<int>(dimension),grid->col_world_size);
-//   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,shared_sparseMat.get()->gRows,static_cast<int>(dimension),true);
+   reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,shared_sparseMat.get()->gRows,static_cast<int>(dimension),true);
  }
 
 
