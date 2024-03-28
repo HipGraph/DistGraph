@@ -268,16 +268,16 @@ public:
           t.col = index; // Calculate column index
           t.value = val;
           sparse_coo.push_back(t);
-          if (sparse_coo.size()>=chunk_size) {
-            bool print_header = itr == 0?true:false;
-            this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,print_header);
-            itr++;
-            sparse_coo.clear();
-          }
+//          if (sparse_coo.size()>=chunk_size) {
+//            bool print_header = itr == 0?true:false;
+//            this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,print_header);
+//            itr++;
+//            sparse_coo.clear();
+//          }
         }
       }
       if (sparse_coo.size()>0){
-        this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,false);
+        this->parallel_write(fh,file_path,sparse_coo,grid,rows,global_rows,global_cols,global_sum,true,true);
       }
       MPI_File_close(&fh);
     }
