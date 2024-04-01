@@ -83,9 +83,6 @@ public:
       stop_clock_and_add(t, "Total Time");
       double totalLocalSpGEMM = std::accumulate((embedding_algo->timing_info).begin(), (embedding_algo->timing_info).end(), 0.0)/16;
       add_perf_stats(totalLocalSpGEMM,"Local SpMM");
-      total_memory += get_memory_usage();
-      add_perf_stats(total_memory, "Memory usage");
-
       jobj[i]=json_perf_statistics();
       reset_performance_timers();
     }

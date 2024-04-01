@@ -189,6 +189,10 @@ public:
 
     auto tiles_per_process =
         SparseTile<INDEX_TYPE, VALUE_TYPE>::get_tiles_per_process_row();
+    bool measured=false;
+
+    size_t total_memory = 0;
+
     for (int k = prev_start; k < this->grid->col_world_size; k += proc_length) {
       int end_process = get_end_proc(k, beta, this->grid->col_world_size);
 
@@ -198,6 +202,11 @@ public:
         auto t = start_clock();
         main_comm->transfer_sparse_data(sendbuf, receivebuf, iteration, batch,k, end_process, 0, tiles_per_process,false);
         stop_clock_and_add(t, "CombinedComm Time");
+        if (!measured){
+          total_memory += get_memory_usage();
+          add_perf_stats(total_memory, "Memory usage");
+          measured=true;
+        }
       }
       if (k == comm_initial_start) {
         // local computation
@@ -224,7 +233,7 @@ public:
         csr_block, lr, iteration, batch, batch_size, considering_batch_size, 1,
         prev_start, prev_end_process, symbolic, main_comm, output);
 
-    // dense_local->invalidate_cache(i, j, true);
+//     dense_local->invalidate_cache(i, j, true);
   }
 
   inline void calc_t_dist_grad_rowptr(
