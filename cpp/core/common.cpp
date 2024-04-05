@@ -9,8 +9,11 @@ MPI_Datatype distblas::core::SPTUPLE;
 MPI_Datatype distblas::core::DENSETUPLE;
 MPI_Datatype distblas::core::SPARSETUPLE;
 
+MPI_Datatype distblas::core::TILETUPLE;
+
 vector<string> distblas::core::perf_counter_keys = {
-    "Computation Time", "Communication Time", "Memory usage", "Data transfers","Total Time","Transfer Data","Compute  Local","Compute  Remote"};
+    "Computation Time","CombinedComm Time", "Communication Time", "Memory usage", "Data transfers","Total Time","Total Tiles", "Locally Computed Tiles","Remote Computed Tiles","Output NNZ",
+    "BFS Frontier","Local SpGEMM","Local SpMM","Remote Merge Time","Remote SpGEMM","Sparsity","Communicated Data Store","Communication Data Loading","CSR Conversion","KNN Time"};
 
 map<string, int> distblas::core::call_count;
 map<string, double> distblas::core::total_time;
@@ -89,7 +92,7 @@ void distblas::core::stop_clock_and_add(my_timer_t &start,string counter_name) {
   }
 }
 
-void distblas::core::add_memory(size_t mem, string counter_name) {
+void distblas::core::add_perf_stats(size_t mem, string counter_name) {
   if (find(perf_counter_keys.begin(), perf_counter_keys.end(), counter_name) !=
       perf_counter_keys.end()) {
     call_count[counter_name]++;
@@ -101,21 +104,6 @@ void distblas::core::add_memory(size_t mem, string counter_name) {
   }
 }
 
-void distblas::core::add_datatransfers(INDEX_TYPE count, string counter_name) {
-  int rank;
-  int world_size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-  if (find(perf_counter_keys.begin(), perf_counter_keys.end(), counter_name) !=
-      perf_counter_keys.end()) {
-    call_count[counter_name]++;
-    total_time[counter_name] += count;
-  } else {
-    cout << "Error, performance counter " << counter_name << " not registered."
-         << endl;
-    exit(1);
-  }
-}
 
 void distblas::core::print_performance_statistics() {
   // This is going to assume that all timing starts and ends with a barrier,
@@ -153,13 +141,17 @@ json distblas::core::json_perf_statistics() {
   for (auto it = perf_counter_keys.begin(); it != perf_counter_keys.end();it++) {
     double val = total_time[*it];
 
-    MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    if (val>=0) {
+      MPI_Allreduce(MPI_IN_PLACE, &val, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    // We also have the call count for each statistic timed
-    val /= world_size;
+      // We also have the call count for each statistic timed
+      if (!((*it == "Remote Computed Tiles") or (*it == "Total Tiles"))) {
+        val /= world_size;
+      }
 
-    if (rank == 0) {
-      j_obj[*it] = val;
+      if (rank == 0) {
+        j_obj[*it] = val;
+      }
     }
   }
   return j_obj;
@@ -171,7 +163,7 @@ my_timer_t distblas::core::start_clock() {
 
 double distblas::core::stop_clock_get_elapsed(my_timer_t &start) {
   auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> diff = end - start;
+  std::chrono::duration<double,std::milli> diff = end - start;
   return diff.count();
 }
 

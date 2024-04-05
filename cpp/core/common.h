@@ -34,6 +34,9 @@ using INDEX_TYPE = uint64_t;
 
 using VALUE_TYPE = double;
 
+const VALUE_TYPE MAX_BOUND = 5;
+const VALUE_TYPE MIN_BOUND = -5;
+
 typedef chrono::time_point<std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
@@ -51,9 +54,11 @@ void reset_performance_timers();
 
 void stop_clock_and_add(my_timer_t &start, string counter_name);
 
-void add_memory(size_t mem, string counter_name);
+void add_perf_stats(size_t mem, string counter_name);
 
-void add_datatransfers(INDEX_TYPE count, string counter_name);
+void add_perf_stats(INDEX_TYPE count, string counter_name);
+
+void add_perf_stats(INDEX_TYPE count, string counter_name);
 
 void print_performance_statistics();
 
@@ -76,6 +81,14 @@ template <typename VALUE_TYPE> struct Tuple {
   int64_t row;
   int64_t col;
   VALUE_TYPE value;
+};
+
+template <typename INDEX_TYPE> struct TileTuple {
+  int batch_id;
+  int tile_id;
+  INDEX_TYPE count=0;
+  INDEX_TYPE send_merge_count=0;
+  int mode=0;
 };
 
 template <typename VALUE_TYPE> struct CSR {
@@ -102,10 +115,11 @@ template <typename VALUE_TYPE, size_t size> struct CacheEntry {
 };
 
 template <typename VALUE_TYPE> struct SparseCacheEntry {
-  vector<VALUE_TYPE> values;
-  vector<INDEX_TYPE> cols;
+  vector<VALUE_TYPE> values = vector<VALUE_TYPE>();
+  vector<INDEX_TYPE> cols = vector<INDEX_TYPE>();
   int inserted_batch_id;
   int inserted_itr;
+  bool force_delete;
 };
 
 
@@ -116,6 +130,16 @@ struct CSRHandle {
   vector<MKL_INT> rowStart;
   vector<MKL_INT> row_idx;
   sparse_matrix_t mkl_handle;
+
+  CSRHandle& operator=(const CSRHandle& other) {
+    if (this != &other) {
+      this->values = other.values;
+      this->col_idx = other.col_idx;
+      this->rowStart = other.rowStart;
+      this->row_idx = other.row_idx;
+    }
+    return *this;
+  }
 };
 
 template <typename T>
@@ -146,6 +170,8 @@ extern MPI_Datatype SPTUPLE;
 extern MPI_Datatype DENSETUPLE;
 
 extern MPI_Datatype SPARSETUPLE;
+
+extern MPI_Datatype TILETUPLE;
 
 extern vector<string> perf_counter_keys;
 
@@ -189,11 +215,18 @@ void initialize_mpi_datatype_SPARSETUPLE() {
   SPARSETUPLE = CreateCustomMpiType(p,p.rows, p.cols, p.values);
 }
 
+template <typename INDEX_TYPE>
+void initialize_mpi_datatype_TILETUPLE() {
+   TileTuple<INDEX_TYPE> p;
+   TILETUPLE = CreateCustomMpiType(p,p.batch_id, p.tile_id, p.count,p.send_merge_count,p.mode);
+}
+
 template <typename VALUE_TYPE, size_t embedding_dim>
 void initialize_mpi_datatypes() {
   initialize_mpi_datatype_SPTUPLE<VALUE_TYPE>();
   initialize_mpi_datatype_DENSETUPLE<VALUE_TYPE,embedding_dim>();
   initialize_mpi_datatype_SPARSETUPLE<VALUE_TYPE,embedding_dim>();
+  initialize_mpi_datatype_TILETUPLE<INDEX_TYPE>();
 }
 
 template <typename VALUE_TYPE, size_t MAXBOUND>

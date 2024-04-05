@@ -84,7 +84,6 @@ public:
         sendbuf[idx].col = coords[i].col;
         sendbuf[idx].value = coords[i].value;
       }
-
       // Broadcast the number of nonzeros that each processor is going to
       // receive
       MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
@@ -104,8 +103,7 @@ public:
                     recvoffsets.data(), SPTUPLE, process_3D_grid->col_world);
 
       // TODO: Parallelize the sort routine?
-            std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
-            column_major<T>); // This helps to speed up CSR creation
+      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),column_major<T>); // This helps to speed up CSR creation
     }
 //    __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
 //                         column_major<T>);

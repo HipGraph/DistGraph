@@ -30,22 +30,19 @@ public:
 
   bool transpose;
 
-  unique_ptr<CSRHandle> handler = nullptr;
+  unique_ptr<CSRHandle> handler = unique_ptr<CSRHandle>(new CSRHandle());
 
   CSRLocal() {}
 
   CSRLocal(MKL_INT rows, MKL_INT cols, MKL_INT max_nnz, Tuple<VALUE_TYPE> *coords,
            int num_coords, bool transpose) {
+    int rank;
+    this->transpose = transpose;
+    this->num_coords = num_coords;
+    this->rows = rows;
+    this->cols = cols;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (num_coords > 0) {
-      this->transpose = transpose;
-      this->num_coords = num_coords;
-      this->rows = rows;
-      this->cols = cols;
-
-      this->handler = unique_ptr<CSRHandle>(new CSRHandle());
-
-      int rank;
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
       // This setup is really clunky, but I don't have time to fix it.
       vector<MKL_INT> rArray(num_coords, 0);
@@ -114,7 +111,6 @@ public:
              sizeof(MKL_INT) * max(num_coords, 1));
       memcpy((handler.get())->rowStart.data(), rows_start,
              sizeof(MKL_INT) * this->rows);
-
       (handler.get())->rowStart[this->rows] = max(num_coords, 1);
 
       mkl_sparse_d_create_csr(
@@ -122,8 +118,9 @@ public:
           this->cols, (handler.get())->rowStart.data(),
           (handler.get())->rowStart.data() + 1, (handler.get())->col_idx.data(),
           (handler.get())->values.data());
-
       mkl_sparse_destroy(tempCSR);
+    }else {
+      handler->rowStart.resize(rows+1,0);
     }
   }
 
@@ -158,6 +155,21 @@ public:
        handler->values.insert((handler->values).end(), Values.begin(), Values.end());
        handler->rowStart[i+1]=filtered.size()+handler->rowStart[i];
     }
+  }
+
+  CSRLocal<VALUE_TYPE>& CSRLocal<VALUE_TYPE>::operator=(const CSRLocal<VALUE_TYPE>& other) {
+    if (this != &other) {
+      // Copy all necessary data members
+      rows = other.rows;
+      cols = other.cols;
+      max_nnz = other.max_nnz;
+      num_coords = other.num_coords;
+      transpose = other.transpose;
+
+      // Copy the CSRHandle using its copy assignment operator or copy constructor
+      handler = make_unique<CSRHandle>(*other.handler);
+    }
+    return *this;
   }
 
   ~CSRLocal() {

@@ -36,6 +36,7 @@ private:
   bool col_major = false;
 
 public:
+  vector<double> timing_info;
   SpMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
@@ -44,7 +45,9 @@ public:
            Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
-        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),dense_local_output(dense_local_output) {}
+        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),dense_local_output(dense_local_output) {
+    this->timing_info = vector<double>(sp_local_receiver->proc_row_width,0);
+  }
 
 
 
@@ -151,7 +154,7 @@ public:
       }
     }
     total_memory = total_memory / (iterations * batches);
-    add_memory(total_memory, "Memory usage");
+    add_perf_stats(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
   }
 
@@ -225,7 +228,7 @@ public:
                           int end_process, bool fetch_from_temp_cache) {
 
     auto source_start_index = batch_id * batch_size;
-    auto source_end_index = std::min((batch_id + 1) * batch_size,
+    auto source_end_index = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                                      this->sp_local_receiver->proc_row_width) -
                             1;
 
@@ -372,6 +375,7 @@ public:
                           : (*this->dense_local->cachePtr)[target_rank];
               array_ptr = arrayMap[dst_id].value;
             }
+            auto t = start_clock();
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
                 prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
@@ -380,6 +384,8 @@ public:
                 prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
               }
             }
+            auto time = stop_clock_get_elapsed(t);
+            timing_info[index]+=time;
 
           }
         }
@@ -392,7 +398,7 @@ public:
                                         int batch_size) {
 
     int row_base_index = batch_id * batch_size;
-    int end_row = std::min((batch_id + 1) * batch_size,
+    int end_row = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
                            ((this->sp_local_receiver)->proc_row_width));
 
 #pragma omp parallel for schedule(static)
