@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
                     alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
     MPI_Barrier(MPI_COMM_WORLD);
     cout << " rank " << rank << " msbfs algo started  " << endl;
-    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr,enable_remote);
+    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
     cout << " rank " << rank << " msbfs algo completed  " << endl;
 
   } else if (sparse_embedding and !save_results){
