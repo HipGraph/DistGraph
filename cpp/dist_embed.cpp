@@ -302,6 +302,7 @@ int main(int argc, char **argv) {
 //    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
 
   }else if (msbfs and !save_results){
+    bool has_spgemm =dimension>spa_threshold?true:false;
             unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
                 new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
                     shared_sparseMat.get(), shared_sparseMat_receiver.get(),
