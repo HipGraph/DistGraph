@@ -73,6 +73,8 @@ int main(int argc, char **argv) {
 
    bool sparse_embedding=false;
 
+   bool msbfs=false;
+
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
       input_file = argv[p + 1];
@@ -110,6 +112,9 @@ int main(int argc, char **argv) {
     }else if (strcmp(argv[p], "-sparse_embedding") == 0) {
       int res = atof(argv[p + 1]);
       sparse_embedding = res == 1 ? true : false;
+    }else if (strcmp(argv[p], "-msbfs") == 0) {
+      int res = atof(argv[p + 1]);
+      msbfs = res == 1 ? true : false;
     }else if (strcmp(argv[p], "-density") == 0) {
       density = atof(argv[p + 1]);
     }else if (strcmp(argv[p], "-save_results") == 0) {
@@ -140,7 +145,6 @@ int main(int argc, char **argv) {
 
 
   // Initialize MPI DataTypes
-
   if (!(spgemm or sparse_embedding)) {
     initialize_mpi_datatypes<VALUE_TYPE, dimension>();
   }else{
@@ -157,8 +161,7 @@ int main(int argc, char **argv) {
   auto shared_sparseMat =
       shared_ptr<distblas::core::SpMat<VALUE_TYPE>>(new distblas::core::SpMat<VALUE_TYPE>(grid.get()));
 
-  cout << " rank " << rank << " reading data from file path:  " << input_file
-       << endl;
+  cout << " rank " << rank << " reading data from file path:  " << input_file<< endl;
 
   auto start_io = std::chrono::high_resolution_clock::now();
 
@@ -169,10 +172,8 @@ int main(int argc, char **argv) {
 
 
 
-  auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,
-                                        grid.get()->col_world_size);
-  auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,
-                                        grid.get()->col_world_size);
+  auto localBRows = divide_and_round_up(shared_sparseMat.get()->gCols,grid.get()->col_world_size);
+  auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->col_world_size);
 
   // To enable full batch size
     if (spmm or spgemm) {
@@ -210,16 +211,7 @@ int main(int argc, char **argv) {
                                        local_cols,static_cast<int>(dimension), density, 0,sparse_coo,
                                        output_file+"/sparse_local.txt",grid.get(),false);
     cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
-//    INDEX_TYPE gROWs = shared_sparseMat.get()->gRows;
-//    INDEX_TYPE gCols = static_cast<INDEX_TYPE>(dimension);
-//    INDEX_TYPE gNNZ =     static_cast<INDEX_TYPE>(sparse_coo.size());
-//    cout<<" rank "<<grid->rank_in_col<<" nnz "<<gNNZ<<endl;
-//    int localBRows = static_cast<int>(dimension);
-//    sparse_input =  make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),
-//                                                                   sparse_coo, gROWs,
-//                                                                   gCols, gNNZ, batch_size,
-//                                                                   localARows, localBRows, false, false);
-  }else if (spgemm){
+  } else if (spgemm) {
     reader.get()->parallel_read_MM<int64_t,VALUE_TYPE,VALUE_TYPE>(sparse_data_file, sparse_input.get(),false,true);
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
@@ -293,20 +285,6 @@ int main(int argc, char **argv) {
 //            grid.get(),
 //            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
 
-//    unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//        new distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>(
-//            shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//            shared_sparseMat_sender.get(), sparse_input.get(),sparse_out.get(),
-//            grid.get(),
-//            alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
-//        unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//            new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
-//                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//                shared_sparseMat_sender.get(), sparse_input.get(),
-//                grid.get(),
-//                alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
-
         unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>>(
             new distblas::algo::Baseline<INDEX_TYPE, VALUE_TYPE, dimension>(
                 shared_sparseMat.get(), shared_sparseMat_receiver.get(),
@@ -316,14 +294,26 @@ int main(int argc, char **argv) {
 
 
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << " rank " << rank << " spgemm algo started  " << endl;
+    cout << " rank " << rank << " spgemm baseline algo started  " << endl;
     perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr,enable_remote);
-    cout << " rank " << rank << " spgemm algo completed  " << endl;
+    cout << " rank " << rank << " spgemm baseline algo completed  " << endl;
 //    output_sparsity = (sparse_out->csr_local_data)->handler->rowStart[(sparse_out->csr_local_data)->handler->rowStart.size()-1];
 //    output_sparsity = 100*(output_sparsity/(((sparse_out->csr_local_data)->handler->rowStart.size()-1)*dimension));
 //    reader->parallel_write_csr<double>(output_file+"/sparse_embedding.txt",(sparse_out->csr_local_data)->handler.get(),grid.get(), localARows,shared_sparseMat.get()->gRows,dimension);
 
-  }else if (sparse_embedding and !save_results){
+  }else if (msbfs and !save_results){
+            unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>>(
+                new distblas::algo::MultiSourceBFS<INDEX_TYPE, VALUE_TYPE, dimension>(
+                    shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                    shared_sparseMat_sender.get(), sparse_input.get(),
+                    grid.get(),
+                    alpha, beta,col_major,sync_comm, tile_width_fraction,has_spgemm));
+    MPI_Barrier(MPI_COMM_WORLD);
+    cout << " rank " << rank << " msbfs algo started  " << endl;
+    perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr,enable_remote);
+    cout << " rank " << rank << " msbfs algo completed  " << endl;
+
+  } else if (sparse_embedding and !save_results){
     bool has_spgemm =dimension>spa_threshold?true:false;
     auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid.get(),localARows,dimension,has_spgemm,true);
     unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::SparseEmbedding<INDEX_TYPE, VALUE_TYPE, dimension>>(
@@ -381,7 +371,7 @@ int main(int argc, char **argv) {
     fout.close();
   }
 // reader->parallel_write(output_file+"/embedding.txt",dense_mat.get()->nCoordinates,localARows, dimension, grid.get(),shared_sparseMat.get());
- if(spgemm & save_results){
+ if(spgemm & save_results) {
    int local_cols = divide_and_round_up(static_cast<int>(dimension),grid->col_world_size);
    reader->parallel_write(output_file+"/sparse_local.txt",sparse_coo,grid.get(), local_cols,shared_sparseMat.get()->gRows,static_cast<int>(dimension),true);
  }
