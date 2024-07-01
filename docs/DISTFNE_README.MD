@@ -1,4 +1,4 @@
-##  DISTFNE: Distributed-Memory Algorithms for Force-Directed Node Embedding
+##  DistFNE: Distributed-Memory Algorithms for Force-Directed Node Embedding
 ## System Requirements
 Users need to have the following softwares/tools installed in their PC/server. The source code was compiled and run successfully in NERSC Perlmutter.
 
