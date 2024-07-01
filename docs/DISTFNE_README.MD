@@ -43,7 +43,7 @@ Input file must be in matrix market format ([check here for details about .mtx f
 ```
 $ ./bin/distembed -input ./datasets/minst.mtx -output ./datasets/output/ -iter 1200 -batch 256 
 ```
-To run DISTFNE embedding in distributed memory setup check the job submission batch script [mnist_job.sh](datasets/minst_job.sh)'
+To run DISTFNE embedding in distributed memory setup check the job submission batch script [mnist_job.sh](https://github.com/HipGraph/DistEmbed/blob/embedding/datasets/minst_job.sh)'
 
 Here, `-input` is the full path of input file, `-output` is the directory where output/embedding file will be saved, `-iter` is the number of iterations, `-batch` is the size of minibatch which is 256 here. All options are described below:
 ```
