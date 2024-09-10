@@ -51,13 +51,15 @@ add_library(disembed_lib SHARED
         cpp/partition/partitioner.hpp
         cpp/algo/spmm.hpp
         cpp/algo/spgemm.hpp
+        cpp/algo/fusedmm.hpp
         cpp/core/sparse_mat_tile.hpp
         cpp/net/tile_based_data_comm.hpp
         cpp/algo/spgemm_with_tiling.hpp
         cpp/algo/sparse_embedding.hpp
         cpp/algo/multi_source_bfs.hpp
         cpp/algo/baseline.hpp
-        cpp/algo/baseline_spmm.hpp)
+        cpp/algo/baseline_spmm.hpp
+        cpp/algo/baseline_fused_mm.hpp)
 
 SET(BUILD_TESTS "" ON)
 
