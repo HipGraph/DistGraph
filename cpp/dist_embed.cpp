@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
   auto localARows = divide_and_round_up(shared_sparseMat.get()->gRows,grid.get()->col_world_size);
 
   // To enable full batch size
-    if (spmm or spgemm) {
+    if (spmm or spgemm or fusedMM) {
       batch_size = localARows;
     }
 
