@@ -123,9 +123,9 @@ public:
         // One process computations without MPI operations
         if (grid->col_world_size == 1){
           // local computations for 1 process
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        true, false, 0, 0, false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        true, false, 0, 0, false);
         } else {
           //  pull model code
             this->execute_pull_model_computations(
