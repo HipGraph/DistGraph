@@ -100,6 +100,8 @@ public:
     VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
         ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
 
+      cout << " rank " << grid->rank_in_col << " memory allocation completed " << batches << endl;
+
     size_t total_memory = 0;
 
     CSRLocal<VALUE_TYPE> *csr_block =
@@ -120,9 +122,9 @@ public:
         // One process computations without MPI operations
         if (grid->col_world_size == 1){
           // local computations for 1 process
-//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-//                                        batch_size, considering_batch_size,
-//                                        true, false, 0, 0, false);
+          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                                        batch_size, considering_batch_size,
+                                        true, false, 0, 0, false);
         } else {
           //  pull model code
             this->execute_pull_model_computations(
