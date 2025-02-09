@@ -118,22 +118,12 @@ public:
 
 
         // One process computations without MPI operations
-        if (grid->col_world_size == 1) {
-          for (int k = 0; k < batch_size; k += 1) {
-            int IDIM = k * embedding_dim;
-            for (int d = 0; d < embedding_dim; d++) {
-              prevCoordinates[IDIM + d] = 0;
-            }
-          }
+        if (grid->col_world_size == 1){
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
                                         true, false, 0, 0, false);
-
-          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-
         } else {
-
           //  pull model code
             this->execute_pull_model_computations(
                 sendbuf_ptr.get(), update_ptr.get(), i, j,
@@ -141,15 +131,15 @@ public:
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
 
-            this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
 
-            for (int k = 0; k < batch_size; k += 1) {
+        }
+          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+          for (int k = 0; k < batch_size; k += 1) {
               int IDIM = k * embedding_dim;
               for (int d = 0; d < embedding_dim; d++) {
-                prevCoordinates[IDIM + d] = 0;
+                  prevCoordinates[IDIM + d] = 0;
               }
-            }
-        }
+          }
         total_memory += get_memory_usage();
       }
     }
