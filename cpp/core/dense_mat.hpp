@@ -3,7 +3,6 @@
 #include "common.h"
 #include "distributed_mat.hpp"
 #include "sparse_mat.hpp"
-#include <Eigen/Dense>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -12,7 +11,7 @@
 #include <unordered_map>
 
 using namespace std;
-using namespace Eigen;
+
 using namespace distblas::net;
 
 namespace distblas::core {

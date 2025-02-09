@@ -10,7 +10,6 @@
 #include "../core/sparse_mat.hpp"
 #include "../net/data_comm.hpp"
 #include "../net/process_3D_grid.hpp"
-#include <Eigen/Dense>
 #include <chrono>
 #include <math.h>
 #include <memory>
@@ -21,7 +20,6 @@
 using namespace std;
 using namespace distblas::core;
 using namespace distblas::net;
-using namespace Eigen;
 
 namespace distblas::algo {
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>

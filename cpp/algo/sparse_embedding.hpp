@@ -7,7 +7,7 @@
 using namespace std;
 using namespace distblas::core;
 using namespace distblas::net;
-using namespace Eigen;
+
 
 using namespace distblas::core;
 

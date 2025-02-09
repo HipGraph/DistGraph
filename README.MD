@@ -33,8 +33,8 @@ python-louvain v0.13
 ## Compile 
 Type the following command on terminal:
 ```
-$ git clone git@github.com:HipGraph/DistEmbed.git
-$ cd DistEmbed
+$ git clone git@github.com:HipGraph/DistGraph.git
+$ cd DistGraph
 $ mkdir build
 $ cd build
 $ cmake -DCMAKE_CXX_FLAGS="-fopenmp"  ..
