@@ -14,7 +14,6 @@ OpenMP version >= 4.5
 [ComBLAS](https://github.com/PASSIONLab/CombBLAS)
 CMake version = 3.17
 intel/2023.2.0
-eigen/3.4.0
 cray-mpich/8.1.28
 ```
 

@@ -2,7 +2,6 @@
 #define COMMON_HEADER
 
 #include "mpi_type_creator.hpp"
-#include <Eigen/Dense>
 #include <cstddef>
 #include <cstdint> // int64_t
 #include <iostream>
