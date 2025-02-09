@@ -136,7 +136,7 @@ public:
 
 
         }
-          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+//          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
           for (int k = 0; k < batch_size; k += 1) {
               int IDIM = k * embedding_dim;
               for (int d = 0; d < embedding_dim; d++) {
