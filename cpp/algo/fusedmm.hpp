@@ -137,15 +137,16 @@ public:
 
         }
 //          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-          for (int k = 0; k < batch_size; k += 1) {
-              int IDIM = k * embedding_dim;
-              for (int d = 0; d < embedding_dim; d++) {
-                  prevCoordinates[IDIM + d] = 0;
-              }
-          }
+//          for (int k = 0; k < batch_size; k += 1) {
+//              int IDIM = k * embedding_dim;
+//              for (int d = 0; d < embedding_dim; d++) {
+//                  prevCoordinates[IDIM + d] = 0;
+//              }
+//          }
         total_memory += get_memory_usage();
       }
     }
+    cout<<" iterations completed "<<endl;
     total_memory = total_memory / (iterations * batches);
     add_perf_stats(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
