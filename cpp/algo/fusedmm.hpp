@@ -100,7 +100,7 @@ public:
     VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
         ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
 
-      cout << " rank " << grid->rank_in_col << " memory allocation completed " << batches << endl;
+    cout << " rank " << grid->rank_in_col << " memory allocation completed " << batches << endl;
 
     size_t total_memory = 0;
 
