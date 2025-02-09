@@ -367,15 +367,15 @@ public:
               array_ptr = arrayMap[dst_id].value;
             }
             auto t = start_clock();
-            for (int d = 0; d < embedding_dim; d++) {
-              if (!fetch_from_cache) {
+//            for (int d = 0; d < embedding_dim; d++) {
+//              if (!fetch_from_cache) {
 //                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
 //                                                                       ->nCoordinates[local_dst * embedding_dim + d];
-                  prevCoordinates[index * embedding_dim + d]=lr;
-              } else {
-                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
-              }
-            }
+////                  prevCoordinates[index * embedding_dim + d]=lr;
+//              } else {
+//                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
+//              }
+//            }
             auto time = stop_clock_get_elapsed(t);
             timing_info[index]+=time;
 
