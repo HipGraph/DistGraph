@@ -17,6 +17,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include <limits.h>
 
 using namespace std;
 using namespace distblas::net;
