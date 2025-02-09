@@ -97,9 +97,10 @@ public:
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
-    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
-        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
-
+//    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
+//        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
+        auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size * embedding_dim, 0);
+        VALUE_TYPE *prevCoordinates = prevCoordinates->data();
     cout << " rank " << grid->rank_in_col << " memory allocation completed " << batches << endl;
 
     size_t total_memory = 0;
