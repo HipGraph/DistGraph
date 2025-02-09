@@ -120,9 +120,9 @@ public:
         // One process computations without MPI operations
         if (grid->col_world_size == 1){
           // local computations for 1 process
-          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
-                                        batch_size, considering_batch_size,
-                                        true, false, 0, 0, false);
+//          this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+//                                        batch_size, considering_batch_size,
+//                                        true, false, 0, 0, false);
         } else {
           //  pull model code
             this->execute_pull_model_computations(
@@ -367,15 +367,14 @@ public:
               array_ptr = arrayMap[dst_id].value;
             }
             auto t = start_clock();
-//            for (int d = 0; d < embedding_dim; d++) {
-//              if (!fetch_from_cache) {
-//                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
-//                                                                       ->nCoordinates[local_dst * embedding_dim + d];
-////                  prevCoordinates[index * embedding_dim + d]=lr;
-//              } else {
-//                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
-//              }
-//            }
+            for (int d = 0; d < embedding_dim; d++) {
+              if (!fetch_from_cache) {
+                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
+                                                                       ->nCoordinates[local_dst * embedding_dim + d];
+              } else {
+                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
+              }
+            }
             auto time = stop_clock_get_elapsed(t);
             timing_info[index]+=time;
 
