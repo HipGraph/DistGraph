@@ -33,6 +33,7 @@ python-louvain v0.13
 Type the following command on terminal:
 ```
 $ git clone git@github.com:HipGraph/DistGraph.git
+$ export COMBLAS_ROOT=<path to COMBLAS ROOT>
 $ cd DistGraph
 $ mkdir build
 $ cd build
