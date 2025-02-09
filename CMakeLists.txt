@@ -23,7 +23,7 @@ message("Finding BLAS")
 find_package(BLAS REQUIRED)
 
 
-include_directories($ENV{COMBLAS_ROOT}/install/include $ENV{MKLROOT}/include $ENV{EIGEN_ROOT}/include)
+include_directories($ENV{COMBLAS_ROOT}/install/include $ENV{MKLROOT}/include)
 link_directories($ENV{COMBLAS_ROOT}/install/lib $ENV{MKLROOT}/lib/intel64)
 
 
