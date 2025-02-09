@@ -338,7 +338,7 @@ public:
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
         INDEX_TYPE index = i - batch_id * batch_size;
@@ -369,8 +369,9 @@ public:
             auto t = start_clock();
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
-                                                                       ->nCoordinates[local_dst * embedding_dim + d];
+//                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
+//                                                                       ->nCoordinates[local_dst * embedding_dim + d];
+                  prevCoordinates[index * embedding_dim + d]=lr;
               } else {
                 prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
               }
