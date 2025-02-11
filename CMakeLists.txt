@@ -61,6 +61,7 @@ add_library(disembed_lib SHARED
         cpp/algo/baseline_spmm.hpp
         cpp/algo/baseline_fused_mm.hpp
         cpp/algo/gat/gat_layer.hpp
+        cpp/algo/gat/gat.hpp
         )
 
 SET(BUILD_TESTS "" ON)
