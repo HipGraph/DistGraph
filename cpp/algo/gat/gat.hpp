@@ -68,7 +68,7 @@ namespace distblas::algo {
             }
 
             stop_clock_and_add(t, "Total Time");
-            jobj[i] = json_perf_statistics();
+//            jobj[i] = json_perf_statistics();
             reset_performance_timers();
             return jobj;
         }

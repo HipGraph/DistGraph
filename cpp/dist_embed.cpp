@@ -293,12 +293,12 @@ int main(int argc, char **argv) {
       perf_stats =  fused_algo.get()->execute(iterations, batch_size,lr);
       cout << " rank " << rank << " FusedMM algo completed  " << endl;
   }else if(gat){
-      unique_ptr<distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>> gat = make_unique(
-              new distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, dimension>(
+      unique_ptr<distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>> gat = make_unique<
+               distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, dimension>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                       shared_sparseMat_sender.get(), sparse_input.get(),
                       grid.get(),
-                      alpha, beta,col_major,sync_comm, tile_width_fraction,false));
+                      alpha, beta,col_major,sync_comm, tile_width_fraction,false);
 
 
       MPI_Barrier(MPI_COMM_WORLD);
