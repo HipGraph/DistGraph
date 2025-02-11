@@ -36,7 +36,7 @@ namespace distblas::algo {
 
         bool hash_spgemm = false;
 
-        vector<GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head>> gat_layers;
+        vector <GATLayer<INDEX_TYPE, VALUE_TYPE, features_per_head>> gat_layers;
 
     public:
         GAT(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
@@ -52,51 +52,24 @@ namespace distblas::algo {
             this->hash_spgemm = hash_spgemm;
         }
 
-        void addLayer(GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head> layer){
+        void addLayer(GATLayer <INDEX_TYPE, VALUE_TYPE, features_per_head> layer) {
             gat_layers.push_back(layer);
         }
 
-        json execute(int iterations, int batch_size, VALUE_TYPE lr) {
+        json execute() {
             json jobj;
-            int batches = 0;
-            if (sp_local_receiver->proc_row_width % batch_size == 0) {
-                batches =
-                        static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
-            } else {
-                batches =
-                        static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+            auto t = start_clock();
+
+            for(int i=0;i<gat_layers.size();++i){
+                for(int j=0;j<gat_layers[i].weights.size();++j){
+                    cout<<" layer "<<i<<" weight "<<j<<endl;
+                }
             }
 
-            for (int i = 0; i < iterations; i++) {
-                auto t = start_clock();
-                size_t total_memory = 0;
-                auto dense_mat = unique_ptr < DenseMat < INDEX_TYPE, VALUE_TYPE, features_per_head>>(
-                        new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
-                auto dense_mat_output = unique_ptr < DenseMat < INDEX_TYPE, VALUE_TYPE, features_per_head>>(
-                        new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
-
-                unique_ptr <distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>
-
-                        embedding_algo =
-                        unique_ptr<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
-                                new distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>(
-                                        sp_local_native, sp_local_receiver,
-                                        sp_local_sender, dense_mat.get(),
-                                        dense_mat_output.get(), grid, alpha, beta, col_major, sync));
-
-                cout << " rank " << grid->rank_in_col << " fusedmm algo started  " << endl;
-                embedding_algo.get()->algo_fusedMM(1, batch_size, lr);
-
-                stop_clock_and_add(t, "Total Time");
-                double totalLocalSpGEMM =
-                        std::accumulate((embedding_algo->timing_info).begin(), (embedding_algo->timing_info).end(),
-                                        0.0) / 16;
-                add_perf_stats(totalLocalSpGEMM, "Local FusedMM");
-                jobj[i] = json_perf_statistics();
-                reset_performance_timers();
-            }
+            stop_clock_and_add(t, "Total Time");
+            jobj[i] = json_perf_statistics();
+            reset_performance_timers();
             return jobj;
         }
-
     };
 }
