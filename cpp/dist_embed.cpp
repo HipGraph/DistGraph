@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
       cout << " rank " << rank << " FusedMM algo completed  " << endl;
   }else if(gat){
       unique_ptr<distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>> gat = make_unique<
-               distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, dimension>>(
+               distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                       shared_sparseMat_sender.get(), sparse_input.get(),
                       grid.get(),
