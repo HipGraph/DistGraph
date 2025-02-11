@@ -4,6 +4,7 @@
 #include "../../core/sparse_mat_tile.hpp"
 #include "../../algo/spgemm_with_tiling.hpp"
 #include "../fusedmm.hpp"
+#include "gat_layer.hpp"
 
 using namespace distblas::core;
 
