@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
 
       MPI_Barrier(MPI_COMM_WORLD);
       cout << " rank " << rank << " gat algo started  " << endl;
-//      perf_stats =  fused_algo.get()->execute(iterations, batch_size,lr);
+      perf_stats = gat->execute();
       cout << " rank " << rank << " gat algo completed  " << endl;
   }else if(spgemm and !save_results){
 //    bool has_spgemm =dimension>spa_threshold?true:false;
