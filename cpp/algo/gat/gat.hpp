@@ -54,7 +54,7 @@ namespace distblas::algo {
         }
 
         void addLayer(GATLayer <INDEX_TYPE, VALUE_TYPE, features_per_head> layer) {
-            gat_layers.push_back(layer);
+            gat_layers.emplace_back(std::move(layer));
         }
 
         json execute() {
