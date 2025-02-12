@@ -242,7 +242,7 @@ public:
         for(int j=0;j<other->cols;++j){
             VALUE_TYPE value=0;
             for(int k=0;k<cols;++k){
-                value+= this->nCoordinates[i*cols+k]*other->nCoordinates[k*other->cols+j]
+                value+= this->nCoordinates[i*cols+k]*other->nCoordinates[k*other->cols+j];
             }
             output->nCoordinates[i*other->cols+j]=value;
         }
