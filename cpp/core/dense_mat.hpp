@@ -25,6 +25,7 @@ class DenseMat : public DistributedMat {
 private:
 public:
   uint64_t rows;
+  uint64_t cols=0;
   unique_ptr<vector<unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>>>
       cachePtr;
   unique_ptr<vector<unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>>>
@@ -43,6 +44,7 @@ public:
 
     this->rows = rows;
     this->grid = grid;
+    this->cols=embedding_dim;
 
     cout<<" col world size "<<grid->col_world_size<<endl;
 
@@ -67,6 +69,29 @@ public:
   }
 
   ~DenseMat() {}
+
+    DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, bool lazy=false): DistributedMat() {
+
+        this->rows = rows;
+        this->grid = grid;
+        this->cols = cols;
+        cout<<" col world size "<<grid->col_world_size<<endl;
+        this->nCoordinates =
+                static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[rows * cols])));
+//    std::srand(this->grid->global_rank);
+        if (!lazy) {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
+                    this->nCoordinates[i * cols + j] = val;
+                }
+            }
+        }
+
+    }
+
+
+
 
   void insert_cache(int rank, INDEX_TYPE key, int batch_id, int iteration,
                     std::array<VALUE_TYPE, embedding_dim> &arr, bool temp) {
@@ -205,6 +230,25 @@ public:
     }
     return false; // Key not found in any nestedMap
   }
+
+
+  void multiply(DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>* other, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>* output){
+    int cols = this->cols>0?this->cols:embedding_dim;
+
+    int output_size = this->rows*other->cols;
+    output->nCoordinates = static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[output_size])));
+#pragma omp parallel for collapse(2)
+    for(int i=0;i<this->rows;++i){
+        for(int j=0;j<other->cols;++j){
+            VALUE_TYPE value=0;
+            for(int k=0;k<cols;++k){
+                value+= this->nCoordinates[i*cols+k]*other->nCoordinates[k*other->cols+j]
+            }
+            output->nCoordinates[i*other->cols+j]=value;
+        }
+    }
+  }
+
 };
 
 } // namespace distblas::core

@@ -63,7 +63,7 @@ namespace distblas::algo {
 
             for(int i=0;i<gat_layers.size();++i){
                 for(int j=0;j<gat_layers[i].weights.size();++j){
-                    cout<<" layer "<<i<<" weight "<<j<<endl;
+
                 }
             }
 
