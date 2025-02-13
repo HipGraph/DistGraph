@@ -353,9 +353,9 @@ public:
             auto t = start_clock();
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-                prevCoordinates[index * embedding_dim + d] += val*  lr *(this->dense_local)->nCoordinates[local_dst * embedding_dim + d];
+                prevCoordinates[index * embedding_dim + d] += val* lr *(this->dense_local)->nCoordinates[local_dst * embedding_dim + d];
               } else {
-                prevCoordinates[index * embedding_dim + d] += val*lr *array_ptr[d];
+                prevCoordinates[index * embedding_dim + d] += val*lr*array_ptr[d];
               }
             }
             auto time = stop_clock_get_elapsed(t);
