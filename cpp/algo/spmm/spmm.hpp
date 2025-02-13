@@ -70,36 +70,22 @@ public:
 
     cout << " rank " << grid->rank_in_col << " total batches " << batches<< endl;
 
-    // This communicator is being used for negative updates and in alpha > 0 to
-    // fetch initial embeddings
-    auto full_comm = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-        new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
-    full_comm.get()->onboard_data();
 
     // Buffer used for receive MPI operations data
-    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
-            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
+    auto update_ptr  = make_unique<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>();
 
     //Buffer used for send MPI operations data
-    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> sendbuf_ptr =
-        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
-            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
-
+    auto sendbuf_ptr = make_unique<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>();
 
     for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
+      auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha);
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
-    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
-        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
+    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
 
     size_t total_memory = 0;
 
@@ -335,7 +321,6 @@ public:
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 
-
 #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
@@ -344,6 +329,7 @@ public:
         for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
              j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           auto dst_id = csr_handle->col_idx[j];
+          VALUE_TYPE val = csr_handle->values[j];
           if (dst_id >= dst_start_index and dst_id < dst_end_index) {
             INDEX_TYPE local_dst =
                 dst_id - (grid)->rank_in_col *
@@ -367,10 +353,9 @@ public:
             auto t = start_clock();
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
-                                                                       ->nCoordinates[local_dst * embedding_dim + d];
+                prevCoordinates[index * embedding_dim + d] += val*  lr *(this->dense_local)->nCoordinates[local_dst * embedding_dim + d]);
               } else {
-                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
+                prevCoordinates[index * embedding_dim + d] += val*lr *(array_ptr[d]));
               }
             }
             auto time = stop_clock_get_elapsed(t);
