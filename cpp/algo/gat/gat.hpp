@@ -2,8 +2,8 @@
 
 #include "../../core/sparse_mat.hpp"
 #include "../../core/sparse_mat_tile.hpp"
-#include "../../algo/spgemm_with_tiling.hpp"
-#include "../fusedmm.hpp"
+#include "../spgemm/spgemm_with_tiling.hpp"
+#include "../fusedMM/fusedmm.hpp"
 #include "gat_layer.hpp"
 
 using namespace distblas::core;
@@ -37,7 +37,11 @@ namespace distblas::algo {
 
         bool hash_spgemm = false;
 
-        vector <GATLayer<INDEX_TYPE, VALUE_TYPE, features_per_head>> gat_layers;
+        vector <GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head>> gat_layers;
+
+
+        vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>> buffers;
+
 
     public:
         GAT(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
@@ -53,17 +57,30 @@ namespace distblas::algo {
             this->hash_spgemm = hash_spgemm;
         }
 
-        void addLayer(GATLayer <INDEX_TYPE, VALUE_TYPE, features_per_head> layer) {
+        void addLayer(GATLayer layer) {
             gat_layers.emplace_back(std::move(layer));
+        }
+
+        void computeGAT(int i, int j){
+
         }
 
         json execute() {
             json jobj;
             auto t = start_clock();
+            buffers->resize(gat_layers.size()+1);
+            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(sparse_local->proc_row_width,gat_layers[0].input_features);
+            for(int i=0;i<gat_layers.size();++i){
+                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[i].num_heads*features_per_head);
+
+                for(int j=0;j<num_heads;++j){
+                    weights[] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,buffers[i]->cols);
+                }
+            }
 
             for(int i=0;i<gat_layers.size();++i){
                 for(int j=0;j<gat_layers[i].weights.size();++j){
-
+                     computeGAT(i,j);
                 }
             }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "algo.hpp"
+#include "../embedding/algo.hpp"
 
 using namespace std;
 using namespace distblas::core;

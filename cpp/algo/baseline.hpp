@@ -2,7 +2,7 @@
 
 #include "../core/sparse_mat.hpp"
 #include "../core/sparse_mat_tile.hpp"
-#include "../algo/spgemm_with_tiling.hpp"
+#include "spgemm/spgemm_with_tiling.hpp"
 
 using namespace distblas::core;
 

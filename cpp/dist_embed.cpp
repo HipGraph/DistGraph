@@ -1,5 +1,5 @@
-#include "algo/algo.hpp"
-#include "algo/spmm.hpp"
+#include "algo/embedding/algo.hpp"
+#include "algo/spmm/spmm.hpp"
 #include "core/common.h"
 #include "core/csr_local.hpp"
 #include "core/dense_mat.hpp"
@@ -16,14 +16,14 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "algo/spgemm.hpp"
+#include "algo/spgemm/spgemm.hpp"
 #include "net/tile_based_data_comm.hpp"
-#include "algo/spgemm_with_tiling.hpp"
-#include "algo/sparse_embedding.hpp"
-#include "algo/multi_source_bfs.hpp"
+#include "algo/spgemm/spgemm_with_tiling.hpp"
+#include "algo/embedding/sparse_embedding.hpp"
+#include "algo/bfs/multi_source_bfs.hpp"
 #include "algo/baseline.hpp"
-#include "algo/baseline_spmm.hpp"
-#include "algo/baseline_fused_mm.hpp"
+#include "algo/spmm/baseline_spmm.hpp"
+#include "algo/fusedMM/baseline_fused_mm.hpp"
 #include "algo/gat/gat.hpp"
 #include "algo/gat/gat_layer.hpp"
 

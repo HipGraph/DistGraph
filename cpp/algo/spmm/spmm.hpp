@@ -1,5 +1,5 @@
 #pragma once
-#include "algo.hpp"
+#include "../embedding/algo.hpp"
 
 using namespace std;
 using namespace distblas::core;
@@ -10,15 +10,16 @@ using namespace distblas::core;
 
 namespace distblas::algo {
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
-class FusedMMAlgo {
+class SpMMAlgo {
 
 private:
   DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output;
-
   DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
+
   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
+
   Process3DGrid *grid;
 
   std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
@@ -37,7 +38,7 @@ private:
 
 public:
   vector<double> timing_info;
-    FusedMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
+  SpMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
            DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
@@ -51,7 +52,7 @@ public:
 
 
 
-  void algo_fusedMM(int iterations, int batch_size, VALUE_TYPE lr) {
+  void algo_spmm(int iterations, int batch_size, VALUE_TYPE lr) {
     auto t = start_clock();
 
     int batches = 0;
@@ -97,11 +98,8 @@ public:
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
-//    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
-//        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
-        auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size * embedding_dim, 0);
-        VALUE_TYPE *prevCoordinates = prevCoordinates_ptr->data();
-    cout << " rank " << grid->rank_in_col << " memory allocation completed " << batches << endl;
+    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
+        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
 
     size_t total_memory = 0;
 
@@ -121,7 +119,7 @@ public:
 
 
         // One process computations without MPI operations
-        if (grid->col_world_size == 1){
+        if (grid->col_world_size == 1) {
           // local computations for 1 process
           this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
                                         batch_size, considering_batch_size,
@@ -133,20 +131,17 @@ public:
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
-
-
         }
           this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-//          for (int k = 0; k < batch_size; k += 1) {
-//              int IDIM = k * embedding_dim;
-//              for (int d = 0; d < embedding_dim; d++) {
-//                  prevCoordinates[IDIM + d] = 0;
-//              }
-//          }
+          for (int k = 0; k < batch_size; k += 1) {
+              int IDIM = k * embedding_dim;
+              for (int d = 0; d < embedding_dim; d++) {
+                  prevCoordinates[IDIM + d] = 0;
+              }
+          }
         total_memory += get_memory_usage();
       }
     }
-    cout<<" iterations completed "<<endl;
     total_memory = total_memory / (iterations * batches);
     add_perf_stats(total_memory, "Memory usage");
     stop_clock_and_add(t, "Total Time");
@@ -318,13 +313,12 @@ public:
               }
               matched = true;
             }
-
             for (int d = 0; d < embedding_dim; d++) {
               if (!fetch_from_cache) {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)->nCoordinates[i * embedding_dim + d]* (this->dense_local)
+                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
                                                                        ->nCoordinates[local_dst * embedding_dim + d];
               } else {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)->nCoordinates[i * embedding_dim + d]*(array_ptr[d]);
+                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
               }
             }
           }
