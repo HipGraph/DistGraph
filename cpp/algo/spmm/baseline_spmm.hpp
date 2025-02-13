@@ -68,14 +68,11 @@ public:
       auto dense_mat_output = unique_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
           new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
 
-      unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>
-
-          embedding_algo =
-              unique_ptr<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-                  new distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+      auto embedding_algo =
+              make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
                       sp_local_native, sp_local_receiver,
                       sp_local_sender, dense_mat.get(),
-                      dense_mat_output.get(), grid, alpha, beta, col_major, sync));
+                      dense_mat_output.get(), grid, alpha, beta, col_major, sync);
 
       cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
       embedding_algo.get()->algo_spmm(1, batch_size, lr);
