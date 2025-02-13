@@ -85,8 +85,7 @@ public:
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
-      auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size * embedding_dim, 0);
-      VALUE_TYPE *prevCoordinates = prevCoordinates_ptr->data();
+
 
     size_t total_memory = 0;
 
@@ -100,11 +99,12 @@ public:
 
       for (int j = 0; j < batches; j++) {
 
+          auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size * embedding_dim, 0);
+          VALUE_TYPE *prevCoordinates = prevCoordinates_ptr->data();
+
         if (j == batches - 1) {
           considering_batch_size = last_batch_size;
         }
-
-
         // One process computations without MPI operations
         if (grid->col_world_size == 1) {
           // local computations for 1 process
@@ -119,13 +119,7 @@ public:
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
         }
-          this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
-//          for (int k = 0; k < batch_size; k += 1) {
-//              int IDIM = k * embedding_dim;
-//              for (int d = 0; d < embedding_dim; d++) {
-//                  prevCoordinates[IDIM + d] = 0;
-//              }
-//          }
+        this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
         total_memory += get_memory_usage();
       }
     }
