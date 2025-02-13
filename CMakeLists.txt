@@ -45,21 +45,21 @@ add_library(disembed_lib SHARED
         cpp/net/process_3D_grid.cpp
         cpp/net/process_3D_grid.hpp
         cpp/net/data_comm.hpp
-        cpp/algo/algo.hpp
+        cpp/algo/embedding/algo.hpp
         cpp/core/json.hpp
         cpp/partition/partitioner.cpp
         cpp/partition/partitioner.hpp
-        cpp/algo/spmm.hpp
-        cpp/algo/spgemm.hpp
-        cpp/algo/fusedmm.hpp
+        cpp/algo/spmm/spmm.hpp
+        cpp/algo/spgemm/spgemm.hpp
+        cpp/algo/fusedMM/fusedmm.hpp
         cpp/core/sparse_mat_tile.hpp
         cpp/net/tile_based_data_comm.hpp
-        cpp/algo/spgemm_with_tiling.hpp
-        cpp/algo/sparse_embedding.hpp
-        cpp/algo/multi_source_bfs.hpp
+        cpp/algo/spgemm/spgemm_with_tiling.hpp
+        cpp/algo/embedding/sparse_embedding.hpp
+        cpp/algo/bfs/multi_source_bfs.hpp
         cpp/algo/baseline.hpp
-        cpp/algo/baseline_spmm.hpp
-        cpp/algo/baseline_fused_mm.hpp
+        cpp/algo/spmm/baseline_spmm.hpp
+        cpp/algo/fusedMM/baseline_fused_mm.hpp
         cpp/algo/gat/gat_layer.hpp
         cpp/algo/gat/gat.hpp
         )
