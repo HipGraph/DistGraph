@@ -57,7 +57,7 @@ namespace distblas::algo {
             this->hash_spgemm = hash_spgemm;
         }
 
-        void addLayer(GATLayer layer) {
+        void addLayer(GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head> layer) {
             gat_layers.emplace_back(std::move(layer));
         }
 
@@ -73,7 +73,7 @@ namespace distblas::algo {
             for(int i=0;i<gat_layers.size();++i){
 //                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[i].num_heads*features_per_head);
 
-                for(int j=0;j<num_heads;++j){
+                for(int j=0;j<gat_layers[i].num_heads;++j){
                     weights[] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,buffers[i]->cols);
                 }
             }
