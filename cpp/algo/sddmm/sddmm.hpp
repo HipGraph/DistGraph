@@ -279,8 +279,8 @@ namespace distblas::algo {
                                     unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
                                             &arrayMap =
                                             (temp_cache)
-                                            ? (*this->dense_local->tempCachePtr)[target_rank]
-                                            : (*this->dense_local->cachePtr)[target_rank];
+                                            ? (*this->dense_local_b->tempCachePtr)[target_rank]
+                                            : (*this->dense_local_b->cachePtr)[target_rank];
                                     array_ptr = arrayMap[i].value;
                                 }
                                 matched = true;
@@ -334,8 +334,8 @@ namespace distblas::algo {
                                 unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
                                         &arrayMap =
                                         (temp_cache)
-                                        ? (*this->dense_local->tempCachePtr)[target_rank]
-                                        : (*this->dense_local->cachePtr)[target_rank];
+                                        ? (*this->dense_local_b->tempCachePtr)[target_rank]
+                                        : (*this->dense_local_b->cachePtr)[target_rank];
                                 array_ptr = arrayMap[dst_id].value;
                             }
                             auto t = start_clock();
@@ -359,19 +359,7 @@ namespace distblas::algo {
         }
 
 
-        inline void update_data_matrix_rowptr(VALUE_TYPE *prevCoordinates, int batch_id, int batch_size) {
 
-            int row_base_index = batch_id * batch_size;
-            int end_row = std::min(static_cast<INDEX_TYPE>((batch_id + 1) * batch_size),
-                                   ((this->sp_local_receiver)->proc_row_width));
-
-            #pragma omp parallel for schedule(static)
-            for (int i = 0; i < (end_row - row_base_index); i++) {
-                for (int d = 0; d < embedding_dim; d++) {
-                    (this->dense_local_output)->nCoordinates[(row_base_index + i) * embedding_dim + d] = prevCoordinates[i * embedding_dim + d];
-                }
-            }
-        }
     };
 } // namespace distblas::algo
 
