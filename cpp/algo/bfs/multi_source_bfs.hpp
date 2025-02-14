@@ -110,7 +110,8 @@ public:
       total_memory += get_memory_usage();
 
       double totalSum = std::accumulate((*(state_holder->nnz_count)).begin(), (*(state_holder->nnz_count)).end(), 0);
-      (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
+//      (*(sparse_input->csr_local_data)) =(*(sparse_out->csr_local_data));
+        sparse_input->csr_local_data =make_unique<CSRLocal<VALUE_TYPE>>(sparse_out->csr_local_data);
       main_comm->update_local_input(sparse_input);
       add_perf_stats(totalSum,"Output NNZ");
       if (bfs_frontier>0) {
