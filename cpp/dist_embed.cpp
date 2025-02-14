@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
   }else if(sddmm){
       auto dense_mat = make_unique<DenseMat<INDEX_TYPE , VALUE_TYPE, dimension>>(grid.get(), shared_sparseMat.get()->proc_row_width);
       auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*shared_sparseMat.get());
-      auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, dimension>(
+      auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, dimension>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                       shared_sparseMat_sender.get(), dense_mat.get(),dense_mat.get(),sparse_output.get(),
                       grid.get(),
