@@ -26,6 +26,7 @@
 #include "algo/fusedMM/baseline_fused_mm.hpp"
 #include "algo/gat/gat.hpp"
 #include "algo/gat/gat_layer.hpp"
+#include "algo/sddmm/sddmm.hpp"
 
 using json = nlohmann::json;
 
@@ -81,6 +82,8 @@ int main(int argc, char **argv) {
    bool fusedMM=false;
 
    bool gat=false;
+
+    bool sddmm=false;
 
   for (int p = 0; p < argc; p++) {
     if (strcmp(argv[p], "-input") == 0) {
@@ -142,6 +145,9 @@ int main(int argc, char **argv) {
     }else if (strcmp(argv[p], "-gat") == 0) {
         int res = atof(argv[p + 1]);
         gat = res == 1 ? true : false;
+    }else if (strcmp(argv[p], "-sddmm") == 0) {
+        int res = atof(argv[p + 1]);
+        sddmm = res == 1 ? true : false;
     }
   }
 
@@ -290,7 +296,21 @@ int main(int argc, char **argv) {
       cout << " rank " << rank << " FusedMM algo started  " << endl;
       perf_stats =  fused_algo.get()->execute(iterations, batch_size,lr);
       cout << " rank " << rank << " FusedMM algo completed  " << endl;
-  }else if(gat){
+  }else if(sddmm){
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE , VALUE_TYPE, dimension>>(grid.get(), shared_sparseMat.get()->proc_row_width);
+      auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*shared_sparseMat.get());
+      auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, dimension>(
+                      shared_sparseMat.get(), shared_sparseMat_receiver.get(),
+                      shared_sparseMat_sender.get(), dense_mat.get(),dense_mat.get(),sparse_output,
+                      grid.get(),
+                      alpha, beta,col_major,sync_comm);
+
+
+      MPI_Barrier(MPI_COMM_WORLD);
+      cout << " rank " << rank << " FusedMM algo started  " << endl;
+//      perf_stats =  fused_algo.get()->execute(iterations, batch_size,lr);
+      cout << " rank " << rank << " FusedMM algo completed  " << endl;
+  } else if(gat){
       unique_ptr<distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>> gat = make_unique<
                distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),

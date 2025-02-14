@@ -49,7 +49,6 @@ namespace distblas::algo {
                 : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
                   sp_local_sender(sp_local_sender), dense_local_a(dense_local_a), dense_local_b(dense_local_b),grid(grid),
                   alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),sp_local_output(sp_local_output) {
-            this->sp_local_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
             this->timing_info = vector<double>(sp_local_receiver->proc_row_width,0);
         }
 
