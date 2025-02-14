@@ -952,7 +952,7 @@ public:
   }
 
   inline void update_local_input(distblas::core::SpMat<VALUE_TYPE>* sparse_input){
-    this->sparse_local->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_input->csr_local_data.get());
+    this->sparse_local->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*sparse_input->csr_local_data);
   }
 };
 
