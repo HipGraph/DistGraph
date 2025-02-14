@@ -85,15 +85,13 @@ namespace distblas::algo {
 
             size_t total_memory = 0;
             CSRLocal<VALUE_TYPE> *csr_block = (col_major) ? (this->sp_local_receiver)->csr_local_data.get() : (this->sp_local_native)->csr_local_data.get();
-
+            CSRLocal<VALUE_TYPE> *csr_block_output = (this->sp_local_output)->csr_local_data.get()
             int considering_batch_size = batch_size;
 
             for (int i = 0; i < iterations; i++) {
 
                 for (int j = 0; j < batches; j++) {
 
-                    auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size * embedding_dim, 0);
-                    VALUE_TYPE *prevCoordinates = prevCoordinates_ptr->data();
 
                     if (j == batches - 1) {
                         considering_batch_size = last_batch_size;
@@ -101,7 +99,7 @@ namespace distblas::algo {
                     // One process computations without MPI operations
                     if (grid->col_world_size == 1) {
                         // local computations for 1 process
-                        this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, j,
+                        this->calc_t_dist_grad_rowptr(csr_block, csr_block_output, lr, j,
                                                       batch_size, considering_batch_size,
                                                       true, false, 0, 0, false);
                     } else {
@@ -109,10 +107,10 @@ namespace distblas::algo {
                         this->execute_pull_model_computations(
                                 sendbuf_ptr.get(), update_ptr.get(), i, j,
                                 this->data_comm_cache[j].get(), csr_block, batch_size,
-                                considering_batch_size, lr, prevCoordinates, 1,
+                                considering_batch_size, lr, csr_block_output, 1,
                                 true, 0, true);
                     }
-                    this->update_data_matrix_rowptr(prevCoordinates, j, batch_size);
+
                     total_memory += get_memory_usage();
                 }
             }
@@ -126,7 +124,7 @@ namespace distblas::algo {
                 std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf, int iteration,
                 int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
                 CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
-                double lr, VALUE_TYPE *prevCoordinates, int comm_initial_start, bool local_execution,
+                double lr, CSRLocal<VALUE_TYPE> *csr_block_output, int comm_initial_start, bool local_execution,
                 int first_execution_proc, bool communication) {
 
             int proc_length = get_proc_length(beta, grid->col_world_size);
@@ -152,14 +150,14 @@ namespace distblas::algo {
                 if (k == comm_initial_start) {
                     // local computation
                     this->calc_t_dist_grad_rowptr(
-                            csr_block, prevCoordinates, lr, batch, batch_size,
+                            csr_block, csr_block_output, lr, batch, batch_size,
                             considering_batch_size, local_execution, col_major,
                             first_execution_proc, prev_start, local_execution);
 
                 } else if (k > comm_initial_start) {
                     int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
-                    this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
+                    this->calc_t_dist_grad_rowptr(csr_block, csr_block_output, lr, batch,
                                                   batch_size, considering_batch_size, false,
                                                   col_major, prev_start, prev_end_process,
                                                   true);
@@ -175,7 +173,7 @@ namespace distblas::algo {
             int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
 
             // updating last remote fetched data vectors
-            this->calc_t_dist_grad_rowptr(csr_block, prevCoordinates, lr, batch,
+            this->calc_t_dist_grad_rowptr(csr_block,csr_block_output , lr, batch,
                                           batch_size, considering_batch_size, false,
                                           col_major, prev_start, prev_end_process,
                                           true);
@@ -185,7 +183,7 @@ namespace distblas::algo {
 
 
 
-        inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
+        inline void calc_t_dist_grad_rowptr(CSRLocal<VALUE_TYPE> *csr_block, CSRLocal<VALUE_TYPE> *csr_block_output,
                                             VALUE_TYPE lr, int batch_id, int batch_size, int block_size,
                                             bool local, bool col_major, int start_process,
                                             int end_process, bool fetch_from_temp_cache) {
@@ -249,7 +247,7 @@ namespace distblas::algo {
         inline void calc_embedding(INDEX_TYPE source_start_index,
                                    INDEX_TYPE source_end_index,
                                    INDEX_TYPE dst_start_index, INDEX_TYPE dst_end_index,
-                                   CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE *prevCoordinates,
+                                   CSRLocal<VALUE_TYPE> *csr_block, CSRLocal<VALUE_TYPE> *csr_block_output,
                                    VALUE_TYPE lr, int batch_id, int batch_size,
                                    int block_size, bool temp_cache) {
             if (csr_block->handler != nullptr) {
@@ -304,7 +302,7 @@ namespace distblas::algo {
         inline void calc_embedding_row_major(INDEX_TYPE source_start_index,
                                              INDEX_TYPE source_end_index, INDEX_TYPE dst_start_index,
                                              INDEX_TYPE dst_end_index, CSRLocal<VALUE_TYPE> *csr_block,
-                                             VALUE_TYPE *prevCoordinates, VALUE_TYPE lr, int batch_id,
+                                             CSRLocal<VALUE_TYPE> *csr_block_output, VALUE_TYPE lr, int batch_id,
                                              int batch_size, int block_size, bool temp_cache) {
             if (csr_block->handler != nullptr) {
                 CSRHandle *csr_handle = csr_block->handler.get();
@@ -317,7 +315,7 @@ namespace distblas::algo {
                     for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
                          j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
                         auto dst_id = csr_handle->col_idx[j];
-                        VALUE_TYPE val = csr_handle->values[j];
+
                         if (dst_id >= dst_start_index and dst_id < dst_end_index) {
                             INDEX_TYPE local_dst =
                                     dst_id - (grid)->rank_in_col *
@@ -339,13 +337,16 @@ namespace distblas::algo {
                                 array_ptr = arrayMap[dst_id].value;
                             }
                             auto t = start_clock();
+                            VALUE_TYPE  val=0;
                             for (int d = 0; d < embedding_dim; d++) {
                                 if (!fetch_from_cache) {
-                                    prevCoordinates[index * embedding_dim + d] += val* lr *(this->dense_local)->nCoordinates[local_dst * embedding_dim + d];
+                                    val +=  (this->dense_local_a)->nCoordinates[i * embedding_dim + d] * (this->dense_local_b)->nCoordinates[local_dst * embedding_dim + d]*lr;
                                 } else {
-                                    prevCoordinates[index * embedding_dim + d] += val*lr*array_ptr[d];
+                                   val += (this->dense_local_a)->nCoordinates[i * embedding_dim + d] *array_ptr[d]*lr;
                                 }
                             }
+                            CSRHandle *csr_handle_output = csr_block_output->handler.get();
+                            csr_handle_output->values[j] = val;
                             auto time = stop_clock_get_elapsed(t);
                             timing_info[index]+=time;
 
