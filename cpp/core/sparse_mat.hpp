@@ -309,8 +309,7 @@ public:
   bool col_partitioned = false;
   Process3DGrid *grid;
 
-  unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>
-      tempCachePtr;
+  unique_ptr<vector<unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>> tempCachePtr;
 
   /**
    * Constructor for Sparse Matrix representation of  Adj matrix
@@ -376,6 +375,13 @@ public:
         }
       }
     }
+  }
+
+  SpMat(const SpMat& other):DistributedMat(other) {
+            // Perform deep copy of all members
+            if (other.tempCachePtr) {
+                tempCachePtr = std::make_unique<CacheType>(*other.tempCachePtr);
+            }
   }
 
   void initialize_batch_collector(INDEX_TYPE batch_size) {
