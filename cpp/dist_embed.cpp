@@ -239,10 +239,8 @@ int main(int argc, char **argv) {
 
     cout << " rank " << rank << " partitioning data started  " << endl;
 
-    partitioner.get()->partition_data<VALUE_TYPE>(
-        shared_sparseMat_sender.get());
-    partitioner.get()->partition_data<VALUE_TYPE>(
-        shared_sparseMat_receiver.get());
+    partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_sender.get());
+    partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat_receiver.get());
     partitioner.get()->partition_data<VALUE_TYPE>(shared_sparseMat.get());
 
     cout << " rank " << rank << " partitioning data completed  " << endl;

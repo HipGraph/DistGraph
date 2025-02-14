@@ -62,6 +62,7 @@ add_library(disembed_lib SHARED
         cpp/algo/fusedMM/baseline_fused_mm.hpp
         cpp/algo/gat/gat_layer.hpp
         cpp/algo/gat/gat.hpp
+        cpp/algo/sddmm/sddmm.hpp
         )
 
 SET(BUILD_TESTS "" ON)
@@ -71,7 +72,7 @@ SET(BUILD_TESTS "" ON)
 #    message(STATUS "Building tests ....")
 #endif ()
 
-SET(SOURCES cpp/dist_embed.cpp)
+SET(SOURCES cpp/dist_embed.cpp cpp/algo/sddmm/sddmm.hpp)
 
 add_executable(distembed ${SOURCES})
 
