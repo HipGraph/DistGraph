@@ -351,6 +351,10 @@ namespace distblas::algo {
                                 }
                             }
                             CSRHandle *csr_handle_output = csr_block_output->handler.get();
+                            auto dst_id_output = csr_handle_output->col_idx[j];
+                             if (!dst_id_output){
+                                 cout<<"not dist"<<endl;
+                             }
 //                            csr_handle_output->values[j] = val;
                             auto time = stop_clock_get_elapsed(t);
                             timing_info[index] += time;
