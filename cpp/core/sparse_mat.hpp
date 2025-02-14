@@ -383,6 +383,9 @@ public:
                 tempCachePtr = std::make_unique<std::vector<
                         std::unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>(*other.tempCachePtr);
             }
+      if (other.csr_local_data) {
+          csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*other.csr_local_data);
+      }
   }
 
   void initialize_batch_collector(INDEX_TYPE batch_size) {
