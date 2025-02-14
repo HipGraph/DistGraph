@@ -380,7 +380,8 @@ public:
   SpMat(const SpMat& other):DistributedMat(other) {
             // Perform deep copy of all members
             if (other.tempCachePtr) {
-                tempCachePtr = std::make_unique<CacheType>(*other.tempCachePtr);
+                tempCachePtr = std::make_unique<std::vector<
+                        std::unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>(*other.tempCachePtr);
             }
   }
 
