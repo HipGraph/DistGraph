@@ -85,7 +85,7 @@ namespace distblas::algo {
 
             size_t total_memory = 0;
             CSRLocal<VALUE_TYPE> *csr_block = (col_major) ? (this->sp_local_receiver)->csr_local_data.get() : (this->sp_local_native)->csr_local_data.get();
-            CSRLocal<VALUE_TYPE> *csr_block_output = (this->sp_local_output)->csr_local_data.get()
+            CSRLocal<VALUE_TYPE> *csr_block_output = (this->sp_local_output)->csr_local_data.get();
             int considering_batch_size = batch_size;
 
             for (int i = 0; i < iterations; i++) {
@@ -204,12 +204,12 @@ namespace distblas::algo {
             if (local) {
                 if (col_major) {
                     calc_embedding(source_start_index, source_end_index, dst_start_index,
-                                   dst_end_index, csr_block, prevCoordinates, lr, batch_id,
+                                   dst_end_index, csr_block, csr_block_output, lr, batch_id,
                                    batch_size, block_size, fetch_from_temp_cache);
                 } else {
                     calc_embedding_row_major(source_start_index, source_end_index,
                                              dst_start_index, dst_end_index, csr_block,
-                                             prevCoordinates, lr, batch_id, batch_size,
+                                             csr_block_output, lr, batch_id, batch_size,
                                              block_size, fetch_from_temp_cache);
                 }
             } else {
@@ -231,12 +231,12 @@ namespace distblas::algo {
                         if (col_major) {
                             calc_embedding(source_start_index, source_end_index,
                                            dst_start_index, dst_end_index, csr_block,
-                                           prevCoordinates, lr, batch_id, batch_size,
+                                           csr_block_output, lr, batch_id, batch_size,
                                            block_size, fetch_from_temp_cache);
                         } else {
                             calc_embedding_row_major(source_start_index, source_end_index,
                                                      dst_start_index, dst_end_index, csr_block,
-                                                     prevCoordinates, lr, batch_id, batch_size,
+                                                     csr_block_output, lr, batch_id, batch_size,
                                                      block_size, fetch_from_temp_cache);
                         }
                     }
