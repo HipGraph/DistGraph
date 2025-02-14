@@ -100,14 +100,14 @@ namespace distblas::algo {
             // One process computations without MPI operations
             if (grid->col_world_size == 1) {
                 // local computations for 1 process
-                this->calc_t_dist_grad_rowptr(csr_block, csr_block_output, lr, j,
+                this->calc_t_dist_grad_rowptr(csr_block, csr_block_output, lr,0,
                                               batch_size, considering_batch_size,
                                               true, false, 0, 0, false);
             } else {
                 //  pull model code
                 this->execute_pull_model_computations(
-                        sendbuf_ptr.get(), update_ptr.get(), i, j,
-                        this->data_comm_cache[j].get(), csr_block, batch_size,
+                        sendbuf_ptr.get(), update_ptr.get(), 0, 0,
+                        this->data_comm_cache[0].get(), csr_block, batch_size,
                         considering_batch_size, lr, csr_block_output, 1,
                         true, 0, true);
             }
