@@ -307,9 +307,9 @@ int main(int argc, char **argv) {
 
 
       MPI_Barrier(MPI_COMM_WORLD);
-      cout << " rank " << rank << " FusedMM algo started  " << endl;
-//      perf_stats =  fused_algo.get()->execute(iterations, batch_size,lr);
-      cout << " rank " << rank << " FusedMM algo completed  " << endl;
+      cout << " rank " << rank << " SDDMM algo started  " << endl;
+      sddmm_algo.get()->execute(iterations, batch_size,lr);
+      cout << " rank " << rank << " SDDMM algo completed  " << endl;
   } else if(gat){
       unique_ptr<distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>> gat = make_unique<
                distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>>(
