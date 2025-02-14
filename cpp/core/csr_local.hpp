@@ -177,6 +177,7 @@ public:
         if (other.handler) {
             handler = std::make_unique<CSRHandle>(*other.handler);
         }
+
     }
 
   ~CSRLocal() {
