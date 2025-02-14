@@ -310,8 +310,6 @@ namespace distblas::algo {
             if (csr_block->handler != nullptr) {
                 CSRHandle *csr_handle = csr_block->handler.get();
 
-                cout<<"calc_embedding_row_major"<<endl;
-
 #pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
                 for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
@@ -352,7 +350,7 @@ namespace distblas::algo {
                                            lr;
                                 }
                             }
-//                            CSRHandle *csr_handle_output = csr_block_output->handler.get();
+                            CSRHandle *csr_handle_output = csr_block_output->handler.get();
 //                            csr_handle_output->values[j] = val;
                             auto time = stop_clock_get_elapsed(t);
                             timing_info[index] += time;
