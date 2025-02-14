@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
       auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*shared_sparseMat.get());
       auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, dimension>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                      shared_sparseMat_sender.get(), dense_mat.get(),dense_mat.get(),sparse_output,
+                      shared_sparseMat_sender.get(), dense_mat.get(),dense_mat.get(),sparse_output.get(),
                       grid.get(),
                       alpha, beta,col_major,sync_comm);
 
