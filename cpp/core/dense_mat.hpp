@@ -75,9 +75,7 @@ public:
         this->rows = rows;
         this->grid = grid;
         this->cols = cols;
-        cout<<" col world size "<<grid->col_world_size<<endl;
-        this->nCoordinates =
-                static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[rows * cols])));
+        this->nCoordinates = static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[rows * cols])));
 //    std::srand(this->grid->global_rank);
         if (!lazy) {
             for (int i = 0; i < rows; i++) {
