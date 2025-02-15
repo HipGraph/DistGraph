@@ -314,8 +314,7 @@ int main(int argc, char **argv) {
       unique_ptr<distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>> gat = make_unique<
                distblas::algo::GAT<INDEX_TYPE, VALUE_TYPE, 256>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-                      shared_sparseMat_sender.get(), sparse_input.get(),
-                      grid.get(),
+                      shared_sparseMat_sender.get(),grid.get(),
                       alpha, beta,col_major,sync_comm, tile_width_fraction,false);
       gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE,256>(256,4));
       gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE,256>(1024,4));
