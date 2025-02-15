@@ -75,7 +75,7 @@ public:
         this->rows = rows;
         this->grid = grid;
         this->cols = cols;
-        this->nCoordinates = static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[rows * cols])));
+        this->nCoordinates = make_unique<vector<VALUE_TYPE>>(rows*cols)->data();
 //    std::srand(this->grid->global_rank);
         if (!lazy) {
             for (int i = 0; i < rows; i++) {
