@@ -17,7 +17,6 @@ namespace distblas::algo {
         distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
         distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
         distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
-        distblas::core::SpMat<VALUE_TYPE> *sparse_local;
 
         Process3DGrid *grid;
 
@@ -47,12 +46,10 @@ namespace distblas::algo {
         GAT(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
             distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
             distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-            distblas::core::SpMat<VALUE_TYPE> *sparse_local,
             Process3DGrid *grid, double alpha, double beta, bool col_major,
             bool sync_comm, double tile_width_fraction, bool hash_spgemm)
                 : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
-                  sp_local_sender(sp_local_sender), sparse_local(sparse_local),
-                  grid(grid), alpha(alpha), beta(beta), col_major(col_major),
+                  sp_local_sender(sp_local_sender),grid(grid), alpha(alpha), beta(beta), col_major(col_major),
                   sync(sync_comm), tile_width_fraction(tile_width_fraction) {
             this->hash_spgemm = hash_spgemm;
         }
@@ -70,10 +67,12 @@ namespace distblas::algo {
             auto t = start_clock();
             buffers.resize(gat_layers.size()+1);
             cout<<"  buffer resizing  completed "<<endl;
-            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[0].input_features);
+            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sp_local_native->proc_row_width,
+                    gat_layers[0].input_features);
             cout<<" first buffer initialization completed "<<endl;
             for(int i=0;i<gat_layers.size();++i){
-                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[i].num_heads*features_per_head,true);
+                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sp_local_native->proc_row_width,
+                        gat_layers[i].num_heads*features_per_head,true);
                 for(int j=0;j<gat_layers[i].num_heads;++j){
                     gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,buffers[i]->cols);
                     cout<<" gat layer initialization completed "<<i<<endl;
