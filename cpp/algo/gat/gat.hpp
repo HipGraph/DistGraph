@@ -70,14 +70,17 @@ namespace distblas::algo {
             auto t = start_clock();
             buffers.resize(gat_layers.size()+1);
             buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[0].input_features);
+            cout<<" first buffer initialization completed "<<endl;
             for(int i=0;i<gat_layers.size();++i){
                 buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[i].num_heads*features_per_head,true);
                 for(int j=0;j<gat_layers[i].num_heads;++j){
                     gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,buffers[i]->cols);
+                    cout<<" gat layer initialization completed "<<i<<endl;
                 }
             }
             for(int i=0;i<gat_layers.size();++i){
                 for(int j=0;j<gat_layers[i].weights.size();++j){
+                    cout<<" computed gat  "<<i<<" "<<j<<endl;
                      computeGAT(i,j);
                 }
             }
