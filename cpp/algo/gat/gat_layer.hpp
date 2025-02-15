@@ -22,6 +22,7 @@ namespace distblas::algo {
         GATLayer(int input_features,  int num_heads) {
             this->input_features = input_features;
             this->num_heads = num_heads;
+            weights.resize(num_heads);
         }
     };
 }
