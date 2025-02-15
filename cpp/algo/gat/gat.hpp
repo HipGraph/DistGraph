@@ -63,7 +63,7 @@ namespace distblas::algo {
 
         void computeGAT(int i, int j){
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
-            buffers[i]->multiply(gat_layers[i].weights[j],dense_output.get());
+            buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
         }
 
         json execute() {
