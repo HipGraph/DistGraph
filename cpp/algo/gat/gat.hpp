@@ -62,22 +62,20 @@ namespace distblas::algo {
         }
 
         void computeGAT(int i, int j){
-
+            auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
+            auto buffers[i]->multiply(gat_layers[i].weights[j],dense_output.get());
         }
 
         json execute() {
-            json jobj;
             auto t = start_clock();
-//            buffers->resize(gat_layers.size()+1);
-//            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(sparse_local->proc_row_width,gat_layers[0].input_features);
+            buffers->resize(gat_layers.size()+1);
+            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[0].input_features);
             for(int i=0;i<gat_layers.size();++i){
-//                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[i].num_heads*features_per_head);
-
+                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sparse_local->proc_row_width,gat_layers[i].num_heads*features_per_head,true);
                 for(int j=0;j<gat_layers[i].num_heads;++j){
                     gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,buffers[i]->cols);
                 }
             }
-
             for(int i=0;i<gat_layers.size();++i){
                 for(int j=0;j<gat_layers[i].weights.size();++j){
                      computeGAT(i,j);
@@ -85,9 +83,7 @@ namespace distblas::algo {
             }
 
             stop_clock_and_add(t, "Total Time");
-//            jobj[i] = json_perf_statistics();
-            reset_performance_timers();
-            return jobj;
+            return json_perf_statistics();
         }
     };
 }

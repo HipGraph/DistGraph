@@ -360,8 +360,6 @@ namespace distblas::algo {
                 }
             }
         }
-
-
     };
 } // namespace distblas::algo
 

@@ -236,7 +236,10 @@ public:
     int cols = this->cols>0?this->cols:embedding_dim;
 
     int output_size = this->rows*other->cols;
+
     output->nCoordinates = static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[output_size])));
+    output->rows=this->rows;
+    output->cols=other->cols;
 #pragma omp parallel for collapse(2)
     for(int i=0;i<this->rows;++i){
         for(int j=0;j<other->cols;++j){
