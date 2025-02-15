@@ -75,6 +75,7 @@ public:
         this->rows = rows;
         this->grid = grid;
         this->cols = cols;
+        cout<<" n coords size "<<rows*cols<<endl;
         this->nCoordinates = make_unique<vector<VALUE_TYPE>>(rows*cols)->data();
 //    std::srand(this->grid->global_rank);
         if (!lazy) {
