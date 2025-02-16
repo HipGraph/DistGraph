@@ -48,7 +48,7 @@ namespace distblas::algo {
             auto csr_local = std::move(sp_mat->csr_local_data);
             auto handler = std::move(csr_local->handler);
 
-            #pragma omp parallel for collapse(2)
+            #pragma omp parallel for
             for(int i=0;i<handler->row_idx.size()-1;++i){
                 for(int j=handler->row_idx[i];j<handler->row_idx[i+1];++j){
                     if (handler->values[j]<0){
