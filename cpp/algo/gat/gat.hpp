@@ -45,8 +45,8 @@ namespace distblas::algo {
 
 
         void applyLeakyRelu(distblas::core::SpMat<VALUE_TYPE>* sp_mat, double alpha){
-            auto csr_local = sp_mat->csr_local_data;
-            auto handler = csr_local->handler;
+            auto csr_local = std::move(sp_mat->csr_local_data);
+            auto handler = std::move(csr_local->handler);
 
             #pragma omp parallel for collapse(2)
             for(int i=0;i<handler->row_idx.size()-1;++i){
