@@ -44,20 +44,18 @@ namespace distblas::algo {
         vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>> buffers;
 
 
-    public:
-        GAT(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-            distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-            Process3DGrid *grid, double alpha, double beta, bool col_major,
-            bool sync_comm, double tile_width_fraction, bool hash_spgemm)
-                : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
-                  sp_local_sender(sp_local_sender),grid(grid), alpha(alpha), beta(beta), col_major(col_major),
-                  sync(sync_comm), tile_width_fraction(tile_width_fraction) {
-            this->hash_spgemm = hash_spgemm;
-        }
+        void applyLeakyRelu(distblas::core::SpMat<VALUE_TYPE> sp_mat*, double alpha=0.01){
+            CSRLocal<VALUE_TYPE> = sp_mat->csr_local_data;
+            CSRHandle* handler = CSRLocal->handler.get();
 
-        void addLayer(GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head> layer) {
-            gat_layers.emplace_back(std::move(layer));
+            #pragma omp parallel for collapse(2)
+            for(int i=0;i<handler->row_idx.size()-1;++i){
+                for(int j=handler->row_idx[i];j<handler->row_idx[i+1];++j){
+                    if (handler->values[j]<0){
+                        handler->values[j]=alpha*handler->values[j];
+                    }
+                }
+            }
         }
 
         void computeGAT(int i, int j){
@@ -76,7 +74,7 @@ namespace distblas::algo {
 
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
 
-//            applyLeakyRelu(sparse_output);
+            applyLeakyRelu(sparse_output.get(),0.001);
 //
 //            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
 //                    new DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>(grid, sp_local_native->proc_row_width));
@@ -89,6 +87,25 @@ namespace distblas::algo {
 //            spmm->execute(1,sp_local_native->proc_row_width,1.0);
 //
 //            assginNextInput(i,j,dense_mat_output.get());
+        }
+
+
+
+
+    public:
+        GAT(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
+            distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
+            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+            Process3DGrid *grid, double alpha, double beta, bool col_major,
+            bool sync_comm, double tile_width_fraction, bool hash_spgemm)
+                : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
+                  sp_local_sender(sp_local_sender),grid(grid), alpha(alpha), beta(beta), col_major(col_major),
+                  sync(sync_comm), tile_width_fraction(tile_width_fraction) {
+            this->hash_spgemm = hash_spgemm;
+        }
+
+        void addLayer(GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head> layer) {
+            gat_layers.emplace_back(std::move(layer));
         }
 
         json execute() {
