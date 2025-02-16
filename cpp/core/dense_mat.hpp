@@ -234,7 +234,7 @@ public:
   void multiply(DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>* other, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>* output){
     int cols = this->cols>0?this->cols:embedding_dim;
 
-    static_assert(cols == rows, "cols must be equal to other->rows");
+    assert(cols == rows, "cols must be equal to other->rows");
     int output_size = this->rows*other->cols;
     output->nCoordinates = make_unique<vector<VALUE_TYPE>>(output_size)->data();
     output->rows=this->rows;
