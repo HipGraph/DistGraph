@@ -83,7 +83,7 @@ namespace distblas::algo {
 
             auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
                     sparse_output.get(), sp_local_receiver,
-                    sp_local_sender,dense_input_a.get(),dense_mat_output.get(),
+                    sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
                             alpha, beta,col_major,sync);
             spmm->execute(1,sp_local_native->proc_row_width,1.0);
