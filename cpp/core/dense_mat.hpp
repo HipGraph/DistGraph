@@ -239,7 +239,7 @@ public:
     output->nCoordinates = make_unique<vector<VALUE_TYPE>>(output_size)->data();
     output->rows=this->rows;
     output->cols=other->cols;
-//#pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
     for(int i=0;i<this->rows;++i){
         for(int j=0;j<other->cols;++j){
             VALUE_TYPE value=0;
