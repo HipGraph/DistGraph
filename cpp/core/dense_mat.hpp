@@ -234,11 +234,12 @@ public:
   void multiply(DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>* other, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>* output){
     int cols = this->cols>0?this->cols:embedding_dim;
 
+    static_assert(cols == rows, "cols must be equal to other->rows");
     int output_size = this->rows*other->cols;
-    output->nCoordinates = static_cast<VALUE_TYPE *>(::operator new(sizeof(VALUE_TYPE[output_size])));
+    output->nCoordinates = make_unique<vector<VALUE_TYPE>>(output_size)->data();
     output->rows=this->rows;
     output->cols=other->cols;
-#pragma omp parallel for collapse(2)
+//#pragma omp parallel for collapse(2)
     for(int i=0;i<this->rows;++i){
         for(int j=0;j<other->cols;++j){
             VALUE_TYPE value=0;
