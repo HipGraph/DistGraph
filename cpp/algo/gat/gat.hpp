@@ -44,7 +44,7 @@ namespace distblas::algo {
         vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>> buffers;
 
 
-        void applyLeakyRelu(distblas::core::SpMat<VALUE_TYPE> sp_mat*, double alpha){
+        void applyLeakyRelu(distblas::core::SpMat<VALUE_TYPE>* sp_mat, double alpha){
             CSRLocal<VALUE_TYPE> = sp_mat->csr_local_data;
             CSRHandle* handler = CSRLocal->handler.get();
 
