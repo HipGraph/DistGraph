@@ -75,16 +75,18 @@ namespace distblas::algo {
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
 
             applyLeakyRelu(sparse_output.get(),0.001);
-//
-//            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
-//                    new DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>(grid, sp_local_native->proc_row_width));
-//
-//            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
-//                    sp_local_native, sp_local_receiver,
-//                    sp_local_sender,dense_input_a.get(),dense_mat_output.get(),
-//                            grid,
-//                            alpha, beta,col_major,sync);
-//            spmm->execute(1,sp_local_native->proc_row_width,1.0);
+
+
+
+            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+                    new DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>(grid, sparse_output->proc_row_width));
+
+            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+                    sparse_output.get(), sp_local_receiver,
+                    sp_local_sender,dense_input_a.get(),dense_mat_output.get(),
+                            grid,
+                            alpha, beta,col_major,sync);
+            spmm->execute(1,sp_local_native->proc_row_width,1.0);
 //
 //            assginNextInput(i,j,dense_mat_output.get());
         }
