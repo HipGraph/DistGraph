@@ -78,9 +78,9 @@ namespace distblas::algo {
             applyLeakyRelu(sparse_output.get(),0.001);
 
             cout<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
-            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid, sparse_output->proc_row_width);
+            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, 1024>>(grid, sparse_output->proc_row_width);
 
-            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, 1024>>(
                     sparse_output.get(), sp_local_receiver,
                     sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
