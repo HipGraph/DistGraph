@@ -61,7 +61,7 @@ namespace distblas::algo {
         void computeGAT(int i, int j){
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
-
+            cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
 
             auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
@@ -73,9 +73,11 @@ namespace distblas::algo {
                     alpha, beta,col_major,sync);
 
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
+            cout<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             applyLeakyRelu(sparse_output.get(),0.001);
 
+            cout<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
             auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid, sparse_output->proc_row_width);
 
             auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
@@ -84,6 +86,8 @@ namespace distblas::algo {
                             grid,
                             alpha, beta,col_major,sync);
             spmm->execute(1,sp_local_native->proc_row_width,1.0);
+
+            cout<<" applying  spmm "<<i<<"  head "<<j<<" completed "<<endl;
 //
 //            assginNextInput(i,j,dense_mat_output.get());
         }
@@ -125,7 +129,7 @@ namespace distblas::algo {
             }
             for(int i=0;i<gat_layers.size();++i){
                 for(int j=0;j<gat_layers[i].weights.size();++j){
-                    cout<<" computed gat  "<<i<<" "<<j<<endl;
+                    cout<<" computing layer  "<<i<<"  head "<<j<<endl;
                      computeGAT(i,j);
                 }
             }
