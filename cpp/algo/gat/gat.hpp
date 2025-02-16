@@ -5,6 +5,8 @@
 #include "../spgemm/spgemm_with_tiling.hpp"
 #include "../fusedMM/fusedmm.hpp"
 #include "gat_layer.hpp"
+#include "../sddmm/sddmm.hpp"
+#include "../spmm/spmm.hpp"
 
 using namespace distblas::core;
 
@@ -61,6 +63,33 @@ namespace distblas::algo {
         void computeGAT(int i, int j){
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
+
+            auto dense_input_a = dense_output;
+            auto dense_input_b = dense_output;
+
+            auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
+
+            auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+                    sp_local_native, sp_local_receiver,
+                    sp_local_sender,dense_input_a.get(),dense_input_b.get(),sparse_output.get(),
+                    grid,
+                    alpha, beta,col_major,sync);
+
+            sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
+
+//            applyLeakyRelu(sparse_output);
+//
+//            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+//                    new DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>(grid, sp_local_native->proc_row_width));
+//
+//            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+//                    sp_local_native, sp_local_receiver,
+//                    sp_local_sender,dense_input_a.get(),dense_mat_output.get(),
+//                            grid,
+//                            alpha, beta,col_major,sync);
+//            spmm->execute(1,sp_local_native->proc_row_width,1.0);
+//
+//            assginNextInput(i,j,dense_mat_output.get());
         }
 
         json execute() {

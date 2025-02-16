@@ -52,7 +52,7 @@ public:
 
 
 
-  void algo_spmm(int iterations, int batch_size, VALUE_TYPE lr) {
+  void execute(int iterations, int batch_size, VALUE_TYPE lr) {
     auto t = start_clock();
 
     int batches = 0;
