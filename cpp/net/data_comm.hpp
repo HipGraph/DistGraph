@@ -463,7 +463,6 @@ public:
     for (int i = 0; i < col_ids.size(); i++) {
       int owner_rank = col_ids[i] / (this->sp_local_receiver)->proc_row_width;
       if (owner_rank == grid->rank_in_col) {
-        send_col_ids_list.push_back(col_ids[i]);
           for (int j = 0; j < grid->col_world_size; j++) {
               if (j != grid->rank_in_col) {
                   DataComm<INDEX_TYPE, VALUE_TYPE>::send_indices_to_proc_map[col_ids[i]][j] = true;

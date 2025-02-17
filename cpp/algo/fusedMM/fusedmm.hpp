@@ -326,8 +326,8 @@ public:
               unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                   &arrayMap =
                       (temp_cache)
-                          ? (*this->dense_local->tempCachePtr)[target_rank]
-                          : (*this->dense_local->cachePtr)[target_rank];
+                          ? (*this->dense_local_b->tempCachePtr)[target_rank]
+                          : (*this->dense_local_b->cachePtr)[target_rank];
               array_ptr = arrayMap[dst_id].values.data();
             }
             auto t = start_clock();

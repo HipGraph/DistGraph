@@ -122,7 +122,7 @@ namespace distblas::algo {
                 MPI_Request req;
 
                 if (communication) {
-                    data_comm->transfer_data(iteration, batch, k, end_process, true);
+                    data_comm->transfer_dense_data(iteration, batch, k, end_process, true);
                 }
 
                 if (k == comm_initial_start) {
