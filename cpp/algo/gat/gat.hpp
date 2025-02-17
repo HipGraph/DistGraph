@@ -84,7 +84,7 @@ namespace distblas::algo {
                     sparse_output.get(), sp_local_receiver,
                     sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
-                            alpha, beta,col_major,sync);
+                            alpha, beta,col_major);
             spmm->execute(1,sp_local_native->proc_row_width,1.0);
 
             cout<<" applying  spmm "<<i<<"  head "<<j<<" completed "<<endl;
