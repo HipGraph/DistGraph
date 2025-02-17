@@ -551,7 +551,7 @@ public:
                     auto copying_count = sp_tuple.rows[k + 1];
                     if (cache.find(key) == cache.end() or (cache[key].inserted_itr!=iteration
                                                                                            or cache[key].inserted_batch_id)!=batch_id ) {
-                        CacheEntry<VALUE_TYPE> sp_entry();
+                        CacheEntry<VALUE_TYPE> sp_entry;
                         sp_entry.inserted_itr = iteration;
                         sp_entry.inserted_batch_id = batch_id;
                         cache[key] = sp_entry;

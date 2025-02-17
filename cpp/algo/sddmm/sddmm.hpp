@@ -253,7 +253,7 @@ namespace distblas::algo {
                                             (temp_cache)
                                             ? (*this->dense_local_b->tempCachePtr)[target_rank]
                                             : (*this->dense_local_b->cachePtr)[target_rank];
-                                    array_ptr = arrayMap[i].value;
+                                    array_ptr = arrayMap[i].values.data();
                                 }
                                 matched = true;
                             }
@@ -308,7 +308,7 @@ namespace distblas::algo {
                                         (temp_cache)
                                         ? (*this->dense_local_b->tempCachePtr)[target_rank]
                                         : (*this->dense_local_b->cachePtr)[target_rank];
-                                array_ptr = arrayMap[dst_id].value;
+                                array_ptr = arrayMap[dst_id].values.data();
                             }
                             auto t = start_clock();
                             VALUE_TYPE val = 0;

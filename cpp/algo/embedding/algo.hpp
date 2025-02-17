@@ -448,7 +448,7 @@ namespace distblas::algo {
                                             (temp_cache)
                                             ? (*this->dense_local->tempCachePtr)[target_rank]
                                             : (*this->dense_local->cachePtr)[target_rank];
-                                    array_ptr = arrayMap[i].value;
+                                    array_ptr = arrayMap[i].values.data();
                                 }
                                 matched = true;
                             }
@@ -517,7 +517,7 @@ namespace distblas::algo {
                                         (temp_cache)
                                         ? (*this->dense_local->tempCachePtr)[target_rank]
                                         : (*this->dense_local->cachePtr)[target_rank];
-                                array_ptr = arrayMap[dst_id].value;
+                                array_ptr = arrayMap[dst_id].values.data();
                             }
 
                             VALUE_TYPE attrc = 0;
@@ -579,7 +579,7 @@ namespace distblas::algo {
                                 (*this->dense_local->tempCachePtr)[owner_rank];
                         VALUE_TYPE *  array_ptr = new VALUE_TYPE [embedding_dim];
                         array_ptr =
-                                arrayMap[global_col_id].value;
+                                arrayMap[global_col_id].values.data();
 
                         for (int d = 0; d < embedding_dim; d++) {
                             forceDiff[d] =

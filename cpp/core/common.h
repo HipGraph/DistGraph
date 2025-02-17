@@ -212,7 +212,7 @@ namespace distblas::core {
     template<typename VALUE_TYPE>
     void initialize_mpi_datatype_DENSETUPLE() {
         DataTuple<VALUE_TYPE> p;
-        DENSETUPLE = CreateCustomMpiType(p, p.cols, p.values);
+        DENSETUPLE = CreateCustomMpiType(p, p.rows, p.values);
     }
 
     template<typename VALUE_TYPE, size_t embedding_dim>
