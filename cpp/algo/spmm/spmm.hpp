@@ -260,7 +260,7 @@ namespace distblas::algo {
                          j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
                         if (csr_handle->col_idx[j] >= source_start_index and csr_handle->col_idx[j] <= source_end_index) {
 
-                            VALUE_TYPE *array_ptr = new VALUE_TYPE[this->dense_local->cols];
+                            VALUE_TYPE *array_ptr = nullptr;
                             auto source_id = csr_handle->col_idx[j];
                             auto index = source_id - batch_id * batch_size;
 
@@ -271,7 +271,7 @@ namespace distblas::algo {
                                             (temp_cache)
                                             ? (*this->dense_local->tempCachePtr)[target_rank]
                                             : (*this->dense_local->cachePtr)[target_rank];
-                                    array_ptr = arrayMap[i].value;
+                                    array_ptr = arrayMap[i].value->data();
                                 }
                                 matched = true;
                             }
@@ -315,14 +315,14 @@ namespace distblas::algo {
                             bool fetch_from_cache =
                                     target_rank == (grid)->rank_in_col ? false : true;
 
-                            VALUE_TYPE *array_ptr = new VALUE_TYPE[this->dense_local->cols];
+                            VALUE_TYPE *array_ptr = nullptr;
                             if (fetch_from_cache) {
                                 unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                                         &arrayMap =
                                         (temp_cache)
                                         ? (*this->dense_local->tempCachePtr)[target_rank]
                                         : (*this->dense_local->cachePtr)[target_rank];
-                                array_ptr = arrayMap[dst_id].value;
+                                array_ptr = arrayMap[dst_id].value->data();
                             }
                             auto t = start_clock();
                             for (int d = 0; d < this->dense_local->cols; d++) {

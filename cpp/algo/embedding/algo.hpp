@@ -584,7 +584,7 @@ namespace distblas::algo {
                         for (int d = 0; d < embedding_dim; d++) {
                             forceDiff[d] =
                                     (this->dense_local)->nCoordinates[row_id * embedding_dim + d] -
-                                    colvec[d];
+                                            array_ptr[d];
                             repuls += forceDiff[d] * forceDiff[d];
                         }
 

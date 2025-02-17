@@ -42,7 +42,7 @@ public:
 
   int batch_id;
 
-  int embedding_dim=su_tuple_max_dim;
+  int embedding_dim=sp_tuple_max_dim;
 
   double alpha;
   DataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
@@ -298,7 +298,7 @@ public:
                       receive_counts_cyclic.data(), rdispls_cyclic.data(),
                       DENSETUPLE, grid->col_world);
         stop_clock_and_add(t, "Communication Time");
-        this->populate_dense_cache(sendbuf_cyclic, receivebuf, iteration, batch_id);
+        this->populate_dense_cache(sendbuf_cyclic, receivebuf, iteration, batch_id,temp_cache);
     }
 
 
@@ -551,7 +551,7 @@ public:
                     auto copying_count = sp_tuple.rows[k + 1];
                     if (cache.find(key) == cache.end() or (cache[key].inserted_itr!=iteration
                                                                                            or cache[key].inserted_batch_id)!=batch_id ) {
-                        CacheEntry<VALUE_TYPE> sp_entry(this->dense_local->cols);
+                        CacheEntry<VALUE_TYPE> sp_entry();
                         sp_entry.inserted_itr = iteration;
                         sp_entry.inserted_batch_id = batch_id;
                         cache[key] = sp_entry;

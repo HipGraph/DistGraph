@@ -112,10 +112,9 @@ namespace distblas::core {
 
     template<typename VALUE_TYPE>
     struct CacheEntry {
-        unique_ptr<VALUE_TYPE[]> value;
+        vector<VALUE_TYPE> values = vector<VALUE_TYPE>();
         int inserted_batch_id;
         int inserted_itr;
-        CacheEntry() : value(std::make_unique<VALUE_TYPE[]>()) {}
     };
 
     template<typename VALUE_TYPE>
@@ -213,7 +212,7 @@ namespace distblas::core {
     template<typename VALUE_TYPE>
     void initialize_mpi_datatype_DENSETUPLE() {
         DataTuple<VALUE_TYPE> p;
-        DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
+        DENSETUPLE = CreateCustomMpiType(p, p.cols, p.values);
     }
 
     template<typename VALUE_TYPE, size_t embedding_dim>

@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
   }else if(sddmm){
       auto dense_mat = make_unique<DenseMat<INDEX_TYPE , VALUE_TYPE>>(grid.get(), shared_sparseMat.get()->proc_row_width,dimension);
       auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*shared_sparseMat.get());
-      auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, dimension>>(
+      auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                       shared_sparseMat_sender.get(), dense_mat.get(),dense_mat.get(),sparse_output.get(),
                       grid.get(),
@@ -381,7 +381,7 @@ int main(int argc, char **argv) {
     reader->parallel_write(output_file+"/embedding.txt",sparse_out.get()->dense_collector.get(),
                            localARows, dimension, grid.get(),shared_sparseMat.get());
   } else if (!save_results) {
-    auto dense_mat = make_shared<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), localARows,dimension));
+    auto dense_mat = make_shared<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), localARows,dimension);
 
     unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
 
