@@ -19,7 +19,7 @@ private:
   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
-  distblas::core::DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *state_holder;
+  distblas::core::DenseMat<INDEX_TYPE, VALUE_TYPE> *state_holder;
   Process3DGrid *grid;
 
   // record temp local output
@@ -54,7 +54,7 @@ public:
       Process3DGrid *grid, double alpha, double beta, bool col_major,
       bool sync_comm, double tile_width_fraction, bool hash_spgemm,
       TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>* communicator=nullptr,
-      distblas::core::DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>*state_holder = nullptr)
+      distblas::core::DenseMat<INDEX_TYPE, VALUE_TYPE>*state_holder = nullptr)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
         sp_local_sender(sp_local_sender), sparse_local(sparse_local),
         grid(grid), alpha(alpha), beta(beta), col_major(col_major),

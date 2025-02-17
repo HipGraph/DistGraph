@@ -92,19 +92,19 @@ namespace distblas::algo {
             // This communicator is being used for negative updates and in alpha > 0 to
             // fetch initial embeddings
             auto repulsive_comm = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender,
-                                                                                dense_local, grid, -1, alpha));
+                                                                                dense_local, grid, -1, alpha);
 
             if (alpha > 0 and grid->col_world_size > 1) {
                 auto full_comm = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender,
-                                                                               dense_local, grid, -1, alpha));
+                                                                               dense_local, grid, -1, alpha);
                 full_comm.get()->onboard_data();
                 int alpha_proc_end = get_end_proc(1, alpha, grid->col_world_size);
                 full_comm.get()->transfer_dense_data(0, 0, 1, alpha_proc_end, false);
             }
 
             for (int i = 0; i < batches; i++) {
-                auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-                        new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+                auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE>>(
+                        new DataComm<INDEX_TYPE, VALUE_TYPE>(
                                 sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
                 data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
                 data_comm_cache[i].get()->onboard_data();
@@ -431,7 +431,7 @@ namespace distblas::algo {
 
 
                     bool matched = false;
-                    std::array<VALUE_TYPE, embedding_dim> array_ptr;
+                    VALUE_TYPE *array_ptr  = new VALUE_TYPE[this->dense_local->cols];
                     bool col_inserted = false;
                     for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
                          j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
@@ -443,7 +443,7 @@ namespace distblas::algo {
 
                             if (!matched) {
                                 if (fetch_from_cache) {
-                                    unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
+                                    unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                                             &arrayMap =
                                             (temp_cache)
                                             ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -457,23 +457,23 @@ namespace distblas::algo {
                                 if (!fetch_from_cache) {
                                     forceDiff[d] =
                                             (this->dense_local)
-                                                    ->nCoordinates[source_id * embedding_dim + d] -
+                                                    ->nCoordinates[source_id * this->dense_local->cols + d] -
                                             (this->dense_local)
-                                                    ->nCoordinates[local_dst * embedding_dim + d];
+                                                    ->nCoordinates[local_dst * this->dense_local->cols + d];
                                 } else {
                                     forceDiff[d] =
                                             (this->dense_local)
-                                                    ->nCoordinates[source_id * embedding_dim + d] -
+                                                    ->nCoordinates[source_id * this->dense_local->cols + d] -
                                             (array_ptr[d]);
                                 }
                                 attrc += forceDiff[d] * forceDiff[d];
                             }
                             VALUE_TYPE d1 = -2.0 / (1.0 + attrc);
 
-                            for (int d = 0; d < embedding_dim; d++) {
+                            for (int d = 0; d < this->dense_local->cols; d++) {
                                 VALUE_TYPE l = scale(forceDiff[d] * d1);
-                                prevCoordinates[index * embedding_dim + d] =
-                                        prevCoordinates[index * embedding_dim + d] + (lr) * l;
+                                prevCoordinates[index * this->dense_local->cols + d] =
+                                        prevCoordinates[index * this->dense_local->cols + d] + (lr) * l;
                             }
                         }
                     }
@@ -509,10 +509,10 @@ namespace distblas::algo {
                                     target_rank == (grid)->rank_in_col ? false : true;
 
                             VALUE_TYPE forceDiff[embedding_dim];
-                            std::array<VALUE_TYPE, embedding_dim> array_ptr;
+                            VALUE_TYPE *  array_ptr = new VALUE_TYPE [embedding_dim];
 
                             if (fetch_from_cache) {
-                                unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
+                                unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                                         &arrayMap =
                                         (temp_cache)
                                         ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -575,9 +575,10 @@ namespace distblas::algo {
 
                     if (fetch_from_cache) {
                         VALUE_TYPE repuls = 0;
-                        unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>> &arrayMap =
+                        unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>> &arrayMap =
                                 (*this->dense_local->tempCachePtr)[owner_rank];
-                        std::array<VALUE_TYPE, embedding_dim> &colvec =
+                        VALUE_TYPE *  array_ptr = new VALUE_TYPE [embedding_dim];
+                        array_ptr =
                                 arrayMap[global_col_id].value;
 
                         for (int d = 0; d < embedding_dim; d++) {

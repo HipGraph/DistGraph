@@ -42,7 +42,7 @@ public:
 
   int batch_id;
 
-  int embedding_dim=su_tuple_max_size;
+  int embedding_dim=su_tuple_max_dim;
 
   double alpha;
   DataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
@@ -465,7 +465,6 @@ public:
       if (owner_rank == grid->rank_in_col) {
         send_col_ids_list.push_back(col_ids[i]);
           for (int j = 0; j < grid->col_world_size; j++) {
-              total_send_count = send_col_ids_list.size();
               if (j != grid->rank_in_col) {
                   DataComm<INDEX_TYPE, VALUE_TYPE>::send_indices_to_proc_map[col_ids[i]][j] = true;
               }

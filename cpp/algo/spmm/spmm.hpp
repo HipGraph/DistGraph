@@ -127,7 +127,7 @@ namespace distblas::algo {
 
         inline void execute_pull_model_computations(int iteration,
                                                     int batch,
-                                                    DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+                                                    DataComm<INDEX_TYPE, VALUE_TYPE> *data_comm,
                                                     CSRLocal<VALUE_TYPE> *csr_block, int batch_size,
                                                     int considering_batch_size,
                                                     double lr, VALUE_TYPE *prevCoordinates, int comm_initial_start,

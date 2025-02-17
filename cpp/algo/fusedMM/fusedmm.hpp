@@ -66,11 +66,11 @@ public:
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto full_comm = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender, dense_local_b, grid, -1, alpha));
+    auto full_comm = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender, dense_local_b, grid, -1, alpha);
     full_comm.get()->onboard_data();
 
     for (int i = 0; i < batches; i++) {
-      auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender, dense_local_b, grid, i, alpha));
+      auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender, dense_local_b, grid, i, alpha);
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }

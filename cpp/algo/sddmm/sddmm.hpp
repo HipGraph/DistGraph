@@ -108,7 +108,7 @@ namespace distblas::algo {
         }
 
         inline void execute_pull_model_computations(int iteration,
-                int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+                int batch, DataComm<INDEX_TYPE, VALUE_TYPE> *data_comm,
                 CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
                 double lr, CSRLocal<VALUE_TYPE> *csr_block_output, int comm_initial_start, bool local_execution,
                 int first_execution_proc, bool communication) {
@@ -122,7 +122,7 @@ namespace distblas::algo {
                 MPI_Request req;
 
                 if (communication) {
-                    data_comm->transfer_data(sendbuf, receivebuf, sync, &req, iteration, batch, k, end_process, true);
+                    data_comm->transfer_data(iteration, batch, k, end_process, true);
                 }
 
                 if (k == comm_initial_start) {
