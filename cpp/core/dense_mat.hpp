@@ -71,7 +71,7 @@ namespace distblas::core {
         void fetch_local_data(VALUE_TYPE *stdArray, int local_key) {
             int base_index = local_key * cols;
             std::copy(nCoordinates + base_index,
-                      this->nCoordinates + base_index + cols, stdArray.data());
+                      this->nCoordinates + base_index + cols, stdArray);
         }
 
         void multiply(DenseMat<INDEX_TYPE, VALUE_TYPE> *other, DenseMat<INDEX_TYPE, VALUE_TYPE> *output) {
@@ -171,7 +171,7 @@ namespace distblas::core {
 
                 for (const auto &kvp: map) {
                     INDEX_TYPE key = kvp.first;
-                    const std::array<VALUE_TYPE> &value = kvp.second.value;
+                    vector<VALUE_TYPE> value = kvp.second.value;
                     fout << key << " ";
                     for (int i = 0; i < cols; ++i) {
                         fout << value[i] << " ";
