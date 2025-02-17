@@ -210,9 +210,9 @@ namespace distblas::core {
         delete[] types;
     }
 
-    template<typename VALUE_TYPE, size_t embedding_dim>
+    template<typename VALUE_TYPE>
     void initialize_mpi_datatype_DENSETUPLE() {
-        DataTuple<VALUE_TYPE, embedding_dim> p;
+        DataTuple<VALUE_TYPE> p;
         DENSETUPLE = CreateCustomMpiType(p, p.col, p.value);
     }
 
@@ -231,7 +231,7 @@ namespace distblas::core {
     template<typename VALUE_TYPE, size_t embedding_dim>
     void initialize_mpi_datatypes() {
         initialize_mpi_datatype_SPTUPLE<VALUE_TYPE>();
-        initialize_mpi_datatype_DENSETUPLE<VALUE_TYPE, embedding_dim>();
+        initialize_mpi_datatype_DENSETUPLE<VALUE_TYPE>();
         initialize_mpi_datatype_SPARSETUPLE<VALUE_TYPE, embedding_dim>();
         initialize_mpi_datatype_TILETUPLE<INDEX_TYPE>();
     }
