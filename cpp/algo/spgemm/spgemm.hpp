@@ -20,7 +20,7 @@ private:
   distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
-  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
+  std::unordered_map<int, unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
 
   //record temp local output
   unique_ptr<vector<unordered_map<INDEX_TYPE,VALUE_TYPE>>> output_ptr;
@@ -84,8 +84,8 @@ public:
 
     cout << " rank " << grid->rank_in_col << " starting onboard_data  " << batches << endl;
     for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+      auto communicator = unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+          new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
               sp_local_receiver, sp_local_sender, sparse_local, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
@@ -152,7 +152,7 @@ public:
   inline void execute_pull_model_computations(
       std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *sendbuf,
       std::vector<SpTuple<VALUE_TYPE,sp_tuple_max_dim>> *receivebuf, int iteration,
-      int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+      int batch, TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
       double lr,  int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication, bool symbolic) {

@@ -578,22 +578,6 @@ public:
         grid->col_world_size);
   }
 
-  auto fetch_data_vector_from_cache(vector<Tuple<VALUE_TYPE>> &entries,
-                                    int rank, INDEX_TYPE key) {
-
-    // Access the array using the provided rank and key
-
-    auto arrayMap = (*tempCachePtr)[rank];
-    auto it = arrayMap.find(key);
-
-    if (it != arrayMap.end()) {
-      auto temp = it->second;
-      entries = temp.value;
-    } else {
-      throw std::runtime_error("cannot find the given key");
-    }
-  }
-
   void print_coords(bool trans) {
     int rank = grid->rank_in_col;
     int world_size = grid->col_world_size;

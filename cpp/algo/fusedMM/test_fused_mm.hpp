@@ -64,19 +64,14 @@ public:
     for (int i = 0; i < iterations; i++) {
       auto t = start_clock();
       size_t total_memory = 0;
-      auto dense_mat = unique_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
-      auto dense_mat_output = unique_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_receiver->proc_row_width,embedding_dim);
+      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_receiver->proc_row_width,embedding_dim);
 
-      unique_ptr<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>
+      unique_ptr<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE>>
 
-          embedding_algo =
-              unique_ptr<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-                  new distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-                      sp_local_native, sp_local_receiver,
-                      sp_local_sender, dense_mat.get(),
-                      dense_mat_output.get(), grid, alpha, beta, col_major, sync));
+      embedding_algo = make_unique<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE>>(sp_local_native, sp_local_receiver,
+                      sp_local_sender, dense_mat.get(),dense_mat.get(),
+                      dense_mat_output.get(), grid, alpha, beta, col_major);
 
       cout << " rank " << grid->rank_in_col << " fusedmm algo started  " << endl;
       embedding_algo.get()->algo_fusedMM(1, batch_size, lr);

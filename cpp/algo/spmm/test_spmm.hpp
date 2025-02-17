@@ -3,6 +3,7 @@
 #include "../../core/sparse_mat.hpp"
 #include "../../core/sparse_mat_tile.hpp"
 #include "../spgemm/spgemm_with_tiling.hpp"
+#include "spmm.hpp"
 
 using namespace distblas::core;
 
@@ -63,16 +64,14 @@ public:
     for (int i = 0; i < iterations; i++) {
       auto t = start_clock();
       size_t total_memory = 0;
-      auto dense_mat = unique_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
-      auto dense_mat_output = unique_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim>(grid, sp_local_receiver->proc_row_width));
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_receiver->proc_row_width,embedding_dim));
+      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_receiver->proc_row_width,embedding_dim));
 
       auto embedding_algo =
-              make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
+              make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
                       sp_local_native, sp_local_receiver,
                       sp_local_sender, dense_mat.get(),
-                      dense_mat_output.get(), grid, alpha, beta, col_major, sync);
+                      dense_mat_output.get(), grid, alpha, beta, col_major);
 
       cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
       embedding_algo.get()->execute(1, batch_size, lr);

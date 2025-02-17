@@ -41,7 +41,7 @@ namespace distblas::algo {
         vector <GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head>> gat_layers;
 
 
-        vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>> buffers;
+        vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE>>> buffers;
 
 
         void applyLeakyRelu(distblas::core::SpMat<VALUE_TYPE>* sp_mat, double alpha){
@@ -59,14 +59,14 @@ namespace distblas::algo {
         }
 
         void computeGAT(int i, int j){
-            auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,features_per_head>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
+            auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
             cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
 
             auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
 
-            auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, features_per_head>>(
+            auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                     sp_local_native, sp_local_receiver,
                     sp_local_sender,dense_output.get(),dense_output.get(),sparse_output.get(),
                     grid,
@@ -78,9 +78,9 @@ namespace distblas::algo {
             applyLeakyRelu(sparse_output.get(),0.001);
 
             cout<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
-            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, 1024>>(grid, sparse_output->proc_row_width);
+            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols);
 
-            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE, 1024>>(
+            auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
                     sparse_output.get(), sp_local_receiver,
                     sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
@@ -115,15 +115,15 @@ namespace distblas::algo {
             auto t = start_clock();
             buffers.resize(gat_layers.size()+1);
             cout<<"  buffer resizing  completed "<<endl;
-            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sp_local_native->proc_row_width,
-                    gat_layers[0].input_features);
+            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,
+                    gat_layers[0].input_features,features_per_head);
             cout<<" first buffer initialization completed "<<endl;
             for(int i=0;i<gat_layers.size();++i){
-                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,sp_local_native->proc_row_width,
+                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,
                         gat_layers[i].num_heads*features_per_head,true);
 
                 for(int j=0;j<gat_layers[i].num_heads;++j){
-                    gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE, features_per_head>>(grid,buffers[i]->cols);
+                    gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,buffers[i]->cols);
                     cout<<" gat layer initialization completed "<<i<<endl;
                 }
             }

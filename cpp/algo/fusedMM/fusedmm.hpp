@@ -9,28 +9,25 @@ using namespace distblas::net;
 using namespace distblas::core;
 
 namespace distblas::algo {
-template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
+template <typename INDEX_TYPE, typename VALUE_TYPE>
 class FusedMMAlgo {
 
 private:
-  DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output;
-
-  DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local;
+  DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_output;
+  DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a;
+  DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
   distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
-  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>> data_comm_cache;
+  std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE>>> data_comm_cache;
 
   //cache size controlling hyper parameter
   double alpha = 0;
 
   //hyper parameter controls the  computation and communication overlapping
   double beta = 1.0;
-
-  //hyper parameter controls the switching the sync vs async commiunication
-  bool sync = false;
 
   //hyper parameter controls the col major or row major  data access
   bool col_major = false;
@@ -40,12 +37,13 @@ public:
     FusedMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-           DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local,
-           DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_output,
-           Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
+           DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a,
+           DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b,
+           DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_output,
+           Process3DGrid *grid, double alpha, double beta, bool col_major)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
-        sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
-        alpha(alpha), beta(beta),col_major(col_major),sync(sync_comm),dense_local_output(dense_local_output) {
+        sp_local_sender(sp_local_sender), dense_local_a(dense_local_a),dense_local_b(dense_local_b), grid(grid),
+        alpha(alpha), beta(beta),col_major(col_major),dense_local_output(dense_local_output) {
     this->timing_info = vector<double>(sp_local_receiver->proc_row_width,0);
   }
 
@@ -58,49 +56,29 @@ public:
     int last_batch_size = batch_size;
 
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size);
     } else {
-      batches =
-          static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
-      last_batch_size =
-          sp_local_receiver->proc_row_width - batch_size * (batches - 1);
+      batches = static_cast<int>(sp_local_receiver->proc_row_width / batch_size) + 1;
+      last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
     }
 
     cout << " rank " << grid->rank_in_col << " total batches " << batches<< endl;
 
     // This communicator is being used for negative updates and in alpha > 0 to
     // fetch initial embeddings
-    auto full_comm = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-        new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-            sp_local_receiver, sp_local_sender, dense_local, grid, -1, alpha));
+    auto full_comm = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender, dense_local_b, grid, -1, alpha));
     full_comm.get()->onboard_data();
 
-    // Buffer used for receive MPI operations data
-    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> update_ptr =
-        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
-            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
-
-    //Buffer used for send MPI operations data
-    unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>> sendbuf_ptr =
-        unique_ptr<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>(
-            new vector<DataTuple<VALUE_TYPE, embedding_dim>>());
-
-
     for (int i = 0; i < batches; i++) {
-      auto communicator = unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-          new DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
-              sp_local_receiver, sp_local_sender, dense_local, grid, i, alpha));
+      auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender, dense_local_b, grid, i, alpha));
       data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
       data_comm_cache[i].get()->onboard_data();
     }
 
     cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
-//    VALUE_TYPE *prevCoordinates = static_cast<VALUE_TYPE *>(
-//        ::operator new(sizeof(VALUE_TYPE[batch_size * embedding_dim])));
-        auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size * embedding_dim, 0);
-        VALUE_TYPE *prevCoordinates = prevCoordinates_ptr->data();
+    auto prevCoordinates_ptr = std::make_unique<std::vector<VALUE_TYPE>>(batch_size *dense_local_a->cols , 0);
+    VALUE_TYPE *prevCoordinates = prevCoordinates_ptr->data();
     cout << " rank " << grid->rank_in_col << " memory allocation completed " << batches << endl;
 
     size_t total_memory = 0;
@@ -128,8 +106,7 @@ public:
                                         true, false, 0, 0, false);
         } else {
           //  pull model code
-            this->execute_pull_model_computations(
-                sendbuf_ptr.get(), update_ptr.get(), i, j,
+            this->execute_pull_model_computations(i, j,
                 this->data_comm_cache[j].get(), csr_block, batch_size,
                 considering_batch_size, lr, prevCoordinates, 1,
                 true, 0, true);
@@ -152,10 +129,8 @@ public:
     stop_clock_and_add(t, "Total Time");
   }
 
-  inline void execute_pull_model_computations(
-      std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf,
-      std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf, int iteration,
-      int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
+  inline void execute_pull_model_computations(int iteration,
+      int batch, DataComm<INDEX_TYPE, VALUE_TYPE> *data_comm,
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
       double lr, VALUE_TYPE *prevCoordinates, int comm_initial_start, bool local_execution,
       int first_execution_proc, bool communication) {
@@ -169,15 +144,7 @@ public:
       MPI_Request req;
 
       if (communication) {
-        data_comm->transfer_data(sendbuf, receivebuf, sync, &req, iteration,batch, k, end_process, true);
-      }
-
-      if (!sync and communication) {
-        MPI_Ialltoallv(
-            (*sendbuf).data(), data_comm->send_counts_cyclic.data(),
-            data_comm->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
-            data_comm->receive_counts_cyclic.data(),
-            data_comm->rdispls_cyclic.data(), DENSETUPLE, grid->col_world, &req);
+        data_comm->transfer_dense_data(iteration,batch, k, end_process, true);
       }
 
       if (k == comm_initial_start) {
@@ -195,11 +162,6 @@ public:
                                       col_major, prev_start, prev_end_process,
                                       true);
       }
-
-      if (!sync and communication) {
-        data_comm->populate_cache(sendbuf, receivebuf, &req, sync, iteration, batch, true);
-      }
-
       prev_start = k;
     }
 
@@ -297,34 +259,33 @@ public:
 
 
         bool matched = false;
-        std::array<VALUE_TYPE, embedding_dim> array_ptr;
+        VALUE_TYPE* array_ptr = new VALUE_TYPE[this->dense_local_a->cols];
         bool col_inserted = false;
         for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
              j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
           if (csr_handle->col_idx[j] >= source_start_index and
               csr_handle->col_idx[j] <= source_end_index) {
-            VALUE_TYPE forceDiff[embedding_dim];
             auto source_id = csr_handle->col_idx[j];
             auto index = source_id - batch_id * batch_size;
 
             if (!matched) {
               if (fetch_from_cache) {
-                unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
+                unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                     &arrayMap =
                         (temp_cache)
-                            ? (*this->dense_local->tempCachePtr)[target_rank]
-                            : (*this->dense_local->cachePtr)[target_rank];
+                            ? (*this->dense_local_b->tempCachePtr)[target_rank]
+                            : (*this->dense_local_b->cachePtr)[target_rank];
                 array_ptr = arrayMap[i].value;
               }
               matched = true;
             }
 
-            for (int d = 0; d < embedding_dim; d++) {
+            for (int d = 0; d < this->dense_local_a->cols; d++) {
               if (!fetch_from_cache) {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)->nCoordinates[i * embedding_dim + d]* (this->dense_local)
-                                                                       ->nCoordinates[local_dst * embedding_dim + d];
+                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)->nCoordinates[i * this->dense_local_a->cols + d]* (this->dense_local_b)
+                                                                       ->nCoordinates[local_dst * this->dense_local_a->cols + d];
               } else {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)->nCoordinates[i * embedding_dim + d]*(array_ptr[d]);
+                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)->nCoordinates[i * this->dense_local_a->cols + d]*(array_ptr[d]);
               }
             }
           }
@@ -359,11 +320,10 @@ public:
             bool fetch_from_cache =
                 target_rank == (grid)->rank_in_col ? false : true;
 
-            VALUE_TYPE forceDiff[embedding_dim];
-            std::array<VALUE_TYPE, embedding_dim> array_ptr;
+            VALUE_TYPE* array_ptr = new VALUE_TYPE[this->dense_local_a->cols];
 
             if (fetch_from_cache) {
-              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
+              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                   &arrayMap =
                       (temp_cache)
                           ? (*this->dense_local->tempCachePtr)[target_rank]
@@ -371,12 +331,12 @@ public:
               array_ptr = arrayMap[dst_id].value;
             }
             auto t = start_clock();
-            for (int d = 0; d < embedding_dim; d++) {
+            for (int d = 0; d < this->dense_local_a->cols; d++) {
               if (!fetch_from_cache) {
-                prevCoordinates[index * embedding_dim + d] += lr *(this->dense_local)
-                                                                       ->nCoordinates[local_dst * embedding_dim + d];
+                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)
+                                                                       ->nCoordinates[local_dst * this->dense_local_a->cols + d];
               } else {
-                prevCoordinates[index * embedding_dim + d] += lr *(array_ptr[d]);
+                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(array_ptr[d]);
               }
             }
             auto time = stop_clock_get_elapsed(t);
@@ -398,10 +358,10 @@ public:
 
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < (end_row - row_base_index); i++) {
-      for (int d = 0; d < embedding_dim; d++) {
+      for (int d = 0; d < this->dense_local_a->cols; d++) {
         (this->dense_local_output)
-            ->nCoordinates[(row_base_index + i) * embedding_dim + d] =
-            prevCoordinates[i * embedding_dim + d];
+            ->nCoordinates[(row_base_index + i) * this->dense_local_a->cols + d] =
+            prevCoordinates[i * this->dense_local_a->cols + d];
       }
     }
   }

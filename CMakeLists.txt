@@ -57,9 +57,9 @@ add_library(disembed_lib SHARED
         cpp/algo/spgemm/spgemm_with_tiling.hpp
         cpp/algo/embedding/sparse_embedding.hpp
         cpp/algo/bfs/multi_source_bfs.hpp
-        cpp/algo/baseline.hpp
-        cpp/algo/spmm/baseline_spmm.hpp
-        cpp/algo/fusedMM/baseline_fused_mm.hpp
+        cpp/algo/spgemm/test_spgemm.hpp
+        cpp/algo/spmm/test_spmm.hpp
+        cpp/algo/fusedMM/test_fused_mm.hpp
         cpp/algo/gat/gat_layer.hpp
         cpp/algo/gat/gat.hpp
         cpp/algo/sddmm/sddmm.hpp

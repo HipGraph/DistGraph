@@ -12,7 +12,7 @@ using namespace std;
 namespace distblas::net {
 
 template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
-class TileDataComm : public DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> {
+class TileDataComm : public DataComm<INDEX_TYPE, VALUE_TYPE> {
 
 private:
   shared_ptr<
@@ -48,7 +48,7 @@ public:
                double tile_width_fraction, bool hash_spgemm = true,
                bool embedding = false, double merge_cost_factor = 1.0,
                DistributedMat* state_holder=nullptr)
-      : DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(
+      : DataComm<INDEX_TYPE, VALUE_TYPE>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
     tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
     this->total_batches = total_batches;

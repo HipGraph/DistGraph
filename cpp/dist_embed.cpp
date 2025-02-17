@@ -21,9 +21,9 @@
 #include "algo/spgemm/spgemm_with_tiling.hpp"
 #include "algo/embedding/sparse_embedding.hpp"
 #include "algo/bfs/multi_source_bfs.hpp"
-#include "algo/baseline.hpp"
-#include "algo/spmm/baseline_spmm.hpp"
-#include "algo/fusedMM/baseline_fused_mm.hpp"
+#include "algo/spgemm/test_spgemm.hpp"
+#include "algo/spmm/test_spmm.hpp"
+#include "algo/fusedMM/test_fused_mm.hpp"
 #include "algo/gat/gat.hpp"
 #include "algo/gat/gat_layer.hpp"
 #include "algo/sddmm/sddmm.hpp"
@@ -164,12 +164,7 @@ int main(int argc, char **argv) {
 
 
   // Initialize MPI DataTypes
-  if (!(spgemm or sparse_embedding)) {
-    initialize_mpi_datatypes<VALUE_TYPE, dimension>();
-  }else{
-    initialize_mpi_datatypes<VALUE_TYPE, sp_tuple_max_dim>();
-  }
-
+  initialize_mpi_datatypes<VALUE_TYPE, sp_tuple_max_dim>();
 
 //  // Creating reader
   auto reader = unique_ptr<ParallelIO>(new ParallelIO());
@@ -297,7 +292,7 @@ int main(int argc, char **argv) {
       perf_stats =  fused_algo.get()->execute(iterations, batch_size,lr);
       cout << " rank " << rank << " FusedMM algo completed  " << endl;
   }else if(sddmm){
-      auto dense_mat = make_unique<DenseMat<INDEX_TYPE , VALUE_TYPE, dimension>>(grid.get(), shared_sparseMat.get()->proc_row_width);
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE , VALUE_TYPE>>(grid.get(), shared_sparseMat.get()->proc_row_width,dimension);
       auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*shared_sparseMat.get());
       auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE, dimension>>(
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
@@ -386,8 +381,7 @@ int main(int argc, char **argv) {
     reader->parallel_write(output_file+"/embedding.txt",sparse_out.get()->dense_collector.get(),
                            localARows, dimension, grid.get(),shared_sparseMat.get());
   } else if (!save_results) {
-    auto dense_mat = shared_ptr<DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>>(
-        new DenseMat<INDEX_TYPE, VALUE_TYPE, dimension>(grid.get(), localARows));
+    auto dense_mat = make_shared<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), localARows,dimension));
 
     unique_ptr<distblas::algo::EmbeddingAlgo<INDEX_TYPE, VALUE_TYPE, dimension>>
 

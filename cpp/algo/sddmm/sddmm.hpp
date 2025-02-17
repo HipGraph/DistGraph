@@ -10,13 +10,13 @@ using namespace distblas::net;
 using namespace distblas::core;
 
 namespace distblas::algo {
-    template<typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
+    template<typename INDEX_TYPE, typename VALUE_TYPE>
     class SDDMM {
 
     private:
         distblas::core::SpMat<VALUE_TYPE> *sp_local_output;
-        DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_a;
-        DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_b;
+        DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a;
+        DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b;
 
         distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
         distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
@@ -24,7 +24,7 @@ namespace distblas::algo {
 
         Process3DGrid *grid;
 
-        std::unordered_map<int, unique_ptr < DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>>
+        std::unordered_map<int, unique_ptr < DataComm<INDEX_TYPE, VALUE_TYPE>>>
         data_comm_cache;
 
         //cache size controlling hyper parameter
@@ -45,8 +45,8 @@ namespace distblas::algo {
         SDDMM(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
               distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
               distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-              DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_a,
-              DenseMat<INDEX_TYPE, VALUE_TYPE, embedding_dim> *dense_local_b,
+              DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a,
+              DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b,
               distblas::core::SpMat<VALUE_TYPE> *sp_local_output,
               Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
                 : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
@@ -72,17 +72,8 @@ namespace distblas::algo {
 
             cout << " rank " << grid->rank_in_col << " total batches " << batches << endl;
 
-            // Buffer used for receive MPI operations data
-            auto update_ptr = make_unique<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>();
-
-            //Buffer used for send MPI operations data
-            auto sendbuf_ptr = make_unique<std::vector<DataTuple<VALUE_TYPE, embedding_dim>>>();
-
             for (int i = 0; i < batches; i++) {
-                auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(sp_local_receiver,
-                                                                                                 sp_local_sender,
-                                                                                                 dense_local_b, grid, i,
-                                                                                                 alpha);
+                auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver,sp_local_sender,dense_local_b, grid, i,alpha);
                 data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
                 data_comm_cache[i].get()->onboard_data();
             }
@@ -100,13 +91,10 @@ namespace distblas::algo {
             // One process computations without MPI operations
             if (grid->col_world_size == 1) {
                 // local computations for 1 process
-                this->calc_t_dist_grad_rowptr(csr_block, csr_block_output, lr,0,
-                                              batch_size, considering_batch_size,
-                                              true, false, 0, 0, false);
+                this->calc_t_dist_grad_rowptr(csr_block, csr_block_output, lr,0,batch_size, considering_batch_size,true, false, 0, 0, false);
             } else {
                 //  pull model code
-                this->execute_pull_model_computations(
-                        sendbuf_ptr.get(), update_ptr.get(), 0, 0,
+                this->execute_pull_model_computations(0, 0,
                         this->data_comm_cache[0].get(), csr_block, batch_size,
                         considering_batch_size, lr, csr_block_output, 1,
                         true, 0, true);
@@ -119,9 +107,7 @@ namespace distblas::algo {
             stop_clock_and_add(t, "Total Time");
         }
 
-        inline void execute_pull_model_computations(
-                std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *sendbuf,
-                std::vector<DataTuple<VALUE_TYPE, embedding_dim>> *receivebuf, int iteration,
+        inline void execute_pull_model_computations(int iteration,
                 int batch, DataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *data_comm,
                 CSRLocal<VALUE_TYPE> *csr_block, int batch_size, int considering_batch_size,
                 double lr, CSRLocal<VALUE_TYPE> *csr_block_output, int comm_initial_start, bool local_execution,
@@ -139,14 +125,6 @@ namespace distblas::algo {
                     data_comm->transfer_data(sendbuf, receivebuf, sync, &req, iteration, batch, k, end_process, true);
                 }
 
-                if (!sync and communication) {
-                    MPI_Ialltoallv(
-                            (*sendbuf).data(), data_comm->send_counts_cyclic.data(),
-                            data_comm->sdispls_cyclic.data(), DENSETUPLE, (*receivebuf).data(),
-                            data_comm->receive_counts_cyclic.data(),
-                            data_comm->rdispls_cyclic.data(), DENSETUPLE, grid->col_world, &req);
-                }
-
                 if (k == comm_initial_start) {
                     // local computation
                     this->calc_t_dist_grad_rowptr(
@@ -161,10 +139,6 @@ namespace distblas::algo {
                                                   batch_size, considering_batch_size, false,
                                                   col_major, prev_start, prev_end_process,
                                                   true);
-                }
-
-                if (!sync and communication) {
-                    data_comm->populate_cache(sendbuf, receivebuf, &req, sync, iteration, batch, true);
                 }
 
                 prev_start = k;
@@ -263,19 +237,18 @@ namespace distblas::algo {
 
 
                     bool matched = false;
-                    std::array<VALUE_TYPE, embedding_dim> array_ptr;
+                    VALUE_TYPE* array_ptr  = new VALUE_TYPE[this->dense_local_a->cols];
                     bool col_inserted = false;
                     for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
                          j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
                         if (csr_handle->col_idx[j] >= source_start_index and
                             csr_handle->col_idx[j] <= source_end_index) {
-                            VALUE_TYPE forceDiff[embedding_dim];
                             auto source_id = csr_handle->col_idx[j];
                             auto index = source_id - batch_id * batch_size;
 
                             if (!matched) {
                                 if (fetch_from_cache) {
-                                    unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
+                                    unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                                             &arrayMap =
                                             (temp_cache)
                                             ? (*this->dense_local_b->tempCachePtr)[target_rank]
@@ -285,12 +258,12 @@ namespace distblas::algo {
                                 matched = true;
                             }
                             VALUE_TYPE val = 0;
-                            for (int d = 0; d < embedding_dim; d++) {
+                            for (int d = 0; d < this->dense_local_a->cols; d++) {
                                 if (!fetch_from_cache) {
-                                    val += (this->dense_local_a)->nCoordinates[i * embedding_dim + d] *
-                                           (this->dense_local_b)->nCoordinates[local_dst * embedding_dim + d] * lr;
+                                    val += (this->dense_local_a)->nCoordinates[i * this->dense_local_a->cols + d] *
+                                           (this->dense_local_b)->nCoordinates[local_dst * this->dense_local_a->cols + d] * lr;
                                 } else {
-                                    val += (this->dense_local_a)->nCoordinates[i * embedding_dim + d] * array_ptr[d] *
+                                    val += (this->dense_local_a)->nCoordinates[i * this->dense_local_a->cols + d] * array_ptr[d] *
                                            lr;
                                 }
                             }
@@ -315,8 +288,7 @@ namespace distblas::algo {
 
                     INDEX_TYPE index = i - batch_id * batch_size;
 
-                    for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]);
-                         j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
+                    for (INDEX_TYPE j = static_cast<INDEX_TYPE>(csr_handle->rowStart[i]); j < static_cast<INDEX_TYPE>(csr_handle->rowStart[i + 1]); j++) {
                         auto dst_id = csr_handle->col_idx[j];
 
                         if (dst_id >= dst_start_index and dst_id < dst_end_index) {
@@ -328,11 +300,10 @@ namespace distblas::algo {
                             bool fetch_from_cache =
                                     target_rank == (grid)->rank_in_col ? false : true;
 
-                            VALUE_TYPE forceDiff[embedding_dim];
-                            std::array<VALUE_TYPE, embedding_dim> array_ptr;
 
+                            VALUE_TYPE * array_ptr = new VALUE_TYPE[this->dense_local_a->cols];
                             if (fetch_from_cache) {
-                                unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE, embedding_dim>>
+                                unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>>
                                         &arrayMap =
                                         (temp_cache)
                                         ? (*this->dense_local_b->tempCachePtr)[target_rank]
@@ -341,12 +312,12 @@ namespace distblas::algo {
                             }
                             auto t = start_clock();
                             VALUE_TYPE val = 0;
-                            for (int d = 0; d < embedding_dim; d++) {
+                            for (int d = 0; d < this->dense_local_a->cols; d++) {
                                 if (!fetch_from_cache) {
-                                    val += (this->dense_local_a)->nCoordinates[i * embedding_dim + d] *
-                                           (this->dense_local_b)->nCoordinates[local_dst * embedding_dim + d] * lr;
+                                    val += (this->dense_local_a)->nCoordinates[i * this->dense_local_a->cols + d] *
+                                           (this->dense_local_b)->nCoordinates[local_dst * this->dense_local_a->cols + d] * lr;
                                 } else {
-                                    val += (this->dense_local_a)->nCoordinates[i * embedding_dim + d] * array_ptr[d] *
+                                    val += (this->dense_local_a)->nCoordinates[i * this->dense_local_a->cols + d] * array_ptr[d] *
                                            lr;
                                 }
                             }
@@ -354,7 +325,6 @@ namespace distblas::algo {
                             csr_handle_output->values[j] = val;
                             auto time = stop_clock_get_elapsed(t);
                             timing_info[index] += time;
-
                         }
                     }
                 }

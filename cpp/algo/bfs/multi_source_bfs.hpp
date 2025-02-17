@@ -53,7 +53,7 @@ public:
   json execute(int iterations, int batch_size, VALUE_TYPE lr) {
     json jobj;
     distblas::core::SpMat<VALUE_TYPE> *sparse_input = nullptr;
-    unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>> state_holder= make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim>>(grid,sp_local_receiver->proc_row_width);
+    auto state_holder= make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim);
     int batches=0;
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
       batches =
@@ -88,8 +88,7 @@ public:
       bool enable_remote = global_mode>0?true:false;
 
       cout<<grid->rank_in_col<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
-      unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,embedding_dim>>
-          spgemm_algo = unique_ptr<distblas::algo::SpGEMMAlgoWithTiling<
+      auto spgemm_algo = make_unique<distblas::algo::SpGEMMAlgoWithTiling<
               INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
               new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
                                                        embedding_dim>(
@@ -125,7 +124,7 @@ public:
    return jobj;
   }
 
-  void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE,embedding_dim> *dense_mat){
+  void update_state_holder( distblas::core::SpMat<VALUE_TYPE> *sparse_input, DenseMat<INDEX_TYPE,VALUE_TYPE> *dense_mat){
     CSRHandle *handle = sparse_input->csr_local_data->handler.get();
     #pragma omp parallel for
     for(auto i=0;i<handle->rowStart.size()-1;i++){
