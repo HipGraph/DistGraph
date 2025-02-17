@@ -1,5 +1,6 @@
 #pragma once
 #include "../embedding/algo.hpp"
+#include "../../net/tile_based_data_comm.hpp"
 
 using namespace std;
 using namespace distblas::core;
