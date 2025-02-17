@@ -89,12 +89,9 @@ public:
 
       cout<<grid->rank_in_col<<" iteration "<<i<<" enable remote "<<enable_remote<<endl;
       auto spgemm_algo = make_unique<distblas::algo::SpGEMMAlgoWithTiling<
-              INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
-              new distblas::algo::SpGEMMAlgoWithTiling<INDEX_TYPE, VALUE_TYPE,
-                                                       embedding_dim>(
-                  sp_local_native, sp_local_receiver, sp_local_sender,
+              INDEX_TYPE, VALUE_TYPE, embedding_dim>>(sp_local_native, sp_local_receiver, sp_local_sender,
                   sparse_input, sparse_out.get(), grid, alpha, beta, col_major,
-                  sync, tile_width_fraction, hash_spgemm,main_comm.get(),state_holder.get()));
+                  sync, tile_width_fraction, hash_spgemm,main_comm.get(),state_holder.get());
 
 
       auto t = start_clock();

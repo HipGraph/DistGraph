@@ -123,7 +123,7 @@ namespace distblas::algo {
                         gat_layers[i].num_heads*features_per_head,true);
 
                 for(int j=0;j<gat_layers[i].num_heads;++j){
-                    gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,buffers[i]->cols);
+                    gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,buffers[i]->cols,features_per_head);
                     cout<<" gat layer initialization completed "<<i<<endl;
                 }
             }

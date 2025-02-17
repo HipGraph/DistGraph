@@ -46,10 +46,10 @@ namespace distblas::algo {
                  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
                  DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local,
                  DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_output,
-                 Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
+                 Process3DGrid *grid, double alpha, double beta, bool col_major)
                 : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
                   sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
-                  alpha(alpha), beta(beta), col_major(col_major), sync(sync_comm),
+                  alpha(alpha), beta(beta), col_major(col_major),
                   dense_local_output(dense_local_output) {
             this->timing_info = vector<double>(sp_local_receiver->proc_row_width, 0);
         }
