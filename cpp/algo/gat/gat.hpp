@@ -12,7 +12,7 @@ using namespace distblas::core;
 
 namespace distblas::algo {
 
-    template<typename INDEX_TYPE, typename VALUE_TYPE, size_t features_per_head>
+    template<typename INDEX_TYPE, typename VALUE_TYPE>
     class GAT {
 
     private:
@@ -38,7 +38,7 @@ namespace distblas::algo {
 
         bool hash_spgemm = false;
 
-        vector <GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head>> gat_layers;
+        vector <GATLayer<INDEX_TYPE,VALUE_TYPE>> gat_layers;
 
 
         vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE>>> buffers;
@@ -107,7 +107,7 @@ namespace distblas::algo {
             this->hash_spgemm = hash_spgemm;
         }
 
-        void addLayer(GATLayer<INDEX_TYPE,VALUE_TYPE,features_per_head> layer) {
+        void addLayer(GATLayer<INDEX_TYPE,VALUE_TYPE> layer) {
             gat_layers.emplace_back(std::move(layer));
         }
 

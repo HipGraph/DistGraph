@@ -10,7 +10,7 @@ using namespace distblas::net;
 
 namespace distblas::algo {
 
-    template<typename INDEX_TYPE, typename VALUE_TYPE, size_t features_per_head>
+    template<typename INDEX_TYPE, typename VALUE_TYPE>
     class GATLayer {
 
     private:
