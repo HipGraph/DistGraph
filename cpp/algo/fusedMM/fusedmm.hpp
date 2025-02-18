@@ -329,22 +329,25 @@ public:
 
             VALUE_TYPE* array_ptr = new VALUE_TYPE[this->dense_local_a->cols];
 
-//            if (fetch_from_cache) {
-//              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
-//                  &arrayMap =
-//                      (temp_cache)
-//                          ? (*this->dense_local_b->tempCachePtr)[target_rank]
-//                          : (*this->dense_local_b->cachePtr)[target_rank];
-//              array_ptr = arrayMap[dst_id].values.data();
-//            }
+            if (fetch_from_cache) {
+              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
+                  &arrayMap =
+                      (temp_cache)
+                          ? (*this->dense_local_b->tempCachePtr)[target_rank]
+                          : (*this->dense_local_b->cachePtr)[target_rank];
+              if (arrayMap.find(dst_id)==arrayMap.end(dst_id)){
+                  cout<<" cannot find "<<dst_id<<" in "<<grid->rank_in_col<<endl;
+              }
+              array_ptr = arrayMap[dst_id].values.data();
+            }
             auto t = start_clock();
             for (int d = 0; d < this->dense_local_a->cols; d++) {
-//              if (!fetch_from_cache) {
-//                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)
-//                                                                       ->nCoordinates[local_dst * this->dense_local_a->cols + d];
-//              } else {
-//                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(array_ptr[d]);
-//              }
+              if (!fetch_from_cache) {
+                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)
+                                                                       ->nCoordinates[local_dst * this->dense_local_a->cols + d];
+              } else {
+                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(array_ptr[d]);
+              }
             }
             auto time = stop_clock_get_elapsed(t);
             timing_info[index]+=time;
