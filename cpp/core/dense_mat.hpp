@@ -31,7 +31,7 @@ namespace distblas::core {
         unique_ptr <vector<unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>> tempCachePtr;
         Process3DGrid *grid;
 
-        unique_ptr<vector<VALUE_TYPE> nCoordinates;
+        unique_ptr<vector<VALUE_TYPE>> nCoordinates;
 
 
         /**
