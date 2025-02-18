@@ -243,7 +243,7 @@ public:
                              latest.values.begin() + col_index_offset);
 
                     }
-//                    (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] = latest;
+                    (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] = latest;
 //                    if (remaining_data_items > 0) {
 //                        DataTuple<VALUE_TYPE> current;
 //                        current.rows[0] =
