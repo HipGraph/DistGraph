@@ -65,6 +65,7 @@ public:
       auto t = start_clock();
       size_t total_memory = 0;
       auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_native->proc_row_width,embedding_dim);
+        cout << " rank " << grid->rank_in_col << " fusedmm intialization of first dense matrices completed  " << endl;
       auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_native->proc_row_width,embedding_dim);
 
         cout << " rank " << grid->rank_in_col << " fusedmm intialization of two dense matrices completed  " << endl;
