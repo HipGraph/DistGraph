@@ -78,9 +78,6 @@ namespace distblas::core {
         void multiply(DenseMat<INDEX_TYPE, VALUE_TYPE> *other, DenseMat<INDEX_TYPE, VALUE_TYPE> *output) {
             cout << " cols " << cols << " rows " << other->rows << endl;
             assert(cols == other->rows);
-            output->nCoordinates = output->nCoordinatePtr->data();
-            output->rows = this->rows;
-            output->cols = other->cols;
             #pragma omp parallel for collapse(2)
             for (int i = 0; i < this->rows; ++i) {
                 for (int j = 0; j < other->cols; ++j) {
