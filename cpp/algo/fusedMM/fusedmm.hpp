@@ -327,14 +327,14 @@ public:
 
             VALUE_TYPE* array_ptr = new VALUE_TYPE[this->dense_local_a->cols];
 
-            if (fetch_from_cache) {
-              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
-                  &arrayMap =
-                      (temp_cache)
-                          ? (*this->dense_local_b->tempCachePtr)[target_rank]
-                          : (*this->dense_local_b->cachePtr)[target_rank];
-              array_ptr = arrayMap[dst_id].values.data();
-            }
+//            if (fetch_from_cache) {
+//              unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>
+//                  &arrayMap =
+//                      (temp_cache)
+//                          ? (*this->dense_local_b->tempCachePtr)[target_rank]
+//                          : (*this->dense_local_b->cachePtr)[target_rank];
+//              array_ptr = arrayMap[dst_id].values.data();
+//            }
             auto t = start_clock();
             for (int d = 0; d < this->dense_local_a->cols; d++) {
 //              if (!fetch_from_cache) {
