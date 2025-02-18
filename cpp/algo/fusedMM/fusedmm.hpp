@@ -155,6 +155,7 @@ public:
             csr_block, prevCoordinates, lr, batch, batch_size,
             considering_batch_size, local_execution, col_major,
             first_execution_proc, prev_start, local_execution);
+          cout<<" rank "<<grid->rank_in_col<<" local computation completed "<<endl;
 
       } else if (k > comm_initial_start) {
         int prev_end_process = get_end_proc(prev_start, beta, grid->col_world_size);
@@ -163,6 +164,7 @@ public:
                                       batch_size, considering_batch_size, false,
                                       col_major, prev_start, prev_end_process,
                                       true);
+          cout<<" rank "<<grid->rank_in_col<<" remote computation completed "<<prev_start<<" : "<<prev_end_process<<endl;
       }
       prev_start = k;
     }
@@ -175,6 +177,7 @@ public:
                                   col_major, prev_start, prev_end_process,
                                   true);
 
+      cout<<" rank "<<grid->rank_in_col<<" remote computation completed "<<prev_start<<" : "<<prev_end_process<<endl;
     // dense_local->invalidate_cache(i, j, true);
   }
 
