@@ -304,13 +304,13 @@ public:
                            INDEX_TYPE dst_end_index, CSRLocal<VALUE_TYPE> *csr_block,
                            VALUE_TYPE *prevCoordinates, VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool temp_cache) {
-        cout<<" inside calc_embedding_row_major "<<grid->rank_in_col<<endl;
+
     if (csr_block->handler != nullptr) {
 
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
-//#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
+#pragma omp parallel for schedule(static) // enable for full batch training or // batch size larger than 1000000
       for (INDEX_TYPE i = source_start_index; i <= source_end_index; i++) {
 
         INDEX_TYPE index = i - batch_id * batch_size;
@@ -335,9 +335,6 @@ public:
                       (temp_cache)
                           ? (*this->dense_local_b->tempCachePtr)[target_rank]
                           : (*this->dense_local_b->cachePtr)[target_rank];
-              if (arrayMap.find(dst_id)==arrayMap.end(dst_id)){
-                  cout<<" cannot find "<<dst_id<<" in "<<grid->rank_in_col<<endl;
-              }
               array_ptr = arrayMap[dst_id].values.data();
             }
             auto t = start_clock();
