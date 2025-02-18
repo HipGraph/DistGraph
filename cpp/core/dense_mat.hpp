@@ -30,7 +30,9 @@ namespace distblas::core {
         unique_ptr <vector<unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>> cachePtr;
         unique_ptr <vector<unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>> tempCachePtr;
         Process3DGrid *grid;
-        VALUE_TYPE *nCoordinates;
+
+        unique_ptr<vector<VALUE_TYPE> nCoordinates;
+
 
         /**
          *
@@ -52,7 +54,7 @@ namespace distblas::core {
                     make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
             this->tempCachePtr =
                     make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
-            this->nCoordinates = make_unique < vector < VALUE_TYPE >> (rows * cols)->data();
+            this->nCoordinates = make_unique < vector < VALUE_TYPE >> (rows * cols);
             this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
             this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
 
