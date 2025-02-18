@@ -19,7 +19,7 @@ namespace distblas::algo {
     public:
         int input_features;
         int num_heads;
-        int features_per_head
+        int features_per_head;
         vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE>>> weights;
 
         GATLayer(int input_features, int features_per_head,  int num_heads) {
