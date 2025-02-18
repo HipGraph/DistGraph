@@ -144,7 +144,9 @@ public:
       MPI_Request req;
 
       if (communication) {
-        data_comm->transfer_dense_data(iteration,batch, k, end_process, true);
+          cout<<" rank "<<grid->rank_in_col<<" transfer data started "<<endl;
+          data_comm->transfer_dense_data(iteration,batch, k, end_process, true);
+          cout<<" rank "<<grid->rank_in_col<<" transfer data completed "<<endl;
       }
 
       if (k == comm_initial_start) {
