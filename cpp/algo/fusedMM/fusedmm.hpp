@@ -304,7 +304,9 @@ public:
                            INDEX_TYPE dst_end_index, CSRLocal<VALUE_TYPE> *csr_block,
                            VALUE_TYPE *prevCoordinates, VALUE_TYPE lr, int batch_id,
                            int batch_size, int block_size, bool temp_cache) {
+        cout<<" inside calc_embedding_row_major "<<grid->rank_in_col<<endl;
     if (csr_block->handler != nullptr) {
+
       CSRHandle *csr_handle = csr_block->handler.get();
 
 
