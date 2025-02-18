@@ -301,7 +301,7 @@ public:
                       DENSETUPLE, grid->col_world);
         stop_clock_and_add(t, "Communication Time");
         cout<<" populate_dense_cache "<<grid->rank_in_col<<endl;
-        this->populate_dense_cache(sendbuf_cyclic, receivebuf, iteration, batch_id,temp_cache);
+        this->populate_dense_cache(sendbuf_cyclic.get(), receivebuf.get(), iteration, batch_id,temp_cache);
     }
 
 
