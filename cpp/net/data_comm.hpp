@@ -274,10 +274,10 @@ public:
         }
         cout<<" exited from  data comm "<<grid->rank_in_col <<" "<<total_send_count<<endl;
         sendbuf_cyclic->resize(total_send_count);
-//        for (int i = 0; i < grid->col_world_size; i++) {
-//            sdispls_cyclic[i] =(i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
-//            copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),(*sendbuf_cyclic).begin() + sdispls_cyclic[i]);
-//        }
+        for (int i = 0; i < grid->col_world_size; i++) {
+            sdispls_cyclic[i] =(i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
+            copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),(*sendbuf_cyclic).begin() + sdispls_cyclic[i]);
+        }
 
         cout<<" first MPI_Alltoall reached "<<grid->rank_in_col<<endl;
         MPI_Alltoall(send_counts_cyclic.data(), 1, MPI_INT,receive_counts_cyclic.data(), 1, MPI_INT, grid->col_world);
