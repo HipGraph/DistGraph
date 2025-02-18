@@ -196,6 +196,7 @@ public:
             auto col_id = pair.first;
             vector<VALUE_TYPE> stdArray(this->dense_local->cols);
             (this->dense_local)->fetch_local_data(stdArray.data(),col_id);
+            INDEX_TYPE global_key = sp_local_receiver->proc_row_width * grid->rank_in_col+col_id;
             for (int i = 0; i < sending_procs.size(); i++) {
                 if (pair.second.count(sending_procs[i]) > 0) {
                     if (send_counts_cyclic[sending_procs[i]] == 0) {
@@ -232,7 +233,7 @@ public:
                     INDEX_TYPE num_of_copying_data = min(offset, pending_col_pos);
                     INDEX_TYPE remaining_data_items = offset - num_of_copying_data;
 
-                    latest.rows[row_index_offset] = col_id;
+                    latest.rows[row_index_offset] = global_key;
                     latest.rows[row_index_offset + 1] = num_of_copying_data;
                     latest.rows[0] = row_index_offset + 2;
                     latest.rows[1] = latest.rows[1] + num_of_copying_data;
@@ -258,7 +259,7 @@ public:
                                 [send_counts_cyclic[sending_procs[i]] - 1];
                         row_index_offset = latest.rows[0];
                         col_index_offset = latest.rows[1];
-                        latest.rows[row_index_offset] = col_id;
+                        latest.rows[row_index_offset] = global_key;
                         latest.rows[row_index_offset + 1] = remaining_data_items;
                         latest.rows[0] = row_index_offset + 2;
                         latest.rows[1] = latest.rows[1] + remaining_data_items;
