@@ -237,12 +237,12 @@ public:
                     latest.rows[0] = row_index_offset + 2;
                     latest.rows[1] = latest.rows[1] + num_of_copying_data;
 
-                    if (num_of_copying_data > 0) {
-                        copy(stdArray.begin(),
-                             stdArray.begin() + num_of_copying_data,
-                             latest.values.begin() + col_index_offset);
-                    }
-                    (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] = latest;
+//                    if (num_of_copying_data > 0) {
+//                        copy(stdArray.begin(),
+//                             stdArray.begin() + num_of_copying_data,
+//                             latest.values.begin() + col_index_offset);
+//                    }
+//                    (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] = latest;
 //                    if (remaining_data_items > 0) {
 //                        DataTuple<VALUE_TYPE> current;
 //                        current.rows[0] =
