@@ -72,8 +72,7 @@ namespace distblas::core {
 
         void fetch_local_data(VALUE_TYPE *stdArray, int local_key) {
             int base_index = local_key * cols;
-            std::copy(nCoordinates + base_index,
-                      this->nCoordinates + base_index + cols, stdArray);
+            std::copy(nCoordinates + base_index,nCoordinates + base_index + cols, stdArray);
         }
 
         void multiply(DenseMat<INDEX_TYPE, VALUE_TYPE> *other, DenseMat<INDEX_TYPE, VALUE_TYPE> *output) {

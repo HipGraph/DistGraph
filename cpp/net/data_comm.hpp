@@ -196,6 +196,7 @@ public:
             auto col_id = pair.first;
             vector<VALUE_TYPE> stdArray(this->dense_local->cols);
             (this->dense_local)->fetch_local_data(stdArray.data(),col_id);
+            cout<<" data matrix loaded "<<grid->rank_in_col<<endl;
             for (int i = 0; i < sending_procs.size(); i++) {
                 if (pair.second.count(sending_procs[i]) > 0) {
                     if (send_counts_cyclic[sending_procs[i]] == 0) {
@@ -278,6 +279,7 @@ public:
             copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),(*sendbuf_cyclic).begin() + sdispls_cyclic[i]);
         }
 
+        cout<<" first MPI_Alltoall reached "<<grid->rank_in_col<<endl;
         MPI_Alltoall(send_counts_cyclic.data(), 1, MPI_INT,receive_counts_cyclic.data(), 1, MPI_INT, grid->col_world);
 
 
@@ -298,6 +300,7 @@ public:
                       receive_counts_cyclic.data(), rdispls_cyclic.data(),
                       DENSETUPLE, grid->col_world);
         stop_clock_and_add(t, "Communication Time");
+        cout<<" populate_dense_cache "<<grid->rank_in_col<<endl;
         this->populate_dense_cache(sendbuf_cyclic, receivebuf, iteration, batch_id,temp_cache);
     }
 
