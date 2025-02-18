@@ -196,53 +196,53 @@ public:
             auto col_id = pair.first;
             vector<VALUE_TYPE> stdArray(this->dense_local->cols);
             (this->dense_local)->fetch_local_data(stdArray.data(),col_id);
-//            for (int i = 0; i < sending_procs.size(); i++) {
-//                if (pair.second.count(sending_procs[i]) > 0) {
-//                    if (send_counts_cyclic[sending_procs[i]] == 0) {
-//                        DataTuple<VALUE_TYPE> current;
-//                        current.rows[0] =
-//                                2; // rows first two indices are already taken for metadata
-//                        current.rows[1] = 0;
-//                        (*data_buffer_ptr)[sending_procs[i]].push_back(current);
-//                        total_send_count++;
-//                        send_counts_cyclic[sending_procs[i]]++;
-//                    }
-//
-//                    DataTuple<VALUE_TYPE> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1];
-//                    auto row_index_offset = latest.rows[0];
-//                    auto col_index_offset = latest.rows[1];
-//                    if (row_index_offset >= row_max or col_index_offset >= sp_tuple_max_dim) {
-//                        DataTuple<VALUE_TYPE> current;
-//                        current.rows[0] =
-//                                2; // rows first two indices are already taken for metadata
-//                        current.rows[1] = 0;
-//                        (*data_buffer_ptr)[sending_procs[i]].push_back(current);
-//                        total_send_count++;
-//                        send_counts_cyclic[sending_procs[i]]++;
-//                        latest =
-//                                (*data_buffer_ptr)[sending_procs[i]]
-//                                [send_counts_cyclic[sending_procs[i]] - 1];
-//                        row_index_offset = latest.rows[0];
-//                        col_index_offset = latest.rows[1];
-//                    }
-//
-//                    INDEX_TYPE offset = stdArray.size();
-//                    // start filling from offset position
-//                    INDEX_TYPE pending_col_pos = sp_tuple_max_dim - col_index_offset;
-//                    INDEX_TYPE num_of_copying_data = min(offset, pending_col_pos);
-//                    INDEX_TYPE remaining_data_items = offset - num_of_copying_data;
-//
-//                    latest.rows[row_index_offset] = col_id;
-//                    latest.rows[row_index_offset + 1] = num_of_copying_data;
-//                    latest.rows[0] = row_index_offset + 2;
-//                    latest.rows[1] = latest.rows[1] + num_of_copying_data;
-//
-//                    if (num_of_copying_data > 0) {
-//                        copy(stdArray.begin(),
-//                             stdArray.begin() + num_of_copying_data,
-//                             latest.values.begin() + col_index_offset);
-//                    }
-//                    (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] = latest;
+            for (int i = 0; i < sending_procs.size(); i++) {
+                if (pair.second.count(sending_procs[i]) > 0) {
+                    if (send_counts_cyclic[sending_procs[i]] == 0) {
+                        DataTuple<VALUE_TYPE> current;
+                        current.rows[0] =
+                                2; // rows first two indices are already taken for metadata
+                        current.rows[1] = 0;
+                        (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                        total_send_count++;
+                        send_counts_cyclic[sending_procs[i]]++;
+                    }
+
+                    DataTuple<VALUE_TYPE> latest = (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1];
+                    auto row_index_offset = latest.rows[0];
+                    auto col_index_offset = latest.rows[1];
+                    if (row_index_offset >= row_max or col_index_offset >= sp_tuple_max_dim) {
+                        DataTuple<VALUE_TYPE> current;
+                        current.rows[0] =
+                                2; // rows first two indices are already taken for metadata
+                        current.rows[1] = 0;
+                        (*data_buffer_ptr)[sending_procs[i]].push_back(current);
+                        total_send_count++;
+                        send_counts_cyclic[sending_procs[i]]++;
+                        latest =
+                                (*data_buffer_ptr)[sending_procs[i]]
+                                [send_counts_cyclic[sending_procs[i]] - 1];
+                        row_index_offset = latest.rows[0];
+                        col_index_offset = latest.rows[1];
+                    }
+
+                    INDEX_TYPE offset = stdArray.size();
+                    // start filling from offset position
+                    INDEX_TYPE pending_col_pos = sp_tuple_max_dim - col_index_offset;
+                    INDEX_TYPE num_of_copying_data = min(offset, pending_col_pos);
+                    INDEX_TYPE remaining_data_items = offset - num_of_copying_data;
+
+                    latest.rows[row_index_offset] = col_id;
+                    latest.rows[row_index_offset + 1] = num_of_copying_data;
+                    latest.rows[0] = row_index_offset + 2;
+                    latest.rows[1] = latest.rows[1] + num_of_copying_data;
+
+                    if (num_of_copying_data > 0) {
+                        copy(stdArray.begin(),
+                             stdArray.begin() + num_of_copying_data,
+                             latest.values.begin() + col_index_offset);
+                    }
+                    (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] = latest;
 //                    if (remaining_data_items > 0) {
 //                        DataTuple<VALUE_TYPE> current;
 //                        current.rows[0] =
@@ -269,8 +269,8 @@ public:
 //                        [send_counts_cyclic[sending_procs[i]] - 1] =
 //                                latest;
 //                    }
-//                }
-//            }
+                }
+            }
         }
         cout<<" exited from  data comm "<<grid->rank_in_col<<endl;
         (*sendbuf_cyclic).resize(total_send_count);
