@@ -67,6 +67,7 @@ public:
       auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_native->proc_row_width,embedding_dim);
       auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_native->proc_row_width,embedding_dim);
 
+        cout << " rank " << grid->rank_in_col << " fusedmm intialization of two dense matrices completed  " << endl;
       auto embedding_algo = make_unique<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE>>(sp_local_native, sp_local_receiver,
                       sp_local_sender, dense_mat.get(),dense_mat.get(),
                       dense_mat_output.get(), grid, alpha, beta, col_major);
