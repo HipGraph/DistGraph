@@ -196,7 +196,6 @@ public:
             auto col_id = pair.first;
             vector<VALUE_TYPE> stdArray(this->dense_local->cols);
             (this->dense_local)->fetch_local_data(stdArray.data(),col_id);
-            cout<<" data matrix loaded "<<grid->rank_in_col<<endl;
             for (int i = 0; i < sending_procs.size(); i++) {
                 if (pair.second.count(sending_procs[i]) > 0) {
                     if (send_counts_cyclic[sending_procs[i]] == 0) {
