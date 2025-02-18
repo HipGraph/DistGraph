@@ -64,12 +64,10 @@ public:
     for (int i = 0; i < iterations; i++) {
       auto t = start_clock();
       size_t total_memory = 0;
-      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_receiver->proc_row_width,embedding_dim);
-      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_receiver->proc_row_width,embedding_dim);
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_native->proc_row_width,embedding_dim);
+      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sp_local_native->proc_row_width,embedding_dim);
 
-      unique_ptr<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE>>
-
-      embedding_algo = make_unique<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE>>(sp_local_native, sp_local_receiver,
+      auto embedding_algo = make_unique<distblas::algo::FusedMMAlgo<INDEX_TYPE, VALUE_TYPE>>(sp_local_native, sp_local_receiver,
                       sp_local_sender, dense_mat.get(),dense_mat.get(),
                       dense_mat_output.get(), grid, alpha, beta, col_major);
 
