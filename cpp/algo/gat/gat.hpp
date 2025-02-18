@@ -60,19 +60,21 @@ namespace distblas::algo {
 
         void computeGAT(int i, int j){
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
+            cout<<" dense computing multiplications  "<<i<<"  head "<<j<<" started "<<endl;
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
-            cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
+            cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
 
             auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                     sp_local_native, sp_local_receiver,
-                    sp_local_sender,dense_output.get(),dense_output.get(),sparse_output.get(),
-                    grid,
-                    alpha, beta,col_major,sync);
+                    sp_local_sender,dense_output.get(),
+                    dense_output.get(),sparse_output.get(),
+                    grid, alpha, beta,col_major,sync);
 
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
+
             cout<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             applyLeakyRelu(sparse_output.get(),0.001);
@@ -115,8 +117,7 @@ namespace distblas::algo {
             auto t = start_clock();
             buffers.resize(gat_layers.size()+1);
             cout<<"  buffer resizing  completed "<<endl;
-            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,
-                    gat_layers[0].input_features,gat_layers[0].features_per_head);
+            buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,gat_layers[0].input_features);
             cout<<" first buffer initialization completed "<<endl;
             for(int i=0;i<gat_layers.size();++i){
                 buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,
