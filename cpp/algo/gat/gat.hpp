@@ -73,6 +73,7 @@ namespace distblas::algo {
                     dense_output.get(),sparse_output.get(),
                     grid, alpha, beta,col_major,sync);
 
+            cout<<" executing  sddmm layer  "<<i<<"  head "<<j<<" starting  "<<endl;
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
 
             cout<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
