@@ -163,8 +163,8 @@ public:
     inline void transfer_dense_data(int iteration, int batch_id,int starting_proc, int end_proc, bool temp_cache) {
 
         //Buffer used for send MPI operations data
-        auto sendbuf_cyclic  = make_unique<std::vector<DataTuple<VALUE_TYPE>>>().get();
-        auto receivebuf = make_unique<std::vector<DataTuple<VALUE_TYPE>>>().get();
+        auto sendbuf_cyclic  = make_unique<std::vector<DataTuple<VALUE_TYPE>>>();
+        auto receivebuf = make_unique<std::vector<DataTuple<VALUE_TYPE>>>();
 
         int total_receive_count = 0;
         int total_send_count = 0;
@@ -267,15 +267,13 @@ public:
                              stdArray.begin() + num_of_copying_data - 1 +
                              remaining_data_items,
                              latest.values.begin());
-                        (*data_buffer_ptr)[sending_procs[i]]
-                        [send_counts_cyclic[sending_procs[i]] - 1] =
-                                latest;
+                        (*data_buffer_ptr)[sending_procs[i]][send_counts_cyclic[sending_procs[i]] - 1] =latest;
                     }
                 }
             }
         }
-        cout<<" exited from  data comm "<<grid->rank_in_col<<endl;
-        (*sendbuf_cyclic).resize(total_send_count);
+        cout<<" exited from  data comm "<<grid->rank_in_col <<" "<<total_send_count<<endl;
+        sendbuf_cyclic->resize(total_send_count);
 //        for (int i = 0; i < grid->col_world_size; i++) {
 //            sdispls_cyclic[i] =(i > 0) ? sdispls_cyclic[i - 1] + send_counts_cyclic[i - 1]: sdispls_cyclic[i];
 //            copy((*data_buffer_ptr)[i].begin(), (*data_buffer_ptr)[i].end(),(*sendbuf_cyclic).begin() + sdispls_cyclic[i]);
