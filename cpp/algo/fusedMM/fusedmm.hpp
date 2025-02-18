@@ -337,12 +337,12 @@ public:
             }
             auto t = start_clock();
             for (int d = 0; d < this->dense_local_a->cols; d++) {
-              if (!fetch_from_cache) {
-                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)
-                                                                       ->nCoordinates[local_dst * this->dense_local_a->cols + d];
-              } else {
-                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(array_ptr[d]);
-              }
+//              if (!fetch_from_cache) {
+//                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(this->dense_local_a)
+//                                                                       ->nCoordinates[local_dst * this->dense_local_a->cols + d];
+//              } else {
+//                prevCoordinates[index * this->dense_local_a->cols + d] += lr *(array_ptr[d]);
+//              }
             }
             auto time = stop_clock_get_elapsed(t);
             timing_info[index]+=time;
