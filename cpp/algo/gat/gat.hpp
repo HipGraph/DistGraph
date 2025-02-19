@@ -66,7 +66,7 @@ namespace distblas::algo {
             cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
-
+            cout<<" sparse_output    "<<i<<"  head "<<j<<" completed  "<<endl;
             auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                     sp_local_native, sp_local_receiver,
                     sp_local_sender,dense_output.get(),
