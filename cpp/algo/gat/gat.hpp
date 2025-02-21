@@ -60,7 +60,7 @@ namespace distblas::algo {
 
         void computeGAT(int i, int j){
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
-            cout<<" dense computing multiplications  "<<i<<"  head "<<j<<" started size "<<buffers[i]->rows*gat_layers[i].weights[j]->cols<<endl;
+            cout<<" rank "<<grid->rank_in_col<<" dense computing multiplications  "<<i<<"  head "<<j<<" started size "<<buffers[i]->rows*gat_layers[i].weights[j]->cols<<endl;
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
 
             cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
