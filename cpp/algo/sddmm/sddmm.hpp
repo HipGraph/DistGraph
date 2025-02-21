@@ -308,6 +308,9 @@ namespace distblas::algo {
                                         (temp_cache)
                                         ? (*this->dense_local_b->tempCachePtr)[target_rank]
                                         : (*this->dense_local_b->cachePtr)[target_rank];
+                                if (arrayMap.find(dst_id)==arrayMap.end()){
+                                    cout<<" cannot find arrayMap "<<dst_id<<" rank "<<grid->rank_in_col<<endl;
+                                }
                                 array_ptr = arrayMap[dst_id].values.data();
                             }
                             auto t = start_clock();
