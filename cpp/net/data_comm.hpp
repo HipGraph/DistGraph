@@ -197,6 +197,9 @@ public:
             vector<VALUE_TYPE> stdArray(this->dense_local->cols);
             (this->dense_local)->fetch_local_data(stdArray.data(),col_id);
             INDEX_TYPE global_key = sp_local_receiver->proc_row_width * grid->rank_in_col+col_id;
+            if (global_key==15141583){
+                cout<<grid->rank_in_col<<" loading global key "<<endl;
+            }
             for (int i = 0; i < sending_procs.size(); i++) {
                 if (pair.second.count(sending_procs[i]) > 0) {
                     if (send_counts_cyclic[sending_procs[i]] == 0) {
