@@ -79,7 +79,7 @@ namespace distblas::algo {
 
             cout<<" rank "<<grid->rank_in_col<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
-            applyLeakyRelu(sparse_output.get(),0.001);
+//            applyLeakyRelu(sparse_output.get(),0.001);
 
             cout<<" rank "<<grid->rank_in_col<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
             auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols);
