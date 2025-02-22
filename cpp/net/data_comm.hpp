@@ -202,6 +202,9 @@ public:
             }
             for (int i = 0; i < sending_procs.size(); i++) {
                 if (pair.second.count(sending_procs[i]) > 0) {
+                    if (global_key==15141583 || global_key== 18175852 || global_key == 7617289){
+                        cout<<grid->rank_in_col<<" loading global key "<<global_key<<" preparing for send "<<sending_procs[i]<<endl;
+                    }
                     if (send_counts_cyclic[sending_procs[i]] == 0) {
                         DataTuple<VALUE_TYPE> current;
                         current.rows[0] =
