@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
                       shared_sparseMat.get(), shared_sparseMat_receiver.get(),
                       shared_sparseMat_sender.get(),grid.get(),
                       alpha, beta,col_major,sync_comm, tile_width_fraction,false);
-      gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE>(256,256,4));
+      gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE>(256,256,2));
 //      gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE,256>(1024,4));
 //      gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE,256>(1024,6));
 
