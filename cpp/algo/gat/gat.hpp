@@ -85,7 +85,7 @@ namespace distblas::algo {
             auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols);
             cout<<" rank "<<grid->rank_in_col<<" creating dense output for  spmm  "<<i<<"  head "<<j<<" completed "<<endl;
             auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
-                    sparse_output.get(), sp_local_receiver,
+                    sp_local_native, sp_local_receiver,
                     sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
                             alpha, beta,col_major);
