@@ -77,7 +77,7 @@ namespace distblas::algo {
             cout<<" rank "<<grid->rank_in_col<<" executing  sddmm layer  "<<i<<"  head "<<j<<" starting  "<<endl;
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
 
-            cout<<" rank "<<grid->rank_in_col<<"<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
+            cout<<" rank "<<grid->rank_in_col<<" sddmm computing layer  <<i<<"  head "<<j<<" completed "<<endl;
 
             applyLeakyRelu(sparse_output.get(),0.001);
 
