@@ -64,24 +64,24 @@ namespace distblas::algo {
             cout<<" rank "<<grid->rank_in_col<<" dense computing multiplications  "<<i<<"  head "<<j<<" started size "<<buffers[i]->rows*gat_layers[i].weights[j]->cols<<endl;
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
 
-            cout<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
+            cout<<" rank "<<grid->rank_in_col<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
-            cout<<" sparse_output    "<<i<<"  head "<<j<<" completed  "<<endl;
+            cout<<" rank "<<grid->rank_in_col<<" sparse_output    "<<i<<"  head "<<j<<" completed  "<<endl;
             auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                     sp_local_native, sp_local_receiver,
                     sp_local_sender,dense_output.get(),
                     dense_output.get(),sparse_output.get(),
                     grid, alpha, beta,col_major,sync);
 
-            cout<<" executing  sddmm layer  "<<i<<"  head "<<j<<" starting  "<<endl;
+            cout<<" rank "<<grid->rank_in_col<<" executing  sddmm layer  "<<i<<"  head "<<j<<" starting  "<<endl;
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
 
-            cout<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
+            cout<<" rank "<<grid->rank_in_col<<"<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             applyLeakyRelu(sparse_output.get(),0.001);
 
-            cout<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
+            cout<<" rank "<<grid->rank_in_col<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
             auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols);
 
             auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
@@ -89,9 +89,13 @@ namespace distblas::algo {
                     sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
                             alpha, beta,col_major);
+
+            cout<<" rank "<<grid->rank_in_col<<" applying  spmm "<<i<<"  head "<<j<<" completed "<<endl;
+
+
             spmm->execute(1,sp_local_native->proc_row_width,1.0);
 
-            cout<<" applying  spmm "<<i<<"  head "<<j<<" completed "<<endl;
+            cout<<" rank "<<grid->rank_in_col<< "  spmm  completed "<<i<<"  head "<<j<<" completed "<<endl;
 //
 //            assginNextInput(i,j,dense_mat_output.get());
         }
