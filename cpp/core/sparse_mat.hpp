@@ -392,9 +392,9 @@ namespace distblas::core {
 
         SpMat(const SpMat &other) : DistributedMat(other) {
             // Perform deep copy of all members
-            this->gRows = other->gRows;
-            this->gCols = other->gCols;
-            this->gNNz = other->gNNz;
+            this->gRows = other.gRows;
+            this->gCols = other.gCols;
+            this->gNNz = other.gNNz;
             //this->coords = coords;
             this->batch_size = batch_size;
             this->proc_col_width = proc_col_width;
