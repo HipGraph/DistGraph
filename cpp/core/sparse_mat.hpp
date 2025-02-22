@@ -396,11 +396,11 @@ namespace distblas::core {
             this->gCols = other.gCols;
             this->gNNz = other.gNNz;
             //this->coords = coords;
-            this->batch_size = batch_size;
-            this->proc_col_width = proc_col_width;
-            this->proc_row_width = proc_row_width;
-            this->transpose = transpose;
-            this->col_partitioned = col_partitioned;
+            this->batch_size = other.batch_size;
+            this->proc_col_width = other.proc_col_width;
+            this->proc_row_width = other.proc_row_width;
+            this->transpose = other.transpose;
+            this->col_partitioned = other.col_partitioned;
             if (other.tempCachePtr) {
                 tempCachePtr = std::make_unique<std::vector<
                         std::unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>(*other.tempCachePtr);
