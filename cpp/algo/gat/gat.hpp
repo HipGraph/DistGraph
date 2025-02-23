@@ -63,7 +63,7 @@ namespace distblas::algo {
             for (int i = 0; i < input->rows; i++) {
                 for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
                     VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
-                    buffers[i]->nCoordinates[i * buffers[i]->cols + k];
+                    buffers[i]->nCoordinates[i * buffers[i]->cols + k]=0.0;
                 }
             }
         }
