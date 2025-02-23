@@ -58,6 +58,16 @@ namespace distblas::algo {
             }
         }
 
+        void assignNextInput(int i, int j, DenseMat<INDEX_TYPE,VALUE_TYPE>* input){
+            int start_index = j*gat_layers[i].features_per_head;
+            for (int i = 0; i < input->rows; i++) {
+                for (int j = start_index; j < start_index+gat_layers[i].features_per_head; j++) {
+                    VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
+                    buffers[i]->nCoordinates[i * cols + j] = input->nCoordinates[i * cols + j-start_index];
+                }
+            }
+        }
+
         void computeGAT(int i, int j){
             cout<<" rank "<<grid->rank_in_col<<" dense computing multiplications  "<<i<<"  head "<<j<<" started size "<<buffers[i]->rows*gat_layers[i].weights[j]->cols<<endl;
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
@@ -96,8 +106,10 @@ namespace distblas::algo {
             spmm->execute(1,sp_local_native->proc_row_width,1.0);
 
             cout<<" rank "<<grid->rank_in_col<< "  spmm  completed "<<i<<"  head "<<j<<" completed "<<endl;
-//
-//            assginNextInput(i,j,dense_mat_output.get());
+
+            if (i<gat_layers.size()-1) {
+                assginNextInput(i+1, j, dense_mat_output.get());
+            }
         }
 
 
