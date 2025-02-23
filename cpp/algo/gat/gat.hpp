@@ -58,7 +58,7 @@ namespace distblas::algo {
             }
         }
 
-        void assignNextInput(int i, int j, DenseMat<INDEX_TYPE,VALUE_TYPE>* input){
+        void assginActivations(int i, int j, DenseMat<INDEX_TYPE,VALUE_TYPE>* input){
             int start_index = j*gat_layers[i].features_per_head;
             for (int i = 0; i < input->rows; i++) {
                 for (int j = start_index; j < start_index+gat_layers[i].features_per_head; j++) {
@@ -108,7 +108,7 @@ namespace distblas::algo {
             cout<<" rank "<<grid->rank_in_col<< "  spmm  completed "<<i<<"  head "<<j<<" completed "<<endl;
 
             if (i<gat_layers.size()-1) {
-                assginNextInput(i+1, j, dense_mat_output.get());
+                assginActivations(i+1, j, dense_mat_output.get());
             }
         }
 
