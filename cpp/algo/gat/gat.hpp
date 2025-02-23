@@ -64,7 +64,7 @@ namespace distblas::algo {
             cout<<" rows "<< input->rows<<" cols 1 "<<buffers[i]->cols<<" cols 2 "<<input->cols<<endl;
             for (int i = 0; i < input->rows; i++) {
                 for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
-                    buffers[i]->nCoordinates[i * buffers[i]->cols + k]=input->nCoordinates[i * input->cols + k-start_index]
+                    buffers[i]->nCoordinates[i * buffers[i]->cols + k]=input->nCoordinates[i * input->cols + k-start_index];
                 }
             }
             cout<<count<<endl;
