@@ -63,7 +63,7 @@ namespace distblas::algo {
             for (int i = 0; i < input->rows; i++) {
                 for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
                     VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
-                    buffers[i]->nCoordinates[i * buffers[i]->cols + k] = input->nCoordinates[i * input->cols + k-start_index];
+                    buffers[i]->nCoordinates[i * buffers[i]->cols + k];
                 }
             }
         }
@@ -138,8 +138,7 @@ namespace distblas::algo {
             buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,gat_layers[0].input_features);
             cout<<" first buffer initialization completed "<<endl;
             for(int i=0;i<gat_layers.size();++i){
-                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,
-                        gat_layers[i].num_heads*gat_layers[i].features_per_head,true);
+                buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,gat_layers[i].num_heads*gat_layers[i].features_per_head,true);
                 gat_layers[i].weights.resize(gat_layers[i].num_heads);
                 for(int j=0;j<gat_layers[i].num_heads;++j){
                     gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,buffers[i]->cols,gat_layers[i].features_per_head);
@@ -147,7 +146,7 @@ namespace distblas::algo {
                 }
             }
             for(int i=0;i<gat_layers.size();++i){
-                for(int j=0;j<gat_layers[i].weights.size();++j){
+                for(int j=0;j<gat_layers[i].num_heads;++j){
                     cout<<" computing layer  "<<i<<"  head "<<j<<endl;
                      computeGAT(i,j);
                 }
