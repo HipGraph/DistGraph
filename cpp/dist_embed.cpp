@@ -313,8 +313,7 @@ int main(int argc, char **argv) {
                       alpha, beta,col_major,sync_comm, tile_width_fraction,false);
       gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE>(128,128,2));
       gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE>(256,128,2));
-//      gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE,256>(1024,6));
-
+      gat->addLayer(distblas::algo::GATLayer<INDEX_TYPE,VALUE_TYPE>(256,128,2));
       MPI_Barrier(MPI_COMM_WORLD);
       cout << " rank " << rank << " gat algo started  " << endl;
       perf_stats = gat->execute();
