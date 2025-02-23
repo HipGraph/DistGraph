@@ -61,53 +61,42 @@ namespace distblas::algo {
         void assginActivations(int i, int j, DenseMat<INDEX_TYPE,VALUE_TYPE>* input){
             int start_index =gat_layers[i].features_per_head*j;
             int count=0;
-            cout<<" rows "<< input->rows<<" cols 1 "<<buffers[i]->cols<<" cols 2 "<<input->cols<<endl;
+
+            #pragma omp parallel for collapse(2)
             for (int r = 0; r < input->rows; r++) {
                 for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
                     buffers[i]->nCoordinates[r * buffers[i]->cols + k]=input->nCoordinates[r * input->cols + k-start_index];
                 }
             }
-            cout<<count<<endl;
         }
 
         void computeGAT(int i, int j){
-            cout<<" rank "<<grid->rank_in_col<<" dense computing multiplications  "<<i<<"  head "<<j<<" started size "<<buffers[i]->rows*gat_layers[i].weights[j]->cols<<endl;
+
             auto  dense_output = make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,buffers[i]->rows,gat_layers[i].weights[j]->cols,true);
-            cout<<" rank "<<grid->rank_in_col<<" dense computing multiplications  "<<i<<"  head "<<j<<" started size "<<buffers[i]->rows*gat_layers[i].weights[j]->cols<<endl;
+
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
 
-            cout<<" rank "<<grid->rank_in_col<<" dense computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
-
             auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
-            cout<<" rank "<<grid->rank_in_col<<" sparse_output    "<<i<<"  head "<<j<<" completed  "<<endl;
+
             auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                     sp_local_native, sp_local_receiver,
                     sp_local_sender,dense_output.get(),
                     dense_output.get(),sparse_output.get(),
                     grid, alpha, beta,col_major,sync);
 
-            cout<<" rank "<<grid->rank_in_col<<" executing  sddmm layer  "<<i<<"  head "<<j<<" starting  "<<endl;
             sddmm_algo->execute(1,sp_local_native->proc_row_width,1.0);
-
-            cout<<" rank "<<grid->rank_in_col<<" sddmm computing layer  "<<i<<"  head "<<j<<" completed "<<endl;
 
             applyLeakyRelu(sparse_output.get(),0.001);
 
-            cout<<" rank "<<grid->rank_in_col<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
             auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols,true);
-            cout<<" rank "<<grid->rank_in_col<<" creating dense output for  spmm  "<<i<<"  head "<<j<<" completed "<<endl;
+
             auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
                     sparse_output.get(), sp_local_receiver,
                     sp_local_sender,dense_output.get(),dense_mat_output.get(),
                             grid,
                             alpha, beta,col_major);
 
-            cout<<" rank "<<grid->rank_in_col<<" applying  spmm "<<i<<"  head "<<j<<" started "<<endl;
-
-
             spmm->execute(1,sp_local_native->proc_row_width,1.0);
-
-            cout<<" rank "<<grid->rank_in_col<< "  spmm  completed "<<i<<"  head "<<j<<" completed "<<endl;
 
             if (i<gat_layers.size()-1) {
                 assginActivations(i+1, j, dense_mat_output.get());
@@ -136,15 +125,15 @@ namespace distblas::algo {
         json execute() {
             auto t = start_clock();
             buffers.resize(gat_layers.size()+1);
-            cout<<"  buffer resizing  completed "<<endl;
+
             buffers[0]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,gat_layers[0].input_features);
-            cout<<" first buffer initialization completed "<<endl;
+
             for(int i=0;i<gat_layers.size();++i){
                 buffers[i+1]= make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,sp_local_native->proc_row_width,gat_layers[i].num_heads*gat_layers[i].features_per_head,true);
                 gat_layers[i].weights.resize(gat_layers[i].num_heads);
                 for(int j=0;j<gat_layers[i].num_heads;++j){
                     gat_layers[i].weights[j] = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid,buffers[i]->cols,gat_layers[i].features_per_head);
-                    cout<<" gat layer initialization completed "<<i<<endl;
+
                 }
             }
             for(int i=0;i<gat_layers.size();++i){

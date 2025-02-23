@@ -70,7 +70,6 @@ namespace distblas::algo {
                 last_batch_size = sp_local_receiver->proc_row_width - batch_size * (batches - 1);
             }
 
-            cout << " rank " << grid->rank_in_col << " total batches " << batches << endl;
 
             for (int i = 0; i < batches; i++) {
                 auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver,sp_local_sender,dense_local_b, grid, i,alpha);
@@ -78,7 +77,6 @@ namespace distblas::algo {
                 data_comm_cache[i].get()->onboard_data();
             }
 
-            cout << " rank " << grid->rank_in_col << " onboard_data completed " << batches << endl;
 
             size_t total_memory = 0;
             CSRLocal<VALUE_TYPE> *csr_block = (col_major) ? (this->sp_local_receiver)->csr_local_data.get()
@@ -308,9 +306,6 @@ namespace distblas::algo {
                                         (temp_cache)
                                         ? (*this->dense_local_b->tempCachePtr)[target_rank]
                                         : (*this->dense_local_b->cachePtr)[target_rank];
-                                if (arrayMap.find(dst_id)==arrayMap.end()){
-                                    cout<<" cannot find arrayMap "<<dst_id<<" rank "<<grid->rank_in_col<<endl;
-                                }
                                 array_ptr = arrayMap[dst_id].values.data();
                             }
                             auto t = start_clock();

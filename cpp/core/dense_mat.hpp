@@ -48,8 +48,6 @@ namespace distblas::core {
             this->grid = grid;
             this->cols = cols;
 
-            cout << " col world size " << grid->col_world_size << endl;
-
             this->cachePtr =
                     make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
             this->tempCachePtr =
@@ -76,7 +74,7 @@ namespace distblas::core {
         }
 
         void multiply(DenseMat<INDEX_TYPE, VALUE_TYPE> *other, DenseMat<INDEX_TYPE, VALUE_TYPE> *output) {
-            cout << " cols " << cols << " rows " << other->rows << endl;
+
             assert(cols == other->rows);
             #pragma omp parallel for collapse(2)
             for (int i = 0; i < this->rows; ++i) {
