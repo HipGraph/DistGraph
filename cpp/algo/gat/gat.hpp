@@ -59,11 +59,11 @@ namespace distblas::algo {
         }
 
         void assginActivations(int i, int j, DenseMat<INDEX_TYPE,VALUE_TYPE>* input){
-            int start_index = j*gat_layers[i].features_per_head;
+            int start_index =gat_layers[i].features_per_head*j;
             for (int i = 0; i < input->rows; i++) {
-                for (int j = start_index; j < start_index+gat_layers[i].features_per_head; j++) {
+                for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
                     VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
-                    buffers[i]->nCoordinates[i * buffers[i]->cols + j] = input->nCoordinates[i * input->cols + j-start_index];
+                    buffers[i]->nCoordinates[i * buffers[i]->cols + k] = input->nCoordinates[i * input->cols + k-start_index];
                 }
             }
         }
@@ -92,7 +92,7 @@ namespace distblas::algo {
             applyLeakyRelu(sparse_output.get(),0.001);
 
             cout<<" rank "<<grid->rank_in_col<<" applying  leaky relu  "<<i<<"  head "<<j<<" completed "<<endl;
-            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols);
+            auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_output->proc_row_width,dense_output.get()->cols,true);
             cout<<" rank "<<grid->rank_in_col<<" creating dense output for  spmm  "<<i<<"  head "<<j<<" completed "<<endl;
             auto spmm = make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
                     sparse_output.get(), sp_local_receiver,
