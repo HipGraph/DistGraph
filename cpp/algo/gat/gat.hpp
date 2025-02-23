@@ -60,16 +60,18 @@ namespace distblas::algo {
 
         void assginActivations(int i, int j, DenseMat<INDEX_TYPE,VALUE_TYPE>* input){
             int start_index =gat_layers[i].features_per_head*j;
+            int count=0;
             for (int i = 0; i < input->rows; i++) {
                 for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
                     VALUE_TYPE val = -1.0 + 2.0 * rand() / (RAND_MAX + 1.0);
 //                    buffers[i]->nCoordinates[i * buffers[i]->cols + k]=0.0;
                     VALUE_TYPE  val = input->nCoordinates[i * input->cols + k-start_index];
                     if (val==0){
-                        cout<<"0"<<endl;
+                        count++;
                     }
                 }
             }
+            cout<<count<<endl;
         }
 
         void computeGAT(int i, int j){
