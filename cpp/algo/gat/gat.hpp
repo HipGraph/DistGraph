@@ -62,9 +62,9 @@ namespace distblas::algo {
             int start_index =gat_layers[i].features_per_head*j;
             int count=0;
             cout<<" rows "<< input->rows<<" cols 1 "<<buffers[i]->cols<<" cols 2 "<<input->cols<<endl;
-            for (int i = 0; i < input->rows; i++) {
+            for (int r = 0; r < input->rows; r++) {
                 for (int k = start_index; k < start_index+gat_layers[i].features_per_head; k++) {
-                    buffers[i]->nCoordinates[i * buffers[i]->cols + k]=input->nCoordinates[i * input->cols + k-start_index];
+                    buffers[i]->nCoordinates[r * buffers[i]->cols + k]=input->nCoordinates[r * input->cols + k-start_index];
                 }
             }
             cout<<count<<endl;
