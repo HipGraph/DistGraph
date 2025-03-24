@@ -49,7 +49,7 @@ public:
     this->hash_spgemm =hash_spgemm;
   }
 
-  SparseTile<INDEX_TYPE, VALUE_TYPE>::SparseTile(const SparseTile& other)
+  SparseTile<INDEX_TYPE, VALUE_TYPE>::SparseTile(const SparseTile<INDEX_TYPE,VALUE_TYPE>& other)
       : DistributedMat<INDEX_TYPE,VALUE_TYPE>(other), id(other.id),
         row_starting_index(other.row_starting_index),
         row_end_index(other.row_end_index),
