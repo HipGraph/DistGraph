@@ -40,7 +40,7 @@ public:
   SparseTile(Process3DGrid *grid, int id, INDEX_TYPE row_starting_index,
              INDEX_TYPE row_end_index, INDEX_TYPE col_start_index,
              INDEX_TYPE col_end_index)
-      : DistributedMat(), grid(grid), id(id),
+      : DistributedMat<INDEX_TYPE,VALUE_TYPE>(), grid(grid), id(id),
         row_starting_index(row_starting_index), row_end_index(row_end_index),
         col_start_index(col_start_index), col_end_index(col_end_index),dimension(dimension) {}
 
