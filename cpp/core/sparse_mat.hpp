@@ -29,7 +29,7 @@ namespace distblas::core {
  * This class represents the Sparse Matrix
  */
 
-    template<typename VALUE_TYPE>
+    template<typename INDEX_TYPE , typename VALUE_TYPE>
     class SpMat : public DistributedMat<INDEX_TYPE,VALUE_TYPE> {
 
     private:
