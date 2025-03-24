@@ -335,7 +335,7 @@ namespace distblas::core {
               INDEX_TYPE &gRows, INDEX_TYPE &gCols, INDEX_TYPE &gNNz, int &batch_size,
               int &proc_row_width, int &proc_col_width, bool transpose,
               bool col_partitioned)
-                : DistributedMat() {
+                : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
             this->gRows = gRows;
             this->gCols = gCols;
             this->gNNz = gNNz;
@@ -360,7 +360,7 @@ namespace distblas::core {
 
         SpMat(Process3DGrid *grid, INDEX_TYPE proc_row_width, INDEX_TYPE proc_col_width,
               bool hash_spgemm, bool random_initialize = false)
-                : DistributedMat() {
+                : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
             this->grid = grid;
             this->tempCachePtr = std::make_unique<std::vector<
                     std::unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>(
