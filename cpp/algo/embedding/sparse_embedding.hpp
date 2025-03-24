@@ -252,7 +252,7 @@ public:
       int batch_size, int block_size, int mode, int start_process,
       int end_process, bool symbolic,
       TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_com,
-      DistributedMat *output) {
+      DistributedMat<INDEX_TYPE,VALUE_TYPE> *output) {
     if (mode == 0) { // local computation
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min(
@@ -347,7 +347,7 @@ public:
                            INDEX_TYPE dst_start_index, INDEX_TYPE dst_end_index,
                            CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE lr,
                            int batch_id, int batch_size, int block_size,
-                           bool symbolic, int mode, DistributedMat *output) {
+                           bool symbolic, int mode, DistributedMat<INDEX_TYPE,VALUE_TYPE> *output) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 

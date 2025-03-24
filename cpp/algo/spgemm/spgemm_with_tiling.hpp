@@ -182,7 +182,7 @@ public:
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size,
       int considering_batch_size, double lr, int comm_initial_start,
       int first_execution_proc, bool communication, bool symbolic,
-      DistributedMat *output) {
+      DistributedMat<INDEX_TYPE,VALUE_TYPE> *output) {
 
     int proc_length = get_proc_length(beta, this->grid->col_world_size);
     int prev_start = comm_initial_start;
@@ -323,7 +323,7 @@ public:
                            INDEX_TYPE dst_start_index, INDEX_TYPE dst_end_index,
                            CSRLocal<VALUE_TYPE> *csr_block, VALUE_TYPE lr,
                            int batch_id, int batch_size, int block_size,
-                           bool symbolic, int mode, DistributedMat *output) {
+                           bool symbolic, int mode, DistributedMat<INDEX_TYPE,VALUE_TYPE> *output) {
     if (csr_block->handler != nullptr) {
       CSRHandle *csr_handle = csr_block->handler.get();
 

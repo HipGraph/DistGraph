@@ -22,7 +22,7 @@ private:
       vector<vector<unordered_map<INDEX_TYPE, unordered_map<int, bool>>>>>
       receive_indices_proc_map;
 
-  DistributedMat* state_holder;
+  DistributedMat<INDEX_TYPE,VALUE_TYPE>* state_holder;
 
   int total_batches;
 
@@ -41,13 +41,13 @@ public:
   shared_ptr<vector<vector<vector<SparseTile<INDEX_TYPE, VALUE_TYPE>>>>>
       sender_proc_tile_map;
 
-  TileDataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-               distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-               distblas::core::SpMat<VALUE_TYPE> *sparse_local,
+  TileDataComm(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+               distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
+               distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local,
                Process3DGrid *grid, double alpha, int total_batches,
                double tile_width_fraction, bool hash_spgemm = true,
                bool embedding = false, double merge_cost_factor = 1.0,
-               DistributedMat* state_holder=nullptr)
+               DistributedMat<INDEX_TYPE,VALUE_TYPE>* state_holder=nullptr)
       : DataComm<INDEX_TYPE, VALUE_TYPE>(
             sp_local_receiver, sp_local_sender, sparse_local, grid, -1, alpha) {
     tiles_per_process_row = static_cast<int>(1 / (tile_width_fraction));
@@ -292,7 +292,7 @@ public:
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *sendbuf_cyclic,
       vector<SpTuple<VALUE_TYPE, sp_tuple_max_dim>> *receivebuf, int iteration,
       int batch_id, int starting_proc, int end_proc, int start_tile,
-      int end_tile, bool embedding=false, DistributedMat* state_holder=nullptr) {
+      int end_tile, bool embedding=false, DistributedMat<INDEX_TYPE,VALUE_TYPE>* state_holder=nullptr) {
     auto t = start_clock();
 
     int total_receive_count = 0;
@@ -951,7 +951,7 @@ public:
     sendbuf->shrink_to_fit();
   }
 
-  inline void update_local_input(distblas::core::SpMat<VALUE_TYPE>* sparse_input){
+  inline void update_local_input(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>* sparse_input){
     this->sparse_local->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*sparse_input->csr_local_data);
   }
 };
