@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
 
   auto start_io = std::chrono::high_resolution_clock::now();
 
-  reader.get()->parallel_read_MM<int64_t,int,VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
+  reader.get()->parallel_read_MM<INDEX_TYPE ,int,VALUE_TYPE>(input_file, shared_sparseMat.get(),true);
 
   cout << " rank " << rank << " gROWs  " << shared_sparseMat.get()->gRows<< "gCols" << shared_sparseMat.get()->gCols << endl;
   cout << " rank " << rank << " reading data from file path:  " << input_file<< " completed " << endl;
