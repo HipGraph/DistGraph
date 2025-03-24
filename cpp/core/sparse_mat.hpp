@@ -30,7 +30,7 @@ namespace distblas::core {
  */
 
     template<typename VALUE_TYPE>
-    class SpMat : public DistributedMat {
+    class SpMat : public DistributedMat<INDEX_TYPE,VALUE_TYPE> {
 
     private:
         void initialize_CSR_from_tuples() {
@@ -351,7 +351,7 @@ namespace distblas::core {
                     grid->col_world_size);
         }
 
-        SpMat(Process3DGrid *grid) : DistributedMat() {
+        SpMat(Process3DGrid *grid) : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
             this->grid = grid;
             this->tempCachePtr = std::make_unique<std::vector<
                     std::unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>(
@@ -390,7 +390,7 @@ namespace distblas::core {
             }
         }
 
-        SpMat(const SpMat &other) : DistributedMat(other) {
+        SpMat(const SpMat &other) : DistributedMat<INDEX_TYPE,VALUE_TYPE>(other) {
             // Perform deep copy of all members
             this->gRows = other.gRows;
             this->gCols = other.gCols;

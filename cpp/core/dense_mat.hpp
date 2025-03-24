@@ -21,7 +21,7 @@ namespace distblas::core {
  * This class represents  the dense matrix.
  */
     template<typename INDEX_TYPE, typename VALUE_TYPE>
-    class DenseMat : public DistributedMat {
+    class DenseMat : public DistributedMat<INDEX_TYPE,VALUE_TYPE> {
 
     private:
     public:
@@ -42,7 +42,7 @@ namespace distblas::core {
          * @param std  initialize with normal distribution with given standard
          * deviation
          */
-        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, bool lazy = false) : DistributedMat(grid,rows,cols) {
+        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, bool lazy = false) : DistributedMat<INDEX_TYPE,VALUE_TYPE>(grid,rows,cols) {
             this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
             this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
             this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
@@ -59,7 +59,7 @@ namespace distblas::core {
         }
 
 
-        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, VALUE_TYPE* data) : DistributedMat(grid, rows,cols) {
+        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, VALUE_TYPE* data) : DistributedMat<INDEX_TYPE,VALUE_TYPE>(grid, rows,cols) {
             this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
             this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
             this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
@@ -67,7 +67,7 @@ namespace distblas::core {
             bootstrap();
         }
 
-        DenseMat(Process3DGrid *grid, string input_file) : DistributedMat() {
+        DenseMat(Process3DGrid *grid, string input_file) : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
             this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
             this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
             this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
