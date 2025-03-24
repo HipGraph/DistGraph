@@ -45,12 +45,12 @@ public:
         col_start_index(col_start_index), col_end_index(col_end_index),dimension(dimension) {}
 
   SparseTile(Process3DGrid *grid, bool hash_spgemm)
-      : DistributedMat(), grid(grid) {
+      : DistributedMat<INDEX_TYPE,VALUE_TYPE>(), grid(grid) {
     this->hash_spgemm =hash_spgemm;
   }
 
   SparseTile<INDEX_TYPE, VALUE_TYPE>::SparseTile(const SparseTile& other)
-      : DistributedMat(other), id(other.id),
+      : DistributedMat<INDEX_TYPE,VALUE_TYPE>(other), id(other.id),
         row_starting_index(other.row_starting_index),
         row_end_index(other.row_end_index),
         col_start_index(other.col_start_index),
