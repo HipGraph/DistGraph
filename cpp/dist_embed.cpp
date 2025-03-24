@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
                                        output_file+"/sparse_local.txt",grid.get(),false);
     cout<<" rank "<<grid->rank_in_col<<" nnz "<<sparse_coo.size()<<endl;
   } else if (spgemm) {
-    reader.get()->parallel_read_MM<int64_t,VALUE_TYPE,VALUE_TYPE>(sparse_data_file, sparse_input.get(),false,true);
+    reader.get()->parallel_read_MM<INDEX_TYPE ,VALUE_TYPE,VALUE_TYPE>(sparse_data_file, sparse_input.get(),false,true);
     sparse_input.get()->batch_size = batch_size;
     sparse_input.get()->proc_row_width = localARows;
     sparse_input.get()->proc_col_width = static_cast<int>(dimension);
