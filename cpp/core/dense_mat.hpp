@@ -68,9 +68,9 @@ namespace distblas::core {
         }
 
         DenseMat(Process3DGrid *grid, string input_file) : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
-            this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
-            this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
-            this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
+            this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (this->rows * this->cols);
+            this->nnz_count = make_unique < vector < INDEX_TYPE >> (this->rows, 0);
+            this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(this->rows, vector<VALUE_TYPE>(this->cols, 0));
             this->nCoordinates= data;
             bootstrap();
         }
@@ -81,14 +81,14 @@ namespace distblas::core {
 
         void bootstrap() override {
             this->cachePtr =
-                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(this->grid->col_world_size);
             this->tempCachePtr =
-                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(this->grid->col_world_size);
         }
 
         void fetch_local_data(VALUE_TYPE *stdArray, int local_key) {
-            int base_index = local_key * cols;
-            std::copy(nCoordinates + base_index,nCoordinates + base_index + cols, stdArray);
+            int base_index = local_key * this->cols;
+            std::copy(nCoordinates + base_index,nCoordinates + base_index + this->cols, stdArray);
         }
 
         void multiply(DenseMat<INDEX_TYPE, VALUE_TYPE> *other, DenseMat<INDEX_TYPE, VALUE_TYPE> *output) {
@@ -110,7 +110,7 @@ namespace distblas::core {
             if (temp) {
                 purge_temp_cache();
             } else {
-                for (int i = 0; i < grid->col_world_size; i++) {
+                for (int i = 0; i < this->grid->col_world_size; i++) {
                     auto &arrayMap = (*cachePtr)[i];
                     for (auto it = arrayMap.begin(); it != arrayMap.end();) {
                         distblas::core::CacheEntry<VALUE_TYPE> cache_ent =
@@ -128,7 +128,7 @@ namespace distblas::core {
         }
 
         void purge_temp_cache() {
-            for (int i = 0; i < grid->col_world_size; i++) {
+            for (int i = 0; i < this->grid->col_world_size; i++) {
                 (*this->tempCachePtr)[i].clear();
                 std::unordered_map<INDEX_TYPE, CacheEntry<VALUE_TYPE>>().swap((*this->tempCachePtr)[i]);
             }
@@ -136,22 +136,22 @@ namespace distblas::core {
 
         //******************** Utility methods for debugging ************************
         void print_matrix() {
-            int rank = grid->rank_in_col;
+            int rank = this->grid->rank_in_col;
             string output_path = "embedding" + to_string(rank) + ".txt";
             char stats[500];
             strcpy(stats, output_path.c_str());
             ofstream fout(stats, std::ios_base::app);
-            for (int i = 0; i < rows; ++i) {
+            for (int i = 0; i < this->rows; ++i) {
                 fout << (i + 1) << " ";
-                for (int j = 0; j < cols; ++j) {
-                    fout << this->nCoordinates[i * cols + j] << " ";
+                for (int j = 0; j < this->cols; ++j) {
+                    fout << this->nCoordinates[i * this->cols + j] << " ";
                 }
                 fout << endl;
             }
         }
 
         void print_matrix_rowptr(int iter) {
-            int rank = grid->rank_in_col;
+            int rank = this->grid->rank_in_col;
             string output_path =
                     "rank_" + to_string(rank) + "itr_" + to_string(iter) + "_embedding.txt";
             char stats[500];
@@ -160,9 +160,9 @@ namespace distblas::core {
             //    fout << (*this->matrixPtr).rows() << " " << (*this->matrixPtr).cols()
             //         << endl;
             for (int i = 0; i < rows; ++i) {
-                fout << i + rank * rows << " ";
-                for (int j = 0; j < cols; ++j) {
-                    fout << this->nCoordinates[i * cols + j] << " ";
+                fout << i + rank * this->rows << " ";
+                for (int j = 0; j < this->cols; ++j) {
+                    fout << this->nCoordinates[i * this->cols + j] << " ";
                 }
                 fout << endl;
             }
@@ -186,7 +186,7 @@ namespace distblas::core {
                     INDEX_TYPE key = kvp.first;
                     vector<VALUE_TYPE> value = kvp.second.value;
                     fout << key << " ";
-                    for (int i = 0; i < cols; ++i) {
+                    for (int i = 0; i < this->cols; ++i) {
                         fout << value[i] << " ";
                     }
                     fout << std::endl;
