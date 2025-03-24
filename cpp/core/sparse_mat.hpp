@@ -67,7 +67,7 @@ namespace distblas::core {
 
         >>*id_to_proc_mapping,
         vector <vector<vector < SparseTile<INDEX_TYPE, VALUE_TYPE>>>> *tile_map,
-        string semring = "+", SpMat<VALUE_TYPE>
+        string semring = "+", SpMat<INDEX_TYPE,VALUE_TYPE>
         *
         input_data = nullptr
         ) {
@@ -514,7 +514,7 @@ namespace distblas::core {
         *id_to_proc_mapping,
         bool mode, string
         semring = "+",
-                SpMat<VALUE_TYPE>
+                SpMat<INDEX_TYPE,VALUE_TYPE>
         *
         input_data = nullptr
         ) {
