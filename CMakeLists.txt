@@ -72,7 +72,7 @@ SET(BUILD_TESTS "" ON)
 #    message(STATUS "Building tests ....")
 #endif ()
 
-SET(SOURCES cpp/dist_embed.cpp cpp/algo/sddmm/sddmm.hpp)
+SET(SOURCES cpp/dist_embed.cpp)
 
 add_executable(distembed ${SOURCES})
 

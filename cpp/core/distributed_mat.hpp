@@ -1,8 +1,10 @@
 #pragma once
 #include "common.h"
 #include "csr_local.hpp"
+#include "../net/process_3D_grid.hpp"
 namespace distblas::core {
 
+    template<typename INDEX_TYPE, typename VALUE_TYPE>
 class DistributedMat {
 
 public:
@@ -22,9 +24,19 @@ public:
 
   unique_ptr<vector<vector<VALUE_TYPE>>> state_metadata;
 
+  distblas::net::Process3DGrid *grid =nullptr;
+  INDEX_TYPE rows;
+  INDEX_TYPE cols;
+
   bool  hash_spgemm;
 
   DistributedMat() = default;
+
+  DistributedMat(distblas::net::Process3DGrid* grid, INDEX_TYPE rows, INDEX_TYPE cols) {
+      this->grid=grid;
+      this->rows=rows;
+      this->cols=cols;
+  }
 
   DistributedMat(const DistributedMat& other)
       : sparse_data_collector(nullptr),
@@ -95,6 +107,9 @@ public:
   void initialize_CSR_from_sparse_collector() {
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
+
+
+  virtual void bootstrap();
 
 
 

@@ -25,11 +25,11 @@ namespace distblas::core {
 
     private:
     public:
-        uint64_t rows;
-        uint64_t cols;
+//        uint64_t rows;
+//        uint64_t cols;
         unique_ptr <vector<unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>> cachePtr;
         unique_ptr <vector<unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>> tempCachePtr;
-        Process3DGrid *grid;
+//        Process3DGrid *grid;
 
         unique_ptr<vector<VALUE_TYPE>> nCoordinatePtr;
         VALUE_TYPE * nCoordinates=nullptr;
@@ -42,16 +42,7 @@ namespace distblas::core {
          * @param std  initialize with normal distribution with given standard
          * deviation
          */
-        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, bool lazy = false) : DistributedMat() {
-
-            this->rows = rows;
-            this->grid = grid;
-            this->cols = cols;
-
-            this->cachePtr =
-                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
-            this->tempCachePtr =
-                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, bool lazy = false) : DistributedMat(grid,rows,cols) {
             this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
             this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
             this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
@@ -64,9 +55,36 @@ namespace distblas::core {
                     }
                 }
             }
+            bootstrap();
         }
 
+
+        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, INDEX_TYPE cols, VALUE_TYPE* data) : DistributedMat(grid, rows,cols) {
+            this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
+            this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
+            this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
+            this->nCoordinates= data
+            bootstrap();
+        }
+
+        DenseMat(Process3DGrid *grid, string input_file) : DistributedMat() {
+            this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
+            this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
+            this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
+            this->nCoordinates= data;
+            bootstrap();
+        }
+
+
+
         ~DenseMat() {}
+
+        void bootstrap() override {
+            this->cachePtr =
+                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+            this->tempCachePtr =
+                    make_unique < vector < unordered_map < INDEX_TYPE, CacheEntry<VALUE_TYPE>>>>(grid->col_world_size);
+        }
 
         void fetch_local_data(VALUE_TYPE *stdArray, int local_key) {
             int base_index = local_key * cols;
@@ -116,7 +134,7 @@ namespace distblas::core {
             }
         }
 
-        //******************** Utitly methods ************************
+        //******************** Utility methods for debugging ************************
         void print_matrix() {
             int rank = grid->rank_in_col;
             string output_path = "embedding" + to_string(rank) + ".txt";
