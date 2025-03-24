@@ -76,7 +76,7 @@ namespace distblas::algo {
 
             buffers[i]->multiply(gat_layers[i].weights[j].get(),dense_output.get());
 
-            auto sparse_output = make_unique<distblas::core::SpMat<VALUE_TYPE>>(*sp_local_native);
+            auto sparse_output = make_unique<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(*sp_local_native);
 
             auto sddmm_algo = make_unique<distblas::algo::SDDMM<INDEX_TYPE, VALUE_TYPE>>(
                     sp_local_native, sp_local_receiver,

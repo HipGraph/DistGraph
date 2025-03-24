@@ -87,7 +87,7 @@ public:
           size_t total_memory = 0;
           auto rows =  sp_local_receiver->proc_row_width;
           auto cols = static_cast<INDEX_TYPE>(embedding_dim);
-          auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
+          auto sparse_out = make_shared<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
           auto main_comm =
               unique_ptr<TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>>(
                   new TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim>(

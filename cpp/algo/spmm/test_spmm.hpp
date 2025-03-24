@@ -13,10 +13,10 @@ template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class BaselineSpMM {
 
 private:
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
-  distblas::core::SpMat<VALUE_TYPE> *sparse_local;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local;
 
   Process3DGrid *grid;
 

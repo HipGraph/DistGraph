@@ -202,7 +202,7 @@ public:
       CSRLocal<VALUE_TYPE> *csr_block, int batch_size,
       int considering_batch_size, double lr, int comm_initial_start,
       int first_execution_proc, bool communication, bool symbolic,
-      DistributedMat *output, bool enable_remote_computation) {
+      DistributedMat<INDEX_TYPE, VALUE_TYPE> *output, bool enable_remote_computation) {
 
     int proc_length = get_proc_length(beta, this->grid->col_world_size);
     int prev_start = comm_initial_start;
@@ -504,7 +504,7 @@ public:
 
   inline void calc_t_dist_replus_rowptr(vector<INDEX_TYPE> &col_ids, VALUE_TYPE lr,
                                         int batch_id, int batch_size,
-                                        int block_size, DistributedMat * output) {
+                                        int block_size, DistributedMat<INDEX_TYPE, VALUE_TYPE> * output) {
 
     int row_base_index = batch_id * batch_size;
 
@@ -659,7 +659,7 @@ public:
   }
 
   inline void merge_remote_computations(
-      int batch_id, INDEX_TYPE batch_size, DistributedMat *output,
+      int batch_id, INDEX_TYPE batch_size, DistributedMat<INDEX_TYPE, VALUE_TYPE> *output,
       TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_comm) {
     auto source_start_index = batch_id * batch_size;
     auto source_end_index =
