@@ -29,9 +29,9 @@ namespace distblas::algo {
 
     protected:
         DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native;
         Process3DGrid *grid;
         VALUE_TYPE MAX_BOUND, MIN_BOUND;
         std::unordered_map<int, unique_ptr < DataComm<INDEX_TYPE, VALUE_TYPE>>>
@@ -50,9 +50,9 @@ namespace distblas::algo {
         bool col_major = true;
 
     public:
-        EmbeddingAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-                      distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-                      distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+        EmbeddingAlgo(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native,
+                      distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+                      distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
                       DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local,
                       Process3DGrid *grid, double alpha, double beta, VALUE_TYPE MAX_BOUND,
                       VALUE_TYPE MIN_BOUND, bool col_major, bool sync_comm)
