@@ -37,13 +37,13 @@ public:
   int get_owner_Process(INDEX_TYPE row, INDEX_TYPE column, INDEX_TYPE  proc_row_width,
                         INDEX_TYPE  proc_col_width, INDEX_TYPE gCols,bool transpose);
 
-  template <typename T>
-  void partition_data(distblas::core::SpMat<T> *sp_mat) {
+  template <typename INDEX_TYPE,VALUE_TYPE>
+  void partition_data(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_mat) {
 
     int world_size = process_3D_grid->col_world_size;
     int my_rank = process_3D_grid->rank_in_col;
 
-    Tuple<T> *sendbuf = new Tuple<T>[sp_mat->coords.size()];
+    Tuple<VALUE_TYPE> *sendbuf = new Tuple<VALUE_TYPE>[sp_mat->coords.size()];
 
     if (world_size > 1) {
       vector<int> sendcounts(world_size, 0);
@@ -51,7 +51,7 @@ public:
 
       vector<int> offsets, bufindices;
 
-      vector<Tuple<T>> coords = sp_mat->coords;
+      vector<Tuple<VALUE_TYPE>> coords = sp_mat->coords;
 
 
 
