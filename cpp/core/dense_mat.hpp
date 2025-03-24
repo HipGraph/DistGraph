@@ -159,7 +159,7 @@ namespace distblas::core {
             ofstream fout(stats, std::ios_base::app);
             //    fout << (*this->matrixPtr).rows() << " " << (*this->matrixPtr).cols()
             //         << endl;
-            for (int i = 0; i < rows; ++i) {
+            for (int i = 0; i < this->rows; ++i) {
                 fout << i + rank * this->rows << " ";
                 for (int j = 0; j < this->cols; ++j) {
                     fout << this->nCoordinates[i * this->cols + j] << " ";
@@ -169,7 +169,7 @@ namespace distblas::core {
         }
 
         void print_cache(int iter) {
-            int rank = grid->rank_in_col;
+            int rank = this->grid->rank_in_col;
 
             for (int i = 0; i < (*this->cachePtr).size(); i++) {
                 unordered_map <INDEX_TYPE, CacheEntry<VALUE_TYPE>> map =
