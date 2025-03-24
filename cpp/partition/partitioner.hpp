@@ -37,7 +37,7 @@ public:
   int get_owner_Process(INDEX_TYPE row, INDEX_TYPE column, INDEX_TYPE  proc_row_width,
                         INDEX_TYPE  proc_col_width, INDEX_TYPE gCols,bool transpose);
 
-  template <typename INDEX_TYPE,VALUE_TYPE>
+  template <typename INDEX_TYPE,typename VALUE_TYPE>
   void partition_data(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_mat) {
 
     int world_size = process_3D_grid->col_world_size;
