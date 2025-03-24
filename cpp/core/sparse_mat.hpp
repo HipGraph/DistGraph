@@ -406,7 +406,7 @@ namespace distblas::core {
                         std::unordered_map<INDEX_TYPE, SparseCacheEntry<VALUE_TYPE>>>>(*other.tempCachePtr);
             }
             if (other.csr_local_data) {
-                csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*other.csr_local_data);
+                this->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(*other.csr_local_data);
             }
         }
 
@@ -440,9 +440,9 @@ namespace distblas::core {
 
             if (enforce_empty_csr or coords.size() > 0) {
                 initialize_CSR_from_tuples();
-            } else if (hash_spgemm and sparse_data_collector->size() > 0) {
+            } else if (this->hash_spgemm and this->parse_data_collector->size() > 0) {
                 this->initialize_CSR_from_sparse_collector();
-            } else if (dense_collector->size() > 0) {
+            } else if (this->dense_collector->size() > 0) {
                 this->initialize_CSR_from_dense_collector(this->proc_row_width,
                                                           this->proc_col_width, state_holder, comparator,
                                                           clear_dense_collector);
@@ -466,7 +466,7 @@ namespace distblas::core {
                             auto d = handle->col_idx[j];
                             auto value = handle->values[j];
                             if (d < cols) {
-                                (*dense_collector)[i][d] = value;
+                                (*this->dense_collector)[i][d] = value;
                             }
                         }
                     }
@@ -477,15 +477,15 @@ namespace distblas::core {
         void initialize_hashtables() {
 #pragma omp parallel for
             for (auto i = 0; i < proc_row_width; i++) {
-                auto count = (*sparse_data_counter)[i];
+                auto count = (*this->sparse_data_counter)[i];
                 auto resize_count = pow(2, log2(count) + 1);
-                (*sparse_data_collector)[i].clear();
+                (*this->sparse_data_collector)[i].clear();
                 Tuple<VALUE_TYPE> t;
                 t.row = i;
                 t.col = -1;
                 t.value = 0;
-                (*sparse_data_collector)[i].resize(resize_count, t);
-                (*sparse_data_counter)[i] = 0;
+                (*this->sparse_data_collector)[i].resize(resize_count, t);
+                (*this->sparse_data_counter)[i] = 0;
             }
         }
 

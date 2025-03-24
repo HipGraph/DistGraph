@@ -93,13 +93,13 @@ namespace distblas::core {
 
         void multiply(DenseMat<INDEX_TYPE, VALUE_TYPE> *other, DenseMat<INDEX_TYPE, VALUE_TYPE> *output) {
 
-            assert(cols == other->rows);
+            assert(this->cols == other->rows);
             #pragma omp parallel for collapse(2)
             for (int i = 0; i < this->rows; ++i) {
                 for (int j = 0; j < other->cols; ++j) {
                     VALUE_TYPE value = 0;
-                    for (int k = 0; k < cols; ++k) {
-                        value += this->nCoordinates[i * cols + k] * other->nCoordinates[k * other->cols + j];
+                    for (int k = 0; k < this->cols; ++k) {
+                        value += this->nCoordinates[i * this->cols + k] * other->nCoordinates[k * other->cols + j];
                     }
                     output->nCoordinates[i * other->cols + j] = value;
                 }

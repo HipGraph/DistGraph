@@ -110,7 +110,7 @@ public:
   }
   void initialize_dataCache(){
     auto len = row_end_index- row_starting_index;
-    dataCachePtr = make_unique<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
+    this->dataCachePtr = make_unique<vector<SparseCacheEntry<VALUE_TYPE>>>(len,SparseCacheEntry<VALUE_TYPE>());
   }
 
 
