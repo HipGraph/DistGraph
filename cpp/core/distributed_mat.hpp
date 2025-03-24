@@ -4,7 +4,6 @@
 #include "../net/process_3D_grid.hpp"
 namespace distblas::core {
 
-    template<typename INDEX_TYPE, typename VALUE_TYPE>
 class DistributedMat {
 
 public:
@@ -102,16 +101,11 @@ public:
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
   }
 
-
-
   void initialize_CSR_from_sparse_collector() {
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
-
   virtual void bootstrap();
-
-
 
 };
 

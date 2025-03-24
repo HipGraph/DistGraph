@@ -12,7 +12,8 @@ using namespace distblas::net;
 
 namespace distblas::core {
 
-template <typename INDEX_TYPE, typename VALUE_TYPE> class SparseTile:public DistributedMat {
+template <typename INDEX_TYPE, typename VALUE_TYPE>
+class SparseTile:public DistributedMat {
 
 private:
 public:
