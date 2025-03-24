@@ -52,7 +52,7 @@ public:
 
   json execute(int iterations, int batch_size, VALUE_TYPE lr) {
     json jobj;
-    distblas::core::SpMat<VALUE_TYPE> *sparse_input = nullptr;
+    distblas::core::SpMat<INDEX_TYPE ,VALUE_TYPE> *sparse_input = nullptr;
     auto state_holder= make_unique<DenseMat<INDEX_TYPE,VALUE_TYPE>>(grid,sp_local_receiver->proc_row_width,embedding_dim);
     int batches=0;
     if (sp_local_receiver->proc_row_width % batch_size == 0) {
@@ -78,7 +78,7 @@ public:
       }
       auto rows =  sp_local_receiver->proc_row_width;
       auto cols = static_cast<INDEX_TYPE>(embedding_dim);
-      auto sparse_out = make_shared<distblas::core::SpMat<VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
+      auto sparse_out = make_shared<distblas::core::SpMat<INDEX_TYPE ,VALUE_TYPE>>(grid,rows,cols,hash_spgemm);
       bfs_frontier =static_cast<double>((sparse_input->csr_local_data)->handler->rowStart[(sparse_input->csr_local_data)->handler->rowStart.size() - 1]);
 
       auto density =   (bfs_frontier/(sp_local_receiver->proc_row_width*embedding_dim))*100;

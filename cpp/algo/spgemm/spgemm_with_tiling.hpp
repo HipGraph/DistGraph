@@ -241,7 +241,7 @@ public:
       int batch_size, int block_size, int mode, int start_process,
       int end_process, bool symbolic,
       TileDataComm<INDEX_TYPE, VALUE_TYPE, embedding_dim> *main_com,
-      DistributedMat<INDEX_TYPE, VALUE_TYPE> *output, DistributedMat *state_holder=nullptr) {
+      DistributedMat<INDEX_TYPE, VALUE_TYPE> *output, DistributedMat<INDEX_TYPE, VALUE_TYPE> *state_holder=nullptr) {
     if (mode == 0) { // local computation
       auto source_start_index = batch_id * batch_size;
       auto source_end_index = std::min(
