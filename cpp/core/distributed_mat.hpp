@@ -4,6 +4,7 @@
 #include "../net/process_3D_grid.hpp"
 namespace distblas::core {
 
+    template<typename INDEX_TYPE, typename VALUE_TYPE>
 class DistributedMat {
 
 public:
