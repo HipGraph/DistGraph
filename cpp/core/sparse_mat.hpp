@@ -440,7 +440,7 @@ namespace distblas::core {
 
             if (enforce_empty_csr or coords.size() > 0) {
                 initialize_CSR_from_tuples();
-            } else if (this->hash_spgemm and this->parse_data_collector->size() > 0) {
+            } else if (this->hash_spgemm and this->sparse_data_collector->size() > 0) {
                 this->initialize_CSR_from_sparse_collector();
             } else if (this->dense_collector->size() > 0) {
                 this->initialize_CSR_from_dense_collector(this->proc_row_width,
