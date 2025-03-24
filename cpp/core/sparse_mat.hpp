@@ -435,7 +435,7 @@ namespace distblas::core {
         /**
          * Initialize the CSR from coords data structure
          */
-        void initialize_CSR_blocks(bool enforce_empty_csr = false, DistributedMat *state_holder = nullptr,
+        void initialize_CSR_blocks(bool enforce_empty_csr = false, DistributedMat<INDEX_TYPE,VALUE_TYPE> *state_holder = nullptr,
                                    VALUE_TYPE comparator = 0, bool clear_dense_collector = true) {
 
             if (enforce_empty_csr or coords.size() > 0) {
