@@ -14,13 +14,13 @@ namespace distblas::algo {
     class SDDMM {
 
     private:
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_output;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_output;
         DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a;
         DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b;
 
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native;
 
         Process3DGrid *grid;
 
@@ -42,12 +42,12 @@ namespace distblas::algo {
     public:
         vector<double> timing_info;
 
-        SDDMM(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-              distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-              distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+        SDDMM(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native,
+              distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+              distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
               DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a,
               DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b,
-              distblas::core::SpMat<VALUE_TYPE> *sp_local_output,
+              distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_output,
               Process3DGrid *grid, double alpha, double beta, bool col_major, bool sync_comm)
                 : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),
                   sp_local_sender(sp_local_sender), dense_local_a(dense_local_a), dense_local_b(dense_local_b),

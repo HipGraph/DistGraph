@@ -16,9 +16,9 @@ namespace distblas::algo {
     class GAT {
 
     private:
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
-        distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
+        distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native;
 
         Process3DGrid *grid;
 
@@ -44,7 +44,7 @@ namespace distblas::algo {
         vector<unique_ptr<DenseMat<INDEX_TYPE,VALUE_TYPE>>> buffers;
 
 
-        void applyLeakyRelu(distblas::core::SpMat<VALUE_TYPE>* sp_mat, double alpha){
+        void applyLeakyRelu(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>* sp_mat, double alpha){
             CSRLocal<VALUE_TYPE> *csr_local  = sp_mat->csr_local_data.get();
             CSRHandle* handler = csr_local->handler.get();
 
@@ -107,9 +107,9 @@ namespace distblas::algo {
 
 
     public:
-        GAT(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-            distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-            distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+        GAT(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native,
+            distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+            distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
             Process3DGrid *grid, double alpha, double beta, bool col_major,
             bool sync_comm, double tile_width_fraction, bool hash_spgemm)
                 : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),

@@ -37,10 +37,10 @@ private:
   bool hash_spgemm = false;
 
 public:
-  BaselineSpMM(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-                 distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-                 distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-                 distblas::core::SpMat<VALUE_TYPE> *sparse_local,
+  BaselineSpMM(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native,
+                 distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+                 distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
+                 distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local,
                  Process3DGrid *grid, double alpha, double beta, bool col_major,
                  bool sync_comm, double tile_width_fraction, bool hash_spgemm)
       : sp_local_native(sp_local_native), sp_local_receiver(sp_local_receiver),

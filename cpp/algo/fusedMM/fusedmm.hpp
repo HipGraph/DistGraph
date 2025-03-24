@@ -16,9 +16,9 @@ private:
   DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_output;
   DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a;
   DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
   std::unordered_map<int, unique_ptr<DataComm<INDEX_TYPE, VALUE_TYPE>>> data_comm_cache;
@@ -34,9 +34,9 @@ private:
 
 public:
   vector<double> timing_info;
-    FusedMMAlgo(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-           distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-           distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+    FusedMMAlgo(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native,
+           distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+           distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
            DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_a,
            DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_b,
            DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local_output,

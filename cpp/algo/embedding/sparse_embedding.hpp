@@ -31,11 +31,11 @@ template <typename INDEX_TYPE, typename VALUE_TYPE, size_t embedding_dim>
 class SparseEmbedding {
 
 private:
-  distblas::core::SpMat<VALUE_TYPE> *sparse_local_output;
-  distblas::core::SpMat<VALUE_TYPE> *sparse_local;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender;
-  distblas::core::SpMat<VALUE_TYPE> *sp_local_native;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local_output;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
+  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native;
   Process3DGrid *grid;
 
   // record temp local output
@@ -59,10 +59,10 @@ private:
 
 public:
   vector<double> timing_info;
-  SparseEmbedding(distblas::core::SpMat<VALUE_TYPE> *sp_local_native,
-                  distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-                  distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
-                  distblas::core::SpMat<VALUE_TYPE> *sparse_local_output,
+  SparseEmbedding(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_native,
+                  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+                  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
+                  distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local_output,
                   Process3DGrid *grid, double alpha, double beta,
                   bool col_major, bool sync_comm, double tile_width_fraction,
                   bool hash_spgemm)
