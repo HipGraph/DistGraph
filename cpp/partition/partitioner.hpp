@@ -103,7 +103,7 @@ public:
                     recvoffsets.data(), SPTUPLE, process_3D_grid->col_world);
 
       // TODO: Parallelize the sort routine?
-      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),column_major<T>); // This helps to speed up CSR creation
+      std::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),column_major<VALUE_TYPE>); // This helps to speed up CSR creation
     }
 //    __gnu_parallel::sort((sp_mat->coords).begin(), (sp_mat->coords).end(),
 //                         column_major<T>);
