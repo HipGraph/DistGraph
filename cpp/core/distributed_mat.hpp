@@ -105,7 +105,7 @@ public:
     csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
-  virtual void bootstrap();
+  virtual void bootstrap()=0;
 
 };
 

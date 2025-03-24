@@ -114,6 +114,8 @@ public:
   }
 
 
+
+
   CSRHandle  fetch_remote_data(INDEX_TYPE global_key) {
     CSRHandle *handle = (this->csr_local_data)->handler.get();
     CSRHandle new_handler;
@@ -130,6 +132,9 @@ public:
 
     return new_handler;
   }
+
+    void bootstrap() override {
+    }
 
 
   static int get_tile_id(int batch_id, INDEX_TYPE col_index,

@@ -626,6 +626,10 @@ namespace distblas::core {
             }
         }
 
+        void bootstrap() override {
+
+        }
+
         ~SpMat() {}
     };
 
