@@ -25,10 +25,10 @@ template <typename INDEX_TYPE, typename VALUE_TYPE>
 class DataComm {
 
 public:
-  SpMat<VALUE_TYPE> *sp_local_receiver;
-  SpMat<VALUE_TYPE> *sp_local_sender;
+  SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver;
+  SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender;
   DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local;
-  SpMat<VALUE_TYPE> *sparse_local;
+  SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local;
   Process3DGrid *grid;
   vector<int> sdispls;
   vector<int> sendcounts;
@@ -45,8 +45,8 @@ public:
   int embedding_dim=sp_tuple_max_dim;
 
   double alpha;
-  DataComm(distblas::core::SpMat<VALUE_TYPE> *sp_local_receiver,
-           distblas::core::SpMat<VALUE_TYPE> *sp_local_sender,
+  DataComm(distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+           distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender,
            DenseMat<INDEX_TYPE, VALUE_TYPE> *dense_local,
            Process3DGrid *grid, int batch_id, double alpha) {
     this->sp_local_receiver = sp_local_receiver;
@@ -70,8 +70,8 @@ public:
     this->embedding_dim=dense_local->cols;
   }
 
-  DataComm(SpMat<VALUE_TYPE> *sp_local_receiver,
-           SpMat<VALUE_TYPE> *sp_local_sender, SpMat<VALUE_TYPE> *sparse_local,
+  DataComm(SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
+           SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_sender, SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_local,
            Process3DGrid *grid, int batch_id, double alpha)
       : sp_local_receiver(sp_local_receiver), sp_local_sender(sp_local_sender),
         sparse_local(sparse_local), grid(grid), alpha(alpha),
