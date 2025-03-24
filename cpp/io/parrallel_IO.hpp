@@ -30,7 +30,7 @@ public:
    */
   template <typename INDEX_TYPE, typename WEIGHT_VALUE, typename VALUE_TYPE>
   void parallel_read_MM(string file_path,
-                        distblas::core::SpMat<VALUE_TYPE> *sp_mat,
+                        distblas::core::SpMat<INDEX_TYPE ,VALUE_TYPE> *sp_mat,
                         bool copy_col_to_value, bool boolean_input=false) {
     MPI_Comm WORLD;
     MPI_Comm_dup(MPI_COMM_WORLD, &WORLD);
@@ -90,7 +90,7 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, VALUE_TYPE *nCoordinates,
                       INDEX_TYPE rows, uint64_t cols, Process3DGrid *grid,
-                      distblas::core::SpMat<VALUE_TYPE> *sp_mat) {
+                      distblas::core::SpMat<INDEX_TYPE ,VALUE_TYPE> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
@@ -149,7 +149,7 @@ public:
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, vector<vector<VALUE_TYPE>> *matrix,
                       INDEX_TYPE rows, uint64_t cols, Process3DGrid *grid,
-                      distblas::core::SpMat<VALUE_TYPE> *sp_mat) {
+                      distblas::core::SpMat<INDEX_TYPE ,VALUE_TYPE> *sp_mat) {
     MPI_File fh;
     MPI_File_open(grid->col_world, file_path.c_str(),
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
