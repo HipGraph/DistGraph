@@ -63,7 +63,7 @@ namespace distblas::core {
             this->nCoordinatePtr = make_unique < vector < VALUE_TYPE >> (rows * cols);
             this->nnz_count = make_unique < vector < INDEX_TYPE >> (rows, 0);
             this->state_metadata = make_unique < vector < vector < VALUE_TYPE>>>(rows, vector<VALUE_TYPE>(cols, 0));
-            this->nCoordinates= data
+            this->nCoordinates= data;
             bootstrap();
         }
 
