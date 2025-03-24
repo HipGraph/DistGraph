@@ -390,7 +390,7 @@ namespace distblas::core {
             }
         }
 
-        SpMat(const SpMat &other) : DistributedMat<INDEX_TYPE,VALUE_TYPE>(other) {
+        SpMat(const SpMat<INDEX_TYPE,VALUE_TYPE> &other) : DistributedMat<INDEX_TYPE,VALUE_TYPE>(other) {
             // Perform deep copy of all members
             this->gRows = other.gRows;
             this->gCols = other.gCols;
