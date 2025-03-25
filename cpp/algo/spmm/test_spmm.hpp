@@ -3,7 +3,7 @@
 #include "../../core/sparse_mat.hpp"
 #include "../../core/sparse_mat_tile.hpp"
 #include "../spgemm/spgemm_with_tiling.hpp"
-#include "spmm.hpp"
+#include "baseline_spmm.hpp"
 
 using namespace distblas::core;
 

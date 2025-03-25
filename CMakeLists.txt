@@ -49,7 +49,7 @@ add_library(disembed_lib SHARED
         cpp/core/json.hpp
         cpp/partition/partitioner.cpp
         cpp/partition/partitioner.hpp
-        cpp/algo/spmm/spmm.hpp
+        cpp/algo/spmm/baseline_spmm.hpp
         cpp/algo/spgemm/spgemm.hpp
         cpp/algo/fusedMM/fusedmm.hpp
         cpp/core/sparse_mat_tile.hpp

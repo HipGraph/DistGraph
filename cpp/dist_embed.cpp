@@ -1,5 +1,5 @@
 #include "algo/embedding/algo.hpp"
-#include "algo/spmm/spmm.hpp"
+#include "algo/spmm/baseline_spmm.hpp"
 #include "core/common.h"
 #include "core/csr_local.hpp"
 #include "core/dense_mat.hpp"

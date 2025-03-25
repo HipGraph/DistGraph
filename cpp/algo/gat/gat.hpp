@@ -6,7 +6,7 @@
 #include "../fusedMM/fusedmm.hpp"
 #include "gat_layer.hpp"
 #include "../sddmm/sddmm.hpp"
-#include "../spmm/spmm.hpp"
+#include "../spmm/baseline_spmm.hpp"
 
 using namespace distblas::core;
 
