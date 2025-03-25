@@ -265,9 +265,9 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix_rowptr(-1);
  json perf_stats;
   if (spmm) {
-      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_input.get()->proc_row_width,dimension);
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), sparse_input.get()->proc_row_width,dimension);
       cout << " rank " << grid->rank_in_col << " fusedmm intialization of first dense matrices completed  " << endl;
-      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_input.get()->proc_row_width,dimension);
+      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), sparse_input.get()->proc_row_width,dimension);
 
       auto spmm_algo = make_unique<distblas::algo::SpMM<INDEX_TYPE, VALUE_TYPE>>(
                 grid.get(),sparse_input.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
