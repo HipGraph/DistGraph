@@ -21,8 +21,8 @@ private:
 
   distblas::algo::SpMMAlgo<INDEX_TYPE,VALUE_TYPE>* spMMAlgo;
 
-  DenseMat<INDEX_TYPE,VALUE_TYPE> input_dense_mat;
-  DenseMat<INDEX_TYPE,VALUE_TYPE> output;
+  DenseMat<INDEX_TYPE,VALUE_TYPE>* input_dense_mat;
+  DenseMat<INDEX_TYPE,VALUE_TYPE>* output;
 
 public:
   SpMM(Process3DGrid* grid, distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE> *sparse_mat,
