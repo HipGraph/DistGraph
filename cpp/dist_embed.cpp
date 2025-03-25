@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   string output_file = "embedding.txt";
   string data_set_name = "";
 
-  int batch_size = 16384;
+  INDEX_TYPE batch_size = 16384;
   double alpha = 0;
   double beta = 0.25;
   int iterations = 30;
