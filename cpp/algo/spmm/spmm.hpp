@@ -48,16 +48,16 @@ public:
   json execute() {
     json jobj;
 
-      auto t = start_clock();
-      size_t total_memory = 0;
-      cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
-      spMMAlgo->execute(1, this->batch_size, 1.0);
+    auto t = start_clock();
+    size_t total_memory = 0;
+    cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
+    spMMAlgo->execute(1, this->batch_size, 1.0);
 
-      stop_clock_and_add(t, "Total Time");
-      double totalLocalSpGEMM = std::accumulate((spMMAlgo->timing_info).begin(), (spMMAlgo->timing_info).end(), 0.0)/16;
-      add_perf_stats(totalLocalSpGEMM,"Local SpMM");
-      jobj[i]=json_perf_statistics();
-      reset_performance_timers();
+    stop_clock_and_add(t, "Total Time");
+    double totalLocalSpGEMM = std::accumulate((spMMAlgo->timing_info).begin(), (spMMAlgo->timing_info).end(), 0.0)/16;
+    add_perf_stats(totalLocalSpGEMM,"Local SpMM");
+    jobj =json_perf_statistics();
+    reset_performance_timers();
 
     return jobj;
   }
