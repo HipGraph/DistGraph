@@ -332,8 +332,8 @@ namespace distblas::core {
          * @param gNNz     total number of NNz in Distributed global Adj matrix
          */
         SpMat(Process3DGrid *grid, vector <Tuple<VALUE_TYPE>> &coords,
-              INDEX_TYPE &gRows, INDEX_TYPE &gCols, INDEX_TYPE &gNNz, int &batch_size,
-              int &proc_row_width, int &proc_col_width, bool transpose,
+              INDEX_TYPE &gRows, INDEX_TYPE &gCols, INDEX_TYPE &gNNz, INDEX_TYPE &batch_size,
+              INDEX_TYPE &proc_row_width, INDEX_TYPE &proc_col_width, bool transpose,
               bool col_partitioned)
                 : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
             this->gRows = gRows;
