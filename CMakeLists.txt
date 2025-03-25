@@ -58,7 +58,7 @@ add_library(disembed_lib SHARED
         cpp/algo/embedding/sparse_embedding.hpp
         cpp/algo/bfs/multi_source_bfs.hpp
         cpp/algo/spgemm/test_spgemm.hpp
-        cpp/algo/spmm/test_spmm.hpp
+        cpp/algo/spmm/spmm.hpp
         cpp/algo/fusedMM/test_fused_mm.hpp
         cpp/algo/gat/gat_layer.hpp
         cpp/algo/gat/gat.hpp
@@ -72,7 +72,7 @@ SET(BUILD_TESTS "" ON)
 #    message(STATUS "Building tests ....")
 #endif ()
 
-SET(SOURCES cpp/dist_embed.cpp)
+SET(SOURCES cpp/dist_embed.cpp cpp/algo/dist_graph_blas.hpp)
 
 add_executable(distembed ${SOURCES})
 

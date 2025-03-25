@@ -22,7 +22,7 @@
 #include "algo/embedding/sparse_embedding.hpp"
 #include "algo/bfs/multi_source_bfs.hpp"
 #include "algo/spgemm/test_spgemm.hpp"
-#include "algo/spmm/test_spmm.hpp"
+#include "algo/spmm/spmm.hpp"
 #include "algo/fusedMM/test_fused_mm.hpp"
 #include "algo/gat/gat.hpp"
 #include "algo/gat/gat_layer.hpp"
