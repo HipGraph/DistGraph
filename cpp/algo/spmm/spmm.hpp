@@ -50,7 +50,7 @@ public:
 
     auto t = start_clock();
     size_t total_memory = 0;
-    cout << " rank " << grid->rank_in_col << " spmm algo started  " << endl;
+    cout << " rank " << this->grid->rank_in_col << " spmm algo started  " << endl;
     spMMAlgo->execute(1, this->batch_size, 1.0);
 
     stop_clock_and_add(t, "Total Time");
