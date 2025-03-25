@@ -40,7 +40,7 @@ typedef chrono::time_point <std::chrono::steady_clock> my_timer_t;
 
 namespace distblas::core {
 
-    int divide_and_round_up(INDEX_TYPE num, int denom);
+    INDEX_TYPE divide_and_round_up(INDEX_TYPE num, int denom);
 
     vector <INDEX_TYPE> generate_random_numbers(int lower_bound, int upper_bound, int seed,
                                                 int ns);

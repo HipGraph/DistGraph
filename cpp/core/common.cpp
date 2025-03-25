@@ -18,7 +18,7 @@ vector<string> distblas::core::perf_counter_keys = {
 map<string, int> distblas::core::call_count;
 map<string, double> distblas::core::total_time;
 
-int distblas::core::divide_and_round_up(INDEX_TYPE num, int denom) {
+INDEX_TYPE distblas::core::divide_and_round_up(INDEX_TYPE num, int denom) {
   if (num % denom > 0) {
     return num / denom + 1;
   } else {
