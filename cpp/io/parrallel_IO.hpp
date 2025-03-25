@@ -87,6 +87,54 @@ public:
     sp_mat->gNNz = G.getnnz();
   }
 
+    template <typename VALUE_TYPE, typename INDEX_TYPE>
+    void read_txt_dist(std::string filename, VALUE_TYPE* nCoordinates,
+                              int no_of_datapoints, int dim, int rank, int world_size, INDEX_TYPE offset = 0) {
+        std::cout << "Rank " << rank << " opening file " << filename << std::endl;
+        std::ifstream file(filename);
+
+        if (!file.is_open()) {
+            std::cerr << "Error: Unable to open the file " << filename << std::endl;
+            return;
+        }
+        std::cout << "Rank " << rank << " opened file " << filename << std::endl;
+
+        // Calculate chunk size for each rank
+        INDEX_TYPE chunk_size = no_of_datapoints / world_size;
+        INDEX_TYPE start_idx = rank * chunk_size;
+        INDEX_TYPE end_index = 0;
+
+        if (rank < world_size - 1) {
+            end_index = (rank + 1) * chunk_size - 1;
+        } else {
+            end_index = std::min((rank + 1) * chunk_size - 1, no_of_datapoints - 1);
+            chunk_size = no_of_datapoints - rank * chunk_size;
+        }
+
+        std::cout << "Rank " << rank << " selected chunk size " << chunk_size << " starting " << start_idx << std::endl;
+
+        // Skip lines up to start_idx
+        std::string line;
+        for (INDEX_TYPE i = 0; i < start_idx + offset && std::getline(file, line); ++i);
+
+        // Read and parse the data into nCoordinates
+        for (INDEX_TYPE i = 0; i < chunk_size; ++i) {
+            if (std::getline(file, line)) {
+                std::istringstream ss(line);
+                int nodeId;
+                std::vector<VALUE_TYPE> values(dim);
+
+                ss >> nodeId;  // Read node ID (not stored)
+                for (int d = 0; d < dim; ++d) {
+                    ss >> values[d];
+                    nCoordinates[i * dim + d] = values[d];  // Store values in row-major order
+                }
+            }
+        }
+
+        std::cout << "Rank " << rank << " data reading completed" << std::endl;
+    }
+
   template <typename VALUE_TYPE>
   void parallel_write(string file_path, VALUE_TYPE *nCoordinates,
                       INDEX_TYPE rows, uint64_t cols, Process3DGrid *grid,
