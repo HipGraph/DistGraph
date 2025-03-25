@@ -265,18 +265,17 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix_rowptr(-1);
  json perf_stats;
   if (spmm) {
-//        unique_ptr<distblas::algo::BaselineSpMM<INDEX_TYPE, VALUE_TYPE, dimension>> spgemm_algo = unique_ptr<distblas::algo::BaselineSpMM<INDEX_TYPE, VALUE_TYPE, dimension>>(
-//            new distblas::algo::BaselineSpMM<INDEX_TYPE, VALUE_TYPE, dimension>(
-//                shared_sparseMat.get(), shared_sparseMat_receiver.get(),
-//                shared_sparseMat_sender.get(), sparse_input.get(),
-//                grid.get(),
-//                alpha, beta,col_major,sync_comm, tile_width_fraction,false));
-//
-//
-//        MPI_Barrier(MPI_COMM_WORLD);
-//        cout << " rank " << rank << " SpMM algo started  " << endl;
-//        perf_stats =  spgemm_algo.get()->execute(iterations, batch_size,lr);
-//        cout << " rank " << rank << " SpMM algo completed  " << endl;
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_input.get()->proc_row_width,dimension);
+      cout << " rank " << grid->rank_in_col << " fusedmm intialization of first dense matrices completed  " << endl;
+      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid, sparse_input.get()->proc_row_width,dimension);
+
+      auto spmm_algo = make_unique<distblas::algo::SpMM<INDEX_TYPE, VALUE_TYPE>>(
+                grid.get(),sparse_input.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
+
+        MPI_Barrier(MPI_COMM_WORLD);
+        cout << " rank " << rank << " SpMM algo started  " << endl;
+        perf_stats =  spmm_algo.get()->execute();
+        cout << " rank " << rank << " SpMM algo completed  " << endl;
 
   }else if(fusedMM){
       unique_ptr<distblas::algo::BaselineFusedMM<INDEX_TYPE, VALUE_TYPE, dimension>> fused_algo = unique_ptr<distblas::algo::BaselineFusedMM<INDEX_TYPE, VALUE_TYPE, dimension>>(
