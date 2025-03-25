@@ -76,8 +76,7 @@ namespace distblas::core {
             int my_rows= rows/world_size;
 
             if (my_rank == world_size - 1) {
-                end_index = std::min((rank + 1) * my_rows - 1, rows - 1);
-                my_rows = my_rows - rank * my_rows;
+                my_rows = rows - my_rank * my_rows;
             }
 
             this->nCoordinatePtr = make_unique<vector<VALUE_TYPE>> (my_rows * cols);
