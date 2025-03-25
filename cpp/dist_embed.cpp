@@ -235,20 +235,20 @@ int main(int argc, char **argv) {
   if (!save_results) {
     auto end_io = std::chrono::high_resolution_clock::now();
 
-    auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
-        new GlobalAdjacency1DPartitioner(grid.get()));
-
-    cout << " rank " << rank << " partitioning data started  " << endl;
-
-    partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(shared_sparseMat_sender.get());
-    partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(shared_sparseMat_receiver.get());
-    partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(shared_sparseMat.get());
-
-    cout << " rank " << rank << " partitioning data completed  " << endl;
-
-    shared_sparseMat.get()->initialize_CSR_blocks(true);
-    shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
-    shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
+//    auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
+//        new GlobalAdjacency1DPartitioner(grid.get()));
+//
+//    cout << " rank " << rank << " partitioning data started  " << endl;
+//
+//    partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(shared_sparseMat_sender.get());
+//    partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(shared_sparseMat_receiver.get());
+//    partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(shared_sparseMat.get());
+//
+//    cout << " rank " << rank << " partitioning data completed  " << endl;
+//
+//    shared_sparseMat.get()->initialize_CSR_blocks(true);
+//    shared_sparseMat_sender.get()->initialize_CSR_blocks(true);
+//    shared_sparseMat_receiver.get()->initialize_CSR_blocks(true);
   }
   if (spgemm and !save_results){
     cout << " rank " << rank << " input gROWs  " << sparse_input.get()->gRows<< "input gCols" << sparse_input.get()->gCols << endl;
@@ -265,12 +265,12 @@ int main(int argc, char **argv) {
 //  dense_mat.get()->print_matrix_rowptr(-1);
  json perf_stats;
   if (spmm) {
-      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), sparse_input.get()->proc_row_width,dimension);
+      auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), shared_sparseMat.get()->proc_row_width,dimension);
       cout << " rank " << grid->rank_in_col << " fusedmm intialization of first dense matrices completed  " << endl;
-      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), sparse_input.get()->proc_row_width,dimension);
+      auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), shared_sparseMat.get()->proc_row_width,dimension);
 
       auto spmm_algo = make_unique<distblas::algo::SpMM<INDEX_TYPE, VALUE_TYPE>>(
-                grid.get(),sparse_input.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
+                grid.get(),shared_sparseMat.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
 
         MPI_Barrier(MPI_COMM_WORLD);
         cout << " rank " << rank << " SpMM algo started  " << endl;
