@@ -10,7 +10,6 @@
 #include <mpi.h>
 #include <random>
 #include <unordered_map>
-#include "../io/parrallel_IO.hpp"
 
 using namespace std;
 
@@ -67,25 +66,6 @@ namespace distblas::core {
             this->nCoordinates= data;
             bootstrap();
         }
-
-        DenseMat(Process3DGrid *grid, INDEX_TYPE rows, VALUE_TYPE cols, string input_file) : DistributedMat<INDEX_TYPE,VALUE_TYPE>() {
-
-
-            int my_rank = grid->rank_in_col;
-            int world_size = grid->world_size;
-            int my_rows= rows/world_size;
-
-            if (my_rank == world_size - 1) {
-                my_rows = rows - my_rank * my_rows;
-            }
-
-            this->nCoordinatePtr = make_unique<vector<VALUE_TYPE>> (my_rows * cols);
-            distblas::io::ParallelIO reader;
-            reader.read_txt_dist<INDEX_TYPE,VALUE_TYPE>(input_file,this->nCoordinatePtr.data(),rows,cols,my_rank,world_size);
-            this->nCoordinates = this->nCoordinatePtr.data();
-            bootstrap();
-        }
-
 
 
         ~DenseMat() {}
