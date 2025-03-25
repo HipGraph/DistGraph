@@ -6,6 +6,7 @@
 #include "../partition/partitioner.hpp"
 
 
+
 using namespace distblas::net;
 using namespace distblas::partition;
 
@@ -83,6 +84,6 @@ namespace distblas::algo {
 
         }
 
-        virtual json execute();
+        virtual json execute() =0;
     };
 }
