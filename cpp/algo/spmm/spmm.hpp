@@ -41,10 +41,6 @@ public:
       spMMAlgo = embedding_algo.get();
   }
 
-  ~SpMM<INDEX_TYPE,VALUE_TYPE>(){
-      spMMAlgo=nullptr;
-  }
-
   json execute() {
     json jobj;
 

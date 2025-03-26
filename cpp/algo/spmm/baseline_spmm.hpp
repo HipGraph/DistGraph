@@ -56,6 +56,7 @@ namespace distblas::algo {
 
 
         void execute(int iterations, int batch_size, VALUE_TYPE lr) {
+            cout<<" start executing "<<endl;
             auto t = start_clock();
 
             int batches = 0;
