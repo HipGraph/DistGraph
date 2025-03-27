@@ -19,7 +19,7 @@ private:
   int rows=0;
   int embedding_dim=0;
 
-  distblas::algo::SpMMAlgo<INDEX_TYPE,VALUE_TYPE>* spMMAlgo;
+  SpMMAlgo<INDEX_TYPE,VALUE_TYPE>* spMMAlgo;
 
   DenseMat<INDEX_TYPE,VALUE_TYPE>* input_dense_mat;
   DenseMat<INDEX_TYPE,VALUE_TYPE>* output;
@@ -46,7 +46,7 @@ public:
 
     auto t = start_clock();
     size_t total_memory = 0;
-    cout << " rank " << this->grid->rank_in_col << " spmm algo started  " << endl;
+    cout << " rank " << this->grid->rank_in_col << " spmm algo started  about to execute  spMMAlgo" << endl;
     spMMAlgo->execute(1, this->batch_size, 1.0);
 
     stop_clock_and_add(t, "Total Time");
