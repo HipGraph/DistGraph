@@ -42,11 +42,12 @@ public:
   }
 
   json execute() {
+      cout << " rank " << this->grid->rank_in_col << " spmm algo started  about to execute  spMMAlgo" << endl;
     json jobj;
 
     auto t = start_clock();
     size_t total_memory = 0;
-    cout << " rank " << this->grid->rank_in_col << " spmm algo started  about to execute  spMMAlgo" << endl;
+
     spMMAlgo->execute(1, this->batch_size, 1.0);
 
     stop_clock_and_add(t, "Total Time");
