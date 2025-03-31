@@ -50,9 +50,9 @@ namespace distblas::algo {
             auto localARows = divide_and_round_up(sparse_mat->gRows,grid->col_world_size);
             batch_size = localARows;
 
-            sparse_mat->batch_size = batch_size;
-            sparse_mat->proc_row_width = localARows;
-            sparse_mat->proc_col_width = localBRows;
+            sparse_local->batch_size = batch_size;
+            sparse_local->proc_row_width = localARows;
+            sparse_local->proc_col_width = localBRows;
 
             vector<Tuple<VALUE_TYPE>> copiedVector(sparse_mat->coords);
             auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(grid,
