@@ -95,7 +95,9 @@ public:
       cout << " rank "<< this->grid->rank_in_col  << " embedding_algo values "<<handle_3->values.size()<<" embedding_algo rowStart "<<handle_3->rowStart.size()<<" embedding_algo col "<<handle_3->col_idx.size()<< endl;
 
       spMMAlgo = embedding_algo.get();
+
       cout << " rank " << this->grid->rank_in_col << " spmm algo assign completed" << endl;
+      spMMAlgo->execute(1, this->batch_size, 1.0);
   }
 
   json execute() {
