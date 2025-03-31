@@ -169,7 +169,7 @@ namespace distblas::core {
             distblas::core::CSRHandle *handle =
                     (this->csr_local_data.get())->handler.get();
 
-            cout << " rank " << grid->rank_in_col << "  calling find_col_ids_for_pulling procs after  CSRHandle"  << endl;
+            cout << " rank " << grid->rank_in_col << "  calling find_col_ids_for_pulling procs after  CSRHandle "  <<handle->values.size()<<" and "<<handle->rowStart.size()<<endl;
 
             vector<int> procs;
             for (int i = starting_proc; i < end_proc; i++) {
