@@ -80,6 +80,7 @@ namespace distblas::algo {
             for (int i = 0; i < batches; i++) {
                 auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender,
                                                                                   dense_local, grid, i, alpha);
+                cout << " rank " << grid->rank_in_col << " communicator initialization completed " << batches << endl;
                 data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
                 data_comm_cache[i].get()->onboard_data();
             }
