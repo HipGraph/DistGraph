@@ -37,7 +37,7 @@ public:
       this->beta=beta;
       auto localBRows = divide_and_round_up(sparse_mat->gCols,grid->col_world_size);
       auto localARows = divide_and_round_up(sparse_mat->gRows,grid->col_world_size);
-      batch_size = localARows;
+      this->batch_size = localARows;
 
       this->sparse_local->batch_size = batch_size;
       this->sparse_local->proc_row_width = localARows;
@@ -62,9 +62,9 @@ public:
 
       cout << " rank " << grid->rank_in_col << " partitioning data started  " << endl;
 
-      partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(sp_local_sender);
-      partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(sp_local_receiver);
-      partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(sparse_local);
+      partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(this->sp_local_sender);
+      partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(this->sp_local_receiver);
+      partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(this->sparse_local);
 
       cout <<  " rank " << grid->rank_in_col << " partitioning data completed  " << endl;
 
