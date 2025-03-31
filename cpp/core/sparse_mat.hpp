@@ -210,6 +210,9 @@ namespace distblas::core {
                     cout << " rank " << grid->rank_in_col << "  working on rank "<<procs[r] << endl;
 
                     for (int i = starting_index; i < end_index; i++) {
+                        if (i>=handle->rowStart.size()){
+                            cout << " rank " << grid->rank_in_col << " i "<<i<< " size "<<handle->rowStart.size()<< endl;
+                        }
                         if (rank != procs[r] and
                             (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
                             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
@@ -219,7 +222,7 @@ namespace distblas::core {
                                 INDEX_TYPE dst_end_index =
                                         std::min((batch_id + 1) * batch_size, proc_row_width);
                                 if (col_val >= dst_start and col_val < dst_end_index) {
-//                                    { proc_to_id_mapping[procs[r]].insert(i); }
+                                    { proc_to_id_mapping[procs[r]].insert(i); }
                                 }
                             }
                         }
