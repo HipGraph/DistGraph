@@ -62,6 +62,8 @@ namespace distblas::algo {
 
         void execute(int iterations, int batch_size, VALUE_TYPE lr) {
             cout<<" start executing "<<endl;
+            distblas::core::CSRHandle *handle_2 = this->sp_local_receiver->csr_local_data.get()->handler.get();
+            cout << " rank "<< this->grid->rank_in_col  << " execute before values "<<handle_2->values.size()<<" execute  before rowStart "<<handle_2->rowStart.size()<<" execute before col "<<handle_2->col_idx.size()<< endl;
             auto t = start_clock();
 
             int batches = 0;
