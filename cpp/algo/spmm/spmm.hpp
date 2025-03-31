@@ -91,8 +91,8 @@ public:
                       output, this->grid, this->alpha, this->beta, false);
       cout << " rank " << this->grid->rank_in_col << " spmm algo initialization completed" << endl;
 
-      distblas::core::CSRHandle *handle_2 = this->sp_local_receiver->csr_local_data.get()->handler.get();
-      cout << " rank "<< this->grid->rank_in_col  << " embedding_algo values "<<handle_2->values.size()<<" embedding_algo rowStart "<<handle_2->rowStart.size()<<" embedding_algo col "<<handle_2->col_idx.size()<< endl;
+      distblas::core::CSRHandle *handle_3 = this->sp_local_receiver->csr_local_data.get()->handler.get();
+      cout << " rank "<< this->grid->rank_in_col  << " embedding_algo values "<<handle_3->values.size()<<" embedding_algo rowStart "<<handle_3->rowStart.size()<<" embedding_algo col "<<handle_3->col_idx.size()<< endl;
 
       spMMAlgo = embedding_algo.get();
       cout << " rank " << this->grid->rank_in_col << " spmm algo assign completed" << endl;
