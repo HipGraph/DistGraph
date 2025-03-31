@@ -46,12 +46,12 @@ namespace distblas::core {
 
             if (col_partitioned) {
                 // This is used to find sending indices
-                this->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(
+                this->csr_local_data = make_shared<CSRLocal<VALUE_TYPE>>(
                         gRows, proc_col_width, coords.size(), coords_ptr, coords.size(),
                         transpose);
             } else {
                 // This is used to find receiving indices and computations
-                this->csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(
+                this->csr_local_data = make_shared<CSRLocal<VALUE_TYPE>>(
                         proc_row_width, gCols, coords.size(), coords_ptr, coords.size(),
                         transpose);
             }
