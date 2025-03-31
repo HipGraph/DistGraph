@@ -497,6 +497,7 @@ namespace distblas::core {
                 bool mode) {
 
             if (mode == 0) {
+                cout << " rank " << grid->rank_in_col << "  calling find_col_ids_for_pulling "  << endl;
                 find_col_ids_for_pulling(batch_id, starting_proc, end_proc,
                                          proc_to_id_mapping, id_to_proc_mapping);
             } else {
