@@ -42,7 +42,7 @@ namespace distblas::algo {
         DistGraphBLAS(Process3DGrid* grid,
                     distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>* sparse_mat,double alpha, double beta){
 
-            sparse_local = sparse_mat;
+            this->sparse_local = sparse_mat;
             this->grid=grid;
             this->alpha=alpha;
             this->beta=beta;
@@ -50,16 +50,16 @@ namespace distblas::algo {
             auto localARows = divide_and_round_up(sparse_mat->gRows,grid->col_world_size);
             batch_size = localARows;
 
-            sparse_local->batch_size = batch_size;
-            sparse_local->proc_row_width = localARows;
-            sparse_local->proc_col_width = localBRows;
+            this->sparse_local->batch_size = batch_size;
+            this->sparse_local->proc_row_width = localARows;
+            this->sparse_local->proc_col_width = localBRows;
 
             vector<Tuple<VALUE_TYPE>> copiedVector(sparse_mat->coords);
             auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(grid,
                                                                                                      copiedVector, sparse_mat->gRows,
                                                                                                      sparse_mat->gCols, sparse_mat->gNNz, batch_size,
                                                                                                      localARows, localBRows, false, true);
-            sp_local_sender =  shared_sparseMat_sender.get();
+            this->sp_local_sender =  shared_sparseMat_sender.get();
 
 
             auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(grid,
@@ -67,7 +67,7 @@ namespace distblas::algo {
                                                                                                        sparse_mat->gCols, sparse_mat->gNNz, batch_size,
                                                                                                        localARows, localBRows, true, false);
 
-            sp_local_receiver = shared_sparseMat_receiver.get();
+            this->sp_local_receiver = shared_sparseMat_receiver.get();
 
             auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
                     new GlobalAdjacency1DPartitioner(grid));
@@ -80,9 +80,9 @@ namespace distblas::algo {
 
             cout <<  " rank " << grid->rank_in_col << " partitioning data completed  " << endl;
 
-            sparse_local->initialize_CSR_blocks(true);
-            sp_local_sender->initialize_CSR_blocks(true);
-            sp_local_receiver->initialize_CSR_blocks(true);
+            this->sparse_local->initialize_CSR_blocks(true);
+            this->sp_local_sender->initialize_CSR_blocks(true);
+            this->sp_local_receiver->initialize_CSR_blocks(true);
             cout <<  " rank " << grid->rank_in_col << " initialize_CSR_blocks completed " << endl;
 
             distblas::core::CSRHandle *handle = this->sp_local_receiver->csr_local_data.get()->handler.get();
