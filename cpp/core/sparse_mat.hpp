@@ -210,9 +210,6 @@ namespace distblas::core {
                     cout << " rank " << grid->rank_in_col << "  working on rank "<<procs[r] << endl;
 
                     for (int i = starting_index; i < end_index; i++) {
-                        if (i>=handle->rowStart.size()){
-                            cout << " rank " << grid->rank_in_col << " i "<<i<< " size "<<handle->rowStart.size()<< endl;
-                        }
                         if (rank != procs[r] and
                             (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
                             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];

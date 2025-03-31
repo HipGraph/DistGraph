@@ -85,7 +85,7 @@ namespace distblas::algo {
             cout <<  " rank " << grid->rank_in_col << " initialize_CSR_blocks completed " << endl;
 
             distblas::core::CSRHandle *handle = this->sp_local_receiver->csr_local_data.get()->handler.get();
-            cout << " rank "<< this->grid->rank_in_col  << "inside access handler passed "<<handle->values.size()<< endl;
+            cout << " rank "<< this->grid->rank_in_col  << "values "<<handle->values.size()<<" rowStart "<<handle->rowStart.size()<<" col "<<handle->col_idx.size()<< endl;
 
         }
 
