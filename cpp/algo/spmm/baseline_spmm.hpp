@@ -51,7 +51,9 @@ namespace distblas::algo {
                   sp_local_sender(sp_local_sender), dense_local(dense_local), grid(grid),
                   alpha(alpha), beta(beta), col_major(col_major),
                   dense_local_output(dense_local_output) {
+            cout << " rank " << this->grid->rank_in_col << " SpMMAlgo constructor completed" << endl;
             this->timing_info = vector<double>(sp_local_receiver->proc_row_width, 0);
+            cout << " rank " << this->grid->rank_in_col << " SpMMAlgo timing assignment completed" << endl;
         }
 
 
