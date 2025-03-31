@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
       auto dense_mat = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), shared_sparseMat.get()->proc_row_width,dimension);
       cout << " rank " << grid->rank_in_col << " spmm intialization of first dense matrices completed  " << endl;
       auto dense_mat_output = make_unique<DenseMat<INDEX_TYPE, VALUE_TYPE>>(grid.get(), shared_sparseMat.get()->proc_row_width,dimension);
-
+      cout << " rank " << grid->rank_in_col << " spmm intialization of output dense matrices completed  " << endl;
       auto spmm_algo = make_unique<distblas::algo::SpMM<INDEX_TYPE, VALUE_TYPE>>(
                 grid.get(),shared_sparseMat.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
       cout << " rank " << rank << " SpMM algo initialization completed  " << endl;
