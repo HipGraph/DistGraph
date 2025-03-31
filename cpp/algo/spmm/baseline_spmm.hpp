@@ -23,8 +23,7 @@ namespace distblas::algo {
 
         Process3DGrid *grid;
 
-        std::unordered_map<int, unique_ptr < DataComm<INDEX_TYPE, VALUE_TYPE>>>
-        data_comm_cache;
+        std::unordered_map<int, unique_ptr < DataComm<INDEX_TYPE, VALUE_TYPE>>> data_comm_cache;
 
         //cache size controlling hyper parameter
         double alpha = 0;
@@ -82,6 +81,7 @@ namespace distblas::algo {
                                                                                   dense_local, grid, i, alpha);
                 cout << " rank " << grid->rank_in_col << " communicator initialization completed " << batches << endl;
                 data_comm_cache.insert(std::make_pair(i, std::move(communicator)));
+                cout << " rank " << grid->rank_in_col << " communicator insertion completed " << batches << endl;
                 data_comm_cache[i].get()->onboard_data();
             }
 

@@ -104,7 +104,7 @@ public:
     int total_send_count = 0;
     // processing chunks
     // calculating receiving data cols
-
+    cout << " rank " << grid->rank_in_col << " calling onbard "  << endl;
     if (alpha == 0) {
       // This represents the case for pulling
 
