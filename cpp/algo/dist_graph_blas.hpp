@@ -43,7 +43,9 @@ namespace distblas::algo {
                     distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>* sparse_mat,double alpha, double beta){
 
             sparse_local = sparse_mat;
-
+            this->grid=grid;
+            this->alpha=alpha;
+            this->beta=beta;
             auto localBRows = divide_and_round_up(sparse_mat->gCols,grid->col_world_size);
             auto localARows = divide_and_round_up(sparse_mat->gRows,grid->col_world_size);
             batch_size = localARows;
