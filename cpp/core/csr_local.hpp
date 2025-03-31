@@ -123,6 +123,7 @@ public:
     }else {
       handler->rowStart.resize(rows+1,0);
     }
+    cout<<"handler creation completed "<<endl;
   }
 
   CSRLocal(vector<vector<Tuple<VALUE_TYPE>>> *sparse_data_collector) {
