@@ -208,8 +208,8 @@ namespace distblas::core {
                     auto end_index = std::min(
                             static_cast<INDEX_TYPE>((procs[r] + 1) * proc_col_width), gCols);
                     cout << " rank " << grid->rank_in_col << "  working on rank "<<procs[r] << endl;
+                    if ()
                     for (int i = starting_index; i < end_index; i++) {
-
                         if (rank != procs[r] and
                             (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
                             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
@@ -219,7 +219,7 @@ namespace distblas::core {
                                 INDEX_TYPE dst_end_index =
                                         std::min((batch_id + 1) * batch_size, proc_row_width);
                                 if (col_val >= dst_start and col_val < dst_end_index) {
-                                    { proc_to_id_mapping[procs[r]].insert(i); }
+//                                    { proc_to_id_mapping[procs[r]].insert(i); }
                                 }
                             }
                         }
