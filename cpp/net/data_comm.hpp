@@ -68,6 +68,9 @@ public:
     this->batch_id = batch_id;
     this->alpha = alpha;
     this->embedding_dim=dense_local->cols;
+
+      distblas::core::CSRHandle *handle_2 = this->sp_local_receiver->csr_local_data.get()->handler.get();
+      cout << " rank "<< this->grid->rank_in_col  << " DataComm values "<<handle_2->values.size()<<" DataComm rowStart "<<handle_2->rowStart.size()<<" DataComm col "<<handle_2->col_idx.size()<< endl;
   }
 
   DataComm(SpMat<INDEX_TYPE,VALUE_TYPE> *sp_local_receiver,
