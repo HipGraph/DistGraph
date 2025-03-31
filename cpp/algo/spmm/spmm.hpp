@@ -37,6 +37,9 @@ public:
       if (this->sp_local_receiver->csr_local_data.get()) {
           cout << " rank "<< this->grid->rank_in_col  <<"csr_local_data initialized properly "<<endl;
       }
+      if (!this->sp_local_receiver->csr_local_data.get()->handler.get()) {
+          cout << " rank "<< this->grid->rank_in_col  <<"handler not initialized properly "<<endl;
+      }
       distblas::core::CSRHandle *handle = this->sp_local_receiver->csr_local_data.get()->handler.get();
       cout << " rank "<< this->grid->rank_in_col  << "access handler passed "<<handle->values.size()<< endl;
       auto embedding_algo =
