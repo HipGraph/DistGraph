@@ -34,8 +34,8 @@ public:
       this->input_dense_mat=input_dense_mat;
       this->output = output;
       cout << " rank " << this->grid->rank_in_col << " SpMMAlgo constructor calling" << endl;
-      if (!this->sp_local_receiver->csr_local_data.get()) {
-          cout << " rank "<< this->grid->rank_in_col  <<"csr_local_data not initialized "<<endl;
+      if (this->sp_local_receiver->csr_local_data.get()) {
+          cout << " rank "<< this->grid->rank_in_col  <<"csr_local_data initialized properly "<<endl;
       }
       distblas::core::CSRHandle *handle = this->sp_local_receiver->csr_local_data.get()->handler.get();
       cout << " rank "<< this->grid->rank_in_col  << "access handler passed "<<handle->values.size()<< endl;
