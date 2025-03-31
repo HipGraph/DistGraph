@@ -175,7 +175,7 @@ namespace distblas::core {
                                                              : (world_size - i + rank) % world_size;
                 procs.push_back(target);
             }
-
+            cout << " rank " << grid->rank_in_col << "  calling find_col_ids_for_pulling procs initialization completed"  << endl;
             if (col_partitioned) {
                 for (int r = 0; r < procs.size(); r++) {
                     INDEX_TYPE starting_index =
