@@ -32,7 +32,7 @@ public:
       :DistGraphBLAS<INDEX_TYPE,VALUE_TYPE>(grid,sparse_mat,alpha,beta)  {
       this->input_dense_mat=input_dense_mat;
       this->output = output;
-
+      cout << " rank " << this->grid->rank_in_col << " SpMMAlgo constructor calling" << endl;
       auto embedding_algo =
               make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
                       this->sparse_local, this->sp_local_receiver,
