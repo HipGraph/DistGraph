@@ -39,6 +39,7 @@ public:
                       this->sp_local_sender,input_dense_mat,
                       output, this->grid, this->alpha, this->beta, false);
       spMMAlgo = embedding_algo.get();
+      cout << " rank " << this->grid->rank_in_col << " spmm algo initialization completed" << endl;
   }
 
   json execute() {
