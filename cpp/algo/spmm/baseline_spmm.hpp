@@ -81,6 +81,8 @@ namespace distblas::algo {
 
 
             for (int i = 0; i < batches; i++) {
+                distblas::core::CSRHandle *handle_2 = this->sp_local_receiver->csr_local_data.get()->handler.get();
+                cout << " rank "<< this->grid->rank_in_col  << " DataComm before values "<<handle_2->values.size()<<" DataComm  before rowStart "<<handle_2->rowStart.size()<<" DataComm before col "<<handle_2->col_idx.size()<< endl;
                 auto communicator = make_unique<DataComm<INDEX_TYPE, VALUE_TYPE>>(sp_local_receiver, sp_local_sender,
                                                                                   dense_local, grid, i, alpha);
                 cout << " rank " << grid->rank_in_col << " communicator initialization completed " << batches << endl;
