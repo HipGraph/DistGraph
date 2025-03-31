@@ -16,7 +16,7 @@ public:
 
   unique_ptr<vector<vector<VALUE_TYPE>>> batch_collector;
 
-  unique_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
+  shared_ptr<CSRLocal<VALUE_TYPE>> csr_local_data;
 
   unique_ptr<vector<distblas::core::SparseCacheEntry<VALUE_TYPE>>> dataCachePtr;
 
@@ -99,11 +99,11 @@ public:
 #pragma omp critical
       (*coords_ptr).insert((*coords_ptr).end(), coords_local.begin(), coords_local.end());
     }
-    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
+    csr_local_data = make_shared<CSRLocal<VALUE_TYPE>>(proc_row_width, gCols, (*coords_ptr).size(),coords_ptr->data(), (*coords_ptr).size(), false);
   }
 
   void initialize_CSR_from_sparse_collector() {
-    csr_local_data = make_unique<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
+    csr_local_data = make_shared<CSRLocal<VALUE_TYPE>>(sparse_data_collector.get());
   }
 
   virtual void bootstrap()=0;
