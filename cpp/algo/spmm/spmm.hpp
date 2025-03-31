@@ -39,21 +39,21 @@ public:
       auto localARows = divide_and_round_up(sparse_mat->gRows,grid->col_world_size);
       this->batch_size = localARows;
 
-      this->sparse_local->batch_size = batch_size;
+      this->sparse_local->batch_size = this->batch_size;
       this->sparse_local->proc_row_width = localARows;
       this->sparse_local->proc_col_width = localBRows;
 
       vector<Tuple<VALUE_TYPE>> copiedVector(sparse_mat->coords);
       auto shared_sparseMat_sender = make_shared<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(grid,
                                                                                                copiedVector, sparse_mat->gRows,
-                                                                                               sparse_mat->gCols, sparse_mat->gNNz, batch_size,
+                                                                                               sparse_mat->gCols, sparse_mat->gNNz, this->batch_size,
                                                                                                localARows, localBRows, false, true);
       this->sp_local_sender =  shared_sparseMat_sender.get();
 
 
       auto shared_sparseMat_receiver = make_shared<distblas::core::SpMat<INDEX_TYPE,VALUE_TYPE>>(grid,
                                                                                                  copiedVector, sparse_mat->gRows,
-                                                                                                 sparse_mat->gCols, sparse_mat->gNNz, batch_size,
+                                                                                                 sparse_mat->gCols, sparse_mat->gNNz, this->batch_size,
                                                                                                  localARows, localBRows, true, false);
 
       this->sp_local_receiver = shared_sparseMat_receiver.get();
@@ -82,8 +82,8 @@ public:
       this->output = output;
       cout << " rank " << this->grid->rank_in_col << " SpMMAlgo constructor calling" << endl;
 
-      distblas::core::CSRHandle *handle = this->sp_local_receiver->csr_local_data.get()->handler.get();
-      cout << " rank "<< this->grid->rank_in_col  << " outside values "<<handle->values.size()<<" outside rowStart "<<handle->rowStart.size()<<" outside col "<<handle->col_idx.size()<< endl;
+      distblas::core::CSRHandle *handle_2 = this->sp_local_receiver->csr_local_data.get()->handler.get();
+      cout << " rank "<< this->grid->rank_in_col  << " outside values "<<handle_2->values.size()<<" outside rowStart "<<handle_2->rowStart.size()<<" outside col "<<handle_2->col_idx.size()<< endl;
       auto embedding_algo =
               make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
                       this->sparse_local, this->sp_local_receiver,
