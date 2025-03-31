@@ -224,6 +224,7 @@ namespace distblas::core {
                             }
                         }
                     }
+                    cout << " rank " << grid->rank_in_col << "  working on rank "<<procs[r] << " completed " endl;
                 }
             }
         }
