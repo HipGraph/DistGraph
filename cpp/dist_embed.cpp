@@ -273,10 +273,10 @@ int main(int argc, char **argv) {
                 grid.get(),shared_sparseMat.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
 
       cout << " rank " << rank << " SpMM algo initialization completed  " << endl;
-        MPI_Barrier(MPI_COMM_WORLD);
-        cout << " rank " << rank << " SpMM algo started  " << endl;
-        perf_stats =  spmm_algo.get()->execute();
-        cout << " rank " << rank << " SpMM algo completed  " << endl;
+      MPI_Barrier(MPI_COMM_WORLD);
+      cout << " rank " << rank << " SpMM algo started  " << endl;
+      perf_stats =  spmm_algo.get()->execute();
+      cout << " rank " << rank << " SpMM algo completed  " << endl;
 
   }else if(fusedMM){
       unique_ptr<distblas::algo::BaselineFusedMM<INDEX_TYPE, VALUE_TYPE, dimension>> fused_algo = unique_ptr<distblas::algo::BaselineFusedMM<INDEX_TYPE, VALUE_TYPE, dimension>>(

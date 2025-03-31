@@ -69,8 +69,7 @@ namespace distblas::algo {
 
             this->sp_local_receiver = shared_sparseMat_receiver.get();
 
-            auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
-                    new GlobalAdjacency1DPartitioner(grid));
+            auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(new GlobalAdjacency1DPartitioner(grid));
 
             cout << " rank " << grid->rank_in_col << " partitioning data started  " << endl;
 

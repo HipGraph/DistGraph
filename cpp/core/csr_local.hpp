@@ -31,7 +31,7 @@ public:
 
   bool transpose;
 
-  unique_ptr<CSRHandle> handler = unique_ptr<CSRHandle>(new CSRHandle());
+  shared_ptr<CSRHandle> handler = shared_ptr<CSRHandle>(new CSRHandle());
 
   CSRLocal() {}
 
