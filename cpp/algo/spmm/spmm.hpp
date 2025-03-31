@@ -30,7 +30,7 @@ public:
        DenseMat<INDEX_TYPE,VALUE_TYPE>* output,
        double alpha, double beta)
       :DistGraphBLAS<INDEX_TYPE,VALUE_TYPE>(grid,sparse_mat,alpha,beta)  {
-      cout << " rank " << this->grid->rank_in_col << " SpMM parent completed" << endl;
+      cout << "SpMM parent completed" << endl;
       this->input_dense_mat=input_dense_mat;
       this->output = output;
       cout << " rank " << this->grid->rank_in_col << " SpMMAlgo constructor calling" << endl;
