@@ -85,6 +85,9 @@ namespace distblas::algo {
             sp_local_receiver->initialize_CSR_blocks(true);
             cout <<  " rank " << grid->rank_in_col << " initialize_CSR_blocks completed " << endl;
 
+            distblas::core::CSRHandle *handle = this->sp_local_receiver->csr_local_data.get()->handler.get();
+            cout << " rank "<< this->grid->rank_in_col  << "inside access handler passed "<<handle->values.size()<< endl;
+
         }
 
         virtual json execute() =0;
