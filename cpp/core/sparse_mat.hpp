@@ -207,8 +207,9 @@ namespace distblas::core {
                     INDEX_TYPE starting_index = proc_col_width * procs[r];
                     auto end_index = std::min(
                             static_cast<INDEX_TYPE>((procs[r] + 1) * proc_col_width), gCols);
+                    cout << " rank " << grid->rank_in_col << "  working on rank "<<procs[r] << endl;
                     for (int i = starting_index; i < end_index; i++) {
-                        cout << " rank " << grid->rank_in_col << "  working on rank "<<i << endl;
+
                         if (rank != procs[r] and
                             (handle->rowStart[i + 1] - handle->rowStart[i]) > 0) {
                             for (auto j = handle->rowStart[i]; j < handle->rowStart[i + 1];
