@@ -271,6 +271,7 @@ int main(int argc, char **argv) {
       cout << " rank " << grid->rank_in_col << " spmm intialization of output dense matrices completed  " << endl;
       auto spmm_algo = make_unique<distblas::algo::SpMM<INDEX_TYPE, VALUE_TYPE>>(
                 grid.get(),shared_sparseMat.get(),dense_mat.get(),dense_mat_output.get(),alpha, beta);
+
       cout << " rank " << rank << " SpMM algo initialization completed  " << endl;
         MPI_Barrier(MPI_COMM_WORLD);
         cout << " rank " << rank << " SpMM algo started  " << endl;

@@ -70,17 +70,18 @@ namespace distblas::algo {
             auto partitioner = unique_ptr<GlobalAdjacency1DPartitioner>(
                     new GlobalAdjacency1DPartitioner(grid));
 
-//            cout << " rank " << rank << " partitioning data started  " << endl;
+            cout << " rank " << grid->rank_in_col << " partitioning data started  " << endl;
 
             partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(sp_local_sender);
             partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(sp_local_receiver);
             partitioner.get()->partition_data<INDEX_TYPE,VALUE_TYPE>(sparse_local);
 
-//            cout << " rank " << rank << " partitioning data completed  " << endl;
+            cout <<  " rank " << grid->rank_in_col << " partitioning data completed  " << endl;
 
             sparse_local->initialize_CSR_blocks(true);
             sp_local_sender->initialize_CSR_blocks(true);
             sp_local_receiver->initialize_CSR_blocks(true);
+            cout <<  " rank " << grid->rank_in_col << " initialize_CSR_blocks completed " << endl;
 
         }
 
