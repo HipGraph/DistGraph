@@ -9,6 +9,7 @@
 
 using namespace distblas::core;
 using namespace  distblas::net;
+using namespace  distblas::partition;
 
 namespace distblas::algo {
 
