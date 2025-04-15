@@ -63,7 +63,7 @@ public:
 
       auto embedding_algo =
               make_unique<distblas::algo::SpMMAlgo<INDEX_TYPE, VALUE_TYPE>>(
-                      sparse_mat.get(), shared_sparseMat_receiver.get(),
+                      sparse_mat, shared_sparseMat_receiver.get(),
                       shared_sparseMat_sender.get(),input_dense_mat,
                       output, grid, alpha, beta, false);
       spMMAlgo = embedding_algo.get();
