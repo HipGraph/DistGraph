@@ -4,6 +4,8 @@
 #include "../../core/sparse_mat_tile.hpp"
 #include "../spgemm/spgemm_with_tiling.hpp"
 #include "baseline_spmm.hpp"
+#include "../../net/data_comm.hpp"
+#include "../../partition/partitioner.hpp"
 
 using namespace distblas::core;
 using namespace  distblas::net;
