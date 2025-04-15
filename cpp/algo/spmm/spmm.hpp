@@ -4,7 +4,6 @@
 #include "../../core/sparse_mat_tile.hpp"
 #include "../spgemm/spgemm_with_tiling.hpp"
 #include "baseline_spmm.hpp"
-#include "../dist_graph_blas.hpp"
 
 using namespace distblas::core;
 using namespace  distblas::net;
