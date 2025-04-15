@@ -63,7 +63,6 @@ add_library(disembed_lib SHARED
         cpp/algo/gat/gat_layer.hpp
         cpp/algo/gat/gat.hpp
         cpp/algo/sddmm/sddmm.hpp
-        cpp/algo/dist_graph_blas.hpp
         )
 
 SET(BUILD_TESTS "" ON)
